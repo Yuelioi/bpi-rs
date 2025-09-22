@@ -1,0 +1,115 @@
+version: '3'
+
+vars:
+  GREETING: Hello, World!
+  CARGO_TEST_ARGS: ":: -- --test-threads=1 --nocapture"
+
+tasks:
+  check:
+    cmds:
+      - cargo check
+
+  
+  test_activity:
+    cmds:
+      - cargo test --features activity activity{{.CARGO_TEST_ARGS}}
+  
+  test_article:
+    cmds:
+      - cargo test --features article article{{.CARGO_TEST_ARGS}}
+  
+  test_audio:
+    cmds:
+      - cargo test --features audio audio{{.CARGO_TEST_ARGS}}
+  
+  test_bangumi:
+    cmds:
+      - cargo test --features bangumi bangumi{{.CARGO_TEST_ARGS}}
+  
+  test_blackroom:
+    cmds:
+      - cargo test --features blackroom blackroom{{.CARGO_TEST_ARGS}}
+  
+  test_cheese:
+    cmds:
+      - cargo test --features cheese cheese{{.CARGO_TEST_ARGS}}
+  
+  test_clientinfo:
+    cmds:
+      - cargo test --features clientinfo clientinfo{{.CARGO_TEST_ARGS}}
+  
+  test_comment:
+    cmds:
+      - cargo test --features comment comment{{.CARGO_TEST_ARGS}}
+  
+  test_creativecenter:
+    cmds:
+      - cargo test --features creativecenter creativecenter{{.CARGO_TEST_ARGS}}
+  
+  test_dynamic:
+    cmds:
+      - cargo test --features dynamic dynamic{{.CARGO_TEST_ARGS}}
+  
+  test_electric:
+    cmds:
+      - cargo test --features electric electric{{.CARGO_TEST_ARGS}}
+  
+  test_emoji:
+    cmds:
+      - cargo test --features emoji emoji{{.CARGO_TEST_ARGS}}
+  
+  test_fav:
+    cmds:
+      - cargo test --features fav fav{{.CARGO_TEST_ARGS}}
+  
+  test_garb:
+    cmds:
+      - cargo test --features garb garb{{.CARGO_TEST_ARGS}}
+  
+  test_historytoview:
+    cmds:
+      - cargo test --features historytoview historytoview{{.CARGO_TEST_ARGS}}
+  
+  test_live:
+    cmds:
+      - cargo test --features live live{{.CARGO_TEST_ARGS}}
+  
+  test_login:
+    cmds:
+      - cargo test --features login login{{.CARGO_TEST_ARGS}}
+  
+  test_manga:
+    cmds:
+      - cargo test --features manga manga{{.CARGO_TEST_ARGS}}
+  
+  test_message:
+    cmds:
+      - cargo test --features message message{{.CARGO_TEST_ARGS}}
+  
+  test_misc:
+    cmds:
+      - cargo test --features misc misc{{.CARGO_TEST_ARGS}}
+  
+  test_search:
+    cmds:
+      - cargo test --features search search{{.CARGO_TEST_ARGS}}
+  
+  test_user:
+    cmds:
+      - cargo test --features user user{{.CARGO_TEST_ARGS}}
+  
+  test_video:
+    cmds:
+      - cargo test --features video video{{.CARGO_TEST_ARGS}}
+  
+  test_vip:
+    cmds:
+      - cargo test --features vip vip{{.CARGO_TEST_ARGS}}
+  
+  test_wallet:
+    cmds:
+      - cargo test --features wallet wallet{{.CARGO_TEST_ARGS}}
+  
+  test_web_widget:
+    cmds:
+      - cargo test --features web_widget web_widget{{.CARGO_TEST_ARGS}}

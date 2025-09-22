@@ -1,0 +1,100 @@
+[package]
+name = "bpi-rs"
+version = "0.1.0"
+edition = "2024"
+
+
+[features]
+default = ["full"]
+full = [
+    "activity",
+    "article",
+    "audio",
+    "bangumi",
+    "cheese",
+    "clientinfo",
+    "comment",
+    "creativecenter",
+    "dynamic",
+    "danmaku",
+    "electric",
+    "fav",
+    "historytoview",
+    "live",
+    "login",
+    "manga",
+    "message",
+    "misc",
+    "note",
+    "opus",
+    "search",
+    "user",
+    "video",
+    "video_ranking",
+    "vip",
+    "wallet",
+    "web_widget",
+]
+activity = []
+article = []
+audio = []
+bangumi = []
+cheese = []
+clientinfo = []
+comment = []
+creativecenter = ["base64"]
+dynamic = ["reqwest/multipart"]
+danmaku=["quick-xml","flate2"]
+electric = []
+fav = []
+historytoview = []
+live = ["base64"]
+login = []
+manga = ["zip"]
+message = ["uuid"]
+misc = [ "hmac", "sha2", "hex"]
+note=[]
+opus=[]
+search = []
+user = []
+video = []
+video_ranking=[]
+vip = []
+wallet = []
+web_widget = []
+
+
+[dependencies]
+config = "0.15.15"
+serde = "1.0.219"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = [
+    "chrono",
+    "local-time",
+    "fmt",
+    "ansi",
+    "std",
+] }
+reqwest = { version = "0.12.23", features = ["json", "cookies", "gzip", "deflate", "brotli", "stream", "multipart"] }
+serde_json = "1"
+thiserror = "2.0.16"
+tokio = { version = "1.35", features = ["macros", "rt-multi-thread", "sync"] }
+chrono = { version = "0.4.41", features = ["clock"] }
+bytes ={version = "1.10.1"}
+
+md5 = { version = "0.8.0"} # wbi
+
+
+base64 = { version = "0.22.1", optional = true }
+zip = { version = "4.6.1", optional = true }
+hmac = { version = "0.12.1", optional = true }
+sha2 = { version = "0.10.9", optional = true }
+hex = { version = "0.4.3", optional = true }
+flate2 = { version = "1.1.2",optional = true }
+quick-xml = {version =  "0.38.3",features = ["serialize"] , optional = true}
+bitflags = {version = "2.9.4"}
+uuid = { version = "1.18.1", features = ["v4"],optional = true }
+
+
+tokio-util = "0.7.16"
+serde_with = "3.14.0"
