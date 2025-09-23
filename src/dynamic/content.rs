@@ -59,6 +59,7 @@ impl BpiClient {
     /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
     ///
     /// 参数
+    ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `size` | Option<u32> | 每页显示数，默认 10 |
@@ -81,6 +82,7 @@ impl BpiClient {
     /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
     ///
     /// 参数
+    ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `teenagers_mode` | Option<u8> | 是否开启青少年模式：0 否，1 是 |

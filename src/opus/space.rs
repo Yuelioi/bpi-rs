@@ -59,6 +59,7 @@ impl BpiClient {
     /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/opus
     ///
     /// 参数
+    ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `mid` | u64 | 用户 UID |

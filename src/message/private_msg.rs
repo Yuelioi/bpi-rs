@@ -72,6 +72,7 @@ impl BpiClient {
     /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/message
     ///
     /// 参数
+    ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `unread_type` | Option<u32> | 未读类型（默认 All） |
@@ -117,6 +118,7 @@ impl BpiClient {
     /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/message
     ///
     /// 参数
+    ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `receiver_id` | u64 | 接收者 ID |

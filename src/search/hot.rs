@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 默认搜索内容
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -52,10 +52,10 @@ impl BpiClient {
     pub async fn search_default(&self) -> Result<BpiResponse<DefaultSearchData>, BpiError> {
         let signed_params = self.get_wbi_sign2(vec![("foo", "bar")]).await?;
 
-        self.get("https://api.bilibili.com/x/web-interface/wbi/search/default")
+        self
+            .get("https://api.bilibili.com/x/web-interface/wbi/search/default")
             .query(&signed_params)
-            .send_bpi("获取默认搜索内容")
-            .await
+            .send_bpi("获取默认搜索内容").await
     }
 
     /// 获取热搜列表（web端）
@@ -64,10 +64,7 @@ impl BpiClient {
     ///
     /// - 无参数
     pub async fn search_hotwords(&self) -> Result<BpiResponse<HotWordDataResponse>, BpiError> {
-        let response = self
-            .get("https://s.search.bilibili.com/main/hotword")
-            .send()
-            .await?;
+        let response = self.get("https://s.search.bilibili.com/main/hotword").send().await?;
 
         let data: HotWordDataResponse = response.json().await?;
 
@@ -85,7 +82,6 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tracing::info;
 
     #[tokio::test]
     async fn test_get_default_search() -> Result<(), Box<BpiError>> {

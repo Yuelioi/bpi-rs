@@ -45,6 +45,7 @@ impl BpiClient {
     /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
     ///
     /// 参数
+    ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `host_mid` | Option<&str> | UP 主 UID |
@@ -79,6 +80,7 @@ impl BpiClient {
     /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
     ///
     /// 参数
+    ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `update_baseline` | &str | 上次列表返回的 update_baseline |

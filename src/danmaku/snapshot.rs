@@ -12,6 +12,7 @@ impl BpiClient {
     /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku
     ///
     /// 参数
+    ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `aid_or_bvid` | &str | 可传 `avid` (数字) 或 `bvid` (如 `BV...`) |

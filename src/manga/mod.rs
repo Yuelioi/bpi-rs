@@ -1,3 +1,7 @@
+//! 漫画
+//!
+//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga
+
 pub mod activity;
 pub mod clockin;
 pub mod comic;

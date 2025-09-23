@@ -18,6 +18,8 @@ async fn main() {
         Ok(result) => {
             tracing::info!("{:#?}", result.data);
         }
-        Err(e) => { tracing::error!("{:#?}", e) }
+        Err(e) => {
+            tracing::error!("{:#?}", e);
+        }
     }
 }

@@ -1,6 +1,6 @@
-//! 弹幕点赞查询与操作
+//! 弹幕点赞查询
 //!
-//! 文档: src/doc/danmaku/thumbup.md 与 src/doc/danmaku/action.md (点赞操作)
+//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/danmaku/thumbup.md
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };

@@ -1,6 +1,6 @@
-//! 漫画操作 API
+//! 购买漫画章节
 //!
-//! 文档: src/doc/manga/Comic.md
+//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Comic.md
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::Serialize;

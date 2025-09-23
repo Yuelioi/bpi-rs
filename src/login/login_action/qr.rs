@@ -34,7 +34,6 @@ pub struct QrcodeImageData {
     pub expires_in: u64, // 过期时间（秒）
 }
 
-// ================= 核心实现 =================
 impl BpiClient {
     /// 发送二维码请求
     pub async fn login_send_qrcode(&self) -> Result<BpiResponse<GenerateQrCodeData>, BpiError> {
@@ -79,7 +78,6 @@ impl BpiClient {
     }
 }
 
-// ================= 测试模块 =================
 #[cfg(test)]
 mod tests {
     use super::*;

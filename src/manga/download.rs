@@ -1,9 +1,9 @@
-//! 漫画下载操作 API
+//! 购买漫画章节
 //!
-//! 文档: src/doc/manga/Download.md
+//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Comic.md
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 漫画图片信息
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -88,18 +88,16 @@ impl BpiClient {
     /// 获取当前话全部图片地址
     ///
     /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
-    pub async fn manga_image_index(
-        &self,
-        ep_id: i32,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    #[allow(dead_code)]
+    async fn manga_image_index(&self, ep_id: i32) -> Result<BpiResponse<ImageIndexData>, BpiError> {
         let params = serde_json::json!({
             "ep_id": ep_id
         });
 
-        self.post("https://manga.bilibili.com/twirp/comic.v1.Comic/GetImageIndex?device=web")
+        self
+            .post("https://manga.bilibili.com/twirp/comic.v1.Comic/GetImageIndex")
             .json(&params)
-            .send_bpi("获取漫画图片索引")
-            .await
+            .send_bpi("获取漫画图片索引").await
     }
 
     /// 获取某一图片的token
@@ -107,21 +105,42 @@ impl BpiClient {
     /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
     ///
     /// 参数
+    ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `image_path` | &str | 图片相对路径，如 /bfs/... |
-    pub async fn manga_image_token(
+    #[allow(dead_code)]
+    async fn manga_image_token(
         &self,
-        image_path: &str,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        image_path: &str
+    ) -> Result<BpiResponse<Vec<ImageToken>>, BpiError> {
         // 构建请求的图片URL
         let url = format!("[\"https://i0.hdslb.com{}\"]", image_path);
 
         let params = ImageTokenRequest { urls: url };
 
-        self.post("https://manga.bilibili.com/twirp/comic.v1.Comic/ImageToken")
+        self
+            .post("https://manga.bilibili.com/twirp/comic.v1.Comic/ImageToken")
             .json(&params)
-            .send_bpi("获取漫画图片token")
-            .await
+            .send_bpi("获取漫画图片token").await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_manga_image_index() -> Result<(), Box<BpiError>> {
+        let bpi = BpiClient::new();
+
+        let ep_id = 482133;
+
+        let result = bpi.manga_image_index(ep_id).await?;
+        let data = result.into_data()?;
+
+        tracing::info!("{:#?}", data);
+
+        Ok(())
     }
 }
