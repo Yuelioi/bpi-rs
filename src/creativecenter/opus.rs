@@ -1,8 +1,8 @@
 //! 创作中心作品管理 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/opus.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/opus.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde_json::json;
 
 impl BpiClient {
@@ -17,17 +17,17 @@ impl BpiClient {
     /// [删除动态](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/opus.md#删除动态)
     pub async fn dynamic_delete(
         &self,
-        dyn_id: &str,
+        dyn_id: &str
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        self.post("https://api.bilibili.com/x/dynamic/feed/operate/remove")
+        self
+            .post("https://api.bilibili.com/x/dynamic/feed/operate/remove")
             .query(&[("csrf", csrf)])
             .json(&json!({
               "dyn_id_str": dyn_id
             }))
-            .send_bpi("删除动态")
-            .await
+            .send_bpi("删除动态").await
     }
 
     /// 删除专栏
@@ -41,14 +41,19 @@ impl BpiClient {
     /// [删除专栏](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/opus.md#删除专栏)
     pub async fn article_delete(
         &self,
-        aid: u64,
+        aid: u64
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        self.post("https://member.bilibili.com/x/web/article/delete")
-            .form(&[("aid", aid.to_string()), ("csrf", csrf)])
-            .send_bpi("删除专栏")
-            .await
+        self
+            .post("https://member.bilibili.com/x/web/article/delete")
+            .form(
+                &[
+                    ("aid", aid.to_string()),
+                    ("csrf", csrf),
+                ]
+            )
+            .send_bpi("删除专栏").await
     }
 }
 

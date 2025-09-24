@@ -1,6 +1,6 @@
 //! 电磁力等级 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/railgun.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/railgun.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };

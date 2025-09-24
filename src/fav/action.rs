@@ -1,25 +1,26 @@
 use super::info::FavFolderInfo;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 impl BpiClient {
     /// 新建收藏夹
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `title` | &str | 收藏夹标题 |
-    /// | `intro` | Option<&str> | 介绍 |
-    /// | `privacy` | Option<u8> | 0 公开，1 私密 |
-    /// | `cover` | Option<&str> | 封面 URL |
+    /// | `intro` | `Option<&str>` | 介绍 |
+    /// | `privacy` | `Option<u8>` | 0 公开，1 私密 |
+    /// | `cover` | `Option<&str>` | 封面 URL |
     pub async fn fav_folder_add(
         &self,
         title: &str,
         intro: Option<&str>,
         privacy: Option<u8>,
-        cover: Option<&str>,
+        cover: Option<&str>
     ) -> Result<BpiResponse<FavFolderInfo>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -34,39 +35,40 @@ impl BpiClient {
             form.push(("cover", cover.to_string()));
         }
 
-        self.post("https://api.bilibili.com/x/v3/fav/folder/add")
+        self
+            .post("https://api.bilibili.com/x/v3/fav/folder/add")
             .form(&form)
-            .send_bpi("新建收藏夹")
-            .await
+            .send_bpi("新建收藏夹").await
     }
 
     /// 修改收藏夹
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `media_id` | u64 | 收藏夹 media_id |
     /// | `title` | &str | 标题 |
-    /// | `intro` | Option<&str> | 介绍 |
-    /// | `privacy` | Option<u8> | 0 公开，1 私密 |
-    /// | `cover` | Option<&str> | 封面 URL |
+    /// | `intro` | `Option<&str>` | 介绍 |
+    /// | `privacy` | `Option<u8>` | 0 公开，1 私密 |
+    /// | `cover` | `Option<&str>` | 封面 URL |
     pub async fn fav_folder_edit(
         &self,
         media_id: u64,
         title: &str,
         intro: Option<&str>,
         privacy: Option<u8>,
-        cover: Option<&str>,
+        cover: Option<&str>
     ) -> Result<BpiResponse<FavFolderInfo>, BpiError> {
         let csrf = self.csrf()?;
 
         let mut form = vec![
             ("media_id", media_id.to_string()),
             ("title", title.to_string()),
-            ("csrf", csrf),
+            ("csrf", csrf)
         ];
         if let Some(intro) = intro {
             form.push(("intro", intro.to_string()));
@@ -78,21 +80,22 @@ impl BpiClient {
             form.push(("cover", cover.to_string()));
         }
 
-        self.post("https://api.bilibili.com/x/v3/fav/folder/edit")
+        self
+            .post("https://api.bilibili.com/x/v3/fav/folder/edit")
             .form(&form)
-            .send_bpi("修改收藏夹")
-            .await
+            .send_bpi("修改收藏夹").await
     }
 
     /// 删除收藏夹
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `media_ids` | &[u64] | 多个收藏夹 media_id |
+    /// | `media_ids` | &`[u64]` | 多个收藏夹 media_id |
     pub async fn fav_folder_del(&self, media_ids: &[u64]) -> Result<BpiResponse<i32>, BpiError> {
         let csrf = self.csrf()?;
         let ids_str = media_ids
@@ -101,20 +104,24 @@ impl BpiClient {
             .collect::<Vec<_>>()
             .join(",");
 
-        let form = [("media_ids", ids_str), ("csrf", csrf)];
+        let form = [
+            ("media_ids", ids_str),
+            ("csrf", csrf),
+        ];
 
-        self.post("https://api.bilibili.com/x/v3/fav/folder/del")
+        self
+            .post("https://api.bilibili.com/x/v3/fav/folder/del")
             .form(&form)
-            .send_bpi("删除收藏夹")
-            .await
+            .send_bpi("删除收藏夹").await
     }
 
     /// 批量复制内容
     /// `resources`: "{内容id}:{内容类型},..."
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -127,7 +134,7 @@ impl BpiClient {
         src_media_id: u64,
         tar_media_id: u64,
         mid: u64,
-        resources: &str,
+        resources: &str
     ) -> Result<BpiResponse<i32>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -140,18 +147,19 @@ impl BpiClient {
             ("csrf", csrf),
         ];
 
-        self.post("https://api.bilibili.com/x/v3/fav/resource/copy")
+        self
+            .post("https://api.bilibili.com/x/v3/fav/resource/copy")
             .form(&form)
-            .send_bpi("批量复制内容")
-            .await
+            .send_bpi("批量复制内容").await
     }
 
     /// 批量移动内容
     /// `resources`: "{内容id}:{内容类型},..."
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -164,7 +172,7 @@ impl BpiClient {
         src_media_id: u64,
         tar_media_id: u64,
         mid: u64,
-        resources: &str,
+        resources: &str
     ) -> Result<BpiResponse<i32>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -177,18 +185,19 @@ impl BpiClient {
             ("csrf", csrf),
         ];
 
-        self.post("https://api.bilibili.com/x/v3/fav/resource/move")
+        self
+            .post("https://api.bilibili.com/x/v3/fav/resource/move")
             .form(&form)
-            .send_bpi("批量移动内容")
-            .await
+            .send_bpi("批量移动内容").await
     }
 
     /// 批量删除内容
     /// `resources`: "{内容id}:{内容类型},..."
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -197,7 +206,7 @@ impl BpiClient {
     pub async fn fav_resource_batch_del(
         &self,
         media_id: u64,
-        resources: &str,
+        resources: &str
     ) -> Result<BpiResponse<i32>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -208,17 +217,18 @@ impl BpiClient {
             ("csrf", csrf),
         ];
 
-        self.post("https://api.bilibili.com/x/v3/fav/resource/batch-del")
+        self
+            .post("https://api.bilibili.com/x/v3/fav/resource/batch-del")
             .form(&form)
-            .send_bpi("批量删除内容")
-            .await
+            .send_bpi("批量删除内容").await
     }
 
     /// 清空所有失效内容
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -226,12 +236,15 @@ impl BpiClient {
     pub async fn fav_resource_clean(&self, media_id: u64) -> Result<BpiResponse<i32>, BpiError> {
         let csrf = self.csrf()?;
 
-        let form = [("media_id", media_id.to_string()), ("csrf", csrf)];
+        let form = [
+            ("media_id", media_id.to_string()),
+            ("csrf", csrf),
+        ];
 
-        self.post("https://api.bilibili.com/x/v3/fav/resource/clean")
+        self
+            .post("https://api.bilibili.com/x/v3/fav/resource/clean")
             .form(&form)
-            .send_bpi("清空所有失效内容")
-            .await
+            .send_bpi("清空所有失效内容").await
     }
 }
 
@@ -270,9 +283,7 @@ mod tests {
         let title = "Edited Title";
         let intro = "Edited Intro";
 
-        let resp = bpi
-            .fav_folder_edit(media_id, title, Some(intro), Some(0), None)
-            .await;
+        let resp = bpi.fav_folder_edit(media_id, title, Some(intro), Some(0), None).await;
         info!("Edit folder result: {:?}", resp);
         assert!(resp.is_ok());
     }
@@ -289,23 +300,27 @@ mod tests {
         let resources_move = "739661210:2";
 
         // 1. 批量复制
-        let copy_resp = bpi
-            .fav_resource_copy(src_media_id, tar_media_id, mid, resources_copy)
-            .await;
+        let copy_resp = bpi.fav_resource_copy(
+            src_media_id,
+            tar_media_id,
+            mid,
+            resources_copy
+        ).await;
         info!("Copy resources result: {:?}", copy_resp);
         assert!(copy_resp.is_ok());
 
         // 2. 批量移动
-        let move_resp = bpi
-            .fav_resource_move(src_media_id, tar_media_id, mid, resources_move)
-            .await;
+        let move_resp = bpi.fav_resource_move(
+            src_media_id,
+            tar_media_id,
+            mid,
+            resources_move
+        ).await;
         info!("Move resources result: {:?}", move_resp);
         assert!(move_resp.is_ok());
 
         // 3. 批量删除
-        let del_resp = bpi
-            .fav_resource_batch_del(tar_media_id, resources_del)
-            .await;
+        let del_resp = bpi.fav_resource_batch_del(tar_media_id, resources_del).await;
         info!("Batch delete resources result: {:?}", del_resp);
         assert!(del_resp.is_ok());
     }

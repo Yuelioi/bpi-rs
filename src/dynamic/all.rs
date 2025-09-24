@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DynamicAllData {
@@ -40,26 +40,32 @@ pub struct DynamicUpdateData {
 
 impl BpiClient {
     /// 获取全部动态列表
-    /// GET https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `host_mid` | Option<&str> | UP 主 UID |
-    /// | `offset` | Option<&str> | 分页偏移量 |
-    /// | `update_baseline` | Option<&str> | 更新基线，用于获取新动态 |
+    /// | `host_mid` | `Option<&str>` | UP 主 UID |
+    /// | `offset` | `Option<&str>` | 分页偏移量 |
+    /// | `update_baseline` | `Option<&str>` | 更新基线，用于获取新动态 |
     pub async fn dynamic_all(
         &self,
         host_mid: Option<&str>,
         offset: Option<&str>,
-        update_baseline: Option<&str>,
+        update_baseline: Option<&str>
     ) -> Result<BpiResponse<DynamicAllData>, BpiError> {
-        let mut req = self
-          .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all")
-          .query(&[("features", "itemOpusStyle,listOnlyfans,opusBigCover,onlyfansVote,decorationCard,onlyfansAssetsV2,forwardListHidden,ugcDelete"), ("web_location", "333.1365")]);
+        let mut req = self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all").query(
+            &[
+                (
+                    "features",
+                    "itemOpusStyle,listOnlyfans,opusBigCover,onlyfansVote,decorationCard,onlyfansAssetsV2,forwardListHidden,ugcDelete",
+                ),
+                ("web_location", "333.1365"),
+            ]
+        );
 
         if let Some(mid) = host_mid {
             req = req.query(&[("host_mid", mid)]);
@@ -75,20 +81,20 @@ impl BpiClient {
     }
 
     /// 检测是否有新动态
-    /// GET https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all/update
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `update_baseline` | &str | 上次列表返回的 update_baseline |
-    /// | `type_str` | Option<&str> | 动态类型 |
+    /// | `type_str` | `Option<&str>` | 动态类型 |
     pub async fn dynamic_check_new(
         &self,
         update_baseline: &str,
-        type_str: Option<&str>,
+        type_str: Option<&str>
     ) -> Result<BpiResponse<DynamicUpdateData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all/update")
@@ -108,7 +114,6 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
-
     async fn test_dynamic_get_all() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         let resp = bpi.dynamic_all(None, None, None).await?;
@@ -122,7 +127,6 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_dynamic_check_new() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         let update_baseline = "0";

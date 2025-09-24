@@ -1,13 +1,12 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 use std::collections::HashMap;
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 // --- Structs for `getChargeRecord` ---
 
 /// 充电自动续费详情
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
 pub struct Renew {
     /// 自己的mid
     pub uid: u64,
@@ -90,7 +89,6 @@ pub struct ChargeRecordData {
 
 /// 充电用户排名
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
 pub struct UpowerRankUser {
     /// 充电用户索引
     pub rank: u64,
@@ -165,7 +163,6 @@ pub struct UpowerItemDetail {
 
 /// UP主信息卡片
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
 pub struct UpCard {
     /// UP主mid
     pub mid: u64,
@@ -179,7 +176,6 @@ pub struct UpCard {
 
 /// 用户信息卡片
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
 pub struct UserCard {
     /// 用户头像url
     pub avatar: String,
@@ -189,7 +185,6 @@ pub struct UserCard {
 
 /// 与UP主的包月充电关系数据
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
 pub struct ChargeFollowInfo {
     /// 已保持多少天包月充电状态
     pub days: u64,
@@ -232,7 +227,6 @@ pub struct ChallengeInfo {
 
 /// UP主信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
 pub struct UpInfo {
     /// UP主mid
     pub mid: u64,
@@ -250,7 +244,6 @@ pub struct UpInfo {
 
 /// 充电用户排名
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
 pub struct RankInfo {
     /// 充电用户mid
     pub mid: u64,
@@ -270,7 +263,6 @@ pub struct RankInfo {
 
 /// 自己的充电关系信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
 pub struct MemberUserInfo {
     /// 用户mid
     pub mid: u64,
@@ -290,7 +282,6 @@ pub struct MemberUserInfo {
 
 /// 充电档位信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
 pub struct LevelInfo {
     /// 充电档位代码
     pub privilege_type: u64,
@@ -304,7 +295,6 @@ pub struct LevelInfo {
 
 /// 包月充电用户排名数据
 #[derive(Debug, Clone, Deserialize, Serialize)]
-
 pub struct MemberRankData {
     /// UP主信息
     pub up_info: UpInfo,
@@ -329,9 +319,10 @@ impl BpiClient {
     ///
     /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -340,81 +331,90 @@ impl BpiClient {
     pub async fn electric_charge_record(
         &self,
         page: u64,
-        charge_type: u32,
+        charge_type: u32
     ) -> Result<BpiResponse<ChargeRecordData>, BpiError> {
-        self.get("https://api.live.bilibili.com/xlive/revenue/v1/guard/getChargeRecord")
-            .query(&[
-                ("page", page.to_string()),
-                ("type", charge_type.to_string()),
-            ])
-            .send_bpi("获取包月充电列表")
-            .await
+        self
+            .get("https://api.live.bilibili.com/xlive/revenue/v1/guard/getChargeRecord")
+            .query(
+                &[
+                    ("page", page.to_string()),
+                    ("type", charge_type.to_string()),
+                ]
+            )
+            .send_bpi("获取包月充电列表").await
     }
 
     /// UP主包月充电详情
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `up_mid` | u64 | 目标用户 mid |
     pub async fn electric_upower_item_detail(
         &self,
-        up_mid: u64,
+        up_mid: u64
     ) -> Result<BpiResponse<UpowerItemDetail>, BpiError> {
-        self.get("https://api.bilibili.com/x/upower/item/detail")
+        self
+            .get("https://api.bilibili.com/x/upower/item/detail")
             .query(&[("up_mid", up_mid)])
-            .send_bpi("获取UP主包月充电详情")
-            .await
+            .send_bpi("获取UP主包月充电详情").await
     }
 
     /// 与UP主的包月充电关系
     ///
     /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `up_mid` | u64 | 目标用户 mid |
     pub async fn electric_charge_follow_info(
         &self,
-        up_mid: u64,
+        up_mid: u64
     ) -> Result<BpiResponse<ChargeFollowInfo>, BpiError> {
-        self.get("https://api.bilibili.com/x/upower/charge/follow/info")
+        self
+            .get("https://api.bilibili.com/x/upower/charge/follow/info")
             .query(&[("up_mid", up_mid)])
-            .send_bpi("获取与UP主的包月充电关系")
-            .await
+            .send_bpi("获取与UP主的包月充电关系").await
     }
 
     /// 包月充电用户排名
     ///
     /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `up_mid` | u64 | 目标用户 mid |
     /// | `pn` | u64 | 页码 |
     /// | `ps` | u64 | 每页项数，最大 101 |
-    /// | `privilege_type` | Option<u64> | 充电档位代码 |
+    /// | `privilege_type` | `Option<u64>` | 充电档位代码 |
     pub async fn electric_upower_member_rank(
         &self,
         up_mid: u64,
         pn: u64,
         ps: u64,
-        privilege_type: Option<u64>,
+        privilege_type: Option<u64>
     ) -> Result<BpiResponse<MemberRankData>, BpiError> {
-        let mut req = self
-            .get("https://api.bilibili.com/x/upower/up/member/rank/v2")
-            .query(&[("up_mid", up_mid), ("pn", pn), ("ps", ps)]);
+        let mut req = self.get("https://api.bilibili.com/x/upower/up/member/rank/v2").query(
+            &[
+                ("up_mid", up_mid),
+                ("pn", pn),
+                ("ps", ps),
+            ]
+        );
 
         if let Some(ptype) = privilege_type {
             req = req.query(&[("privilege_type", ptype)]);
@@ -457,10 +457,7 @@ mod tests {
 
         if let Ok(response) = resp {
             let data = response.data.unwrap();
-            info!(
-                "UP主 {} 的充电总人数: {}",
-                data.user_card.nickname, data.upower_rank.total
-            );
+            info!("UP主 {} 的充电总人数: {}", data.user_card.nickname, data.upower_rank.total);
         }
     }
 
@@ -474,10 +471,7 @@ mod tests {
 
         if let Ok(response) = resp {
             let data = response.data.unwrap();
-            info!(
-                "与UP主 {} 的充电关系：已保持 {} 天",
-                data.up_card.nickname, data.days
-            );
+            info!("与UP主 {} 的充电关系：已保持 {} 天", data.up_card.nickname, data.days);
         }
     }
 

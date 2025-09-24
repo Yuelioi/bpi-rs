@@ -1,6 +1,6 @@
 //! 漫画赛季
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Season.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Season.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -84,7 +84,8 @@ pub type SeasonInfoResponse = BpiResponse<SeasonInfoData>;
 impl BpiClient {
     /// 获取漫画赛季信息
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_season_info(&self) -> Result<SeasonInfoResponse, BpiError> {
         self
             .post("https://manga.bilibili.com/twirp/user.v1.Season/GetSeasonInfo")

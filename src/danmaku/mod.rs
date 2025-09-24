@@ -1,3 +1,5 @@
+//! 弹幕
+
 pub mod action;
 pub mod danmaku_xml;
 pub mod history;

@@ -1,8 +1,6 @@
 //! 获取视频详细信息 (Web端)
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
-//!
-//! 文档：https://socialsisteryi.github.io/bilibili-API-collect/docs/video/video.html#获取视频详细信息
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
 use crate::models::Account;
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
@@ -340,13 +338,14 @@ pub type VideoInfoResponse = BpiResponse<VideoData>;
 impl BpiClient {
     /// 获取视频详细信息 (Web端)
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video/video.html#获取视频详细信息
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/video.html#获取视频详细信息)
     ///
     /// # 参数
     /// | 名称   | 类型         | 说明                 |
     /// | ------ | ------------| -------------------- |
-    /// | `aid`  | Option<u64> | 稿件 avid，可选      |
-    /// | `bvid` | Option<&str>| 稿件 bvid，可选      |
+    /// | `aid`  | `Option<u64>` | 稿件 avid，可选      |
+    /// | `bvid` | `Option<&str>`| 稿件 bvid，可选      |
     ///
     /// 两者任选一个
     pub async fn video_info(

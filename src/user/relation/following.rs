@@ -1,8 +1,8 @@
 //! B站用户关注列表相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 响应数据结构体 ---
 
@@ -98,21 +98,22 @@ pub struct FollowingListResponseData {
 impl BpiClient {
     /// 查询用户关注明细
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// # 参数
     /// | 名称        | 类型           | 说明                                   |
     /// | ----------- | --------------| -------------------------------------- |
     /// | `vmid`      | u64           | 目标用户 mid                           |
-    /// | `order_type`| Option<&str>  | 排序方式，可选                         |
-    /// | `ps`        | Option<u32>   | 每页项数，默认50                       |
-    /// | `pn`        | Option<u32>   | 页码，默认1                            |
+    /// | `order_type`| `Option<&str>`  | 排序方式，可选                         |
+    /// | `ps`        | `Option<u32>`   | 每页项数，默认50                       |
+    /// | `pn`        | `Option<u32>`   | 页码，默认1                            |
     pub async fn user_followings(
         &self,
         vmid: u64,
         order_type: Option<&str>,
         ps: Option<u32>,
-        pn: Option<u32>,
+        pn: Option<u32>
     ) -> Result<BpiResponse<FollowingListResponseData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/relation/followings")
@@ -143,12 +144,9 @@ mod tests {
     const TEST_VMID: u64 = 293793435;
 
     #[tokio::test]
-
     async fn test_user_followings() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .user_followings(TEST_VMID, None, Some(50), Some(1))
-            .await?;
+        let resp = bpi.user_followings(TEST_VMID, None, Some(50), Some(1)).await?;
         let data = resp.into_data()?;
 
         info!("用户关注明细: {:?}", data);

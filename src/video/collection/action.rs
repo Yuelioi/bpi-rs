@@ -1,6 +1,6 @@
 //! B站视频合集相关接口实现
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
 
@@ -16,16 +16,17 @@ pub struct CreateSeriesResponseData {
 impl BpiClient {
     /// 创建视频列表并添加视频
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
     /// | ------------ | --------------| -------------------- |
     /// | `mid`        | u64           | 用户 mid             |
     /// | `name`       | &str          | 标题                 |
-    /// | `keywords`   | Option<&str>  | 关键词，可选         |
-    /// | `description`| Option<&str>  | 简介，可选           |
-    /// | `aids`       | Option<&str>  | 视频 aid 列表，以`,`分隔，可选 |
+    /// | `keywords`   | `Option<&str>`  | 关键词，可选         |
+    /// | `description`| `Option<&str>`  | 简介，可选           |
+    /// | `aids`       | `Option<&str>`  | 视频 aid 列表，以`,`分隔，可选 |
     pub async fn collection_create_and_add_archives(
         &self,
         mid: u64,
@@ -59,7 +60,8 @@ impl BpiClient {
 
     /// 删除视频列表
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
@@ -88,7 +90,8 @@ impl BpiClient {
 
     /// 从视频列表中删除稿件
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
@@ -119,7 +122,8 @@ impl BpiClient {
 
     /// 添加稿件至视频列表
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
@@ -150,7 +154,8 @@ impl BpiClient {
 
     /// 编辑视频列表信息
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
@@ -158,10 +163,10 @@ impl BpiClient {
     /// | `mid`        | u64           | 用户 mid             |
     /// | `series_id`  | u64           | 视频列表 ID          |
     /// | `name`       | &str          | 标题                 |
-    /// | `keywords`   | Option<&str>  | 关键词，可选         |
-    /// | `description`| Option<&str>  | 简介，可选           |
-    /// | `add_aids`   | Option<&str>  | 要添加的视频 aid 列表，以`,`分隔，可选 |
-    /// | `del_aids`   | Option<&str>  | 要删除的视频 aid 列表，以`,`分隔，可选 |
+    /// | `keywords`   | `Option<&str>`  | 关键词，可选         |
+    /// | `description`| `Option<&str>`  | 简介，可选           |
+    /// | `add_aids`   | `Option<&str>`  | 要添加的视频 aid 列表，以`,`分隔，可选 |
+    /// | `del_aids`   | `Option<&str>`  | 要删除的视频 aid 列表，以`,`分隔，可选 |
     pub async fn collection_update_series(
         &self,
         mid: u64,

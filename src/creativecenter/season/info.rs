@@ -1,11 +1,11 @@
 //! 获取合集列表 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
-use super::models::{Season, Section};
+use super::models::{ Season, Section };
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct SeasonInfoData {
@@ -27,12 +27,12 @@ pub struct Sections {
 impl BpiClient {
     pub async fn season_info(
         &self,
-        season_id: u64,
+        season_id: u64
     ) -> Result<BpiResponse<SeasonInfoData>, BpiError> {
-        self.get("https://member.bilibili.com/x2/creative/web/season")
+        self
+            .get("https://member.bilibili.com/x2/creative/web/season")
             .query(&[("id", &season_id.to_string())])
-            .send_bpi("获取合集信息")
-            .await
+            .send_bpi("获取合集信息").await
     }
 }
 

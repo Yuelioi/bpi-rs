@@ -1,10 +1,10 @@
 //! 文集基本信息
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/articles.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/articles.md)
 
-use crate::article::models::{ArticleAuthor, ArticleCategory, ArticleStats};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::article::models::{ ArticleAuthor, ArticleCategory, ArticleStats };
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 文集基本信息数据
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -112,12 +112,12 @@ impl BpiClient {
     /// [获取文集基本信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/articles.md#获取文集基本信息)
     pub async fn article_articles_info(
         &self,
-        id: i64,
+        id: i64
     ) -> Result<BpiResponse<ArticlesData>, BpiError> {
-        self.get("https://api.bilibili.com/x/article/list/web/articles")
+        self
+            .get("https://api.bilibili.com/x/article/list/web/articles")
             .query(&[("id", id.to_string())])
-            .send_bpi("获取文集基本信息")
-            .await
+            .send_bpi("获取文集基本信息").await
     }
 }
 

@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 use serde_json::json;
 // --- 保存视频笔记 ---
 
@@ -15,9 +15,10 @@ pub struct NoteAddResponseData {
 impl BpiClient {
     /// 保存视频笔记
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -25,10 +26,10 @@ impl BpiClient {
     /// | `title` | &str | 笔记标题 |
     /// | `summary` | &str | 笔记预览文本 |
     /// | `content` | &str | 笔记正文 |
-    /// | `note_id` | Option<&str> | 笔记 ID（创建时可省略） |
-    /// | `tags` | Option<&str> | 跳转标签列表 |
-    /// | `publish` | Option<bool> | 是否公开：false 不公开，true 公开 |
-    /// | `auto_comment` | Option<bool> | 是否添加到评论区 |
+    /// | `note_id` | `Option<&str>` | 笔记 ID（创建时可省略） |
+    /// | `tags` | `Option<&str>` | 跳转标签列表 |
+    /// | `publish` | `Option<bool>` | 是否公开：false 不公开，true 公开 |
+    /// | `auto_comment` | `Option<bool>` | 是否添加到评论区 |
     pub async fn note_add(
         &self,
         oid: u64,
@@ -38,7 +39,7 @@ impl BpiClient {
         note_id: Option<&str>,
         tags: Option<&str>,
         publish: Option<bool>,
-        auto_comment: Option<bool>,
+        auto_comment: Option<bool>
     ) -> Result<BpiResponse<NoteAddResponseData>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -53,7 +54,7 @@ impl BpiClient {
             ("cls", "1".to_string()),
             ("from", "save".to_string()),
             ("platform", "web".to_string()),
-            ("csrf", csrf),
+            ("csrf", csrf)
         ];
 
         if let Some(tags) = tags {
@@ -65,26 +66,21 @@ impl BpiClient {
         }
 
         if let Some(publish) = publish {
-            form.push(("publish", if publish { "1" } else { "0" }.to_string()));
+            form.push(("publish", (if publish { "1" } else { "0" }).to_string()));
         }
         if let Some(auto_comment) = auto_comment {
-            form.push((
-                "auto_comment",
-                if auto_comment { "1" } else { "0" }.to_string(),
-            ));
+            form.push(("auto_comment", (if auto_comment { "1" } else { "0" }).to_string()));
         }
 
-        self.post("https://api.bilibili.com/x/note/add")
-            .form(&form)
-            .send_bpi("保存视频笔记")
-            .await
+        self.post("https://api.bilibili.com/x/note/add").form(&form).send_bpi("保存视频笔记").await
     }
 
     /// 保存视频笔记（精简参数）
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -92,33 +88,33 @@ impl BpiClient {
     /// | `title` | &str | 笔记标题 |
     /// | `summary` | &str | 笔记预览文本 |
     /// | `content` | &str | 笔记正文 |
-    /// | `note_id` | Option<&str> | 笔记 ID（创建时可省略） |
+    /// | `note_id` | `Option<&str>` | 笔记 ID（创建时可省略） |
     pub async fn note_add_simple(
         &self,
         oid: u64,
         title: &str,
         summary: &str,
         content: &str,
-        note_id: Option<&str>,
+        note_id: Option<&str>
     ) -> Result<BpiResponse<NoteAddResponseData>, BpiError> {
-        self.note_add(oid, title, summary, content, note_id, None, None, None)
-            .await
+        self.note_add(oid, title, summary, content, note_id, None, None, None).await
     }
 
     /// 删除视频笔记
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `oid` | u64 | 目标 ID（视频 avid） |
-    /// | `note_id` | Option<String> | 笔记 ID |
+    /// | `note_id` | `Option<String>` | 笔记 ID |
     pub async fn note_del(
         &self,
         oid: u64,
-        note_id: Option<String>,
+        note_id: Option<String>
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -128,10 +124,7 @@ impl BpiClient {
             form.push(("note_id", note_id.to_string()));
         }
 
-        self.post("https://api.bilibili.com/x/note/del")
-            .form(&form)
-            .send_bpi("删除视频笔记")
-            .await
+        self.post("https://api.bilibili.com/x/note/del").form(&form).send_bpi("删除视频笔记").await
     }
 }
 
@@ -146,7 +139,8 @@ mod tests {
         let oid = 464606672;
         let title = "测试笔记";
         let summary = "这是个测试摘要";
-        let content = "Lorem Ipsum is simply dummy text \
+        let content =
+            "Lorem Ipsum is simply dummy text \
         of the printing and typesetting industry. Lorem Ipsum\
          has been the industry's standard dummy text ever since \
          the 1500s, when an unknown printer took a galley of type \
@@ -157,18 +151,16 @@ mod tests {
          and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
 
         // 1. 保存笔记
-        let add_resp = bpi
-            .note_add(
-                oid,
-                title,
-                summary,
-                content,
-                None,
-                None,
-                Some(false),
-                Some(false),
-            )
-            .await;
+        let add_resp = bpi.note_add(
+            oid,
+            title,
+            summary,
+            content,
+            None,
+            None,
+            Some(false),
+            Some(false)
+        ).await;
 
         info!("Add note result: {:?}", add_resp);
         assert!(add_resp.is_ok());

@@ -1,6 +1,6 @@
 //! 购买漫画章节
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Comic.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Comic.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -60,7 +60,7 @@ pub struct ImageIndexData {
     pub images: Vec<MangaImage>,
     /// 本话信息最后修改时间
     pub last_modified: String,
-    /// 图片host，通常为 https://manga.hdslb.com
+    /// 图片host，通常为 `https://manga.hdslb.com`
     pub host: String,
     /// 视频信息
     pub video: MangaVideo,
@@ -87,7 +87,8 @@ pub struct ImageToken {
 impl BpiClient {
     /// 获取当前话全部图片地址
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     #[allow(dead_code)]
     async fn manga_image_index(&self, ep_id: i32) -> Result<BpiResponse<ImageIndexData>, BpiError> {
         let params = serde_json::json!({
@@ -102,9 +103,10 @@ impl BpiClient {
 
     /// 获取某一图片的token
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |

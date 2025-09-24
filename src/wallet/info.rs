@@ -32,7 +32,8 @@ pub struct UserWallet {
 impl BpiClient {
     /// 获取用户钱包信息
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/wallet/info.html#获取用户钱包信息
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/wallet/info.html#获取用户钱包信息)
     pub async fn wallet_info(&self) -> Result<BpiResponse<UserWallet>, BpiError> {
         let csrf = self.csrf()?;
 

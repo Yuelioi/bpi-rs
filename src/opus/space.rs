@@ -2,8 +2,8 @@
 //!
 //! [空间图文](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/opus/space.md#空间图文)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 空间图文封面信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -56,35 +56,36 @@ pub struct SpaceData {
 impl BpiClient {
     /// 获取用户空间图文
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/opus
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/opus)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `mid` | u64 | 用户 UID |
-    /// | `page` | Option<u32> | 页码，默认 0 |
-    /// | `offset` | Option<&str> | 下一页偏移量 |
-    /// | `typ` | Option<&str> | 类型：`all`/`article`/`dynamic`，默认 `all` |
+    /// | `page` | `Option<u32>` | 页码，默认 0 |
+    /// | `offset` | `Option<&str>` | 下一页偏移量 |
+    /// | `typ` | `Option<&str>` | 类型：`all`/`article`/`dynamic`，默认 `all` |
     pub async fn opus_space_feed(
         &self,
         mid: u64,
         page: Option<u32>,
         offset: Option<&str>,
-        typ: Option<&str>, // all/article/dynamic
+        typ: Option<&str> // all/article/dynamic
     ) -> Result<BpiResponse<SpaceData>, BpiError> {
         let query = vec![
             ("host_mid", mid.to_string()),
             ("page", page.unwrap_or(0).to_string()),
             ("offset", offset.unwrap_or("").to_string()),
             ("type", typ.unwrap_or("all").to_string()),
-            ("web_location", "333.1387".to_string()),
+            ("web_location", "333.1387".to_string())
         ];
 
-        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space")
+        self
+            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space")
             .query(&query)
-            .send_bpi("获取用户空间图文")
-            .await
+            .send_bpi("获取用户空间图文").await
     }
 }
 

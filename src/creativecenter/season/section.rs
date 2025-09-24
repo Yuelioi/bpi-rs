@@ -1,9 +1,9 @@
 //! 获取合集小节中的视频 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 小节中的视频信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -84,12 +84,12 @@ impl BpiClient {
     /// [获取合集小节中的视频](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/section.md#获取合集小节中的视频)
     pub async fn season_section_episodes(
         &self,
-        season_id: u64,
+        season_id: u64
     ) -> Result<BpiResponse<SeasonSectionEpisodesData>, BpiError> {
-        self.get("https://member.bilibili.com/x2/creative/web/season/section")
+        self
+            .get("https://member.bilibili.com/x2/creative/web/season/section")
             .query(&[("id", season_id.to_string())])
-            .send_bpi("获取合集小节中的视频")
-            .await
+            .send_bpi("获取合集小节中的视频").await
     }
 }
 

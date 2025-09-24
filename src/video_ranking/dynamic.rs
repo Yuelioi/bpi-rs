@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 获取分区最新视频列表 ---
 
@@ -94,19 +94,20 @@ pub struct NewListRankData {
 impl BpiClient {
     /// 获取分区最新视频列表
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区最新视频列表
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区最新视频列表)
     ///
     /// # 参数
     /// | 名称   | 类型         | 说明                 |
     /// | ------ | ------------| -------------------- |
     /// | `rid`  | u32         | 分区ID               |
-    /// | `pn`   | Option<u32> | 页码，可选           |
-    /// | `ps`   | Option<u32> | 每页数量，可选       |
+    /// | `pn`   | `Option<u32>` | 页码，可选           |
+    /// | `ps`   | `Option<u32>` | 每页数量，可选       |
     pub async fn video_region_dynamic(
         &self,
         rid: u32,
         pn: Option<u32>,
-        ps: Option<u32>,
+        ps: Option<u32>
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
         let mut request = self
             .get("https://api.bilibili.com/x/web-interface/dynamic/region")
@@ -124,25 +125,29 @@ impl BpiClient {
 
     /// 获取分区标签近期互动列表
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区标签近期互动列表
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区标签近期互动列表)
     ///
     /// # 参数
     /// | 名称    | 类型         | 说明                 |
     /// | ------- | ------------| -------------------- |
     /// | `rid`   | u32         | 分区ID               |
     /// | `tag_id`| u64         | 标签ID               |
-    /// | `pn`    | Option<u32> | 页码，可选           |
-    /// | `ps`    | Option<u32> | 每页数量，可选       |
+    /// | `pn`    | `Option<u32>` | 页码，可选           |
+    /// | `ps`    | `Option<u32>` | 每页数量，可选       |
     pub async fn video_region_tag_dynamic(
         &self,
         rid: u32,
         tag_id: u64,
         pn: Option<u32>,
-        ps: Option<u32>,
+        ps: Option<u32>
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        let mut request = self
-            .get("https://api.bilibili.com/x/web-interface/dynamic/tag")
-            .query(&[("rid", rid.to_string()), ("tag_id", tag_id.to_string())]);
+        let mut request = self.get("https://api.bilibili.com/x/web-interface/dynamic/tag").query(
+            &[
+                ("rid", rid.to_string()),
+                ("tag_id", tag_id.to_string()),
+            ]
+        );
 
         if let Some(pn) = pn {
             request = request.query(&[("pn", pn.to_string())]);
@@ -156,21 +161,22 @@ impl BpiClient {
 
     /// 获取分区近期投稿列表
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区近期投稿列表
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区近期投稿列表)
     ///
     /// # 参数
     /// | 名称   | 类型         | 说明                 |
     /// | ------ | ------------| -------------------- |
     /// | `rid`  | u32         | 分区ID               |
-    /// | `pn`   | Option<u32> | 页码，可选           |
-    /// | `ps`   | Option<u32> | 每页数量，可选       |
-    /// | `typ`  | Option<u32> | 类型，可选           |
+    /// | `pn`   | `Option<u32>` | 页码，可选           |
+    /// | `ps`   | `Option<u32>` | 每页数量，可选       |
+    /// | `typ`  | `Option<u32>` | 类型，可选           |
     pub async fn video_region_newlist(
         &self,
         rid: u32,
         pn: Option<u32>,
         ps: Option<u32>,
-        typ: Option<u32>,
+        typ: Option<u32>
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
         let mut request = self
             .get("https://api.bilibili.com/x/web-interface/newlist")
@@ -191,14 +197,15 @@ impl BpiClient {
 
     /// 获取分区近期投稿列表（带排序）
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区近期投稿列表带排序
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区近期投稿列表带排序)
     ///
     /// # 参数
     /// | 名称        | 类型           | 说明                 |
     /// | ----------- | --------------| -------------------- |
     /// | `cate_id`   | u32           | 分类ID               |
-    /// | `order`     | Option<&str>  | 排序方式，可选       |
-    /// | `page`      | Option<u32>   | 页码，可选           |
+    /// | `order`     | `Option<&str>`  | 排序方式，可选       |
+    /// | `page`      | `Option<u32>`   | 页码，可选           |
     /// | `pagesize`  | u32           | 每页数量             |
     /// | `time_from` | &str          | 起始日期(YYYYMMDD)   |
     /// | `time_to`   | &str          | 结束日期(YYYYMMDD)   |
@@ -209,20 +216,20 @@ impl BpiClient {
         page: Option<u32>,
         pagesize: u32,
         time_from: &str,
-        time_to: &str,
+        time_to: &str
     ) -> Result<BpiResponse<NewListRankData>, BpiError> {
         let cate_id = cate_id.to_string();
         let pagesize = pagesize.to_string();
-        let mut request = self
-            .get("https://api.bilibili.com/x/web-interface/newlist_rank")
-            .query(&[
+        let mut request = self.get("https://api.bilibili.com/x/web-interface/newlist_rank").query(
+            &[
                 ("search_type", "video"),
                 ("view_type", "hot_rank"),
                 ("cate_id", cate_id.as_str()),
                 ("pagesize", pagesize.as_str()),
                 ("time_from", time_from),
                 ("time_to", time_to),
-            ]);
+            ]
+        );
 
         if let Some(o) = order {
             request = request.query(&[("order", o)]);
@@ -238,7 +245,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{Duration, Local};
+    use chrono::{ Duration, Local };
     use tracing::info;
 
     #[tokio::test]
@@ -291,16 +298,14 @@ mod tests {
         let time_from = seven_days_ago.format("%Y%m%d").to_string();
         let time_to = today.format("%Y%m%d").to_string();
 
-        let resp = bpi
-            .video_region_newlist_rank(
-                cate_id,
-                Some("click"),
-                Some(1),
-                pagesize,
-                &time_from,
-                &time_to,
-            )
-            .await;
+        let resp = bpi.video_region_newlist_rank(
+            cate_id,
+            Some("click"),
+            Some(1),
+            pagesize,
+            &time_from,
+            &time_to
+        ).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());

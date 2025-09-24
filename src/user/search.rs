@@ -1,8 +1,8 @@
 //! B站用户搜索相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 响应数据结构体 ---
 
@@ -121,18 +121,19 @@ pub struct ContributedVideosResponseData {
 impl BpiClient {
     /// 查询用户投稿视频明细
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `mid` | u64 | 目标用户 UID |
-    /// | `order` | Option<&str> | 排序方式，默认 `pubdate` |
-    /// | `tid` | Option<u64> | 分区筛选，默认 0 |
-    /// | `keyword` | Option<&str> | 关键词筛选 |
-    /// | `pn` | Option<u32> | 页码，默认 1 |
-    /// | `ps` | Option<u32> | 每页项数，默认 30 |
+    /// | `order` | `Option<&str>` | 排序方式，默认 `pubdate` |
+    /// | `tid` | `Option<u64>` | 分区筛选，默认 0 |
+    /// | `keyword` | `Option<&str>` | 关键词筛选 |
+    /// | `pn` | `Option<u32>` | 页码，默认 1 |
+    /// | `ps` | `Option<u32>` | 每页项数，默认 30 |
     pub async fn user_contributed_videos(
         &self,
         mid: u64,
@@ -140,7 +141,7 @@ impl BpiClient {
         tid: Option<u64>,
         keyword: Option<&str>,
         pn: Option<u32>,
-        ps: Option<u32>,
+        ps: Option<u32>
     ) -> Result<BpiResponse<ContributedVideosResponseData>, BpiError> {
         let pn_val = pn.unwrap_or(1);
         let ps_val = ps.unwrap_or(30);
@@ -152,7 +153,7 @@ impl BpiClient {
             ("order", order_val.to_string()),
             ("tid", tid_val.to_string()),
             ("pn", pn_val.to_string()),
-            ("ps", ps_val.to_string()),
+            ("ps", ps_val.to_string())
         ];
 
         if let Some(k) = keyword {
@@ -161,9 +162,7 @@ impl BpiClient {
 
         let params = self.get_wbi_sign2(params).await?;
 
-        let req = self
-            .get("https://api.bilibili.com/x/space/wbi/arc/search")
-            .query(&params);
+        let req = self.get("https://api.bilibili.com/x/space/wbi/arc/search").query(&params);
 
         req.send_bpi("查询用户投稿视频明细").await
     }
@@ -181,12 +180,9 @@ mod tests {
     const TEST_KEYWORD: &str = "科技";
 
     #[tokio::test]
-
     async fn test_user_contributed_videos_default() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .user_contributed_videos(TEST_MID, None, None, None, Some(1), Some(2))
-            .await?;
+        let resp = bpi.user_contributed_videos(TEST_MID, None, None, None, Some(1), Some(2)).await?;
         let data = resp.into_data()?;
 
         info!("用户投稿视频明细: {:?}", data);
@@ -199,12 +195,16 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_user_contributed_videos_with_keyword() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .user_contributed_videos(TEST_MID, None, None, Some(TEST_KEYWORD), Some(1), Some(10))
-            .await?;
+        let resp = bpi.user_contributed_videos(
+            TEST_MID,
+            None,
+            None,
+            Some(TEST_KEYWORD),
+            Some(1),
+            Some(10)
+        ).await?;
         let data = resp.into_data()?;
 
         info!("用户投稿视频明细（关键词）: {:?}", data);

@@ -1,6 +1,6 @@
-//! B站视频主模块
+//! 视频主模块
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 pub mod action;
 pub mod appeal;
 pub mod attribute_data;

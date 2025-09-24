@@ -1,6 +1,6 @@
 //! 创作中心上传 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/upload.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/upload.md)
 
 use std::collections::HashMap;
 
@@ -25,7 +25,7 @@ impl BpiClient {
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `mime_type` | &str | 图片 MIME 类型，如 image/jpeg |
-    /// | `cover` | impl AsRef<str> | 封面数据，可以是：纯 base64、完整 data URI、文件路径 |
+    /// | `cover` | `AsRef<str>` | 封面数据，可以是：纯 base64、完整 data URI、文件路径 |
     ///
     /// # 注意
     /// 文件不得超过 20M

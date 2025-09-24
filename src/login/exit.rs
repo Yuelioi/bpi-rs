@@ -1,9 +1,9 @@
 //! 退出登录 (Web端)
 //!
-//! 文档：https://socialsisteryi.github.io/bilibili-API-collect/docs/login/exit.html#退出登录-web端
+//! [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/exit.html#退出登录-web端)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 退出登录成功后的数据体
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -37,23 +37,19 @@ impl BpiClient {
     /// - `gourl`：成功后跳转的 URL，可选，默认 `javascript:history.go(-1)`
     pub async fn logout_web(
         &self,
-        gourl: Option<&str>,
+        gourl: Option<&str>
     ) -> Result<BpiResponse<LogoutData>, BpiError> {
         let csrf = self.csrf()?;
 
         let form = vec![
             ("biliCSRF", csrf),
-            (
-                "gourl",
-                gourl.unwrap_or("javascript:history.go(-1)").to_string(),
-            ),
+            ("gourl", gourl.unwrap_or("javascript:history.go(-1)").to_string())
         ];
 
         let result = self
             .post("https://passport.bilibili.com/login/exit/v2")
             .form(&form)
-            .send_bpi("退出登录 (Web端)")
-            .await?;
+            .send_bpi("退出登录 (Web端)").await?;
 
         Ok(result)
     }

@@ -1,15 +1,15 @@
 //! 评论区相关操作 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 评论区类型枚举（部分示例，需按需求扩展）
 #[derive(Debug, Clone, Copy, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CommentType {
-    Video = 1,    // 视频
+    Video = 1, // 视频
     Article = 12, // 专栏
     Dynamic = 17, // 动态
     Unknown = 0,
@@ -64,8 +64,8 @@ impl BpiClient {
     /// | `type` | CommentType | 评论区类型 |
     /// | `oid` | u64 | 对象 ID |
     /// | `message` | &str | 评论内容 |
-    /// | `root` | Option<u64> | 根评论 rpid，可选 |
-    /// | `parent` | Option<u64> | 父评论 rpid，可选 |
+    /// | `root` | `Option<u64>` | 根评论 rpid，可选 |
+    /// | `parent` | `Option<u64>` | 父评论 rpid，可选 |
     ///
     /// # 文档
     /// [发表评论](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action.md#发表评论)
@@ -75,7 +75,7 @@ impl BpiClient {
         oid: u64,
         message: &str,
         root: Option<u64>,
-        parent: Option<u64>,
+        parent: Option<u64>
     ) -> Result<BpiResponse<CommentData>, BpiError> {
         let csrf = self.csrf()?;
         let mut params = vec![
@@ -83,7 +83,7 @@ impl BpiClient {
             ("oid", oid.to_string()),
             ("message", message.to_string()),
             ("plat", "1".to_string()), // 默认 web
-            ("csrf", csrf.to_string()),
+            ("csrf", csrf.to_string())
         ];
         if let Some(r) = root {
             params.push(("root", r.to_string()));
@@ -92,10 +92,10 @@ impl BpiClient {
             params.push(("parent", p.to_string()));
         }
 
-        self.post("https://api.bilibili.com/x/v2/reply/add")
+        self
+            .post("https://api.bilibili.com/x/v2/reply/add")
             .form(&params)
-            .send_bpi("发表评论")
-            .await
+            .send_bpi("发表评论").await
     }
     /// 点赞评论
     ///
@@ -114,7 +114,7 @@ impl BpiClient {
         r#type: CommentType,
         oid: u64,
         rpid: u64,
-        action: u8,
+        action: u8
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -126,10 +126,10 @@ impl BpiClient {
             ("csrf", csrf.to_string()),
         ];
 
-        self.post("https://api.bilibili.com/x/v2/reply/action")
+        self
+            .post("https://api.bilibili.com/x/v2/reply/action")
             .form(&params)
-            .send_bpi("点赞评论")
-            .await
+            .send_bpi("点赞评论").await
     }
 
     /// 点踩评论
@@ -149,7 +149,7 @@ impl BpiClient {
         r#type: CommentType,
         oid: u64,
         rpid: u64,
-        action: u8,
+        action: u8
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -161,10 +161,10 @@ impl BpiClient {
             ("csrf", csrf.to_string()),
         ];
 
-        self.post("https://api.bilibili.com/x/v2/reply/hate")
+        self
+            .post("https://api.bilibili.com/x/v2/reply/hate")
             .form(&params)
-            .send_bpi("点踩评论")
-            .await
+            .send_bpi("点踩评论").await
     }
     /// 删除评论
     ///
@@ -181,7 +181,7 @@ impl BpiClient {
         &self,
         r#type: CommentType,
         oid: u64,
-        rpid: u64,
+        rpid: u64
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -192,10 +192,10 @@ impl BpiClient {
             ("csrf", csrf.to_string()),
         ];
 
-        self.post("https://api.bilibili.com/x/v2/reply/del")
+        self
+            .post("https://api.bilibili.com/x/v2/reply/del")
             .form(&params)
-            .send_bpi("删除评论")
-            .await
+            .send_bpi("删除评论").await
     }
     /// 置顶评论
     ///
@@ -214,7 +214,7 @@ impl BpiClient {
         r#type: CommentType,
         oid: u64,
         rpid: u64,
-        action: u8,
+        action: u8
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -226,10 +226,10 @@ impl BpiClient {
             ("csrf", csrf.to_string()),
         ];
 
-        self.post("https://api.bilibili.com/x/v2/reply/top")
+        self
+            .post("https://api.bilibili.com/x/v2/reply/top")
             .form(&params)
-            .send_bpi("置顶评论")
-            .await
+            .send_bpi("置顶评论").await
     }
 
     /// 举报评论
@@ -241,7 +241,7 @@ impl BpiClient {
     /// | `oid` | u64 | 对象 ID |
     /// | `rpid` | u64 | 评论 rpid |
     /// | `reason` | ReportReason | 举报原因 |
-    /// | `content` | Option<&str> | 举报内容，可选 |
+    /// | `content` | `Option<&str>` | 举报内容，可选 |
     ///
     /// # 文档
     /// [举报评论](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action.md#举报评论)
@@ -251,7 +251,7 @@ impl BpiClient {
         oid: u64,
         rpid: u64,
         reason: ReportReason,
-        content: Option<&str>,
+        content: Option<&str>
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let mut params = vec![
@@ -259,16 +259,16 @@ impl BpiClient {
             ("oid", oid.to_string()),
             ("rpid", rpid.to_string()),
             ("reason", (reason as u32).to_string()),
-            ("csrf", csrf),
+            ("csrf", csrf)
         ];
         if let Some(c) = content {
             params.push(("content", c.to_string()));
         }
 
-        self.post("https://api.bilibili.com/x/v2/reply/report")
+        self
+            .post("https://api.bilibili.com/x/v2/reply/report")
             .form(&params)
-            .send_bpi("举报评论")
-            .await
+            .send_bpi("举报评论").await
     }
 }
 
@@ -276,7 +276,7 @@ impl BpiClient {
 mod tests {
     use super::*;
     use std::time::Duration;
-    use std::time::{SystemTime, UNIX_EPOCH};
+    use std::time::{ SystemTime, UNIX_EPOCH };
     use tokio::time;
 
     const TEST_AID: u64 = 851944245;
@@ -284,22 +284,17 @@ mod tests {
     /// 测试辅助函数：添加评论并返回rpid
     async fn add_test_comment() -> Result<u64, BpiError> {
         let bpi = BpiClient::new();
-        let now = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
 
         // 简单伪随机：用当前秒对一个常数取模再加偏移
         let random_secs = (now % 1_000_000) + 1_600_000_000;
-        let resp = bpi
-            .comment_add(
-                CommentType::Video,
-                TEST_AID,
-                &random_secs.to_string(),
-                None,
-                None,
-            )
-            .await?;
+        let resp = bpi.comment_add(
+            CommentType::Video,
+            TEST_AID,
+            &random_secs.to_string(),
+            None,
+            None
+        ).await?;
 
         let data = resp.into_data()?;
         Ok(data.rpid)
@@ -308,8 +303,7 @@ mod tests {
     /// 测试辅助函数：删除评论
     async fn delete_test_comment(rpid: u64) -> Result<(), BpiError> {
         let bpi = BpiClient::new();
-        bpi.comment_delete(CommentType::Video, TEST_AID, rpid)
-            .await?;
+        bpi.comment_delete(CommentType::Video, TEST_AID, rpid).await?;
         Ok(())
     }
 
@@ -319,9 +313,7 @@ mod tests {
         time::sleep(Duration::from_secs(3)).await;
 
         let bpi = BpiClient::new();
-        let resp = bpi
-            .comment_like(CommentType::Video, TEST_AID, rpid, 1)
-            .await?;
+        let resp = bpi.comment_like(CommentType::Video, TEST_AID, rpid, 1).await?;
         assert_eq!(resp.code, 0);
 
         time::sleep(Duration::from_secs(3)).await;
@@ -336,9 +328,7 @@ mod tests {
         time::sleep(Duration::from_secs(3)).await;
 
         let bpi = BpiClient::new();
-        let resp = bpi
-            .comment_dislike(CommentType::Video, TEST_AID, rpid, 1)
-            .await?;
+        let resp = bpi.comment_dislike(CommentType::Video, TEST_AID, rpid, 1).await?;
 
         assert_eq!(resp.code, 0);
 

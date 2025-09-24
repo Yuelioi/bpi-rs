@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 查询该稿件是否禁止笔记 ---
 
@@ -92,24 +92,26 @@ pub struct PublicNoteInfoData {
 impl BpiClient {
     /// 查询该稿件是否禁止笔记
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
     ///
     /// - aid: 稿件 avid
     pub async fn note_is_forbid(
         &self,
-        aid: u64,
+        aid: u64
     ) -> Result<BpiResponse<NoteIsForbidData>, BpiError> {
-        self.get("https://api.bilibili.com/x/note/is_forbid")
+        self
+            .get("https://api.bilibili.com/x/note/is_forbid")
             .query(&[("aid", aid)])
-            .send_bpi("查询稿件是否禁止笔记")
-            .await
+            .send_bpi("查询稿件是否禁止笔记").await
     }
 
     /// 查询私有笔记内容
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -118,27 +120,34 @@ impl BpiClient {
     pub async fn note_get_private_info(
         &self,
         oid: u64,
-        note_id: u64,
+        note_id: u64
     ) -> Result<BpiResponse<PrivateNoteInfoData>, BpiError> {
-        self.get("https://api.bilibili.com/x/note/info")
-            .query(&[("oid", oid), ("oid_type", 0), ("note_id", note_id)])
-            .send_bpi("查询私有笔记内容")
-            .await
+        self
+            .get("https://api.bilibili.com/x/note/info")
+            .query(
+                &[
+                    ("oid", oid),
+                    ("oid_type", 0),
+                    ("note_id", note_id),
+                ]
+            )
+            .send_bpi("查询私有笔记内容").await
     }
 
     /// 查询公开笔记内容
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
     ///
     /// - cvid: 公开笔记 cvid
     pub async fn note_get_public_info(
         &self,
-        cvid: u64,
+        cvid: u64
     ) -> Result<BpiResponse<PublicNoteInfoData>, BpiError> {
-        self.get("https://api.bilibili.com/x/note/publish/info")
+        self
+            .get("https://api.bilibili.com/x/note/publish/info")
             .query(&[("cvid", cvid)])
-            .send_bpi("查询公开笔记内容")
-            .await
+            .send_bpi("查询公开笔记内容").await
     }
 }
 

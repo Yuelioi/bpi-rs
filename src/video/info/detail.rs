@@ -1,6 +1,6 @@
 //! 获取视频超详细信息(Web端)
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
 use crate::models::{ LevelInfo, Nameplate, Official, OfficialVerify, Pendant, VipLabel };
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
@@ -418,14 +418,15 @@ pub type VideoDetailResponse = BpiResponse<VideoDetailData>;
 impl BpiClient {
     /// 获取视频超详细信息 (Web端)
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video/video.html#获取视频超详细信息-web端
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/video.html#获取视频超详细信息-web端)
     ///
     /// # 参数
     /// | 名称        | 类型         | 说明                 |
     /// | ----------- | ------------| -------------------- |
-    /// | `aid`       | Option<u64> | 稿件 avid，可选      |
-    /// | `bvid`      | Option<&str>| 稿件 bvid，可选      |
-    /// | `need_elec` | Option<u8>  | 是否获取充电信息 0否 1是，可选 |
+    /// | `aid`       | `Option<u64>` | 稿件 avid，可选      |
+    /// | `bvid`      | `Option<&str>`| 稿件 bvid，可选      |
+    /// | `need_elec` | `Option<u8>`  | 是否获取充电信息 0否 1是，可选 |
     ///
     /// `aid` 和 `bvid` 二选一
     pub async fn video_detail(

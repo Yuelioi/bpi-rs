@@ -1,8 +1,8 @@
 //! 音频榜单
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AudioRankPeriodData {
@@ -74,15 +74,15 @@ impl BpiClient {
     /// [获取音频榜单每期列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md#获取音频榜单每期列表)
     pub async fn audio_rank_period(
         &self,
-        list_type: u32,
+        list_type: u32
     ) -> Result<BpiResponse<AudioRankPeriodData>, BpiError> {
         let csrf = self.csrf()?;
         let params = vec![("list_type", list_type.to_string()), ("csrf", csrf)];
 
-        self.get("https://api.bilibili.com/x/copyright-music-publicity/toplist/all_period")
+        self
+            .get("https://api.bilibili.com/x/copyright-music-publicity/toplist/all_period")
             .query(&params)
-            .send_bpi("获取音频榜单每期列表")
-            .await
+            .send_bpi("获取音频榜单每期列表").await
     }
 
     /// 查询音频榜单单期信息
@@ -96,15 +96,15 @@ impl BpiClient {
     /// [查询音频榜单单期信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md#查询音频榜单单期信息)
     pub async fn audio_rank_detail(
         &self,
-        list_id: u64,
+        list_id: u64
     ) -> Result<BpiResponse<AudioRankDetailData>, BpiError> {
         let csrf = self.csrf()?;
         let params = vec![("list_id", list_id.to_string()), ("csrf", csrf)];
 
-        self.get("https://api.bilibili.com/x/copyright-music-publicity/toplist/detail")
+        self
+            .get("https://api.bilibili.com/x/copyright-music-publicity/toplist/detail")
             .query(&params)
-            .send_bpi("查询音频榜单单期信息")
-            .await
+            .send_bpi("查询音频榜单单期信息").await
     }
 
     /// 获取音频榜单单期内容
@@ -119,15 +119,15 @@ impl BpiClient {
     /// [获取音频榜单单期内容](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md#获取音频榜单单期内容)
     pub async fn audio_rank_music_list(
         &self,
-        list_id: u64,
+        list_id: u64
     ) -> Result<BpiResponse<AudioRankMusicListData>, BpiError> {
         let csrf = self.csrf()?;
         let params = vec![("list_id", list_id.to_string()), ("csrf", csrf)];
 
-        self.get("https://api.bilibili.com/x/copyright-music-publicity/toplist/music_list")
+        self
+            .get("https://api.bilibili.com/x/copyright-music-publicity/toplist/music_list")
             .query(&params)
-            .send_bpi("获取音频榜单单期内容")
-            .await
+            .send_bpi("获取音频榜单单期内容").await
     }
 
     /// 订阅或退订榜单
@@ -136,14 +136,14 @@ impl BpiClient {
     /// | 名称      | 类型           | 说明                       |
     /// | --------- | -------------- | -------------------------- |
     /// | `state`   | u32            | 操作代码（1：订阅，2：退订）|
-    /// | `list_id` | Option<u64>    | 榜单 id（可选）            |
+    /// | `list_id` | `Option<u64>`    | 榜单 id（可选）            |
     ///
     /// # 文档
     /// [订阅或退订榜单](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md#订阅或退订榜单)
     pub async fn audio_rank_subscribe(
         &self,
         state: u32,
-        list_id: Option<u64>,
+        list_id: Option<u64>
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let mut params = vec![("state", state.to_string()), ("csrf", csrf.to_string())];
@@ -151,10 +151,10 @@ impl BpiClient {
             params.push(("list_id", id.to_string()));
         }
 
-        self.post("https://api.bilibili.com/x/copyright-music-publicity/toplist/subscribe/update")
+        self
+            .post("https://api.bilibili.com/x/copyright-music-publicity/toplist/subscribe/update")
             .form(&params)
-            .send_bpi("订阅或退订榜单")
-            .await
+            .send_bpi("订阅或退订榜单").await
     }
 }
 
@@ -218,7 +218,6 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_update_audio_rank_subscribe() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new();
         bpi.audio_rank_subscribe(1, Some(76)).await?;

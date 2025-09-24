@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 获取收藏夹内容明细列表 ---
 
@@ -102,19 +102,20 @@ pub struct FavResourceIdItem {
 impl BpiClient {
     /// 获取收藏夹内容明细列表
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `media_id` | u64 | 收藏夹 media_id |
-    /// | `tid` | Option<u32> | 分区 tid |
-    /// | `keyword` | Option<&str> | 关键词过滤 |
-    /// | `order` | Option<&str> | 排序，如 `mtime` |
-    /// | `typ` | Option<u8> | 内容类型 |
+    /// | `tid` | `Option<u32>` | 分区 tid |
+    /// | `keyword` | `Option<&str>` | 关键词过滤 |
+    /// | `order` | `Option<&str>` | 排序，如 `mtime` |
+    /// | `typ` | `Option<u8>` | 内容类型 |
     /// | `ps` | u32 | 每页条数 |
-    /// | `pn` | Option<u32> | 页码 |
+    /// | `pn` | `Option<u32>` | 页码 |
     pub async fn fav_list_detail(
         &self,
         media_id: u64,
@@ -123,15 +124,15 @@ impl BpiClient {
         order: Option<&str>,
         typ: Option<u8>,
         ps: u32,
-        pn: Option<u32>,
+        pn: Option<u32>
     ) -> Result<BpiResponse<FavListDetailData>, BpiError> {
-        let mut request = self
-            .get("https://api.bilibili.com/x/v3/fav/resource/list")
-            .query(&[
+        let mut request = self.get("https://api.bilibili.com/x/v3/fav/resource/list").query(
+            &[
                 ("media_id", media_id.to_string()),
                 ("ps", ps.to_string()),
                 ("platform", "web".to_string()),
-            ]);
+            ]
+        );
 
         if let Some(tid) = tid {
             request = request.query(&[("tid", tid)]);
@@ -154,24 +155,27 @@ impl BpiClient {
 
     /// 获取收藏夹全部内容id
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `media_id` | u64 | 收藏夹 media_id |
     pub async fn fav_resource_ids(
         &self,
-        media_id: u64,
+        media_id: u64
     ) -> Result<BpiResponse<Vec<FavResourceIdItem>>, BpiError> {
-        self.get("https://api.bilibili.com/x/v3/fav/resource/ids")
-            .query(&[
-                ("media_id", media_id.to_string()),
-                ("platform", "web".to_string()),
-            ])
-            .send_bpi("获取收藏夹全部内容id")
-            .await
+        self
+            .get("https://api.bilibili.com/x/v3/fav/resource/ids")
+            .query(
+                &[
+                    ("media_id", media_id.to_string()),
+                    ("platform", "web".to_string()),
+                ]
+            )
+            .send_bpi("获取收藏夹全部内容id").await
     }
 }
 
@@ -184,9 +188,15 @@ mod tests {
     async fn test_get_fav_list_detail() {
         let bpi = BpiClient::new();
         let media_id = 1572769770;
-        let resp = bpi
-            .fav_list_detail(media_id, None, None, Some("mtime"), Some(0), 5, Some(1))
-            .await;
+        let resp = bpi.fav_list_detail(
+            media_id,
+            None,
+            None,
+            Some("mtime"),
+            Some(0),
+            5,
+            Some(1)
+        ).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());

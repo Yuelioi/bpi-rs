@@ -1,6 +1,6 @@
 //! 获取硬币数
 //!
-//! https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info_info.html#获取硬币数
+//! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info_info.html#获取硬币数)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -15,7 +15,8 @@ pub struct CoinInfo {
 impl BpiClient {
     /// 获取账号硬币数
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login)
     pub async fn login_info_coin(&self) -> Result<BpiResponse<CoinInfo>, BpiError> {
         self.get("https://account.bilibili.com/site/getCoin").send_bpi("获取硬币数").await
     }

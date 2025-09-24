@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 导航栏动态 API 结构体 ---
 
@@ -54,18 +54,19 @@ pub struct DynamicNavData {
 impl BpiClient {
     /// 获取导航栏动态列表
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `update_baseline` | Option<&str> | 更新基线，获取新动态时使用 |
-    /// | `offset` | Option<&str> | 分页偏移量，翻页时使用 |
+    /// | `update_baseline` | `Option<&str>` | 更新基线，获取新动态时使用 |
+    /// | `offset` | `Option<&str>` | 分页偏移量，翻页时使用 |
     pub async fn dynamic_nav_feed(
         &self,
         update_baseline: Option<&str>,
-        offset: Option<&str>,
+        offset: Option<&str>
     ) -> Result<BpiResponse<DynamicNavData>, BpiError> {
         let mut req = self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/nav");
 
@@ -87,7 +88,6 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
-
     async fn test_get_dynamic_nav_feed() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         let resp = bpi.dynamic_nav_feed(None, None).await?;

@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 // ================= 数据结构 =================
 
@@ -82,9 +82,10 @@ impl BpiClient {
     /// 获取指定直播间的红包信息
     ///
 
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -93,9 +94,11 @@ impl BpiClient {
         let params = [("roomid", room_id.to_string())];
 
         let resp: LotteryInfoResponse = self
-      .get("https://api.live.bilibili.com/xlive/lottery-interface/v1/lottery/getLotteryInfoWeb")
-      .query(&params)
-      .send_bpi("获取指定直播间的红包信息").await?;
+            .get(
+                "https://api.live.bilibili.com/xlive/lottery-interface/v1/lottery/getLotteryInfoWeb"
+            )
+            .query(&params)
+            .send_bpi("获取指定直播间的红包信息").await?;
 
         Ok(resp)
     }

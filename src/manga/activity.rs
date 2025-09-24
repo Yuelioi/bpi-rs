@@ -1,6 +1,6 @@
 //! 漫画任务操作
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Activity.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Activity.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -20,7 +20,8 @@ pub type ShareComicResponse = BpiResponse<ShareComicData>;
 impl BpiClient {
     /// 分享漫画获取积分
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_share_comic(&self) -> Result<ShareComicResponse, BpiError> {
         let params = [("platform", "android")];
         self

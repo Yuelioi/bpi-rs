@@ -1,8 +1,8 @@
 //! B站用户批量信息相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// UID 查询返回的单个条目
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -22,20 +22,21 @@ pub struct NameToUidData {
 impl BpiClient {
     /// 批量查询用户名对应的 UID
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
-    /// 参数
+    /// # 参数
     /// - `names`: 用户名列表，多个用户名以逗号分隔
     pub async fn user_name_to_uid(
         &self,
-        names: &[&str],
+        names: &[&str]
     ) -> Result<BpiResponse<NameToUidData>, BpiError> {
         let names_str = names.join(",");
 
-        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/name-to-uid")
+        self
+            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/name-to-uid")
             .query(&[("names", names_str)])
-            .send_bpi("用户名查 UID")
-            .await
+            .send_bpi("用户名查 UID").await
     }
 }
 

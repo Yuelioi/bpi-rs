@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 获取稍后再看视频列表 ---
 
@@ -95,18 +95,19 @@ impl BpiClient {
     /// 视频添加稍后再看（最多100个）
     /// avid 与 bvid 任选一个
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `aid` | Option<u64> | 稿件 avid |
-    /// | `bvid` | Option<&str> | 稿件 bvid |
+    /// | `aid` | `Option<u64>` | 稿件 avid |
+    /// | `bvid` | `Option<&str>` | 稿件 bvid |
     pub async fn toview_add_video(
         &self,
         aid: Option<u64>,
-        bvid: Option<&str>,
+        bvid: Option<&str>
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -118,36 +119,38 @@ impl BpiClient {
             form.push(("bvid", bvid_str.to_string()));
         }
 
-        self.post("https://api.bilibili.com/x/v2/history/toview/add")
+        self
+            .post("https://api.bilibili.com/x/v2/history/toview/add")
             .form(&form)
-            .send_bpi("添加稍后再看视频")
-            .await
+            .send_bpi("添加稍后再看视频").await
     }
 
     /// 获取稍后再看视频列表
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
     pub async fn toview_list(&self) -> Result<BpiResponse<ToViewListData>, BpiError> {
-        self.get("https://api.bilibili.com/x/v2/history/toview")
-            .send_bpi("获取稍后再看视频列表")
-            .await
+        self
+            .get("https://api.bilibili.com/x/v2/history/toview")
+            .send_bpi("获取稍后再看视频列表").await
     }
 
     /// 删除稍后再看视频
     /// `aid` 和 `viewed` 参数任选一个
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `aid` | Option<u64> | 稿件 avid |
-    /// | `viewed` | Option<bool> | 是否删除已观看 |
+    /// | `aid` | `Option<u64>` | 稿件 avid |
+    /// | `viewed` | `Option<bool>` | 是否删除已观看 |
     pub async fn toview_delete(
         &self,
         aid: Option<u64>,
-        viewed: Option<bool>,
+        viewed: Option<bool>
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -159,24 +162,25 @@ impl BpiClient {
             form.push(("viewed", is_viewed.to_string()));
         }
 
-        self.post("https://api.bilibili.com/x/v2/history/toview/del")
+        self
+            .post("https://api.bilibili.com/x/v2/history/toview/del")
             .form(&form)
-            .send_bpi("删除稍后再看视频")
-            .await
+            .send_bpi("删除稍后再看视频").await
     }
 
     /// 清空稍后再看视频列表
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
     pub async fn toview_clear(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
         let form = [("csrf", csrf)];
 
-        self.post("https://api.bilibili.com/x/v2/history/toview/clear")
+        self
+            .post("https://api.bilibili.com/x/v2/history/toview/clear")
             .form(&form)
-            .send_bpi("清空稍后再看视频列表")
-            .await
+            .send_bpi("清空稍后再看视频列表").await
     }
 }
 

@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 // ================= 数据结构 =================
 
@@ -18,12 +18,12 @@ pub struct GiftTypeItem {
 impl BpiClient {
     /// 获取所有礼物列表
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_gift_types(&self) -> Result<BpiResponse<Vec<GiftTypeItem>>, BpiError> {
         let resp = self
             .get("https://api.live.bilibili.com/gift/v1/master/getGiftTypes")
-            .send_bpi("获取所有礼物列表")
-            .await?;
+            .send_bpi("获取所有礼物列表").await?;
 
         Ok(resp)
     }

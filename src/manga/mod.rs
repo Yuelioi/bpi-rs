@@ -1,6 +1,6 @@
 //! 漫画
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga)
 
 pub mod activity;
 pub mod clockin;

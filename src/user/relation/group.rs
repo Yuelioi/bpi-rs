@@ -1,6 +1,6 @@
 //! B站用户分组相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
 
@@ -18,7 +18,8 @@ pub struct CreateTagResponseData {
 impl BpiClient {
     /// 创建分组
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#创建分组
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#创建分组)
     ///
     /// # 参数
     /// | 名称      | 类型         | 说明           |
@@ -42,7 +43,8 @@ impl BpiClient {
 
     /// 重命名分组
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#重命名分组
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#重命名分组)
     ///
     /// # 参数
     /// | 名称      | 类型         | 说明           |
@@ -69,7 +71,8 @@ impl BpiClient {
 
     /// 删除分组
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#删除分组
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#删除分组)
     ///
     /// # 参数
     /// | 名称      | 类型         | 说明           |
@@ -93,13 +96,14 @@ impl BpiClient {
 
     /// 修改分组成员（添加）
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#修改分组成员
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#修改分组成员)
     ///
     /// # 参数
     /// | 名称      | 类型         | 说明           |
     /// | --------- | ------------| -------------- |
-    /// | `fids`    | &[u64]      | 目标用户 mid 列表|
-    /// | `tagids`  | &[i64]      | 分组ID列表      |
+    /// | `fids`    | &`[u64]`      | 目标用户 mid 列表|
+    /// | `tagids`  | &`[i64]`      | 分组ID列表      |
     pub async fn user_group_add_users_to_tags(
         &self,
         fids: &[u64],
@@ -131,12 +135,13 @@ impl BpiClient {
 
     // 修改分组成员（删除）
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#修改分组成员
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#修改分组成员)
     ///
     /// # 参数
     /// | 名称      | 类型         | 说明           |
     /// | --------- | ------------| -------------- |
-    /// | `fids`    | &[u64]      | 目标用户 mid 列表|
+    /// | `fids`    | &`[u64]`      | 目标用户 mid 列表|
     pub async fn user_group_remove_users_(
         &self,
         fids: &[u64]
@@ -162,13 +167,14 @@ impl BpiClient {
 
     /// 复制关注到分组
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#复制关注到分组
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#复制关注到分组)
     ///
     /// # 参数
     /// | 名称      | 类型         | 说明           |
     /// | --------- | ------------| -------------- |
-    /// | `fids`    | &[u64]      | 用户 mid 列表   |
-    /// | `tagids`  | &[i64]      | 目标分组ID列表  |
+    /// | `fids`    | &`[u64]`      | 用户 mid 列表   |
+    /// | `tagids`  | &`[i64]`      | 目标分组ID列表  |
     pub async fn user_group_copy_users_to_tags(
         &self,
         fids: &[u64],
@@ -200,14 +206,15 @@ impl BpiClient {
 
     /// 移动关注到分组
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#移动关注到分组
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#移动关注到分组)
     ///
     /// # 参数
     /// | 名称            | 类型         | 说明           |
     /// | --------------- | ------------| -------------- |
-    /// | `fids`          | &[u64]      | 用户 mid 列表   |
-    /// | `before_tag_ids`| &[i64]      | 原分组ID列表    |
-    /// | `after_tag_ids` | &[i64]      | 新分组ID列表    |
+    /// | `fids`          | &`[u64]`      | 用户 mid 列表   |
+    /// | `before_tag_ids`| &`[i64]`      | 原分组ID列表    |
+    /// | `after_tag_ids` | &`[i64]`      | 新分组ID列表    |
     pub async fn user_group_move_users_to_tags(
         &self,
         fids: &[u64],

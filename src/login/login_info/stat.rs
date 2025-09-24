@@ -1,6 +1,6 @@
 //! 登录用户状态数（双端）
 //!
-//! https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info.html#登录用户状态数-双端
+//! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info.html#登录用户状态数-双端)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };

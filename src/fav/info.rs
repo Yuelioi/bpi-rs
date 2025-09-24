@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 获取收藏夹元数据 ---
 
@@ -149,39 +149,41 @@ pub struct ResourceInfoItem {
 impl BpiClient {
     /// 获取收藏夹元数据
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `media_id` | u64 | 收藏夹 media_id |
     pub async fn fav_folder_info(
         &self,
-        media_id: u64,
+        media_id: u64
     ) -> Result<BpiResponse<FavFolderInfo>, BpiError> {
-        self.get("https://api.bilibili.com/x/v3/fav/folder/info")
+        self
+            .get("https://api.bilibili.com/x/v3/fav/folder/info")
             .query(&[("media_id", media_id)])
-            .send_bpi("获取收藏夹元数据")
-            .await
+            .send_bpi("获取收藏夹元数据").await
     }
 
     /// 获取指定用户创建的所有收藏夹信息
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `up_mid` | u64 | 用户 mid |
-    /// | `typ` | Option<u8> | 类型过滤 |
-    /// | `rid` | Option<u64> | 关联资源 id |
+    /// | `typ` | `Option<u8>` | 类型过滤 |
+    /// | `rid` | `Option<u64>` | 关联资源 id |
     pub async fn fav_created_list(
         &self,
         up_mid: u64,
         typ: Option<u8>,
-        rid: Option<u64>,
+        rid: Option<u64>
     ) -> Result<BpiResponse<CreatedFolderListData>, BpiError> {
         let mut request = self
             .get("https://api.bilibili.com/x/v3/fav/folder/created/list-all")
@@ -196,15 +198,15 @@ impl BpiClient {
 
         request
             .query(&[("web_location", "333.1387")])
-            .send_bpi("获取指定用户创建的所有收藏夹信息")
-            .await
+            .send_bpi("获取指定用户创建的所有收藏夹信息").await
     }
 
     /// 查询用户收藏的视频收藏夹
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -215,37 +217,45 @@ impl BpiClient {
         &self,
         up_mid: u64,
         pn: u32,
-        ps: u32,
+        ps: u32
     ) -> Result<BpiResponse<CollectedFolderListData>, BpiError> {
-        self.get("https://api.bilibili.com/x/v3/fav/folder/collected/list")
-            .query(&[
-                ("up_mid", up_mid.to_string()),
-                ("pn", pn.to_string()),
-                ("ps", ps.to_string()),
-                ("platform", "web".to_string()),
-            ])
-            .send_bpi("查询用户收藏的视频收藏夹")
-            .await
+        self
+            .get("https://api.bilibili.com/x/v3/fav/folder/collected/list")
+            .query(
+                &[
+                    ("up_mid", up_mid.to_string()),
+                    ("pn", pn.to_string()),
+                    ("ps", ps.to_string()),
+                    ("platform", "web".to_string()),
+                ]
+            )
+            .send_bpi("查询用户收藏的视频收藏夹").await
     }
 
     /// 批量获取指定收藏id的内容
     /// `resources`: "{内容id}:{内容类型},..."
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `resources` | &str | 形如 "{内容id}:{内容类型},..." |
     pub async fn fav_resource_infos(
         &self,
-        resources: &str,
+        resources: &str
     ) -> Result<BpiResponse<Vec<ResourceInfoItem>>, BpiError> {
-        self.get("https://api.bilibili.com/x/v3/fav/resource/infos")
-            .query(&[("resources", resources), ("platform", "web")])
-            .send_bpi("批量获取指定收藏id的内容")
-            .await
+        self
+            .get("https://api.bilibili.com/x/v3/fav/resource/infos")
+            .query(
+                &[
+                    ("resources", resources),
+                    ("platform", "web"),
+                ]
+            )
+            .send_bpi("批量获取指定收藏id的内容").await
     }
 }
 

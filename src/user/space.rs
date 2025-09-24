@@ -1,8 +1,8 @@
 //! B站用户空间相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 响应数据结构体 ---
 
@@ -209,7 +209,8 @@ pub struct BangumiFollowListResponseData {
 impl BpiClient {
     /// 获取用户空间公告
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// # 参数
     /// | 名称   | 类型   | 说明           |
@@ -217,25 +218,26 @@ impl BpiClient {
     /// | `mid`  | u64    | 目标用户 mid   |
     pub async fn user_space_notice(
         &self,
-        mid: u64,
+        mid: u64
     ) -> Result<BpiResponse<SpaceNoticeResponseData>, BpiError> {
-        self.get("https://api.bilibili.com/x/space/notice")
+        self
+            .get("https://api.bilibili.com/x/space/notice")
             .query(&[("mid", &mid.to_string())])
-            .send_bpi("查看用户空间公告")
-            .await
+            .send_bpi("查看用户空间公告").await
     }
 
     /// 修改空间公告
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// # 参数
     /// | 名称    | 类型           | 说明                 |
     /// | ------- | --------------| -------------------- |
-    /// | `notice`| Option<&str>  | 公告内容，少于150字  |
+    /// | `notice`| `Option<&str>`  | 公告内容，少于150字  |
     pub async fn user_space_notice_set(
         &self,
-        notice: Option<&str>,
+        notice: Option<&str>
     ) -> Result<BpiResponse<()>, BpiError> {
         let csrf = self.csrf()?;
         let mut form = reqwest::multipart::Form::new().text("csrf", csrf.to_string());
@@ -247,29 +249,30 @@ impl BpiClient {
             form = form.text("notice", n.to_string());
         }
 
-        self.post("https://api.bilibili.com/x/space/notice/set")
+        self
+            .post("https://api.bilibili.com/x/space/notice/set")
             .multipart(form)
-            .send_bpi("修改空间公告")
-            .await
+            .send_bpi("修改空间公告").await
     }
 
     /// 查询用户追番/追剧明细
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// # 参数
     /// | 名称      | 类型           | 说明                 |
     /// | --------- | --------------| -------------------- |
     /// | `mid`     | u64           | 目标用户 mid         |
-    /// | `pn`      | Option<u32>   | 页码，默认1          |
-    /// | `ps`      | Option<u32>   | 每页项数，默认15     |
+    /// | `pn`      | `Option<u32>`   | 页码，默认1          |
+    /// | `ps`      | `Option<u32>`   | 每页项数，默认15     |
     /// | `list_type`| u8           | 查询类型 1:追番 2:追剧 |
     pub async fn user_bangumi_follow_list(
         &self,
         mid: u64,
         pn: Option<u32>,
         ps: Option<u32>,
-        list_type: u8,
+        list_type: u8
     ) -> Result<BpiResponse<BangumiFollowListResponseData>, BpiError> {
         let pn_val = pn.unwrap_or(1);
         let ps_val = ps.unwrap_or(15);
@@ -278,9 +281,12 @@ impl BpiClient {
             return Err(BpiError::parse("ps 参数超出有效范围 [1, 30]"));
         }
 
-        let mut req = self
-            .get("https://api.bilibili.com/x/space/bangumi/follow/list")
-            .query(&[("vmid", &mid.to_string()), ("type", &list_type.to_string())]);
+        let mut req = self.get("https://api.bilibili.com/x/space/bangumi/follow/list").query(
+            &[
+                ("vmid", &mid.to_string()),
+                ("type", &list_type.to_string()),
+            ]
+        );
 
         if pn.is_some() {
             req = req.query(&[("pn", &pn_val.to_string())]);
@@ -317,7 +323,6 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_user_space_notice_set() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         let notice = "这是一个通过 API 设置的测试公告。";
@@ -346,13 +351,10 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_user_bangumi_follow_list() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         // 1: 追番, 2: 追剧
-        let resp = bpi
-            .user_bangumi_follow_list(TEST_MID, Some(1), Some(15), 1)
-            .await?;
+        let resp = bpi.user_bangumi_follow_list(TEST_MID, Some(1), Some(15), 1).await?;
         let data = resp.into_data()?;
 
         info!("追番列表: {:?}", data);

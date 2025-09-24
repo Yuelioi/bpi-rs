@@ -86,11 +86,14 @@ pub mod auth;
 pub mod client;
 pub mod err;
 pub mod log;
+pub mod request;
 pub mod response;
 
 // bv aid互转, 以及生成wbi
 pub mod utils;
 
-pub use client::{BilibiliRequest, BpiClient};
+pub use auth::Account;
+pub use client::BpiClient;
 pub use err::error::BpiError;
+pub use request::BilibiliRequest;
 pub use response::BpiResponse;

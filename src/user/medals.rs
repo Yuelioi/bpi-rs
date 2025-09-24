@@ -1,8 +1,8 @@
 //! B站用户粉丝勋章相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 粉丝勋章响应数据
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -77,15 +77,16 @@ pub struct UinfoMedal {
 impl BpiClient {
     /// 获取指定用户的所有粉丝勋章
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     pub async fn user_medal_wall(
         &self,
-        target_id: u64,
+        target_id: u64
     ) -> Result<BpiResponse<MedalWallData>, BpiError> {
-        self.get("https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall")
+        self
+            .get("https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall")
             .query(&[("target_id", target_id.to_string())])
-            .send_bpi("获取用户粉丝勋章")
-            .await
+            .send_bpi("获取用户粉丝勋章").await
     }
 }
 

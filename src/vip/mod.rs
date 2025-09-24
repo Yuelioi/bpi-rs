@@ -1,3 +1,5 @@
+//! VIP
+
 pub mod action;
 pub mod center;
 

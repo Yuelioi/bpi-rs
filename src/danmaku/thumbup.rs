@@ -1,6 +1,6 @@
 //! 弹幕点赞查询
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/danmaku/thumbup.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/danmaku/thumbup.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };

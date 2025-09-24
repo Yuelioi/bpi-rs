@@ -1,6 +1,6 @@
 //! B站用户认证类型一览
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
 // 用户认证类型一览
 // ID	认证类型	详细类型
 // 0	无

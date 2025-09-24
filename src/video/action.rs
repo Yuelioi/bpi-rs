@@ -1,15 +1,11 @@
 //! B站视频交互接口(Web端)
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
-//! 文档：
-//! - 点赞视频：https://api.bilibili.com/x/web-interface/archive/like
-//! - 投币视频：https://api.bilibili.com/x/web-interface/coin/add
-//! - 收藏视频：https://api.bilibili.com/x/v3/fav/resource/deal
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
 use std::collections::HashMap;
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 点赞视频 - 请求参数
 #[derive(Debug, Clone, Serialize)]
@@ -60,73 +56,79 @@ pub type FavoriteResponse = BpiResponse<FavoriteData>;
 impl BpiClient {
     /// 点赞/取消点赞
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/action.md
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/action.md)
     ///
     /// # 参数
     /// | 名称   | 类型           | 说明                 |
     /// | ------ | --------------| -------------------- |
-    /// | `aid`  | Option<u64>   | 稿件 avid，可选      |
-    /// | `bvid` | Option<String>| 稿件 bvid，可选      |
+    /// | `aid`  | `Option<u64>`   | 稿件 avid，可选      |
+    /// | `bvid` | `Option<String>`| 稿件 bvid，可选      |
     /// | `like` | u8            | 操作方式 (1:点赞, 2:取消) |
     pub async fn video_like(
         &self,
         aid: Option<u64>,
         bvid: Option<String>,
-        like: u8,
+        like: u8
     ) -> Result<BpiResponse<CoinData>, BpiError> {
         let csrf = self.csrf()?;
 
         let result = self
             .post("https://api.bilibili.com/x/web-interface/archive/like")
             .with_bilibili_headers()
-            .form(&[
-                ("aid", aid.unwrap_or(0).to_string()),
-                ("bvid", bvid.unwrap_or("".to_string())),
-                ("like", like.to_string()),
-                ("csrf", csrf),
-            ])
-            .send_bpi("点赞")
-            .await?;
+            .form(
+                &[
+                    ("aid", aid.unwrap_or(0).to_string()),
+                    ("bvid", bvid.unwrap_or("".to_string())),
+                    ("like", like.to_string()),
+                    ("csrf", csrf),
+                ]
+            )
+            .send_bpi("点赞").await?;
 
         Ok(result)
     }
 
     /// 投币视频
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/action.md
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/action.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
     /// | ------------ | --------------| -------------------- |
-    /// | `aid`        | Option<u64>   | 稿件 avid，可选      |
-    /// | `bvid`       | Option<String>| 稿件 bvid，可选      |
+    /// | `aid`        | `Option<u64>`   | 稿件 avid，可选      |
+    /// | `bvid`       | `Option<String>`| 稿件 bvid，可选      |
     /// | `multiply`   | u8            | 投币数量（上限2）    |
-    /// | `select_like`| Option<u8>    | 是否附加点赞，0:否，1:是，默认0 |
+    /// | `select_like`| `Option<u8>`    | 是否附加点赞，0:否，1:是，默认0 |
     pub async fn video_coin(
         &self,
         aid: Option<u64>,
         bvid: Option<String>,
         multiply: u8,
-        select_like: Option<u8>,
+        select_like: Option<u8>
     ) -> Result<BpiResponse<CoinData>, BpiError> {
         let csrf = self.csrf()?;
 
-        self.post("https://api.bilibili.com/x/web-interface/coin/add")
+        self
+            .post("https://api.bilibili.com/x/web-interface/coin/add")
             .with_bilibili_headers()
-            .form(&[
-                ("aid", aid.unwrap_or(0).to_string()),
-                ("bvid", bvid.unwrap_or("".to_string())),
-                ("multiply", multiply.to_string()),
-                ("select_like", select_like.unwrap_or(0).to_string()),
-                ("csrf", csrf),
-            ])
-            .send_bpi("投币")
-            .await
+            .form(
+                &[
+                    ("aid", aid.unwrap_or(0).to_string()),
+                    ("bvid", bvid.unwrap_or("".to_string())),
+                    ("multiply", multiply.to_string()),
+                    ("select_like", select_like.unwrap_or(0).to_string()),
+                    ("csrf", csrf),
+                ]
+            )
+            .send_bpi("投币").await
     }
 
     /// 收藏视频
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/action.md
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/action.md)
     ///
     /// # 参数
     /// | 名称           | 类型                 | 说明                 |
@@ -138,7 +140,7 @@ impl BpiClient {
         &self,
         rid: u64,
         add_media_ids: Option<Vec<&str>>,
-        del_media_ids: Option<Vec<&str>>,
+        del_media_ids: Option<Vec<&str>>
     ) -> Result<FavoriteResponse, BpiError> {
         if add_media_ids.is_none() && del_media_ids.is_none() {
             return Err(BpiError::InvalidParameter {
@@ -174,11 +176,11 @@ impl BpiClient {
             params.insert("del_media_ids", s);
         }
 
-        self.post("https://api.bilibili.com/x/v3/fav/resource/deal")
+        self
+            .post("https://api.bilibili.com/x/v3/fav/resource/deal")
             .with_bilibili_headers()
             .form(&params)
-            .send_bpi("收藏视频")
-            .await
+            .send_bpi("收藏视频").await
     }
 }
 
@@ -192,14 +194,11 @@ mod tests {
 
         match bpi.video_like(Some(10001), None, 1).await {
             Ok(resp) => tracing::info!("点赞响应: {:?}", resp),
-            Err(e) => match e.code() {
-                Some(65006) => {
-                    tracing::info!("已赞过")
+            Err(e) =>
+                match e.code() {
+                    Some(65006) => { tracing::info!("已赞过") }
+                    _ => { panic!("请求失败: {}", e) }
                 }
-                _ => {
-                    panic!("请求失败: {}", e)
-                }
-            },
         }
     }
 
@@ -209,14 +208,11 @@ mod tests {
 
         match bpi.video_coin(Some(10001), None, 1, Some(1)).await {
             Ok(resp) => tracing::info!("投币响应: {:?}", resp),
-            Err(e) => match e.code() {
-                Some(34005) => {
-                    tracing::info!("超过投币上限")
+            Err(e) =>
+                match e.code() {
+                    Some(34005) => { tracing::info!("超过投币上限") }
+                    _ => { panic!("请求失败: {}", e) }
                 }
-                _ => {
-                    panic!("请求失败: {}", e)
-                }
-            },
         }
     }
 
@@ -224,10 +220,7 @@ mod tests {
     async fn test_favorite_video() {
         let bpi = BpiClient::new();
 
-        match bpi
-            .video_favorite(10001, Some(vec!["44717370"]), None)
-            .await
-        {
+        match bpi.video_favorite(10001, Some(vec!["44717370"]), None).await {
             Ok(resp) => tracing::info!("收藏响应: {:?}", resp),
             Err(e) => panic!("请求失败: {}", e),
         }

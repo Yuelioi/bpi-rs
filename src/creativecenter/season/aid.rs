@@ -1,9 +1,9 @@
 //! 根据 aid 反查合集信息 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 合集信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -101,10 +101,10 @@ impl BpiClient {
     /// # 文档
     /// [根据 aid 反查合集信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/aid.md#根据-aid-反查合集信息)
     pub async fn season_by_aid(&self, aid: u64) -> Result<BpiResponse<SeasonInfoData>, BpiError> {
-        self.get("https://member.bilibili.com/x2/creative/web/season/aid")
+        self
+            .get("https://member.bilibili.com/x2/creative/web/season/aid")
             .query(&[("id", aid.to_string())])
-            .send_bpi("根据 aid 查询合集")
-            .await
+            .send_bpi("根据 aid 查询合集").await
     }
 }
 

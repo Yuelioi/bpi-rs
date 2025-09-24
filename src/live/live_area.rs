@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 // ================= 数据结构 =================
 
@@ -44,12 +44,12 @@ impl BpiClient {
     /// 获取全部直播间分区列表
     ///
 
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_area_list(&self) -> Result<BpiResponse<Vec<LiveParentArea>>, BpiError> {
         let resp = self
             .get("https://api.live.bilibili.com/room/v1/Area/getList")
-            .send_bpi("获取全部直播间分区列表")
-            .await?;
+            .send_bpi("获取全部直播间分区列表").await?;
 
         Ok(resp)
     }

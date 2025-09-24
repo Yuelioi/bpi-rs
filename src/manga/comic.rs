@@ -1,6 +1,6 @@
 //! 购买漫画章节
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Comic.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Comic.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::Serialize;
@@ -47,7 +47,7 @@ pub struct BuyEpisodeRequest {
 impl BpiClient {
     /// 购买漫画章节
     ///
-    /// 对应: https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode
+    /// [网页入口](https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode)
     pub async fn manga_buy_episode(
         &self,
         request: BuyEpisodeRequest
@@ -62,7 +62,7 @@ impl BpiClient {
 
     /// 使用漫读券购买漫画章节
     ///
-    /// 对应: https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode
+    /// [网页入口](https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode)
     pub async fn manga_buy_episode_with_coupon(
         &self,
         ep_id: i32,
@@ -83,7 +83,7 @@ impl BpiClient {
 
     /// 使用新人等免购买漫画章节
     ///
-    /// 对应: https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode
+    /// [网页入口](https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode)
     pub async fn manga_buy_episode_with_free(
         &self,
         comic_id: i32,
@@ -104,7 +104,7 @@ impl BpiClient {
 
     /// 使用通用券购买漫画章节
     ///
-    /// 对应: https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode
+    /// [网页入口](https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode)
     pub async fn manga_buy_episode_with_general_coupon(
         &self,
         ep_id: i32,

@@ -1,6 +1,6 @@
 //! 创作中心视频管理 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/videos.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/videos.md)
 
 use serde::{ Deserialize, Serialize };
 
@@ -109,7 +109,7 @@ impl BpiClient {
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `pn` | i64 | 页码 |
-    /// | `ps` | Option<i64> | 每页数量，可选 |
+    /// | `ps` | `Option<i64>` | 每页数量，可选 |
     ///
     /// # 文档
     /// [获取稿件列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/videos.md#获取稿件列表)

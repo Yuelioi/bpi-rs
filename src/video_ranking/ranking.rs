@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 获取分区视频排行榜列表 ---
 
@@ -24,17 +24,18 @@ pub struct RankingListData {
 impl BpiClient {
     /// 获取分区视频排行榜列表
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/ranking.html#获取分区视频排行榜列表
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/ranking.html#获取分区视频排行榜列表)
     ///
     /// # 参数
     /// | 名称        | 类型           | 说明                 |
     /// | ----------- | --------------| -------------------- |
-    /// | `rid`       | Option<u32>   | 目标分区 tid，默认0(全站) |
-    /// | `type_name` | Option<&str>  | 榜单类型 all/rookie/origin，可选 |
+    /// | `rid`       | `Option<u32>`   | 目标分区 tid，默认0(全站) |
+    /// | `type_name` | `Option<&str>`  | 榜单类型 all/rookie/origin，可选 |
     pub async fn video_ranking_list(
         &self,
         rid: Option<u32>,
-        type_name: Option<&str>,
+        type_name: Option<&str>
     ) -> Result<BpiResponse<RankingListData>, BpiError> {
         let mut request = self.get("https://api.bilibili.com/x/web-interface/ranking/v2");
 
@@ -46,7 +47,10 @@ impl BpiClient {
         }
 
         // 添加 User-Agent 以通过鉴权
-        request = request.header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36");
+        request = request.header(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+        );
 
         // WBI签名相关参数文档未给出完整说明，忽略
         // request = request.query(&[("w_rid", "wbi_signature"), ("wts", "wbi_timestamp")]);
@@ -76,10 +80,7 @@ mod tests {
             info!("排行榜视频数: {}", data.list.len());
             if let Some(first_item) = data.list.first() {
                 // 因为 RankingVideoItem 使用了 serde_json::Value，这里打印原始 JSON
-                info!(
-                    "first item: {}",
-                    serde_json::to_string_pretty(&first_item).unwrap()
-                );
+                info!("first item: {}", serde_json::to_string_pretty(&first_item).unwrap());
             }
         }
     }

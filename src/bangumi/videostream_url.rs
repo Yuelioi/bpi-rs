@@ -1,9 +1,9 @@
 //! 视频流URL
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/videostream_url.md
-use crate::models::{Fnval, VideoQuality};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/videostream_url.md)
+use crate::models::{ Fnval, VideoQuality };
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 番剧视频流响应
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -45,8 +45,8 @@ impl BpiClient {
     /// # 参数
     /// | 名称    | 类型   | 说明                                |
     /// | ------- | ------ | ----------------------------------- |
-    /// | `ep_id` | Option<u64    | 稿件 epid                           |
-    /// | `cid`   | Option<u64>> | 视频 cid（可选，与 ep_id 二选一） |
+    /// | `ep_id` | `Option<u64>`    | 稿件 epid                           |
+    /// | `cid`   | `Option<u64>` | 视频 cid（可选，与 ep_id 二选一） |
     /// | `qn`    | u32    | 视频清晰度选择                       |
     /// | `fnval` | u32    | 视频获取方式选择                     |
     ///
@@ -57,7 +57,7 @@ impl BpiClient {
         ep_id: Option<u64>,
         cid: Option<u64>,
         qn: Option<VideoQuality>,
-        fnval: Option<Fnval>,
+        fnval: Option<Fnval>
     ) -> Result<BpiResponse<BangumiVideoStreamData>, BpiError> {
         // 验证参数
         if ep_id.is_none() && cid.is_none() {
@@ -86,11 +86,11 @@ impl BpiClient {
             params.push(("fnval", fv.bits().to_string()));
         }
 
-        self.get("https://api.bilibili.com/pgc/player/web/playurl")
+        self
+            .get("https://api.bilibili.com/pgc/player/web/playurl")
             .with_bilibili_headers()
             .query(&params)
-            .send_bpi("获取番剧视频流URL")
-            .await
+            .send_bpi("获取番剧视频流URL").await
     }
 
     /// 获取番剧视频流 URL
@@ -108,10 +108,9 @@ impl BpiClient {
         &self,
         ep_id: u64,
         qn: Option<VideoQuality>,
-        fnval: Option<Fnval>,
+        fnval: Option<Fnval>
     ) -> Result<BpiResponse<BangumiVideoStreamData>, BpiError> {
-        self.bangumi_video_stream(Some(ep_id), None, qn, fnval)
-            .await
+        self.bangumi_video_stream(Some(ep_id), None, qn, fnval).await
     }
 
     /// 获取番剧视频流 URL
@@ -129,7 +128,7 @@ impl BpiClient {
         &self,
         cid: u64,
         qn: Option<VideoQuality>,
-        fnval: Option<Fnval>,
+        fnval: Option<Fnval>
     ) -> Result<BpiResponse<BangumiVideoStreamData>, BpiError> {
         self.bangumi_video_stream(None, Some(cid), qn, fnval).await
     }
@@ -145,31 +144,23 @@ mod tests {
     #[tokio::test]
     async fn test_bangumi_video_stream_url_simple() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new();
-        let result = bpi
-            .bangumi_video_stream_by_epid(
-                TEST_EP_ID,
-                Some(VideoQuality::P8K),
-                Some(
-                    Fnval::DASH
-                        | Fnval::FOURK
-                        | Fnval::EIGHTK
-                        | Fnval::HDR
-                        | Fnval::DOLBY_AUDIO
-                        | Fnval::DOLBY_VISION
-                        | Fnval::AV1,
-                ),
+        let result = bpi.bangumi_video_stream_by_epid(
+            TEST_EP_ID,
+            Some(VideoQuality::P8K),
+            Some(
+                Fnval::DASH |
+                    Fnval::FOURK |
+                    Fnval::EIGHTK |
+                    Fnval::HDR |
+                    Fnval::DOLBY_AUDIO |
+                    Fnval::DOLBY_VISION |
+                    Fnval::AV1
             )
-            .await?;
+        ).await?;
 
         let data = result.into_data()?;
-        tracing::info!(
-            "==========最佳格式==========\n{:#?}",
-            data.base.best_format()
-        );
-        tracing::info!(
-            "==========最佳视频==========\n{:#?}",
-            data.base.best_video()
-        );
+        tracing::info!("==========最佳格式==========\n{:#?}", data.base.best_format());
+        tracing::info!("==========最佳视频==========\n{:#?}", data.base.best_video());
 
         assert!(data.base.timelength.unwrap() > 0);
         assert!(!data.base.accept_format.is_empty());
@@ -181,9 +172,11 @@ mod tests {
     #[tokio::test]
     async fn test_bangumi_video_stream_url_by_cid() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new();
-        let result = bpi
-            .bangumi_video_stream_by_cid(TEST_CID, Some(VideoQuality::P480), Some(Fnval::DASH))
-            .await?;
+        let result = bpi.bangumi_video_stream_by_cid(
+            TEST_CID,
+            Some(VideoQuality::P480),
+            Some(Fnval::DASH)
+        ).await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
         Ok(())

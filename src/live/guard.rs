@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct UserInfo {
@@ -178,41 +178,41 @@ impl BpiClient {
     /// room_id: 直播间号
     /// ruid: 主播id
     /// page: 页
-    /// page_size: 10~30 [20]
+    /// page_size: 10~30 `[20]`
     /// typ:3,4,5 周/月/总 亲密度
 
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `room_id` | i64 | 直播间号 |
     /// | `ruid` | i64 | 主播 id |
-    /// | `page` | Option<i32> | 页码，默认 1 |
-    /// | `page_size` | Option<i32> | 每页 10~30，默认 20 |
-    /// | `typ` | Option<i32> | 3/4/5：周/月/总 亲密度 |
+    /// | `page` | `Option<i32>` | 页码，默认 1 |
+    /// | `page_size` | `Option<i32>` | 每页 10~30，默认 20 |
+    /// | `typ` | `Option<i32>` | 3/4/5：周/月/总 亲密度 |
     pub async fn live_guard_list(
         &self,
         room_id: i64,
         ruid: i64,
         page: Option<i32>,
         page_size: Option<i32>,
-        typ: Option<i32>,
+        typ: Option<i32>
     ) -> Result<GuardListResponse, BpiError> {
         let params: Vec<(&str, String)> = vec![
             ("roomid", room_id.to_string()),
             ("ruid", ruid.to_string()),
             ("page", page.unwrap_or(1).to_string()),
             ("page_size", page_size.unwrap_or(20).to_string()),
-            ("typ", typ.unwrap_or(5).to_string()),
+            ("typ", typ.unwrap_or(5).to_string())
         ];
 
         let resp: GuardListResponse = self
             .get("https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topListNew")
             .query(&params)
-            .send_bpi("查询大航海成员")
-            .await?;
+            .send_bpi("查询大航海成员").await?;
 
         Ok(resp)
     }
@@ -225,9 +225,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_guard_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .live_guard_list(23174842, 504140200, None, None, None)
-            .await?;
+        let resp = bpi.live_guard_list(23174842, 504140200, None, None, None).await?;
 
         let data = resp.data.unwrap();
         assert!(data.list.len() > 0);

@@ -1,6 +1,7 @@
-//! B站用户主模块
+//! 用户
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+
 pub mod batch;
 pub mod contract;
 pub mod info;

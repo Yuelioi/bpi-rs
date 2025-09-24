@@ -1,6 +1,6 @@
 //! 查询大会员状态
 //!
-//! 文档：https://socialsisteryi.github.io/bilibili-API-collect/docs/login/member_center.html#查询大会员状态
+//! [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/member_center.html#查询大会员状态)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };

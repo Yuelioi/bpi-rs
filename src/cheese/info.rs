@@ -1,9 +1,9 @@
 //! 课程（PUGV）相关 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/cheese/info.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/cheese/info.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // ==========================
 // 数据结构（/pugv/view/web/season）
@@ -55,7 +55,7 @@ pub struct CourseBriefImg {
 pub struct CourseCoupon {
     pub amount: f64,
     pub expire_time: String, // YYYY-MM-DD HH:MM:SS
-    pub start_time: String,  // YYYY-MM-DD HH:MM:SS
+    pub start_time: String, // YYYY-MM-DD HH:MM:SS
     pub status: i32,
     pub title: String,
     pub token: String,
@@ -71,18 +71,18 @@ pub struct CourseEpisodePage {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CourseEpisode {
-    pub aid: u64,          // 课程分集 avid（与普通稿件部分不互通）
-    pub cid: u64,          // 课程分集 cid（与普通视频部分不互通）
-    pub duration: u64,     // 单位：秒
-    pub from: String,      // "pugv"
-    pub id: u64,           // 课程分集 epid（与番剧不互通）
-    pub index: u32,        // 课程分集数
-    pub page: u32,         // 一般为 1
-    pub play: u64,         // 分集播放量
+    pub aid: u64, // 课程分集 avid（与普通稿件部分不互通）
+    pub cid: u64, // 课程分集 cid（与普通视频部分不互通）
+    pub duration: u64, // 单位：秒
+    pub from: String, // "pugv"
+    pub id: u64, // 课程分集 epid（与番剧不互通）
+    pub index: u32, // 课程分集数
+    pub page: u32, // 一般为 1
+    pub play: u64, // 分集播放量
     pub release_date: u64, // 发布时间（时间戳）
-    pub status: i32,       // 1 可看、2 不可看
-    pub title: String,     // 分集标题
-    pub watched: bool,     // 是否观看（需登录 + 正确 Referer）
+    pub status: i32, // 1 可看、2 不可看
+    pub title: String, // 分集标题
+    pub watched: bool, // 是否观看（需登录 + 正确 Referer）
     #[serde(rename = "watchedHistory")] // 文档里为驼峰
     pub watched_history: u64,
 }
@@ -183,8 +183,8 @@ pub struct CourseEpList {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CourseEpPage {
     pub next: bool, // 是否存在下一页
-    pub num: u32,   // 当前页码
-    pub size: u32,  // 每页项数
+    pub num: u32, // 当前页码
+    pub size: u32, // 每页项数
     pub total: u32, // 总计项数
 }
 
@@ -201,8 +201,8 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `season_id` | Option<u64> | 课程 season_id，与 ep_id 二选一 |
-    /// | `ep_id` | Option<u64> | 课程分集 ep_id，与 season_id 二选一 |
+    /// | `season_id` | `Option<u64>` | 课程 season_id，与 ep_id 二选一 |
+    /// | `ep_id` | `Option<u64>` | 课程分集 ep_id，与 season_id 二选一 |
     ///
     /// # 错误
     /// 当 season_id 和 ep_id 都未提供时返回参数错误
@@ -212,12 +212,12 @@ impl BpiClient {
     pub async fn cheese_info(
         &self,
         season_id: Option<u64>,
-        ep_id: Option<u64>,
+        ep_id: Option<u64>
     ) -> Result<BpiResponse<CourseInfo>, BpiError> {
         if season_id.is_none() && ep_id.is_none() {
-            return Err(BpiError::parse(
-                "cheese_info: season_id 与 ep_id 必须至少提供一个".to_string(),
-            ));
+            return Err(
+                BpiError::parse("cheese_info: season_id 与 ep_id 必须至少提供一个".to_string())
+            );
         }
         // 构造查询参数
         let mut req = self
@@ -242,7 +242,7 @@ impl BpiClient {
     /// | `season_id` | u64 | 课程 season_id |
     pub async fn cheese_info_by_season_id(
         &self,
-        season_id: u64,
+        season_id: u64
     ) -> Result<BpiResponse<CourseInfo>, BpiError> {
         self.cheese_info(Some(season_id), None).await
     }
@@ -255,7 +255,7 @@ impl BpiClient {
     /// | `ep_id` | u64 | 课程分集 ep_id |
     pub async fn cheese_info_by_ep_id(
         &self,
-        ep_id: u64,
+        ep_id: u64
     ) -> Result<BpiResponse<CourseInfo>, BpiError> {
         self.cheese_info(None, Some(ep_id)).await
     }
@@ -268,8 +268,8 @@ impl BpiClient {
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `season_id` | u64 | 课程 season_id |
-    /// | `ps` | Option<u32> | 每页数量，可选，默认值由 API 决定 |
-    /// | `pn` | Option<u32> | 页码，可选，默认为 1 |
+    /// | `ps` | `Option<u32>` | 每页数量，可选，默认值由 API 决定 |
+    /// | `pn` | `Option<u32>` | 页码，可选，默认为 1 |
     ///
     /// # 文档
     /// [获取课程分集列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/cheese/info.md#获取课程分集列表)
@@ -277,7 +277,7 @@ impl BpiClient {
         &self,
         season_id: u64,
         ps: Option<u32>,
-        pn: Option<u32>,
+        pn: Option<u32>
     ) -> Result<BpiResponse<CourseEpList>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/pugv/view/web/ep/list")
@@ -308,10 +308,7 @@ mod tests {
     #[tokio::test]
     async fn test_cheese_info_by_season_id() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new();
-        let data = bpi
-            .cheese_info_by_season_id(TEST_SEASON_ID)
-            .await?
-            .into_data()?;
+        let data = bpi.cheese_info_by_season_id(TEST_SEASON_ID).await?.into_data()?;
 
         assert_eq!(data.season_id, TEST_SEASON_ID);
         tracing::info!("{:#?}", data);
@@ -332,10 +329,7 @@ mod tests {
     #[tokio::test]
     async fn test_cheese_ep_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new();
-        let data = bpi
-            .cheese_ep_list(TEST_SEASON_ID, Some(50), Some(1))
-            .await?
-            .into_data()?;
+        let data = bpi.cheese_ep_list(TEST_SEASON_ID, Some(50), Some(1)).await?.into_data()?;
         assert_eq!(data.items.first().unwrap().id, TEST_SEASON_ID);
 
         tracing::info!("课程标题: {:?}", data.items.first().unwrap().title);

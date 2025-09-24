@@ -1,6 +1,6 @@
 //! B站首页头图相关接口
 //!
-//! 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/header.html
+//! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/header.html)
 use serde::{ Deserialize, Serialize };
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
@@ -100,7 +100,8 @@ pub struct Opacity {
 impl BpiClient {
     /// 获取首页头图
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/header.html#获取首页头图
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/header.html#获取首页头图)
     ///
     pub async fn web_widget_header_page(&self) -> Result<BpiResponse<HeaderData>, BpiError> {
         let mut result = self

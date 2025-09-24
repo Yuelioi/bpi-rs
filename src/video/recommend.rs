@@ -1,8 +1,8 @@
 //! 视频推荐相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 视频推荐相关数据结构体 ---
 
@@ -170,19 +170,20 @@ pub struct RcmdFeedResponseData {
 impl BpiClient {
     /// 获取单视频推荐列表
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video/recommend.html#获取单视频推荐列表
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/recommend.html#获取单视频推荐列表)
     ///
     /// # 参数
     /// | 名称   | 类型         | 说明                 |
     /// | ------ | ------------| -------------------- |
-    /// | `aid`  | Option<u64> | 稿件 avid，可选      |
-    /// | `bvid` | Option<&str>| 稿件 bvid，可选      |
+    /// | `aid`  | `Option<u64>` | 稿件 avid，可选      |
+    /// | `bvid` | `Option<&str>`| 稿件 bvid，可选      |
     ///
     /// `aid` 和 `bvid` 必须提供一个。
     pub async fn video_related_videos(
         &self,
         aid: Option<u64>,
-        bvid: Option<&str>,
+        bvid: Option<&str>
     ) -> Result<BpiResponse<Vec<RelatedVideo>>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -202,19 +203,20 @@ impl BpiClient {
 
     /// 获取首页视频推荐列表
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video/recommend.html#获取首页视频推荐列表
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/recommend.html#获取首页视频推荐列表)
     ///
     /// # 参数
     /// | 名称        | 类型         | 说明                 |
     /// | ----------- | ------------| -------------------- |
-    /// | `ps`        | Option<u8>  | 单页返回的记录条数，最多30，可选 |
-    /// | `fresh_idx` | Option<u32> | 当前翻页号，可选，默认1 |
-    /// | `fetch_row` | Option<u32> | 本次抓取的最后一行行号，可选 |
+    /// | `ps`        | `Option<u8>`  | 单页返回的记录条数，最多30，可选 |
+    /// | `fresh_idx` | `Option<u32>` | 当前翻页号，可选，默认1 |
+    /// | `fetch_row` | `Option<u32>` | 本次抓取的最后一行行号，可选 |
     pub async fn video_homepage_recommendations(
         &self,
         ps: Option<u8>,
         fresh_idx: Option<u32>,
-        fetch_row: Option<u32>,
+        fetch_row: Option<u32>
     ) -> Result<BpiResponse<RcmdFeedResponseData>, BpiError> {
         let ps_val = ps.unwrap_or(12);
         let fresh_idx_val = fresh_idx.unwrap_or(1);
@@ -225,7 +227,7 @@ impl BpiClient {
             ("fresh_idx", fresh_idx_val.to_string()),
             ("fresh_idx_1h", fresh_idx_val.to_string()),
             ("brush", fresh_idx_val.to_string()),
-            ("fetch_row", fetch_row_val.to_string()),
+            ("fetch_row", fetch_row_val.to_string())
         ];
         let params = self.get_wbi_sign2(params).await?;
 
@@ -261,12 +263,9 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_video_homepage_recommendations() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .video_homepage_recommendations(Some(12), Some(1), Some(1))
-            .await?;
+        let resp = bpi.video_homepage_recommendations(Some(12), Some(1), Some(1)).await?;
         let data = resp.into_data()?;
 
         info!("首页推荐列表: {:?}", data);

@@ -1,6 +1,6 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use chrono::NaiveDate;
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct ChargeVipInfo {
@@ -200,30 +200,31 @@ impl BpiClient {
 
     pub async fn electric_month_up_list(
         &self,
-        up_mid: i64,
+        up_mid: i64
     ) -> Result<BpiResponse<ChargeMonthUpData>, BpiError> {
-        self.get("https://api.bilibili.com/x/ugcpay-rank/elec/month/up")
+        self
+            .get("https://api.bilibili.com/x/ugcpay-rank/elec/month/up")
             .query(&[("up_mid", up_mid)])
-            .send_bpi("获取空间充电公示列表")
-            .await
+            .send_bpi("获取空间充电公示列表").await
     }
 
     /// 获取视频充电鸣谢名单
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `mid` | i64 | up 主 mid |
-    /// | `aid` | Option<i64> | 稿件 avid |
-    /// | `bvid` | Option<&str> | 稿件 bvid |
+    /// | `aid` | `Option<i64>` | 稿件 avid |
+    /// | `bvid` | `Option<&str>` | 稿件 bvid |
     pub async fn electric_video_show(
         &self,
         mid: i64,
         aid: Option<i64>,
-        bvid: Option<&str>,
+        bvid: Option<&str>
     ) -> Result<BpiResponse<VideoElecShowData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/web-interface/elec/show")
@@ -238,29 +239,34 @@ impl BpiClient {
     }
 
     /// 获取我收到的充电列表
-    /// GET https://pay.bilibili.com/bk/brokerage/listForCustomerRechargeRecord
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `page` | u64 | 页数 |
-    /// | `page_size` | u64 | 分页大小 [1,50] |
-    /// | `begin_time` | Option<NaiveDate> | 开始日期 YYYY-MM-DD |
-    /// | `end_time` | Option<NaiveDate> | 结束日期 YYYY-MM-DD |
+    /// | `page_size` | u64 | 分页大小 `[1,50]` |
+    /// | `begin_time` | `Option<NaiveDate>` | 开始日期 YYYY-MM-DD |
+    /// | `end_time` | `Option<NaiveDate>` | 结束日期 YYYY-MM-DD |
     pub async fn electric_recharge_list(
         &self,
         page: u64,
         page_size: u64,
         begin_time: Option<NaiveDate>,
-        end_time: Option<NaiveDate>,
+        end_time: Option<NaiveDate>
     ) -> Result<BpiResponse<RechargeData>, BpiError> {
         let mut req = self
             .get("https://pay.bilibili.com/bk/brokerage/listForCustomerRechargeRecord")
             .query(&[("customerId", "10026")])
-            .query(&[("currentPage", page), ("pageSize", page_size)]);
+            .query(
+                &[
+                    ("currentPage", page),
+                    ("pageSize", page_size),
+                ]
+            );
 
         if let Some(begin) = begin_time {
             req = req.query(&[("beginTime", begin.format("%Y-%m-%d").to_string())]);
@@ -273,20 +279,20 @@ impl BpiClient {
     }
 
     /// 获取历史充电数据
-    /// GET https://member.bilibili.com/x/h5/elec/rank/recent
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `pn` | Option<u64> | 页数，默认 1 |
-    /// | `ps` | Option<u64> | 分页大小，默认 10，范围 [1,20] |
+    /// | `pn` | `Option<u64>` | 页数，默认 1 |
+    /// | `ps` | `Option<u64>` | 分页大小，默认 10，范围 `[1,20]` |
     pub async fn electric_rank_recent(
         &self,
         pn: Option<u64>,
-        ps: Option<u64>,
+        ps: Option<u64>
     ) -> Result<BpiResponse<ElecRankData>, BpiError> {
         let mut req = self.get("https://member.bilibili.com/x/h5/elec/rank/recent");
 
@@ -304,7 +310,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{Duration, Utc};
+    use chrono::{ Duration, Utc };
     use tracing::info;
 
     #[tokio::test]
@@ -317,9 +323,7 @@ mod tests {
     #[tokio::test]
     async fn test_electric_video_show() {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .electric_video_show(53456, None, Some("BV1Dh411S7sS"))
-            .await;
+        let resp = bpi.electric_video_show(53456, None, Some("BV1Dh411S7sS")).await;
         assert!(resp.is_ok());
     }
 
@@ -348,17 +352,12 @@ mod tests {
         let start_date = now - Duration::days(30);
         let end_date = now;
 
-        let resp = bpi
-            .electric_recharge_list(1, 10, Some(start_date), Some(end_date))
-            .await;
+        let resp = bpi.electric_recharge_list(1, 10, Some(start_date), Some(end_date)).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
         if let Ok(response) = resp {
-            info!(
-                "在日期范围内获取到的总记录数: {}",
-                response.data.unwrap().page.total_count
-            );
+            info!("在日期范围内获取到的总记录数: {}", response.data.unwrap().page.total_count);
         }
     }
 

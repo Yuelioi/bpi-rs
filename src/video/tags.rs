@@ -1,8 +1,8 @@
 //! 视频 TAG 相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 响应数据结构体 ---
 
@@ -24,21 +24,22 @@ pub struct VideoTag {
 impl BpiClient {
     /// 获取视频 TAG 信息（新版）
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video/tags.html#获取视频tag信息
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/tags.html#获取视频tag信息)
     ///
     /// # 参数
     /// | 名称   | 类型         | 说明                 |
     /// | ------ | ------------| -------------------- |
-    /// | `aid`  | Option<u64> | 稿件 avid，可选      |
-    /// | `bvid` | Option<&str>| 稿件 bvid，可选      |
-    /// | `cid`  | Option<u64> | 分P cid，可选        |
+    /// | `aid`  | `Option<u64>` | 稿件 avid，可选      |
+    /// | `bvid` | `Option<&str>`| 稿件 bvid，可选      |
+    /// | `cid`  | `Option<u64>` | 分P cid，可选        |
     ///
     /// `aid` 和 `bvid` 必须提供一个。
     pub async fn video_tags(
         &self,
         aid: Option<u64>,
         bvid: Option<&str>,
-        cid: Option<u64>,
+        cid: Option<u64>
     ) -> Result<BpiResponse<Vec<VideoTag>>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -72,7 +73,6 @@ mod tests {
     const TEST_CID: u64 = 153322313;
 
     #[tokio::test]
-
     async fn test_video_tags_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         let resp = bpi.video_tags(Some(TEST_AID), None, Some(TEST_CID)).await?;
@@ -86,7 +86,6 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_video_tags_by_bvid() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         let resp = bpi.video_tags(None, Some(TEST_BVID), None).await?;

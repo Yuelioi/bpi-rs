@@ -1,6 +1,6 @@
 //! B站视频分区一览 (v2)
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 /// 包含所有主分区及子分区信息，字段对应于 tid_v2 和 tname_v2。
 pub enum VideoPartitionV2 {
     /// 动画

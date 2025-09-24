@@ -1,4 +1,4 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::Deserialize;
 
 /// 搜索建议结果
@@ -19,17 +19,18 @@ pub struct SearchSuggestItem {
 impl BpiClient {
     /// 获取搜索建议关键词
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/search
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/search)
     ///
-    /// 参数
+    /// # 参数
     /// - `term`: 搜索关键词
     pub async fn search_suggest(&self, term: &str) -> Result<BpiResponse<SearchSuggest>, BpiError> {
         let params = [("term", term)];
 
-        self.get("https://s.search.bilibili.com/main/suggest")
+        self
+            .get("https://s.search.bilibili.com/main/suggest")
             .query(&params)
-            .send_bpi("获取搜索建议")
-            .await
+            .send_bpi("获取搜索建议").await
     }
 }
 
@@ -39,7 +40,6 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
-
     async fn test_search_suggest() {
         // 创建一个 BilibiliRequest 实例
         let bpi = BpiClient::new();

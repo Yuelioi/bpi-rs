@@ -1,5 +1,5 @@
-use crate::models::{Pendant, VipLabel};
-use serde::{Deserialize, Serialize};
+use crate::models::{ Pendant, VipLabel };
+use serde::{ Deserialize, Serialize };
 
 /// 作者模块 √
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -96,7 +96,7 @@ pub struct ThreePointItem {
     pub label: String,
     /// 弹出框文本
     pub modal: Option<Modal>,
-    /// 参数信息
+    /// # 参数信息
     pub params: Option<Params>,
     /// 三点操作类型，参见 右上角三点菜单
     #[serde(rename = "type")]

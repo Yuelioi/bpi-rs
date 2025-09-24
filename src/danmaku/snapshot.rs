@@ -1,17 +1,18 @@
 //! 弹幕快照（最近产生的几条弹幕，最多20条）
 //!
-//! 文档入口: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku
+//! [文档入口](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 pub type SnapshotResponse = BpiResponse<Vec<String>>;
 
 impl BpiClient {
     /// 获取弹幕快照（最近产生的若干条，最多20条）
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -20,8 +21,7 @@ impl BpiClient {
         let resp: SnapshotResponse = self
             .get("https://api.bilibili.com/x/v2/dm/ajax")
             .query(&[("aid", aid_or_bvid.to_string())])
-            .send_bpi("获取弹幕快照")
-            .await?;
+            .send_bpi("获取弹幕快照").await?;
 
         Ok(resp)
     }

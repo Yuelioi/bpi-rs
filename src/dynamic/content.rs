@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 直播的已关注者列表项
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -56,19 +56,21 @@ pub struct DynUpUsersData {
 impl BpiClient {
     /// 获取正在直播的已关注者
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `size` | Option<u32> | 每页显示数，默认 10 |
+    /// | `size` | `Option<u32>` | 每页显示数，默认 10 |
     pub async fn dynamic_live_users(
         &self,
-        size: Option<u32>,
+        size: Option<u32>
     ) -> Result<BpiResponse<LiveUsersData>, BpiError> {
-        let mut req =
-            self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_live_users");
+        let mut req = self.get(
+            "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_live_users"
+        );
 
         if let Some(s) = size {
             req = req.query(&[("size", &s.to_string())]);
@@ -79,19 +81,21 @@ impl BpiClient {
 
     /// 获取发布新动态的已关注者
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `teenagers_mode` | Option<u8> | 是否开启青少年模式：0 否，1 是 |
+    /// | `teenagers_mode` | `Option<u8>` | 是否开启青少年模式：0 否，1 是 |
     pub async fn dynamic_up_users(
         &self,
-        teenagers_mode: Option<u8>,
+        teenagers_mode: Option<u8>
     ) -> Result<BpiResponse<DynUpUsersData>, BpiError> {
-        let mut req =
-            self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist");
+        let mut req = self.get(
+            "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist"
+        );
 
         if let Some(mode) = teenagers_mode {
             req = req.query(&[("teenagers_mode", &mode.to_string())]);
@@ -113,7 +117,6 @@ mod tests {
     // 例如: tracing_subscriber::fmt::init();
 
     #[tokio::test]
-
     async fn test_get_live_users() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         let resp = bpi.dynamic_live_users(Some(1)).await?;
@@ -126,7 +129,6 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_get_dyn_up_users() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         let resp = bpi.dynamic_up_users(None).await?;

@@ -1,6 +1,6 @@
 use crate::models::Vip;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 use serde_json::Value;
 // 以下结构体为API文档中未完全列出的部分，根据描述进行了推断和简化。
 // 如果您有完整的文档，请替换这些结构体。
@@ -254,18 +254,19 @@ impl BpiClient {
     /// # 参数
     /// * `dynamic_id` - 动态ID
     /// * `offset` - 偏移量，非必要
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `dynamic_id` | &str | 动态 ID |
-    /// | `offset` | Option<&str> | 偏移量 |
+    /// | `offset` | `Option<&str>` | 偏移量 |
     pub async fn dynamic_repost_detail(
         &self,
         dynamic_id: &str,
-        offset: Option<&str>,
+        offset: Option<&str>
     ) -> Result<BpiResponse<RepostDetailResponseData>, BpiError> {
         let mut req = self
             .get("https://api.vc.bilibili.com/dynamic_repost/v1/dynamic_repost/repost_detail")
@@ -286,31 +287,34 @@ impl BpiClient {
     /// * `dynamic_id` - 动态ID
     /// * `pn` - 页码，非必要，默认1
     /// * `ps` - 每页数量，非必要，默认20
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `dynamic_id` | u64 | 动态 ID |
-    /// | `pn` | Option<u64> | 页码，默认 1 |
-    /// | `ps` | Option<u64> | 页大小，默认 20 |
+    /// | `pn` | `Option<u64>` | 页码，默认 1 |
+    /// | `ps` | `Option<u64>` | 页大小，默认 20 |
     pub async fn dynamic_spec_item_likes(
         &self,
         dynamic_id: u64,
         pn: Option<u64>,
-        ps: Option<u64>,
+        ps: Option<u64>
     ) -> Result<BpiResponse<SpecItemLikesResponseData>, BpiError> {
         let pn_val = pn.unwrap_or(1);
         let ps_val = ps.unwrap_or(20);
 
         let req = self
             .get("https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/spec_item_likes")
-            .query(&[
-                ("dynamic_id", &dynamic_id.to_string()),
-                ("pn", &pn_val.to_string()),
-                ("ps", &ps_val.to_string()),
-            ]);
+            .query(
+                &[
+                    ("dynamic_id", &dynamic_id.to_string()),
+                    ("pn", &pn_val.to_string()),
+                    ("ps", &ps_val.to_string()),
+                ]
+            );
 
         req.send_bpi("获取动态点赞列表").await
     }
@@ -332,7 +336,6 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
-
     async fn test_get_repost_detail() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         // 替换为有效的动态ID进行测试

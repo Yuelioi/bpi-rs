@@ -1,7 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::client::BilibiliRequest;
-use crate::{BpiClient, BpiError, BpiResponse};
+use crate::{ BpiClient, BpiError, BpiResponse, BilibiliRequest };
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GeetestData {
@@ -34,8 +33,7 @@ impl BpiClient {
     pub async fn login_generate_captcha(&self) -> Result<GenerateCaptcha, BpiError> {
         let result: BpiResponse<GeetestData> = self
             .get("https://passport.bilibili.com/x/passport-login/captcha?source=main_web")
-            .send_bpi("获取验证码")
-            .await?;
+            .send_bpi("获取验证码").await?;
 
         let data = result.into_data()?;
 

@@ -3,13 +3,13 @@
 //! bili_ticket 位于请求头 Cookie 中, 非必需, 但存在可降低风控概率
 //! 是 JWT 令牌，有效时长为 259200 秒，即 3 天。
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/misc/sign/bili_ticket.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/misc/sign/bili_ticket.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use hmac::{Hmac, Mac};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use hmac::{ Hmac, Mac };
+use serde::{ Deserialize, Serialize };
 use sha2::Sha256;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{ SystemTime, UNIX_EPOCH };
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -40,7 +40,8 @@ pub struct NavData {
 impl BpiClient {
     /// 生成 bili_ticket
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/misc
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/misc)
     pub async fn misc_sign_bili_ticket(&self) -> Result<BpiResponse<TicketData>, BpiError> {
         let csrf = self.csrf()?;
         // 获取当前时间戳
@@ -64,10 +65,10 @@ impl BpiClient {
         ];
 
         // 发送请求
-        self.post("https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
+        self
+            .post("https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
             .query(&params)
-            .send_bpi("生成bili_ticket")
-            .await
+            .send_bpi("生成bili_ticket").await
     }
 
     /// 仅获取 bili_ticket 字符串
@@ -79,8 +80,9 @@ impl BpiClient {
 
     /// 使用 HMAC-SHA256 算法计算哈希
     fn hmac_sha256(&self, key: &str, message: &str) -> Result<String, BpiError> {
-        let mut mac = HmacSha256::new_from_slice(key.as_bytes())
-            .map_err(|e| BpiError::parse(format!("HMAC 密钥错误: {}", e)))?;
+        let mut mac = HmacSha256::new_from_slice(key.as_bytes()).map_err(|e|
+            BpiError::parse(format!("HMAC 密钥错误: {}", e))
+        )?;
 
         mac.update(message.as_bytes());
         let result = mac.finalize();
@@ -164,10 +166,7 @@ mod tests {
         // 测试带 CSRF 的情况
         match bpi.misc_sign_bili_ticket().await {
             Ok(resp) => {
-                tracing::info!(
-                    "带 CSRF 的 bili_ticket 生成成功: {}",
-                    resp.data.unwrap().ticket
-                );
+                tracing::info!("带 CSRF 的 bili_ticket 生成成功: {}", resp.data.unwrap().ticket);
             }
             Err(err) => {
                 tracing::info!("带 CSRF 测试失败（预期可能失败）: {}", err);
@@ -175,32 +174,4 @@ mod tests {
             }
         }
     }
-}
-
-// 使用示例文档
-impl BpiClient {
-    /// 使用示例：
-    ///
-    /// ```rust
-    /// use your_crate::{Bpi, BpiResult};
-    ///
-    /// async fn example() -> BpiResult<()> {
-    ///     let bpi = BpiClient::new();
-    ///
-    ///     // 方法1: 获取完整信息
-    ///     let ticket_response = bpi.generate_bili_ticket(None).await?;
-    ///     tracing::info!("bili_ticket: {}", ticket_data.ticket);
-    ///     tracing::info!("有效期: {} 秒", ticket_data.ttl);
-    ///
-    ///     // 方法2: 仅获取 ticket 字符串
-    ///     let ticket = bpi.get_bili_ticket_string(None).await?;
-    ///     tracing::info!("bili_ticket: {}", ticket);
-    ///
-    ///     // 方法3: 带 CSRF token
-    ///     let ticket_with_csrf = bpi.generate_bili_ticket(Some("your_bili_jct")).await?;
-    ///
-    ///     Ok(())
-    /// }
-    /// ```
-    pub fn _usage_example() {}
 }

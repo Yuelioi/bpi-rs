@@ -1,8 +1,8 @@
 //! 歌单&音频收藏夹详细信息
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/music_list.md
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/music_list.md)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AudioCollectionsListData {
@@ -195,12 +195,17 @@ impl BpiClient {
     pub async fn audio_collections_list(
         &self,
         pn: u32,
-        ps: u32,
+        ps: u32
     ) -> Result<BpiResponse<AudioCollectionsListData>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/collections/list")
-            .query(&[("pn", pn.to_string()), ("ps", ps.to_string())])
-            .send_bpi("查询自己创建的歌单")
-            .await
+        self
+            .get("https://www.bilibili.com/audio/music-service-c/web/collections/list")
+            .query(
+                &[
+                    ("pn", pn.to_string()),
+                    ("ps", ps.to_string()),
+                ]
+            )
+            .send_bpi("查询自己创建的歌单").await
     }
 
     /// 查询音频收藏夹信息
@@ -214,12 +219,12 @@ impl BpiClient {
     /// [查询音频收藏夹（默认歌单）信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/music_list.md#查询音频收藏夹默认歌单信息)
     pub async fn audio_collection_info(
         &self,
-        sid: u64,
+        sid: u64
     ) -> Result<BpiResponse<AudioCollection>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/collections/info")
+        self
+            .get("https://www.bilibili.com/audio/music-service-c/web/collections/info")
             .query(&[("sid", sid.to_string())])
-            .send_bpi("查询音频收藏夹信息")
-            .await
+            .send_bpi("查询音频收藏夹信息").await
     }
 
     /// 查询热门歌单
@@ -235,12 +240,17 @@ impl BpiClient {
     pub async fn audio_hot_menu(
         &self,
         pn: u32,
-        ps: u32,
+        ps: u32
     ) -> Result<BpiResponse<AudioHotMenuData>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/menu/hit")
-            .query(&[("pn", pn.to_string()), ("ps", ps.to_string())])
-            .send_bpi("查询热门歌单")
-            .await
+        self
+            .get("https://www.bilibili.com/audio/music-service-c/web/menu/hit")
+            .query(
+                &[
+                    ("pn", pn.to_string()),
+                    ("ps", ps.to_string()),
+                ]
+            )
+            .send_bpi("查询热门歌单").await
     }
 
     /// 查询热门榜单
@@ -256,12 +266,17 @@ impl BpiClient {
     pub async fn audio_rank_menu(
         &self,
         pn: u32,
-        ps: u32,
+        ps: u32
     ) -> Result<BpiResponse<AudioRankMenuData>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/menu/rank")
-            .query(&[("pn", pn.to_string()), ("ps", ps.to_string())])
-            .send_bpi("查询热门榜单")
-            .await
+        self
+            .get("https://www.bilibili.com/audio/music-service-c/web/menu/rank")
+            .query(
+                &[
+                    ("pn", pn.to_string()),
+                    ("ps", ps.to_string()),
+                ]
+            )
+            .send_bpi("查询热门榜单").await
     }
 }
 

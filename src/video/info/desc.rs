@@ -1,6 +1,6 @@
 //! 查询稿件简介相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -24,13 +24,14 @@ pub struct VideoDescResponse {
 impl BpiClient {
     /// 查询稿件简介
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video/info.html#获取稿件简介
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/info.html#获取稿件简介)
     ///
     /// # 参数
     /// | 名称   | 类型         | 说明                 |
     /// | ------ | ------------| -------------------- |
-    /// | `aid`  | Option<u64> | 稿件 avid，可选      |
-    /// | `bvid` | Option<&str>| 稿件 bvid，可选      |
+    /// | `aid`  | `Option<u64>` | 稿件 avid，可选      |
+    /// | `bvid` | `Option<&str>`| 稿件 bvid，可选      |
     ///
     /// 两者任选一个
     pub async fn video_desc(

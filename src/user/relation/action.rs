@@ -1,6 +1,6 @@
 //! B站用户关系操作相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
 
@@ -83,14 +83,15 @@ pub enum RelationSource {
 impl BpiClient {
     /// 操作用户关系
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// # 参数
     /// | 名称      | 类型                | 说明                       |
     /// | --------- | -------------------| -------------------------- |
     /// | `fid`     | u64                | 目标用户 mid               |
     /// | `action`  | RelationAction     | 操作代码，见 RelationAction 枚举 |
-    /// | `source`  | Option<RelationSource> | 关注来源代码，可选，见 RelationSource 枚举 |
+    /// | `source`  | `Option<RelationSource>` | 关注来源代码，可选，见 RelationSource 枚举 |
     pub async fn user_modify_relation(
         &self,
         fid: u64,

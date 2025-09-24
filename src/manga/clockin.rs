@@ -1,6 +1,6 @@
 //! 签到
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/ClockIn.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/ClockIn.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -63,7 +63,8 @@ pub type ClockInInfoResponse = BpiResponse<ClockInInfoData>;
 impl BpiClient {
     /// 漫画签到
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_clock_in(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let params = [("platform", "android")];
         self
@@ -74,9 +75,10 @@ impl BpiClient {
 
     /// 漫画补签
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -97,7 +99,8 @@ impl BpiClient {
 
     /// 获取漫画签到信息
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_clock_in_info(&self) -> Result<ClockInInfoResponse, BpiError> {
         self
             .post("https://manga.bilibili.com/twirp/activity.v1.Activity/GetClockInInfo")

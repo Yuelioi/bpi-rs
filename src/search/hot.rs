@@ -48,7 +48,8 @@ pub struct HotWordDataResponse {
 impl BpiClient {
     /// 获取默认搜索内容（web端）
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/search
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/search)
     pub async fn search_default(&self) -> Result<BpiResponse<DefaultSearchData>, BpiError> {
         let signed_params = self.get_wbi_sign2(vec![("foo", "bar")]).await?;
 
@@ -60,7 +61,8 @@ impl BpiClient {
 
     /// 获取热搜列表（web端）
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/search
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/search)
     ///
     /// - 无参数
     pub async fn search_hotwords(&self) -> Result<BpiResponse<HotWordDataResponse>, BpiError> {

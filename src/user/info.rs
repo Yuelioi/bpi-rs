@@ -1,9 +1,9 @@
 //! B站用户信息相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
-use crate::models::{LevelInfo, Nameplate, Official, OfficialVerify, Pendant, Vip, VipLabel};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+use crate::models::{ LevelInfo, Nameplate, Official, OfficialVerify, Pendant, Vip, VipLabel };
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 用户空间详细信息响应结构体
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -382,7 +382,8 @@ impl BpiClient {
     /// 获取用户空间详细信息
     /// 需要 Wbi 签名认证
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// - `mid`: 用户 UID
     pub async fn user_space_info(&self, mid: u64) -> Result<BpiResponse<UserSpaceInfo>, BpiError> {
@@ -391,26 +392,27 @@ impl BpiClient {
 
         let params = self.get_wbi_sign2(params).await?;
 
-        self.get("https://api.bilibili.com/x/space/wbi/acc/info")
+        self
+            .get("https://api.bilibili.com/x/space/wbi/acc/info")
             .query(&params)
-            .send_bpi("获取用户空间详细信息")
-            .await
+            .send_bpi("获取用户空间详细信息").await
     }
 
     /// 获取用户名片信息
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `mid` | u64 | 用户 UID |
-    /// | `photo` | Option<bool> | 是否包含主页头图 |
+    /// | `photo` | `Option<bool>` | 是否包含主页头图 |
     pub async fn user_card_info(
         &self,
         mid: u64,
-        photo: Option<bool>,
+        photo: Option<bool>
     ) -> Result<BpiResponse<UserCardInfo>, BpiError> {
         let mut params = vec![("mid", mid.to_string())];
 
@@ -419,32 +421,34 @@ impl BpiClient {
             params.push(("photo", photo_value.to_string()));
         }
 
-        self.get("https://api.bilibili.com/x/web-interface/card")
+        self
+            .get("https://api.bilibili.com/x/web-interface/card")
             .query(&params)
-            .send_bpi("获取用户名片信息")
-            .await
+            .send_bpi("获取用户名片信息").await
     }
 
     /// 获取用户名片信息（包含主页头图）
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// - `mid`: 用户 UID
     pub async fn user_card_info_with_photo(
         &self,
-        mid: u64,
+        mid: u64
     ) -> Result<BpiResponse<UserCardInfo>, BpiError> {
         self.user_card_info(mid, Some(true)).await
     }
 
     /// 获取用户名片信息（不包含主页头图）
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// - `mid`: 用户 UID
     pub async fn user_card_info_without_photo(
         &self,
-        mid: u64,
+        mid: u64
     ) -> Result<BpiResponse<UserCardInfo>, BpiError> {
         self.user_card_info(mid, Some(false)).await
     }
@@ -458,10 +462,10 @@ impl BpiClient {
             .collect::<Vec<_>>()
             .join(",");
 
-        self.get("https://api.vc.bilibili.com/account/v1/user/cards")
+        self
+            .get("https://api.vc.bilibili.com/account/v1/user/cards")
             .query(&[("uids", mids_str)])
-            .send_bpi("批量获取用户卡片")
-            .await
+            .send_bpi("批量获取用户卡片").await
     }
 
     /// 批量获取用户详细信息（带大会员/认证信息）
@@ -473,10 +477,10 @@ impl BpiClient {
             .collect::<Vec<_>>()
             .join(",");
 
-        self.get("https://api.vc.bilibili.com/x/im/user_infos")
+        self
+            .get("https://api.vc.bilibili.com/x/im/user_infos")
             .query(&[("uids", mids_str)])
-            .send_bpi("批量获取用户详细信息")
-            .await
+            .send_bpi("批量获取用户详细信息").await
     }
 }
 
@@ -502,7 +506,10 @@ mod tests {
                 tracing::info!("用户昵称: {}", data.name);
                 tracing::info!("用户等级: {}", data.level);
                 tracing::info!("是否为会员: {}", data.vip.vip_type > 0);
-                tracing::info!("粉丝数量: {}", data.fans_medal.as_ref().map_or(0, |_| 1));
+                tracing::info!(
+                    "粉丝数量: {}",
+                    data.fans_medal.as_ref().map_or(0, |_| 1)
+                );
             }
             Err(e) => {
                 tracing::error!("请求失败: {:?}", e);

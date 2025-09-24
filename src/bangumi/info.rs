@@ -1,6 +1,6 @@
 //! 番剧基本信息
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/info.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/info.md)
 use crate::models::VipLabel;
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };

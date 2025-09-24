@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 /// 发送充电留言的请求体
 #[derive(Debug, Clone, Serialize)]
@@ -90,9 +90,10 @@ impl BpiClient {
     ///
     /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -101,7 +102,7 @@ impl BpiClient {
     pub async fn electric_message_send(
         &self,
         order_id: &str,
-        message: &str,
+        message: &str
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -111,33 +112,33 @@ impl BpiClient {
             ("csrf", &csrf),
         ];
 
-        self.post("https://api.bilibili.com/x/ugcpay/trade/elec/message")
+        self
+            .post("https://api.bilibili.com/x/ugcpay/trade/elec/message")
             .form(&body)
-            .send_bpi("发送充电留言")
-            .await
+            .send_bpi("发送充电留言").await
     }
 
     /// 查询我收到的充电留言
-    /// GET https://member.bilibili.com/x/web/elec/remark/list
     ///
     /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `pn` | Option<u64> | 页数，默认 1 |
-    /// | `ps` | Option<u64> | 分页大小，默认 10，范围 [1,12] |
-    /// | `begin` | Option<NaiveDate> | 开始日期 YYYY-MM-DD |
-    /// | `end` | Option<NaiveDate> | 结束日期 YYYY-MM-DD |
+    /// | `pn` | `Option<u64>` | 页数，默认 1 |
+    /// | `ps` | `Option<u64>` | 分页大小，默认 10，范围 `[1,12]` |
+    /// | `begin` | `Option<NaiveDate>` | 开始日期 YYYY-MM-DD |
+    /// | `end` | `Option<NaiveDate>` | 结束日期 YYYY-MM-DD |
     pub async fn electric_remark_list(
         &self,
         pn: Option<u64>,
         ps: Option<u64>,
         begin: Option<NaiveDate>,
-        end: Option<NaiveDate>,
+        end: Option<NaiveDate>
     ) -> Result<BpiResponse<ElecRemarkList>, BpiError> {
         let mut req = self.get("https://member.bilibili.com/x/web/elec/remark/list");
 
@@ -158,35 +159,35 @@ impl BpiClient {
     }
 
     /// 查询充电留言详情
-    /// GET https://member.bilibili.com/x/web/elec/remark/detail
     ///
     /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `id` | u64 | 留言 id |
     pub async fn electric_remark_detail(
         &self,
-        id: u64,
+        id: u64
     ) -> Result<BpiResponse<ElecRemarkDetail>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/elec/remark/detail")
+        self
+            .get("https://member.bilibili.com/x/web/elec/remark/detail")
             .query(&[("id", id)])
-            .send_bpi("查询充电留言详情")
-            .await
+            .send_bpi("查询充电留言详情").await
     }
 
     /// 回复充电留言
-    /// POST https://member.bilibili.com/x/web/elec/remark/reply
     ///
     /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -195,7 +196,7 @@ impl BpiClient {
     pub async fn electric_remark_reply(
         &self,
         id: u64,
-        msg: &str,
+        msg: &str
     ) -> Result<BpiResponse<u64>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -205,10 +206,10 @@ impl BpiClient {
             ("csrf", csrf.to_string()),
         ];
 
-        self.post("https://member.bilibili.com/x/web/elec/remark/reply")
+        self
+            .post("https://member.bilibili.com/x/web/elec/remark/reply")
             .form(&body)
-            .send_bpi("回复充电留言")
-            .await
+            .send_bpi("回复充电留言").await
     }
 }
 
@@ -230,9 +231,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_elec_remark_list() {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .electric_remark_list(Some(1), Some(10), None, None)
-            .await;
+        let resp = bpi.electric_remark_list(Some(1), Some(10), None, None).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 

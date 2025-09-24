@@ -1,14 +1,14 @@
 use serde_json::json;
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 impl BpiClient {
     /// 点赞动态
-    /// POST https://api.bilibili.com/x/dynamic/feed/dyn/thumb
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -17,11 +17,12 @@ impl BpiClient {
     pub async fn dynamic_like(
         &self,
         dyn_id_str: &str,
-        up: u8,
+        up: u8
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        let json_body = json!({
+        let json_body =
+            json!({
             "dyn_id_str": dyn_id_str,
             "up": up ,
             "spmid":"333.1369.0.0",
@@ -29,83 +30,90 @@ impl BpiClient {
 
         });
 
-        self.post("https://api.bilibili.com/x/dynamic/feed/dyn/thumb")
+        self
+            .post("https://api.bilibili.com/x/dynamic/feed/dyn/thumb")
             .query(&[("csrf", csrf)])
             .json(&json_body)
-            .send_bpi("点赞动态")
-            .await
+            .send_bpi("点赞动态").await
     }
 
     /// 删除定时发布动态
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `draft_id` | &str | 定时发布动态 ID |
     pub async fn dynamic_remove_draft(
         &self,
-        draft_id: &str,
+        draft_id: &str
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        self.post("https://api.vc.bilibili.com/dynamic_draft/v1/dynamic_draft/rm_draft")
-            .form(&[("draft_id", draft_id), ("csrf", csrf.as_str())])
-            .send_bpi("删除定时发布动态")
-            .await
+        self
+            .post("https://api.vc.bilibili.com/dynamic_draft/v1/dynamic_draft/rm_draft")
+            .form(
+                &[
+                    ("draft_id", draft_id),
+                    ("csrf", csrf.as_str()),
+                ]
+            )
+            .send_bpi("删除定时发布动态").await
     }
 
     /// 设置置顶动态
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `dyn_str` | &str | 动态 ID |
     pub async fn dynamic_set_top(
         &self,
-        dyn_str: &str,
+        dyn_str: &str
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let json_body = json!({
             "dyn_str": dyn_str,
         });
 
-        self.post("https://api.bilibili.com/x/dynamic/feed/space/set_top")
+        self
+            .post("https://api.bilibili.com/x/dynamic/feed/space/set_top")
             .query(&[("csrf", csrf)])
             .json(&json_body)
-            .send_bpi("设置置顶动态")
-            .await
+            .send_bpi("设置置顶动态").await
     }
 
     /// 取消置顶动态
-    /// POST https://api.bilibili.com/x/dynamic/feed/space/rm_top
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `dyn_str` | &str | 动态 ID |
     pub async fn dynamic_remove_top(
         &self,
-        dyn_str: &str,
+        dyn_str: &str
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let json_body = json!({
             "dyn_str": dyn_str,
         });
 
-        self.post("https://api.bilibili.com/x/dynamic/feed/space/rm_top")
+        self
+            .post("https://api.bilibili.com/x/dynamic/feed/space/rm_top")
             .query(&[("csrf", csrf)])
             .json(&json_body)
-            .send_bpi("取消置顶动态")
-            .await
+            .send_bpi("取消置顶动态").await
     }
 }
 
@@ -114,7 +122,6 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-
     async fn test_dynamic_like() {
         let bpi = BpiClient::new();
         let dynamic_id = "1099138163191840776";

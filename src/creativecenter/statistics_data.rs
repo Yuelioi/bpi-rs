@@ -1,6 +1,6 @@
 //! 创作中心统计数据 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md)
 
 use serde::{ Deserialize, Serialize };
 
@@ -450,8 +450,8 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `t` | Option<i64> | 时间戳，可选 |
-    /// | `size` | Option<i64> | 最近 N 条视频，可选，默认 5 |
+    /// | `t` | `Option<i64>` | 时间戳，可选 |
+    /// | `size` | `Option<i64>` | 最近 N 条视频，可选，默认 5 |
     ///
     /// # 文档
     /// [获取 UP 主视频数据比较](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md#获取-up-主视频数据比较)

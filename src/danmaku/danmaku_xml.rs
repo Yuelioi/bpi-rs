@@ -1,27 +1,27 @@
 //! XML 弹幕
 //!
-//! 文档入口: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku
+//! [文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
 
-use crate::{BpiClient, BpiError};
+use crate::{ BpiClient, BpiError };
 use flate2::read::DeflateDecoder;
 use quick_xml::de::from_str;
 use reqwest::Client;
 use std::io::Read;
 
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
 // 用于解析 <d> 标签的 p 属性的元数据
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DanmakuMeta {
-    pub time: f32,         // 视频内弹幕出现时间（秒）
+    pub time: f32, // 视频内弹幕出现时间（秒）
     pub danmaku_type: i32, // 弹幕类型
-    pub font_size: i32,    // 字号
-    pub color: i32,        // 颜色（十进制RGB888值）
-    pub send_time: i64,    // 发送时间戳
-    pub pool_type: i32,    // 弹幕池类型
+    pub font_size: i32, // 字号
+    pub color: i32, // 颜色（十进制RGB888值）
+    pub send_time: i64, // 发送时间戳
+    pub pool_type: i32, // 弹幕池类型
     pub user_hash: String, // 发送者mid的HASH
-    pub dmid: i64,         // 弹幕dmid（唯一标识）
-    pub block_level: i32,  // 屏蔽等级
+    pub dmid: i64, // 弹幕dmid（唯一标识）
+    pub block_level: i32, // 屏蔽等级
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -88,9 +88,10 @@ pub struct DanmakuXml {
 impl BpiClient {
     /// 获取实时弹幕（接口1）
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -106,17 +107,14 @@ impl BpiClient {
             .get("https://api.bilibili.com/x/v1/dm/list.so")
             // .header(ACCEPT, "application/xml, text/xml, */*")
             .query(&[("oid", oid.to_string())])
-            .send()
-            .await
+            .send().await
             .map_err(BpiError::from)?
-            .bytes()
-            .await
+            .bytes().await
             .map_err(|e| BpiError::network(format!("获取响应体失败: {}", e)))?;
 
         let mut d = DeflateDecoder::new(&bytes[..]);
         let mut xml = String::new();
-        d.read_to_string(&mut xml)
-            .map_err(|_| BpiError::parse("读取xml失败"))?;
+        d.read_to_string(&mut xml).map_err(|_| BpiError::parse("读取xml失败"))?;
 
         let mut parsed: DanmakuXml = from_str(&xml).map_err(|_| BpiError::parse("解析xml失败"))?;
 
@@ -128,9 +126,10 @@ impl BpiClient {
     /// 获取实时弹幕（接口2）
     /// 使用 deflate 压缩（reqwest 会自动解压），返回 XML 文本
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -148,8 +147,7 @@ impl BpiClient {
 
         let mut d = DeflateDecoder::new(&bytes[..]);
         let mut xml = String::new();
-        d.read_to_string(&mut xml)
-            .map_err(|_| BpiError::parse("读取xml失败"))?;
+        d.read_to_string(&mut xml).map_err(|_| BpiError::parse("读取xml失败"))?;
 
         let mut parsed: DanmakuXml = from_str(&xml).map_err(|_| BpiError::parse("解析xml失败"))?;
 
@@ -173,11 +171,7 @@ mod tests {
         let data = bpi.danmaku_xml_list_so(16546).await?;
         let duration = start.elapsed();
 
-        info!(
-            "耗时1 {:?} 弹幕装填个数: {:?} ",
-            duration,
-            data.danmakus.len()
-        );
+        info!("耗时1 {:?} 弹幕装填个数: {:?} ", duration, data.danmakus.len());
         Ok(())
     }
 
@@ -189,11 +183,7 @@ mod tests {
         let data = bpi.danmaku_xml_list(16546).await?;
         let duration = start.elapsed();
 
-        info!(
-            "耗时2 {:?} 弹幕装填个数: {:?} ",
-            duration,
-            data.danmakus.len()
-        );
+        info!("耗时2 {:?} 弹幕装填个数: {:?} ", duration, data.danmakus.len());
 
         Ok(())
     }

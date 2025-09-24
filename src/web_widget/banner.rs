@@ -1,6 +1,6 @@
 //! B站分区轮播图相关接口
 //!
-//! 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/banner.html
+//! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/banner.html)
 use crate::video::video_zone_v2::VideoPartitionV2;
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -24,7 +24,8 @@ pub struct RegionBannerData {
 impl BpiClient {
     /// 获取各分区的轮播图（Web端）
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/banner.html#获取各分区的轮播图
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/banner.html#获取各分区的轮播图)
     ///
     /// # 参数
     /// | 名称        | 类型                | 说明         |

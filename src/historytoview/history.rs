@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 历史记录列表的页面信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -118,24 +118,25 @@ pub struct HistoryListData {
 impl BpiClient {
     /// 获取历史记录列表（web端）
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `max` | Option<u64> | 截止目标 id（0/avid/ssid/直播间 id/rlid/cvid） |
-    /// | `business` | Option<&str> | 业务类型：archive/pgc/live/article-list/article |
-    /// | `view_at` | Option<u64> | 时间戳 |
-    /// | `typ` | Option<&str> | 分类筛选：all/archive/live/article 等 |
-    /// | `ps` | Option<u32> | 每页项数 |
+    /// | `max` | `Option<u64>` | 截止目标 id（0/avid/ssid/直播间 id/rlid/cvid） |
+    /// | `business` | `Option<&str>` | 业务类型：archive/pgc/live/article-list/article |
+    /// | `view_at` | `Option<u64>` | 时间戳 |
+    /// | `typ` | `Option<&str>` | 分类筛选：all/archive/live/article 等 |
+    /// | `ps` | `Option<u32>` | 每页项数 |
     pub async fn history_list(
         &self,
         max: Option<u64>,
         business: Option<&str>,
         view_at: Option<u64>,
         typ: Option<&str>,
-        ps: Option<u32>,
+        ps: Option<u32>
     ) -> Result<BpiResponse<HistoryListData>, BpiError> {
         let mut request = self.get("https://api.bilibili.com/x/web-interface/history/cursor");
 
@@ -160,71 +161,81 @@ impl BpiClient {
 
     /// 删除历史记录
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `kid` | &str | 记录目标 id |
     pub async fn history_delete(
         &self,
-        kid: &str,
+        kid: &str
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        let payload = [("kid", kid), ("csrf", &csrf)];
+        let payload = [
+            ("kid", kid),
+            ("csrf", &csrf),
+        ];
 
-        self.post("https://api.bilibili.com/x/v2/history/delete")
+        self
+            .post("https://api.bilibili.com/x/v2/history/delete")
             .form(&payload)
-            .send_bpi("删除历史记录")
-            .await
+            .send_bpi("删除历史记录").await
     }
 
     /// 清空历史记录
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
     pub async fn history_clear(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
         let payload = [("csrf", &csrf)];
 
-        self.post("https://api.bilibili.com/x/v2/history/clear")
+        self
+            .post("https://api.bilibili.com/x/v2/history/clear")
             .form(&payload)
-            .send_bpi("清空历史记录")
-            .await
+            .send_bpi("清空历史记录").await
     }
 
     /// 停用历史记录
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `switch` | bool | 是否停用 |
     pub async fn history_shadow_set(
         &self,
-        switch: bool,
+        switch: bool
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        let payload = [("switch", switch.to_string()), ("csrf", csrf)];
+        let payload = [
+            ("switch", switch.to_string()),
+            ("csrf", csrf),
+        ];
 
-        self.post("https://api.bilibili.com/x/v2/history/shadow/set")
+        self
+            .post("https://api.bilibili.com/x/v2/history/shadow/set")
             .form(&payload)
-            .send_bpi("停用历史记录")
-            .await
+            .send_bpi("停用历史记录").await
     }
 
     /// 查询历史记录停用状态
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
     pub async fn history_shadow_get(&self) -> Result<BpiResponse<bool>, BpiError> {
-        self.get("https://api.bilibili.com/x/v2/history/shadow")
-            .send_bpi("查询历史记录停用状态")
-            .await
+        self
+            .get("https://api.bilibili.com/x/v2/history/shadow")
+            .send_bpi("查询历史记录停用状态").await
     }
 }
 
@@ -273,10 +284,7 @@ mod tests {
 
         // 恢复原始状态
         let set_back_resp = bpi.history_shadow_set(current_status).await;
-        info!(
-            "Set back to original status {}: {:?}",
-            current_status, set_back_resp
-        );
+        info!("Set back to original status {}: {:?}", current_status, set_back_resp);
         assert!(set_back_resp.is_ok());
     }
 }

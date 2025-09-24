@@ -1,9 +1,9 @@
 //! IP 地址归属地查询 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/clientinfo/ip.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/clientinfo/ip.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // ==========================
 // 数据结构
@@ -36,13 +36,14 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `ip` | Option<&str> | IPv4 或 IPv6 地址，可选。如果留空，返回请求方 IP 信息 |
+    /// | `ip` | `Option<&str>` | IPv4 或 IPv6 地址，可选。如果留空，返回请求方 IP 信息 |
     ///
     /// # 文档
     /// [IP 地址归属地查询](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/clientinfo/ip.md)
     pub async fn clientinfo_ip(&self, ip: Option<&str>) -> Result<BpiResponse<IpInfo>, BpiError> {
-        let mut req =
-            self.get("https://api.live.bilibili.com/ip_service/v1/ip_service/get_ip_addr");
+        let mut req = self.get(
+            "https://api.live.bilibili.com/ip_service/v1/ip_service/get_ip_addr"
+        );
 
         if let Some(ip) = ip {
             req = req.query(&[("ip", ip)]);

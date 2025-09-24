@@ -1,9 +1,9 @@
 //! B站用户粉丝列表相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
 use crate::models::Vip;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 // --- 响应数据结构体 ---
 
 /// 用户认证信息
@@ -61,17 +61,18 @@ pub struct FansListResponseData {
 impl BpiClient {
     /// 查询用户粉丝明细
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// # 参数
     /// | 名称            | 类型           | 说明                                   |
     /// | --------------- | --------------| -------------------------------------- |
     /// | `vmid`          | u64           | 目标用户 mid                           |
-    /// | `ps`            | Option<u32>   | 每页项数，默认50                       |
-    /// | `pn`            | Option<u32>   | 页码，默认1                            |
-    /// | `offset`        | Option<&str>  | 偏移量，翻页用                         |
-    /// | `last_access_ts`| Option<u64>   | 上次访问时间戳，秒                     |
-    /// | `from`          | Option<&str>  | 请求来源，部分场景传"main"             |
+    /// | `ps`            | `Option<u32>`   | 每页项数，默认50                       |
+    /// | `pn`            | `Option<u32>`   | 页码，默认1                            |
+    /// | `offset`        | `Option<&str>`  | 偏移量，翻页用                         |
+    /// | `last_access_ts`| `Option<u64>`   | 上次访问时间戳，秒                     |
+    /// | `from`          | `Option<&str>`  | 请求来源，部分场景传"main"             |
     pub async fn user_followers(
         &self,
         vmid: u64,
@@ -79,7 +80,7 @@ impl BpiClient {
         pn: Option<u32>,
         offset: Option<&str>,
         last_access_ts: Option<u64>,
-        from: Option<&str>,
+        from: Option<&str>
     ) -> Result<BpiResponse<FansListResponseData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/relation/fans")
@@ -116,12 +117,9 @@ mod tests {
     const TEST_VMID: u64 = 4279370;
 
     #[tokio::test]
-
     async fn test_user_followers() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .user_followers(TEST_VMID, Some(50), Some(1), None, None, None)
-            .await?;
+        let resp = bpi.user_followers(TEST_VMID, Some(50), Some(1), None, None, None).await?;
         let data = resp.into_data()?;
 
         info!("用户粉丝明细: {:?}", data);

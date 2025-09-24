@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct FollowUpLiveItem {
@@ -135,13 +135,14 @@ impl BpiClient {
     /// 获取用户关注的所有UP的直播情况
     ///
 
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_follow_up_list(
         &self,
         page: Option<i32>,
         page_size: Option<i32>,
         ignore_record: Option<i32>,
-        hit_ab: Option<bool>,
+        hit_ab: Option<bool>
     ) -> Result<BpiResponse<FollowUpLiveData>, BpiError> {
         let mut query = Vec::new();
 
@@ -161,19 +162,20 @@ impl BpiClient {
             query.push(("hit_ab", hit_ab.to_string()));
         }
 
-        self.get("https://api.live.bilibili.com/xlive/web-ucenter/user/following")
+        self
+            .get("https://api.live.bilibili.com/xlive/web-ucenter/user/following")
             .query(&query)
-            .send_bpi("获取用户关注的所有UP的直播情况")
-            .await
+            .send_bpi("获取用户关注的所有UP的直播情况").await
     }
 
     /// 获取用户关注的所有UP且正在直播的列表（PC端）
     ///
 
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_follow_up_web_list(
         &self,
-        hit_ab: Option<bool>,
+        hit_ab: Option<bool>
     ) -> Result<BpiResponse<LiveWebListData>, BpiError> {
         let mut query = Vec::new();
 
@@ -181,10 +183,10 @@ impl BpiClient {
             query.push(("hit_ab", hit_ab.to_string()));
         }
 
-        self.get("https://api.live.bilibili.com/xlive/web-ucenter/v1/xfetter/GetWebList")
+        self
+            .get("https://api.live.bilibili.com/xlive/web-ucenter/v1/xfetter/GetWebList")
             .query(&query)
-            .send_bpi("获取用户关注的所有UP且正在直播的列表")
-            .await
+            .send_bpi("获取用户关注的所有UP且正在直播的列表").await
     }
 }
 
@@ -195,10 +197,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_follow_up_live_list() {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .live_follow_up_list(Some(1), Some(2), Some(1), Some(true))
-            .await
-            .unwrap();
+        let resp = bpi.live_follow_up_list(Some(1), Some(2), Some(1), Some(true)).await.unwrap();
         tracing::info!("{:?}", resp);
     }
 

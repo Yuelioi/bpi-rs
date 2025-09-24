@@ -1,6 +1,6 @@
 //! 获取我的信息
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/login/member_center.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/login/member_center.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -42,7 +42,8 @@ pub struct AccountInfo {
 
 impl BpiClient {
     /// 获取我的账号信息
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login)
     pub async fn member_center_account_info(&self) -> Result<BpiResponse<AccountInfo>, BpiError> {
         let result = self
             .get("https://api.bilibili.com/x/member/web/account")

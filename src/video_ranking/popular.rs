@@ -1,5 +1,5 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 获取当前热门视频列表 ---
 
@@ -86,17 +86,18 @@ pub struct PopularSeriesOneData {
 impl BpiClient {
     /// 获取当前热门视频列表
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/popular.html#获取当前热门视频列表
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/popular.html#获取当前热门视频列表)
     ///
     /// # 参数
     /// | 名称 | 类型         | 说明                 |
     /// | ---- | ------------| -------------------- |
-    /// | `pn` | Option<u32> | 页码，可选           |
-    /// | `ps` | Option<u32> | 每页数量，可选       |
+    /// | `pn` | `Option<u32>` | 页码，可选           |
+    /// | `ps` | `Option<u32>` | 每页数量，可选       |
     pub async fn video_popular_list(
         &self,
         pn: Option<u32>,
-        ps: Option<u32>,
+        ps: Option<u32>
     ) -> Result<BpiResponse<PopularListData>, BpiError> {
         let mut request = self.get("https://api.bilibili.com/x/web-interface/popular");
 
@@ -112,19 +113,21 @@ impl BpiClient {
 
     /// 获取每周必看全部列表
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/popular.html#获取每周必看全部列表
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/popular.html#获取每周必看全部列表)
     ///
     pub async fn video_popular_series_list(
-        &self,
+        &self
     ) -> Result<BpiResponse<PopularSeriesListData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/popular/series/list")
-            .send_bpi("获取每周必看全部列表")
-            .await
+        self
+            .get("https://api.bilibili.com/x/web-interface/popular/series/list")
+            .send_bpi("获取每周必看全部列表").await
     }
 
     /// 获取每周必看选期详细信息
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/popular.html#获取每周必看选期详细信息
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/popular.html#获取每周必看选期详细信息)
     ///
     /// # 参数
     /// | 名称     | 类型     | 说明         |
@@ -132,12 +135,12 @@ impl BpiClient {
     /// | `number` | u32     | 期数         |
     pub async fn video_popular_series_one(
         &self,
-        number: u32,
+        number: u32
     ) -> Result<BpiResponse<PopularSeriesOneData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/popular/series/one")
+        self
+            .get("https://api.bilibili.com/x/web-interface/popular/series/one")
             .query(&[("number", number)])
-            .send_bpi("获取每周必看选期详细信息")
-            .await
+            .send_bpi("获取每周必看选期详细信息").await
     }
 }
 

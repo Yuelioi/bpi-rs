@@ -1,8 +1,8 @@
 //! 音频状态数
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/status_number.md
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/status_number.md)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AudioStatusNumberData {
@@ -27,12 +27,12 @@ impl BpiClient {
     /// [歌曲状态数](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/status_number.md#歌曲状态数)
     pub async fn audio_status_number(
         &self,
-        sid: i64,
+        sid: i64
     ) -> Result<BpiResponse<AudioStatusNumberData>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/stat/song")
+        self
+            .get("https://www.bilibili.com/audio/music-service-c/web/stat/song")
             .query(&[("sid", sid.to_string())])
-            .send_bpi("查询歌曲状态数")
-            .await
+            .send_bpi("查询歌曲状态数").await
     }
 }
 

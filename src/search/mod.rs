@@ -1,3 +1,5 @@
+//! 搜索
+
 pub mod hot;
 
 mod result;

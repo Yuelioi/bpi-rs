@@ -1,6 +1,6 @@
 //! 导航栏用户信息
 //!
-//! https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info_info.html#导航栏用户信息
+//! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info_info.html#导航栏用户信息)
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
 

@@ -1,6 +1,6 @@
 //! 创建合集 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -30,9 +30,9 @@ impl BpiClient {
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `title` | &str | 合集标题 |
-    /// | `desc` | Option<&str> | 合集简介，可选 |
+    /// | `desc` | `Option<&str>` | 合集简介，可选 |
     /// | `cover` | &str | 封面图 URL（从上传接口获取） |
-    /// | `season_price` | Option<u32> | 合集价格，可选，默认 0 |
+    /// | `season_price` | `Option<u32>` | 合集价格，可选，默认 0 |
     ///
     /// # 文档
     /// [创建合集](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/create.md#创建合集)
@@ -98,7 +98,7 @@ impl BpiClient {
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `section_id` | u64 | 合集小节 ID |
-    /// | `episodes` | Vec<EpisodeAdd> | 视频列表 |
+    /// | `episodes` | `Vec<EpisodeAdd>` | 视频列表 |
     ///
     /// # 文档
     /// [添加视频到合集](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/push.md#添加视频到合集)

@@ -1,6 +1,6 @@
 //! 积分商城
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/point_shop.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/point_shop.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -91,7 +91,8 @@ pub type ExchangeResponse = BpiResponse<serde_json::Value>;
 impl BpiClient {
     /// 获取当前持有点数
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_user_point(&self) -> Result<UserPointResponse, BpiError> {
         self
             .post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/GetUserPoint")
@@ -100,7 +101,8 @@ impl BpiClient {
 
     /// 获取兑换奖品列表
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_point_products(&self) -> Result<ProductListResponse, BpiError> {
         self
             .post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/ListProduct")
@@ -109,9 +111,10 @@ impl BpiClient {
 
     /// 兑换物品
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |

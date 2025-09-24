@@ -1,8 +1,8 @@
 //! 互动视频相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 响应数据结构体 ---
 
@@ -164,15 +164,16 @@ pub struct InteractiveVideoHiddenVar {
 impl BpiClient {
     /// 获取互动视频模块详细信息
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video/interact_video.html#获取互动视频信息
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/interact_video.html#获取互动视频信息)
     ///
     /// # 参数
     /// | 名称           | 类型           | 说明                 |
     /// | -------------- | --------------| -------------------- |
-    /// | `aid`          | Option<u64>   | 稿件 avid，可选      |
-    /// | `bvid`         | Option<&str>  | 稿件 bvid，可选      |
+    /// | `aid`          | `Option<u64>`   | 稿件 avid，可选      |
+    /// | `bvid`         | `Option<&str>`  | 稿件 bvid，可选      |
     /// | `graph_version`| u64           | 剧情图 ID            |
-    /// | `edge_id`      | Option<u64>   | 模块编号，0或留空为起始模块，可选 |
+    /// | `edge_id`      | `Option<u64>`   | 模块编号，0或留空为起始模块，可选 |
     ///
     /// `aid` 和 `bvid` 必须提供一个。
     pub async fn video_interactive_video_info(
@@ -180,7 +181,7 @@ impl BpiClient {
         aid: Option<u64>,
         bvid: Option<&str>,
         graph_version: u64,
-        edge_id: Option<u64>,
+        edge_id: Option<u64>
     ) -> Result<BpiResponse<InteractiveVideoInfoResponseData>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -215,12 +216,14 @@ mod tests {
     const TEST_GRAPH_VERSION: u64 = 1273647;
 
     #[tokio::test]
-
     async fn test_video_interactive_video_info_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .video_interactive_video_info(Some(TEST_AID), None, TEST_GRAPH_VERSION, None)
-            .await?;
+        let resp = bpi.video_interactive_video_info(
+            Some(TEST_AID),
+            None,
+            TEST_GRAPH_VERSION,
+            None
+        ).await?;
         let data = resp.into_data()?;
 
         info!("互动视频信息: {:?}", data);

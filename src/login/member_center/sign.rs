@@ -1,6 +1,6 @@
 //! 修改签名
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/login/member_center.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/login/member_center.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 

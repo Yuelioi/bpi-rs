@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct LiveInfo {
@@ -84,11 +84,12 @@ impl BpiClient {
     /// 获取直播回放列表
     ///
 
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_replay_list(
         &self,
         page: Option<i32>,
-        page_size: Option<i32>,
+        page_size: Option<i32>
     ) -> Result<BpiResponse<ReplayListData>, BpiError> {
         let mut query = Vec::new();
 
@@ -100,10 +101,10 @@ impl BpiClient {
             query.push(("page_size", page_size.to_string()));
         }
 
-        self.get("https://api.live.bilibili.com/xlive/app-blink/v1/anchorVideo/AnchorGetReplayList")
+        self
+            .get("https://api.live.bilibili.com/xlive/app-blink/v1/anchorVideo/AnchorGetReplayList")
             .query(&query)
-            .send_bpi("获取直播回放列表")
-            .await
+            .send_bpi("获取直播回放列表").await
     }
 }
 

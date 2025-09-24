@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 // ================= 数据结构 =================
 
@@ -86,24 +86,25 @@ impl BpiClient {
     /// area_parent_id: 直播分区
     /// area_id: 直播子分区
 
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `room_id` | i64 | 直播间 ID |
-    /// | `area_parent_id` | Option<i32> | 分区 ID |
-    /// | `area_id` | Option<i32> | 子分区 ID |
+    /// | `area_parent_id` | `Option<i32>` | 分区 ID |
+    /// | `area_id` | `Option<i32>` | 子分区 ID |
     pub async fn live_room_gift_list(
         &self,
         room_id: i64,
         area_parent_id: Option<i32>,
-        area_id: Option<i32>,
+        area_id: Option<i32>
     ) -> Result<RoomGiftResponse, BpiError> {
         let mut params: Vec<(&str, String)> = vec![
             ("room_id", room_id.to_string()),
-            ("platform", "web".to_string()),
+            ("platform", "web".to_string())
         ];
 
         if let Some(area_parent_id) = area_parent_id {
@@ -117,8 +118,7 @@ impl BpiClient {
         let resp: RoomGiftResponse = self
             .get("https://api.live.bilibili.com/xlive/web-room/v1/giftPanel/roomGiftList")
             .query(&params)
-            .send_bpi("获取直播间礼物列表")
-            .await?;
+            .send_bpi("获取直播间礼物列表").await?;
 
         Ok(resp)
     }
@@ -126,9 +126,10 @@ impl BpiClient {
     /// 获取盲盒概率
     ///
 
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
@@ -139,8 +140,7 @@ impl BpiClient {
         let resp: BlindGiftResponse = self
             .get("https://api.live.bilibili.com/xlive/general-interface/v1/blindFirstWin/getInfo")
             .query(&params)
-            .send_bpi("获取盲盒概率")
-            .await?;
+            .send_bpi("获取盲盒概率").await?;
 
         Ok(resp)
     }

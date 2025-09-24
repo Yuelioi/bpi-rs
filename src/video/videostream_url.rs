@@ -1,8 +1,8 @@
 //! 视频流地址相关接口 (web端)
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 视频流URL相关数据结构体 ---
 
@@ -109,21 +109,22 @@ pub struct PlayUrlResponseData {
 impl BpiClient {
     /// 获取视频流地址（web端）
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video/videostream_url.html#获取视频流地址
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/videostream_url.html#获取视频流地址)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
     /// | ------------ | --------------| -------------------- |
-    /// | `aid`        | Option<u64>   | 稿件 avid，可选      |
-    /// | `bvid`       | Option<&str>  | 稿件 bvid，可选      |
+    /// | `aid`        | `Option<u64>`   | 稿件 avid，可选      |
+    /// | `bvid`       | `Option<&str>`  | 稿件 bvid，可选      |
     /// | `cid`        | u64           | 视频 cid             |
-    /// | `qn`         | Option<u64>   | 清晰度选择，可选     |
-    /// | `fnval`      | Option<u64>   | 流格式标识，可选，默认1(MP4) |
-    /// | `fnver`      | Option<u64>   | 流版本标识，可选，默认0 |
-    /// | `fourk`      | Option<u8>    | 是否允许4K，可选，默认0 |
-    /// | `platform`   | Option<&str>  | 平台标识，可选，默认"pc" |
-    /// | `high_quality`| Option<u8>   | 是否高画质，可选     |
-    /// | `try_look`   | Option<u8>    | 是否可不登录拉取高画质，可选 |
+    /// | `qn`         | `Option<u64>`   | 清晰度选择，可选     |
+    /// | `fnval`      | `Option<u64>`   | 流格式标识，可选，默认1(MP4) |
+    /// | `fnver`      | `Option<u64>`   | 流版本标识，可选，默认0 |
+    /// | `fourk`      | `Option<u8>`    | 是否允许4K，可选，默认0 |
+    /// | `platform`   | `Option<&str>`  | 平台标识，可选，默认"pc" |
+    /// | `high_quality`| `Option<u8>`   | 是否高画质，可选     |
+    /// | `try_look`   | `Option<u8>`    | 是否可不登录拉取高画质，可选 |
     ///
     /// `aid` 和 `bvid` 必须提供一个。
     pub async fn video_playurl(
@@ -137,7 +138,7 @@ impl BpiClient {
         fourk: Option<u8>,
         platform: Option<&str>,
         high_quality: Option<u8>,
-        try_look: Option<u8>,
+        try_look: Option<u8>
     ) -> Result<BpiResponse<PlayUrlResponseData>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -178,11 +179,11 @@ impl BpiClient {
         // 签名
         let params = self.get_wbi_sign2(params).await?;
 
-        self.get("https://api.bilibili.com/x/player/wbi/playurl")
+        self
+            .get("https://api.bilibili.com/x/player/wbi/playurl")
             .with_bilibili_headers()
             .query(&params)
-            .send_bpi("获取视频流地址")
-            .await
+            .send_bpi("获取视频流地址").await
     }
 }
 
@@ -197,24 +198,21 @@ mod tests {
     const TEST_CID: u64 = 28104724389;
 
     #[tokio::test]
-
     async fn test_video_playurl_mp4_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         // 请求 MP4 格式，720P
-        let resp = bpi
-            .video_playurl(
-                Some(TEST_AID),
-                None,
-                TEST_CID,
-                Some(64),
-                Some(1),
-                None,
-                None,
-                None,
-                None,
-                None,
-            )
-            .await?;
+        let resp = bpi.video_playurl(
+            Some(TEST_AID),
+            None,
+            TEST_CID,
+            Some(64),
+            Some(1),
+            None,
+            None,
+            None,
+            None,
+            None
+        ).await?;
         let data = resp.into_data()?;
 
         info!("MP4 视频流信息: {:?}", data);
@@ -225,24 +223,21 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_video_playurl_4k() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         // 请求 4K
-        let resp = bpi
-            .video_playurl(
-                Some(TEST_AID),
-                None,
-                TEST_CID,
-                Some(120),
-                Some(16 | 128),
-                Some(0),
-                Some(1),
-                None,
-                None,
-                None,
-            )
-            .await?;
+        let resp = bpi.video_playurl(
+            Some(TEST_AID),
+            None,
+            TEST_CID,
+            Some(120),
+            Some(16 | 128),
+            Some(0),
+            Some(1),
+            None,
+            None,
+            None
+        ).await?;
         let data = resp.into_data()?;
 
         info!("4K 视频流信息: {:?}", data);

@@ -1,8 +1,8 @@
 //! B站用户关系、UP主状态、导航栏等相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 响应数据结构体 ---
 
@@ -113,7 +113,8 @@ pub struct AlbumCountResponseData {
 impl BpiClient {
     /// 获取用户关系状态数
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// # 参数
     /// | 名称   | 类型   | 说明           |
@@ -121,17 +122,18 @@ impl BpiClient {
     /// | `vmid` | u64    | 目标用户 mid   |
     pub async fn user_relation_stat(
         &self,
-        vmid: u64,
+        vmid: u64
     ) -> Result<BpiResponse<RelationStatResponseData>, BpiError> {
-        self.get("https://api.bilibili.com/x/relation/stat")
+        self
+            .get("https://api.bilibili.com/x/relation/stat")
             .query(&[("vmid", &vmid.to_string())])
-            .send_bpi("获取用户关系状态数")
-            .await
+            .send_bpi("获取用户关系状态数").await
     }
 
     /// 获取UP主状态数
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// # 参数
     /// | 名称   | 类型   | 说明           |
@@ -139,32 +141,34 @@ impl BpiClient {
     /// | `mid`  | u64    | 目标用户 mid   |
     pub async fn user_up_stat(
         &self,
-        mid: u64,
+        mid: u64
     ) -> Result<BpiResponse<UpstatResponseData>, BpiError> {
-        self.get("https://api.bilibili.com/x/space/upstat")
+        self
+            .get("https://api.bilibili.com/x/space/upstat")
             .query(&[("mid", &mid.to_string())])
-            .send_bpi("获取 UP 主状态数")
-            .await
+            .send_bpi("获取 UP 主状态数").await
     }
 
     /// 获取用户导航栏状态数
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// # 参数
     /// | 名称   | 类型   | 说明           |
     /// | ------ | ------ | -------------- |
     /// | `mid`  | u64    | 目标用户 mid   |
     pub async fn user_navnum(&self, mid: u64) -> Result<BpiResponse<NavnumResponseData>, BpiError> {
-        self.get("https://api.bilibili.com/x/space/navnum")
+        self
+            .get("https://api.bilibili.com/x/space/navnum")
             .query(&[("mid", &mid.to_string())])
-            .send_bpi("获取用户导航栏状态数")
-            .await
+            .send_bpi("获取用户导航栏状态数").await
     }
 
     /// 获取相簿投稿数
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     ///
     /// # 参数
     /// | 名称   | 类型   | 说明           |
@@ -172,12 +176,12 @@ impl BpiClient {
     /// | `uid`  | u64    | 目标用户 mid   |
     pub async fn user_album_count(
         &self,
-        uid: u64,
+        uid: u64
     ) -> Result<BpiResponse<AlbumCountResponseData>, BpiError> {
-        self.get("https://api.vc.bilibili.com/link_draw/v1/doc/upload_count")
+        self
+            .get("https://api.vc.bilibili.com/link_draw/v1/doc/upload_count")
             .query(&[("uid", &uid.to_string())])
-            .send_bpi("获取相簿投稿数")
-            .await
+            .send_bpi("获取相簿投稿数").await
     }
 }
 
@@ -195,7 +199,6 @@ mod tests {
     const TEST_NAV_MID: u64 = 645769214;
 
     #[tokio::test]
-
     async fn test_get_relation_stat() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         let resp = bpi.user_relation_stat(TEST_MID).await?;
@@ -208,7 +211,6 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_get_up_stat() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         let resp = bpi.user_up_stat(TEST_UP_MID).await?;

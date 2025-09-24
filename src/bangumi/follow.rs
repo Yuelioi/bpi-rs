@@ -1,8 +1,8 @@
 //! 追番相关
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/follow.md
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/follow.md)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BangumiFollowResult {
@@ -22,17 +22,19 @@ impl BpiClient {
     /// [追番](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/follow.md#追番)
     pub async fn bangumi_follow(
         &self,
-        season_id: u64,
+        season_id: u64
     ) -> Result<BpiResponse<BangumiFollowResult>, BpiError> {
         let csrf = self.csrf()?;
-        self.post("https://api.bilibili.com/pgc/web/follow/add")
+        self
+            .post("https://api.bilibili.com/pgc/web/follow/add")
             .with_bilibili_headers()
-            .form(&[
-                ("season_id", season_id.to_string()),
-                ("csrf", csrf.to_string()),
-            ])
-            .send_bpi("追番")
-            .await
+            .form(
+                &[
+                    ("season_id", season_id.to_string()),
+                    ("csrf", csrf.to_string()),
+                ]
+            )
+            .send_bpi("追番").await
     }
 
     /// 取消追番
@@ -43,17 +45,19 @@ impl BpiClient {
     /// [取消追番](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/follow.md#取消追番)
     pub async fn bangumi_unfollow(
         &self,
-        season_id: u64,
+        season_id: u64
     ) -> Result<BpiResponse<BangumiFollowResult>, BpiError> {
         let csrf = self.csrf()?;
-        self.post("https://api.bilibili.com/pgc/web/follow/del")
+        self
+            .post("https://api.bilibili.com/pgc/web/follow/del")
             .with_bilibili_headers()
-            .form(&[
-                ("season_id", season_id.to_string()),
-                ("csrf", csrf.to_string()),
-            ])
-            .send_bpi("取消追番")
-            .await
+            .form(
+                &[
+                    ("season_id", season_id.to_string()),
+                    ("csrf", csrf.to_string()),
+                ]
+            )
+            .send_bpi("取消追番").await
     }
 }
 

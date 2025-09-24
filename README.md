@@ -21,19 +21,24 @@
 
 ✅ 测试全通过：集成测试覆盖主要功能，保证接口调用稳定可靠。
 
-📦 响应结构体清晰：所有 API 返回统一封装的 BpiResponse<T>，并通过 Rust 的强类型系统保证数据安全。
+📦 响应结构体清晰：所有 API 返回统一封装的 BpiResponse `<T>`，并通过 Rust 的强类型系统保证数据安全。
 
 api都是 `分类` + `函数` 便于查找, 比如 `video_info`  `bangumi_coin` `vip_info`, 具体分类可以参考
 
-## 函数调用预览
+## 函数文档丰富
 
-![](./assets/preview.png)
+在ide中提示
 
-## 📦 安装
+![预览](./assets/preview.png)
 
-```toml
-[dependencies]
-bpi-rs = { git = "https://github.com/yuelioi/bpi-rs" }
+在[cargo文档](https://docs.rs/bpi-rs/latest/bpi_rs/client/struct.BpiClient.html)展示
+
+![cargo函数展示](./assets/cargo.png)
+
+## 📦 安装[dependencies]
+
+```bash
+cargo add bpi-rs
 ```
 
 ## 🚀 快速开始
@@ -126,7 +131,7 @@ bpi.login_check_qrcode_status(qrcode_key).await.unwrap().into_data().unwrap().co
 
 ## 📡 API 返回值
 
-所有 API 返回统一的结构体 BpiResponse<T>：
+所有 API 返回统一的结构体 BpiResponse `<T>`：
 
 ```rust
 pub struct BpiResponse<T> {
@@ -220,14 +225,6 @@ pub async fn some_action(
 ```rust
 self.csrf()?  // 返回字符串 or BpiError
 ```
-
-## features
-
-dynamic = ["reqwest/multipart"]
-danmaku=["quick-xml","flate2"]
-manga = ["zip"]
-message = ["uuid"]
-misc = [ "hmac", "sha2", "hex"]
 
 ## ⚠️ 注意事项
 

@@ -12,7 +12,8 @@ pub struct VipExperienceData {
 impl BpiClient {
     /// 兑换大会员卡券
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/vip/action.html#兑换大会员卡券
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/vip/action.html#兑换大会员卡券)
     ///
     /// # 参数
     /// | 名称    | 类型 | 说明         |
@@ -36,7 +37,8 @@ impl BpiClient {
 
     /// 领取大会员每日经验
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/vip/action.html#领取大会员每日经验
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/vip/action.html#领取大会员每日经验)
     ///
     pub async fn vip_add_experience(&self) -> Result<BpiResponse<VipExperienceData>, BpiError> {
         let csrf = self.csrf()?;

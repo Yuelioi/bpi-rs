@@ -1,11 +1,11 @@
 //! 获取合集列表 API
 //!
-//! 参考文档：https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/list.md
+//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/list.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
-use super::models::{Season, Section};
+use super::models::{ Season, Section };
 
 /// 合集列表返回结构
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -99,8 +99,8 @@ impl BpiClient {
     /// | ---- | ---- | ---- |
     /// | `pn` | u32 | 页码，默认 1 |
     /// | `ps` | u32 | 每页数量，默认 30 |
-    /// | `order` | Option<&str> | 排序方式：ctime 或 mtime |
-    /// | `sort` | Option<&str> | 升降序：asc 或 desc |
+    /// | `order` | `Option<&str>` | 排序方式：ctime 或 mtime |
+    /// | `sort` | `Option<&str>` | 升降序：asc 或 desc |
     ///
     /// # 文档
     /// [获取合集列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/list.md#获取合集列表)
@@ -109,7 +109,7 @@ impl BpiClient {
         pn: u32,
         ps: u32,
         order: Option<&str>,
-        sort: Option<&str>,
+        sort: Option<&str>
     ) -> Result<BpiResponse<SeasonListData>, BpiError> {
         let mut query: Vec<(&str, String)> = vec![("pn", pn.to_string()), ("ps", ps.to_string())];
 
@@ -120,10 +120,10 @@ impl BpiClient {
             query.push(("sort", sort_val.to_string()));
         }
 
-        self.get("https://member.bilibili.com/x2/creative/web/seasons")
+        self
+            .get("https://member.bilibili.com/x2/creative/web/seasons")
             .query(&query)
-            .send_bpi("获取合集列表")
-            .await
+            .send_bpi("获取合集列表").await
     }
 }
 
@@ -134,10 +134,7 @@ mod tests {
     #[tokio::test]
     async fn test_season_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new();
-        let data = bpi
-            .season_list(1, 10, Some("ctime"), Some("desc"))
-            .await?
-            .into_data()?;
+        let data = bpi.season_list(1, 10, Some("ctime"), Some("desc")).await?.into_data()?;
 
         tracing::info!("共 {} 个合集", data.total);
         for s in data.seasons {

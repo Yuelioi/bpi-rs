@@ -1,8 +1,8 @@
 //! B站 web 播放器相关接口
 //!
-//! 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 // --- 响应数据结构体 ---
 
@@ -197,16 +197,17 @@ pub struct ElecHighLevel {
 impl BpiClient {
     /// 获取 web 播放器信息
     ///
-    /// 文档: https://socialsisteryi.github.io/bilibili-API-collect/docs/video/player.html#获取web播放器信息
+    /// # 文档
+    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/player.html#获取web播放器信息)
     ///
     /// # 参数
     /// | 名称        | 类型           | 说明                 |
     /// | ----------- | --------------| -------------------- |
-    /// | `aid`       | Option<u64>   | 稿件 avid，可选      |
-    /// | `bvid`      | Option<&str>  | 稿件 bvid，可选      |
+    /// | `aid`       | `Option<u64>`   | 稿件 avid，可选      |
+    /// | `bvid`      | `Option<&str>`  | 稿件 bvid，可选      |
     /// | `cid`       | u64           | 稿件 cid             |
-    /// | `season_id` | Option<u64>   | 番剧 season_id，可选 |
-    /// | `ep_id`     | Option<u64>   | 剧集 ep_id，可选     |
+    /// | `season_id` | `Option<u64>`   | 番剧 season_id，可选 |
+    /// | `ep_id`     | `Option<u64>`   | 剧集 ep_id，可选     |
     ///
     /// `aid` 和 `bvid` 必须提供一个。
     pub async fn video_player_info_v2(
@@ -215,7 +216,7 @@ impl BpiClient {
         bvid: Option<&str>,
         cid: u64,
         season_id: Option<u64>,
-        ep_id: Option<u64>,
+        ep_id: Option<u64>
     ) -> Result<BpiResponse<PlayerInfoResponseData>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -236,10 +237,10 @@ impl BpiClient {
         }
         let params = self.get_wbi_sign2(params).await?;
 
-        self.get("https://api.bilibili.com/x/player/wbi/v2")
+        self
+            .get("https://api.bilibili.com/x/player/wbi/v2")
             .query(&params)
-            .send_bpi("获取 web 播放器信息")
-            .await
+            .send_bpi("获取 web 播放器信息").await
     }
 }
 
@@ -254,12 +255,9 @@ mod tests {
     const TEST_CID: u64 = 636329244;
 
     #[tokio::test]
-
     async fn test_video_player_info_v2_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .video_player_info_v2(Some(TEST_AID), None, TEST_CID, None, None)
-            .await?;
+        let resp = bpi.video_player_info_v2(Some(TEST_AID), None, TEST_CID, None, None).await?;
         let data = resp.into_data()?;
 
         info!("播放器信息: {:?}", data);
@@ -271,12 +269,9 @@ mod tests {
     }
 
     #[tokio::test]
-
     async fn test_video_player_info_v2_by_bvid() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
-        let resp = bpi
-            .video_player_info_v2(Some(TEST_AID), None, TEST_CID, None, None)
-            .await?;
+        let resp = bpi.video_player_info_v2(Some(TEST_AID), None, TEST_CID, None, None).await?;
         let data = resp.into_data()?;
 
         info!("播放器信息: {:?}", data);

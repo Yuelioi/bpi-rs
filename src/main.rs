@@ -1,4 +1,4 @@
-use bpi_rs::{ auth::Account, BpiClient };
+use bpi_rs::{ Account, BpiClient };
 
 #[tokio::main]
 async fn main() {

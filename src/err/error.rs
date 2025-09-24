@@ -22,15 +22,21 @@ pub enum ErrorCategory {
 pub enum BpiError {
     /// 网络请求失败
     #[error("网络请求失败: {message}")]
-    Network { message: String },
+    Network {
+        message: String,
+    },
 
     /// HTTP状态码错误
     #[error("HTTP请求失败，状态码: {status}")]
-    Http { status: u16 },
+    Http {
+        status: u16,
+    },
 
     /// JSON解析失败
     #[error("数据解析失败: {message}")]
-    Parse { message: String },
+    Parse {
+        message: String,
+    },
 
     /// API返回的业务错误
     #[error("API错误 [{code}]: {message}")]
@@ -42,9 +48,11 @@ pub enum BpiError {
 
     /// 验证错误
     #[error("验证失败: {message}")]
-    Authentication { message: String },
+    Authentication {
+        message: String,
+    },
 
-    /// 参数错误
+    /// # 参数错误
     #[error("参数错误 [{field}]: {message}")]
     InvalidParameter {
         field: &'static str,
@@ -177,8 +185,8 @@ impl BpiError {
 
     /// 判断是否为权限问题
     pub fn is_permission_error(&self) -> bool {
-        matches!(self.category(), ErrorCategory::Auth)
-            || matches!(self.code(), Some(-403) | Some(-4))
+        matches!(self.category(), ErrorCategory::Auth) ||
+            matches!(self.code(), Some(-403) | Some(-4))
     }
 
     /// 判断是否需要VIP权限

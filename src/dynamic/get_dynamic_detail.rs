@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
-use crate::models::{LevelInfo, Official, Pendant, Vip};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::models::{ LevelInfo, Official, Pendant, Vip };
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct DynamicCardData {
@@ -130,30 +130,32 @@ pub struct UpUser {
 impl BpiClient {
     /// 获取特定动态卡片信息
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `dynamic_id` | &str | 动态 ID |
     pub async fn dynamic_card_detail(
         &self,
-        dynamic_id: &str,
+        dynamic_id: &str
     ) -> Result<BpiResponse<DynamicCardData>, BpiError> {
-        self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail")
+        self
+            .get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail")
             .query(&[("dynamic_id", dynamic_id)])
-            .send_bpi("获取特定动态卡片信息")
-            .await
+            .send_bpi("获取特定动态卡片信息").await
     }
 
     /// 获取最近更新 UP 主列表
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
     pub async fn dynamic_recent_up_list(&self) -> Result<BpiResponse<RecentUpData>, BpiError> {
-        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/portal")
-            .send_bpi("获取最近更新 UP 主列表")
-            .await
+        self
+            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/portal")
+            .send_bpi("获取最近更新 UP 主列表").await
     }
 }
 

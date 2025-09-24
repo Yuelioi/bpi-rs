@@ -1,6 +1,6 @@
 //! 漫画用户信息
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/User.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/User.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -45,7 +45,7 @@ pub struct GetCouponsRequest {
     #[serde(rename = "pageNum")]
     pub page_num: i32,
 
-    /// 分页大小，默认20，取值范围[1,100]
+    /// 分页大小，默认20，取值范围`[1,100]`
     #[serde(rename = "pageSize")]
     pub page_size: i32,
 
@@ -67,14 +67,15 @@ pub struct GetCouponsRequest {
 impl BpiClient {
     /// 获取拥有的漫读券列表
     ///
-    /// 文档: https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     ///
-    /// 参数
+    /// # 参数
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `page_num` | i32 | 页码 |
-    /// | `page_size` | i32 | 分页大小，默认 20，[1,100] |
+    /// | `page_size` | i32 | 分页大小，默认 20，`[1,100]` |
     pub async fn manga_coupons(
         &self,
         page_num: i32,

@@ -1,8 +1,8 @@
 //! 番剧或影视时间线
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/timeline.md
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/timeline.md)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 番剧类型
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -63,7 +63,7 @@ impl BpiClient {
         &self,
         types: BangumiTimelineType,
         before: i32,
-        after: i32,
+        after: i32
     ) -> Result<BpiResponse<Vec<BangumiTimelineDay>>, BpiError> {
         // 验证参数
         if before < 0 || before > 7 {
@@ -79,14 +79,16 @@ impl BpiClient {
             });
         }
 
-        self.get("https://api.bilibili.com/pgc/web/timeline")
-            .query(&[
-                ("types", types.as_i32().to_string()),
-                ("before", before.to_string()),
-                ("after", after.to_string()),
-            ])
-            .send_bpi("获取番剧或影视时间线")
-            .await
+        self
+            .get("https://api.bilibili.com/pgc/web/timeline")
+            .query(
+                &[
+                    ("types", types.as_i32().to_string()),
+                    ("before", before.to_string()),
+                    ("after", after.to_string()),
+                ]
+            )
+            .send_bpi("获取番剧或影视时间线").await
     }
 }
 

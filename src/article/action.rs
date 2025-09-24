@@ -1,8 +1,8 @@
 //! 专栏点赞&投币&收藏
 //!
-//! https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/action.md
+//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/action.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
 /// 投币响应数据
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -25,20 +25,21 @@ impl BpiClient {
     pub async fn article_like(
         &self,
         id: u64,
-        like: bool,
+        like: bool
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let r#type = if like { 1 } else { 2 };
 
         let result = self
             .post("https://api.bilibili.com/x/article/like")
-            .form(&[
-                ("id", id.to_string()),
-                ("type", r#type.to_string()),
-                ("csrf", csrf),
-            ])
-            .send_bpi("点赞文章")
-            .await?;
+            .form(
+                &[
+                    ("id", id.to_string()),
+                    ("type", r#type.to_string()),
+                    ("csrf", csrf),
+                ]
+            )
+            .send_bpi("点赞文章").await?;
 
         Ok(result)
     }
@@ -58,22 +59,23 @@ impl BpiClient {
         &self,
         aid: u64,
         upid: u64,
-        multiply: u32,
+        multiply: u32
     ) -> Result<BpiResponse<CoinResponseData>, BpiError> {
         let multiply = multiply.min(2);
         let csrf = self.csrf()?;
 
         let result = self
             .post("https://api.bilibili.com/x/web-interface/coin/add")
-            .form(&[
-                ("aid", aid.to_string()),
-                ("upid", upid.to_string()),
-                ("multiply", multiply.to_string()),
-                ("avtype", "2".to_string()),
-                ("csrf", csrf),
-            ])
-            .send_bpi("投币文章")
-            .await?;
+            .form(
+                &[
+                    ("aid", aid.to_string()),
+                    ("upid", upid.to_string()),
+                    ("multiply", multiply.to_string()),
+                    ("avtype", "2".to_string()),
+                    ("csrf", csrf),
+                ]
+            )
+            .send_bpi("投币文章").await?;
 
         Ok(result)
     }
@@ -89,15 +91,19 @@ impl BpiClient {
     /// [收藏文章](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/action.md#收藏文章)
     pub async fn article_favorite(
         &self,
-        id: u64,
+        id: u64
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
         let result = self
             .post("https://api.bilibili.com/x/article/favorites/add")
-            .form(&[("id", id.to_string()), ("csrf", csrf)])
-            .send_bpi("收藏文章")
-            .await?;
+            .form(
+                &[
+                    ("id", id.to_string()),
+                    ("csrf", csrf),
+                ]
+            )
+            .send_bpi("收藏文章").await?;
 
         Ok(result)
     }
@@ -113,15 +119,19 @@ impl BpiClient {
     /// [收藏文章](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/action.md#收藏文章)
     pub async fn article_unfavorite(
         &self,
-        id: i64,
+        id: i64
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
         let result = self
             .post("https://api.bilibili.com/x/article/favorites/del")
-            .form(&[("id", id.to_string()), ("csrf", csrf)])
-            .send_bpi("收藏文章")
-            .await?;
+            .form(
+                &[
+                    ("id", id.to_string()),
+                    ("csrf", csrf),
+                ]
+            )
+            .send_bpi("收藏文章").await?;
 
         Ok(result)
     }
@@ -136,15 +146,10 @@ mod tests {
     #[tokio::test]
     async fn test_like_article() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new();
-        bpi.article_like(TEST_CVID, true)
-            .await
+        bpi.article_like(TEST_CVID, true).await
             .map(|_| ())
             .or_else(|e| {
-                if e.code() == Some(65006) {
-                    Ok(())
-                } else {
-                    Err(Box::new(e))
-                }
+                if e.code() == Some(65006) { Ok(()) } else { Err(Box::new(e)) }
             })
     }
 
@@ -153,15 +158,10 @@ mod tests {
         let bpi = BpiClient::new();
         let multiply = 1;
 
-        bpi.article_coin(TEST_CVID, TEST_UID, multiply)
-            .await
+        bpi.article_coin(TEST_CVID, TEST_UID, multiply).await
             .map(|_| ())
             .or_else(|e| {
-                if e.code() == Some(34005) {
-                    Ok(())
-                } else {
-                    Err(Box::new(e))
-                }
+                if e.code() == Some(34005) { Ok(()) } else { Err(Box::new(e)) }
             })
     }
 
