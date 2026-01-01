@@ -208,7 +208,7 @@ pub struct Picture {
     pub img_src: String,
     pub img_width: u64,
     pub img_height: u64,
-    pub img_size: f64, // KB
+    pub img_size: Option<f64>, // KB
 }
 
 /// 折叠信息
