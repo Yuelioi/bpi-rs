@@ -280,7 +280,7 @@ pub struct Cursor {
     pub session_id: String,
     pub mode: i64,
     pub mode_text: String,
-    pub all_count: i64,
+    pub all_count: Option<std::num::NonZeroU64>,
     pub support_mode: Vec<i64>,
 }
 
