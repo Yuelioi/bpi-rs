@@ -22,7 +22,7 @@ pub struct Stat {
     pub danmaku: u64,
     pub reply: u64,
     #[serde(rename = "favorite")]
-    pub favorite: u64,
+    pub favorite: Option<u64>,
     #[serde(rename = "fav")]
     pub fav: Option<u64>,
     pub coin: u64,
@@ -68,14 +68,14 @@ pub struct Rights {
     pub ugc_pay: u8,
     pub is_cooperation: u8,
     pub ugc_pay_preview: u8,
-    pub no_background: u8,
-    pub clean_mode: u8,
-    pub is_stein_gate: u8,
+    pub no_background: Option<u8>,
+    pub clean_mode: Option<u8>,
+    pub is_stein_gate: Option<u8>,
     pub arc_pay: u8,
     pub free_watch: u8,
     // 新增字段
-    pub is_360: u8,
-    pub no_share: u8,
+    pub is_360: Option<u8>,
+    pub no_share: Option<u8>,
 }
 
 /// 视频每P信息
@@ -90,7 +90,7 @@ pub struct Page {
     pub weblink: String,
     pub dimension: Dimension,
     pub first_frame: Option<String>,
-    pub ctime: u64,
+    pub ctime: Option<u64>,
 }
 
 /// 字幕上传者信息
@@ -280,7 +280,7 @@ pub struct VideoData {
     pub pubdate: u64,
     pub ctime: u64,
     pub desc: String,
-    pub desc_v2: Vec<serde_json::Value>,
+    pub desc_v2: Option<Vec<serde_json::Value>>,
     pub state: u32,
     pub duration: u64, // 单位为秒
     #[serde(default = "default_forward")] // 仅撞车视频存在此字段
