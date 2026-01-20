@@ -60,8 +60,8 @@ pub struct User {
 pub struct DynamicBasic {
     pub comment_id_str: String,
     pub comment_type: i64,
-    pub editable: bool,
-    pub jump_url: String,
+    // pub editable: bool,
+    // pub jump_url: String,
     pub like_icon: serde_json::Value,
     pub rid_str: String,
 }
