@@ -6,11 +6,12 @@ use std::fmt;
 #[derive(Debug, Clone, Serialize)]
 pub struct Vip {
     /// 会员类型 0：无 1：月大会员 2：年度及以上大会员
-    #[serde(alias = "vipType")]
+    #[serde(alias = "vipType", alias = "vip_type", alias = "type")]             // 标识
     pub vip_type: u8,
     /// 会员状态 0：无 1：有
+    #[serde(alias = "status", alias = "vipStatus", alias = "vip_status")]       // 标识
     pub vip_status: u8,
-    #[serde(alias = "vipDueDate", alias = "due_date")]
+    #[serde(alias = "vipDueDate", alias = "due_date", alias = "vip_due_date")]  // 标识
     /// 会员过期时间 毫秒时间戳
     pub vip_due_date: u64,
     /// 会员标签
@@ -88,7 +89,7 @@ impl<'de> Deserialize<'de> for Vip {
 
                 while let Some(key) = map.next_key::<String>()? {
                     match key.as_str() {
-                        "vipType" | "vip_type" => {
+                        "vipType" | "vip_type" | "type" => {
                             if vip_type.is_some() {
                                 return Err(de::Error::duplicate_field("vip_type"));
                             }
