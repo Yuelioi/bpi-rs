@@ -1,18 +1,18 @@
-use serde::de::{self, Deserializer, MapAccess, Visitor};
-use serde::{Deserialize, Serialize};
+use serde::de::{ self, Deserializer, MapAccess, Visitor };
+use serde::{ Deserialize, Serialize };
 use std::fmt;
 
 /// 会员信息
 #[derive(Debug, Clone, Serialize)]
 pub struct Vip {
     /// 会员类型 0：无 1：月大会员 2：年度及以上大会员
-    #[serde(alias = "vipType", alias = "vip_type", alias = "type")]             // 标识
+    /// 别名：vipType | vip_type | type
     pub vip_type: u8,
     /// 会员状态 0：无 1：有
-    #[serde(alias = "status", alias = "vipStatus", alias = "vip_status")]       // 标识
+    /// 别名：vipStatus | vip_status | status
     pub vip_status: u8,
-    #[serde(alias = "vipDueDate", alias = "due_date", alias = "vip_due_date")]  // 标识
     /// 会员过期时间 毫秒时间戳
+    /// 别名：vipDueDate | due_date | vip_due_date
     pub vip_due_date: u64,
     /// 会员标签
     pub label: VipLabel,
@@ -56,10 +56,7 @@ pub struct VipLabel {
 }
 
 impl<'de> Deserialize<'de> for Vip {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
         struct VipVisitor;
 
         impl<'de> Visitor<'de> for VipVisitor {
@@ -69,10 +66,7 @@ impl<'de> Deserialize<'de> for Vip {
                 formatter.write_str("a Vip object")
             }
 
-            fn visit_map<M>(self, mut map: M) -> Result<Vip, M::Error>
-            where
-                M: MapAccess<'de>,
-            {
+            fn visit_map<M>(self, mut map: M) -> Result<Vip, M::Error> where M: MapAccess<'de> {
                 let mut vip_type = None;
                 let mut vip_status = None;
                 let mut vip_due_date = None;
@@ -95,21 +89,7 @@ impl<'de> Deserialize<'de> for Vip {
                             }
                             vip_type = Some(map.next_value()?);
                         }
-                        "vip_status" => {
-                            if vip_status.is_none() {
-                                vip_status = Some(map.next_value()?);
-                            } else {
-                                let _: serde_json::Value = map.next_value()?;
-                            }
-                        }
-                        "vipStatus" => {
-                            if vip_status.is_none() {
-                                vip_status = Some(map.next_value()?);
-                            } else {
-                                let _: serde_json::Value = map.next_value()?;
-                            }
-                        }
-                        "status" => {
+                        "vip_status" | "vipStatus" | "status" => {
                             if vip_status.is_none() {
                                 vip_status = Some(map.next_value()?);
                             } else {
@@ -192,13 +172,14 @@ impl<'de> Deserialize<'de> for Vip {
 
                 // 检查必需字段
                 let vip_type = vip_type.ok_or_else(|| de::Error::missing_field("vip_type"))?;
-                let vip_status =
-                    vip_status.ok_or_else(|| de::Error::missing_field("vip_status"))?;
-                let vip_due_date =
-                    vip_due_date.ok_or_else(|| de::Error::missing_field("vip_due_date"))?;
+                let vip_status = vip_status.ok_or_else(|| de::Error::missing_field("vip_status"))?;
+                let vip_due_date = vip_due_date.ok_or_else(||
+                    de::Error::missing_field("vip_due_date")
+                )?;
                 let label = label.ok_or_else(|| de::Error::missing_field("label"))?;
-                let nickname_color =
-                    nickname_color.ok_or_else(|| de::Error::missing_field("nickname_color"))?;
+                let nickname_color = nickname_color.ok_or_else(||
+                    de::Error::missing_field("nickname_color")
+                )?;
 
                 Ok(Vip {
                     vip_type,
