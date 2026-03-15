@@ -1,0 +1,8 @@
+# 本地测试用, 可以打开B站登录, F12 > Application => Cookies 找到下面的值
+# 最主要的是 sessdata, 偶尔需要使用 bili_jct
+
+bili_jct = "ab7d21xxx"
+dede_user_id = "xxxxxx"
+dede_user_id_ckmd5 = "2ae3c614dxxx"
+sessdata = "03b1exxxx"
+buvid3 = "C0229Bxxx"
