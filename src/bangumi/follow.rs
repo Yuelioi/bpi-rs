@@ -1,6 +1,6 @@
 //! 追番相关
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/follow.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/follow.md)
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
 
@@ -19,7 +19,7 @@ impl BpiClient {
     /// * `season_id` - 剧集ssid
     ///
     /// # 文档
-    /// [追番](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/follow.md#追番)
+    /// [追番](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/follow.md#追番)
     pub async fn bangumi_follow(
         &self,
         season_id: u64
@@ -42,7 +42,7 @@ impl BpiClient {
     /// # 参数
     /// * `season_id` - 剧集ssid
     /// # 文档
-    /// [取消追番](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/follow.md#取消追番)
+    /// [取消追番](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/follow.md#取消追番)
     pub async fn bangumi_unfollow(
         &self,
         season_id: u64

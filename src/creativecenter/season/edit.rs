@@ -1,6 +1,6 @@
 //! 编辑合集小节 API
 //!
-//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season.md)
+//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -101,7 +101,7 @@ impl BpiClient {
     /// | `sorts` | `Vec<SeasonSectionSort>` | 小节排序列表 |
     ///
     /// # 文档
-    /// [编辑合集信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/edit.md#编辑合集信息)
+    /// [编辑合集信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/edit.md#编辑合集信息)
     pub async fn season_edit(
         &self,
         season: SeasonEdit,
@@ -131,7 +131,7 @@ impl BpiClient {
     /// | `sorts` | `Vec<SectionSort>` | 视频排序信息 |
     ///
     /// # 文档
-    /// [编辑合集小节](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/edit.md#编辑合集小节)
+    /// [编辑合集小节](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/edit.md#编辑合集小节)
     pub async fn season_section_edit(
         &self,
         section: SeasonSectionEdit,
@@ -162,7 +162,7 @@ impl BpiClient {
     /// | `sorts` | `Vec<SectionSort>` | 视频排序信息 |
     ///
     /// # 文档
-    /// [编辑合集小节](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/edit.md#编辑合集小节)
+    /// [编辑合集小节](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/edit.md#编辑合集小节)
     pub async fn season_section_episode_edit(
         &self,
         section: EpisodeEdit,
@@ -214,7 +214,7 @@ impl BpiClient {
     /// | `title` | &str | 视频标题 |
     ///
     /// # 文档
-    /// [编辑投稿视频合集/小节](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/edit.md#编辑投稿视频合集小节)
+    /// [编辑投稿视频合集/小节](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/edit.md#编辑投稿视频合集小节)
     pub async fn season_section_add_episodes(
         &self,
         section_id: u64,

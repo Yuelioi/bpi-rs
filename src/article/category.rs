@@ -1,6 +1,6 @@
 //! 专栏分类
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/category.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/category.md)
 
 use crate::article::models::ArticleCategory;
 

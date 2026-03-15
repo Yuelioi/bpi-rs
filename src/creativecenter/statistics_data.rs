@@ -1,6 +1,6 @@
 //! 创作中心统计数据 API
 //!
-//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md)
+//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md)
 
 use serde::{ Deserialize, Serialize };
 
@@ -436,7 +436,7 @@ impl BpiClient {
     /// 获取 UP 主的视频统计数据，包括播放、点赞、投币、收藏等数据。
     ///
     /// # 文档
-    /// [获取 UP 主视频状态数据](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md#获取-up-主视频状态数据)
+    /// [获取 UP 主视频状态数据](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取-up-主视频状态数据)
     pub async fn up_stat(&self) -> Result<BpiResponse<UpStatData>, BpiError> {
         self
             .get("https://member.bilibili.com/x/web/index/stat")
@@ -454,7 +454,7 @@ impl BpiClient {
     /// | `size` | `Option<i64>` | 最近 N 条视频，可选，默认 5 |
     ///
     /// # 文档
-    /// [获取 UP 主视频数据比较](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md#获取-up-主视频数据比较)
+    /// [获取 UP 主视频数据比较](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取-up-主视频数据比较)
     pub async fn up_archive_compare(
         &self,
         t: Option<i64>,
@@ -477,7 +477,7 @@ impl BpiClient {
     /// 获取 UP 主专栏的统计数据，包括阅读、评论、点赞等数据。
     ///
     /// # 文档
-    /// [获取UP主专栏状态数据](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md#获取up主专栏状态数据)
+    /// [获取UP主专栏状态数据](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主专栏状态数据)
     pub async fn up_article_stat(&self) -> Result<BpiResponse<UpArticleStatData>, BpiError> {
         self
             .get("https://member.bilibili.com/x/web/data/article")
@@ -494,7 +494,7 @@ impl BpiClient {
     /// | `type_code` | i64 | 数据类型：1播放 2弹幕 3评论 4分享 5投币 6收藏 7充电 8点赞 |
     ///
     /// # 文档
-    /// [获取UP主视频数据增量趋势](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md#获取up主视频数据增量趋势)
+    /// [获取UP主视频数据增量趋势](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主视频数据增量趋势)
     pub async fn up_video_trend(
         &self,
         type_code: i64
@@ -515,7 +515,7 @@ impl BpiClient {
     /// | `type_code` | i64 | 数据类型：1阅读 2评论 3分享 4投币 5收藏 6点赞 |
     ///
     /// # 文档
-    /// [获取UP主专栏数据增量趋势](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md#获取up主专栏数据增量趋势)
+    /// [获取UP主专栏数据增量趋势](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主专栏数据增量趋势)
     pub async fn up_article_trend(
         &self,
         type_code: i64
@@ -531,7 +531,7 @@ impl BpiClient {
     /// 获取视频播放来源的占比情况，包括动态、搜索、推荐等来源。
     ///
     /// # 文档
-    /// [获取播放来源占比](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md#获取播放来源占比)
+    /// [获取播放来源占比](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取播放来源占比)
     #[allow(dead_code)]
     async fn up_play_source(&self) -> Result<BpiResponse<PlaySourceData>, BpiError> {
         self
@@ -545,7 +545,7 @@ impl BpiClient {
     /// 获取视频播放的分布情况，包括粉丝与路人的观看数据。
     ///
     /// # 文档
-    /// [获取播放分布情况](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/statistics&data.md#获取播放分布情况)
+    /// [获取播放分布情况](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取播放分布情况)
     pub async fn up_viewer_data(&self) -> Result<BpiResponse<ViewerData>, BpiError> {
         self.get("https://member.bilibili.com/x/web/data/base").send_bpi("获取播放分布情况").await
     }

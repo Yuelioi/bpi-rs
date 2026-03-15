@@ -1,6 +1,6 @@
 //! 评论查询 API
 //!
-//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/list.md)
+//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -92,7 +92,7 @@ impl BpiClient {
     /// | `nohot` | `Option<i32>` | 是否不显示热评，可选：0 显示，1 不显示 |
     ///
     /// # 文档
-    /// [获取评论主列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/list.md#获取评论主列表)
+    /// [获取评论主列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取评论主列表)
     pub async fn comment_list(
         &self,
         r#type: i32,
@@ -136,7 +136,7 @@ impl BpiClient {
     /// | `ps` | `Option<i32>` | 每页条数，可选 |
     ///
     /// # 文档
-    /// [获取子评论列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/list.md#获取子评论列表)
+    /// [获取子评论列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取子评论列表)
     pub async fn comment_replies(
         &self,
         r#type: i32,
@@ -177,7 +177,7 @@ impl BpiClient {
     /// | `ps` | `Option<i32>` | 每页条数，可选 |
     ///
     /// # 文档
-    /// [获取热评列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/list.md#获取热评列表)
+    /// [获取热评列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取热评列表)
     pub async fn comment_hot(
         &self,
         r#type: i32,
@@ -212,7 +212,7 @@ impl BpiClient {
     /// | `oid` | i64 | 对象 ID |
     ///
     /// # 文档
-    /// [获取评论总数](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/list.md#获取评论总数)
+    /// [获取评论总数](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取评论总数)
     pub async fn comment_count(
         &self,
         r#type: i32,

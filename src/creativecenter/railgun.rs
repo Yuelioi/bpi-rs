@@ -1,6 +1,6 @@
 //! 电磁力等级 API
 //!
-//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/railgun.md)
+//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/railgun.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -26,7 +26,7 @@ impl BpiClient {
     /// 获取当前用户的电磁力等级信息，包括等级、分数、信用分等。
     ///
     /// # 文档
-    /// [获取电磁力等级](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/railgun.md#获取电磁力等级)
+    /// [获取电磁力等级](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/railgun.md#获取电磁力等级)
     pub async fn up_electromagnetic_info(
         &self
     ) -> Result<BpiResponse<ElectromagneticInfo>, BpiError> {

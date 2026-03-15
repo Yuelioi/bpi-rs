@@ -1,6 +1,6 @@
 //! 评论区相关操作 API
 //!
-//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action)
+//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -68,7 +68,7 @@ impl BpiClient {
     /// | `parent` | `Option<u64>` | 父评论 rpid，可选 |
     ///
     /// # 文档
-    /// [发表评论](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action.md#发表评论)
+    /// [发表评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#发表评论)
     pub async fn comment_add(
         &self,
         r#type: CommentType,
@@ -108,7 +108,7 @@ impl BpiClient {
     /// | `action` | u8 | 操作：0 取消，1 点赞 |
     ///
     /// # 文档
-    /// [点赞评论](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action.md#点赞评论)
+    /// [点赞评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#点赞评论)
     pub async fn comment_like(
         &self,
         r#type: CommentType,
@@ -143,7 +143,7 @@ impl BpiClient {
     /// | `action` | u8 | 操作：0 取消，1 点踩 |
     ///
     /// # 文档
-    /// [点踩评论](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action.md#点踩评论)
+    /// [点踩评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#点踩评论)
     pub async fn comment_dislike(
         &self,
         r#type: CommentType,
@@ -176,7 +176,7 @@ impl BpiClient {
     /// | `rpid` | u64 | 评论 rpid |
     ///
     /// # 文档
-    /// [删除评论](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action.md#删除评论)
+    /// [删除评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#删除评论)
     pub async fn comment_delete(
         &self,
         r#type: CommentType,
@@ -208,7 +208,7 @@ impl BpiClient {
     /// | `action` | u8 | 操作：0 取消置顶，1 置顶 |
     ///
     /// # 文档
-    /// [置顶评论](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action.md#置顶评论)
+    /// [置顶评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#置顶评论)
     pub async fn comment_top(
         &self,
         r#type: CommentType,
@@ -244,7 +244,7 @@ impl BpiClient {
     /// | `content` | `Option<&str>` | 举报内容，可选 |
     ///
     /// # 文档
-    /// [举报评论](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/comment/action.md#举报评论)
+    /// [举报评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#举报评论)
     pub async fn comment_report(
         &self,
         r#type: CommentType,

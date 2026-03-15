@@ -1,6 +1,6 @@
 //! 购买漫画章节
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/manga/Comic.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/Comic.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::Serialize;

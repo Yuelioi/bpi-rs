@@ -1,6 +1,6 @@
 //! 音频流URL
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/musicstream_url.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/musicstream_url.md)
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
 
@@ -72,7 +72,7 @@ impl BpiClient {
     /// | `sid`  | u64   | 音频 auid    |
     ///
     /// # 文档
-    /// [获取音频流URL(web端)](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/musicstream_url.md#获取音频流urlweb端)
+    /// [获取音频流URL(web端)](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/musicstream_url.md#获取音频流urlweb端)
     pub async fn audio_stream_url_web(
         &self,
         sid: u64
@@ -101,7 +101,7 @@ impl BpiClient {
     /// | `quality`| AudioQuality  | 音质代码           |
     ///
     /// # 文档
-    /// [获取音频流URL（可获取付费音频）](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/musicstream_url.md#获取音频流url可获取付费音频)
+    /// [获取音频流URL（可获取付费音频）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/musicstream_url.md#获取音频流url可获取付费音频)
     pub async fn audio_stream_url(
         &self,
         songid: u64,

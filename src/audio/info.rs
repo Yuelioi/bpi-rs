@@ -1,6 +1,6 @@
 //! 歌曲基本信息
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/info.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -135,7 +135,7 @@ impl BpiClient {
     /// | `sid`  | u64    | 音频 auid (必要)  |
     ///
     /// # 文档
-    /// [查询歌曲基本信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/info.md#查询歌曲基本信息)
+    /// [查询歌曲基本信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#查询歌曲基本信息)
     pub async fn audio_info(&self, sid: u64) -> Result<BpiResponse<AudioInfoData>, BpiError> {
         self
             .get("https://www.bilibili.com/audio/music-service-c/web/song/info")
@@ -151,7 +151,7 @@ impl BpiClient {
     /// | `sid`  | u64    | 音频 auid (必要)  |
     ///
     /// # 文档
-    /// [查询歌曲 TAG](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/info.md#查询歌曲tag)
+    /// [查询歌曲 TAG](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#查询歌曲tag)
     pub async fn audio_tags(&self, sid: u64) -> Result<BpiResponse<Vec<AudioTag>>, BpiError> {
         self
             .get("https://www.bilibili.com/audio/music-service-c/web/tag/song")
@@ -167,7 +167,7 @@ impl BpiClient {
     /// | `sid`  | u64    | 音频 auid (必要)  |
     ///
     /// # 文档
-    /// [查询歌曲创作成员列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/info.md#查询歌曲创作成员列表)
+    /// [查询歌曲创作成员列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#查询歌曲创作成员列表)
     pub async fn audio_members(&self, sid: u64) -> Result<AudioMemberResponse, BpiError> {
         self
             .get("https://www.bilibili.com/audio/music-service-c/web/member/song")
@@ -183,7 +183,7 @@ impl BpiClient {
     /// | `sid`  | u64    | 音频 auid (必要)  |
     ///
     /// # 文档
-    /// [获取歌曲歌词](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/info.md#获取歌曲歌词)
+    /// [获取歌曲歌词](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#获取歌曲歌词)
     pub async fn audio_lyric(&self, sid: u64) -> Result<BpiResponse<String>, BpiError> {
         self
             .get("https://www.bilibili.com/audio/music-service-c/web/song/lyric")

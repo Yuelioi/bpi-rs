@@ -1,6 +1,6 @@
 //! 创作中心视频管理 API
 //!
-//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/videos.md)
+//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/videos.md)
 
 use serde::{ Deserialize, Serialize };
 
@@ -112,7 +112,7 @@ impl BpiClient {
     /// | `ps` | `Option<i64>` | 每页数量，可选 |
     ///
     /// # 文档
-    /// [获取稿件列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/videos.md#获取稿件列表)
+    /// [获取稿件列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/videos.md#获取稿件列表)
     pub async fn up_archives_list(
         &self,
         pn: i64,
@@ -137,7 +137,7 @@ impl BpiClient {
     /// | `aid` | i64 | 视频 av 号 |
     ///
     /// # 文档
-    /// [获取视频基础信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/videos.md#获取视频基础信息)
+    /// [获取视频基础信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/videos.md#获取视频基础信息)
     pub async fn up_archive_videos(
         &self,
         aid: i64

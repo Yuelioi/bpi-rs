@@ -1,6 +1,6 @@
 //! 音频投币&收藏
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/action.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md)
 //!
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
@@ -113,7 +113,7 @@ impl BpiClient {
     /// | `false`  | 未收藏   |
     ///
     /// # 文档
-    /// [查询音频收藏状态](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/action.md#查询音频收藏状态)
+    /// [查询音频收藏状态](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md#查询音频收藏状态)
 
     pub async fn audio_collection_status(&self, sid: u64) -> Result<BpiResponse<bool>, BpiError> {
         let result = self
@@ -134,7 +134,7 @@ impl BpiClient {
     /// 投币数量，`0` 为未投币，上限为 `2`
     ///
     /// # 文档
-    /// [查询音频投币数](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/action.md#查询音频投币数)
+    /// [查询音频投币数](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md#查询音频投币数)
 
     pub async fn audio_coin_count(&self, sid: u64) -> Result<BpiResponse<i32>, BpiError> {
         let result = self
@@ -156,7 +156,7 @@ impl BpiClient {
     /// 当前投币数量
     ///
     /// # 文档
-    /// [投币音频](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/action.md#投币音频)
+    /// [投币音频](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md#投币音频)
     pub async fn audio_coin(
         &self,
         sid: u64,

@@ -1,6 +1,6 @@
 //! 视频流URL
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/videostream_url.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/videostream_url.md)
 use crate::models::{ Fnval, VideoQuality };
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -51,7 +51,7 @@ impl BpiClient {
     /// | `fnval` | u32    | 视频获取方式选择                     |
     ///
     /// # 文档
-    /// [获取番剧视频流URL](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/videostream_url.md#获取番剧视频流url)
+    /// [获取番剧视频流URL](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/videostream_url.md#获取番剧视频流url)
     pub async fn bangumi_video_stream(
         &self,
         ep_id: Option<u64>,
@@ -103,7 +103,7 @@ impl BpiClient {
     /// | `fnval` | u32    | 视频获取方式选择                     |
     ///
     /// # 文档
-    /// [获取番剧视频流URL](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/videostream_url.md#获取番剧视频流url)
+    /// [获取番剧视频流URL](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/videostream_url.md#获取番剧视频流url)
     pub async fn bangumi_video_stream_by_epid(
         &self,
         ep_id: u64,
@@ -123,7 +123,7 @@ impl BpiClient {
     /// | `fnval` | u32    | 视频获取方式选择                     |
     ///
     /// # 文档
-    /// [获取番剧视频流URL](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/videostream_url.md#获取番剧视频流url)
+    /// [获取番剧视频流URL](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/videostream_url.md#获取番剧视频流url)
     pub async fn bangumi_video_stream_by_cid(
         &self,
         cid: u64,
