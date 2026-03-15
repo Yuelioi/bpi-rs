@@ -46,10 +46,13 @@ impl BpiClient {
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
+        let block_type = if hour == 0 {"2".to_string()} else {"1".to_string()};
+        
         let form = vec![
             ("room_id", room_id.to_string()),
             ("tuid", tuid.to_string()),
             ("mobile_app", "web".to_string()),
+            ("type", block_type),
             ("hour", hour.to_string()),
             ("csrf_token", csrf.clone()),
             ("csrf", csrf)
