@@ -4,6 +4,19 @@ use serde::de::DeserializeOwned;
 use tokio::time::Instant;
 use tracing;
 
+/// 找到不超过 index 的最近合法 UTF-8 字符边界
+#[cfg(any(test, debug_assertions))]
+fn floor_char_boundary(s: &str, index: usize) -> usize {
+    if index >= s.len() {
+        return s.len();
+    }
+    let mut i = index;
+    while i > 0 && !s.is_char_boundary(i) {
+        i -= 1;
+    }
+    i
+}
+
 pub trait BilibiliRequest {
     fn with_bilibili_headers(self) -> Self;
     fn with_user_agent(self) -> Self;
@@ -74,10 +87,9 @@ impl BilibiliRequest for RequestBuilder {
             {
                 let json_str = String::from_utf8_lossy(&bytes);
                 let error_pos = e.column().saturating_sub(1);
-                let start = json_str.floor_char_boundary(error_pos.saturating_sub(25));
-                let end = json_str.floor_char_boundary((error_pos + 25).min(json_str.len()));
+                let start = floor_char_boundary(&json_str, error_pos.saturating_sub(25));
+                let end = floor_char_boundary(&json_str, (error_pos + 25).min(json_str.len()));
                 let context = &json_str[start..end];
-
                 tracing::error!(
                     "{} JSON解析失败 (行:{} 列:{}): {}",
                     operation_name,
