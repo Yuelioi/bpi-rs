@@ -119,46 +119,51 @@ impl BpiClient {
         let img_key_key = format!("{}img_key", s);
         let sub_key_key = format!("{}sub_key", s);
 
-        // 先尝试从缓存读取
-        let (img_key, sub_key) = {
+        // 独立作用域读缓存，guard 在 await 前彻底释放
+        let cached = {
             let map = WBI_KEY_MAP.read().unwrap();
-            if let (Some(img), Some(sub)) = (map.get(&img_key_key), map.get(&sub_key_key)) {
-                (img.clone(), sub.clone())
-            } else {
-                drop(map); // 释放读锁再去写
-
-                // 缓存没有 -> 请求 API
-                let resp: BpiResponse<NavData> = self
-                    .get("https://api.bilibili.com/x/web-interface/nav")
-                    .send_bpi("获取 wbi 签名").await?;
-
-                let data = resp.data.ok_or_else(|| BpiError::parse("获取 wbi 签名失败"))?;
-
-                let img = data.wbi_img.img_url
-                    .rsplit('/')
-                    .next()
-                    .unwrap()
-                    .split('.')
-                    .next()
-                    .unwrap()
-                    .to_string();
-
-                let sub = data.wbi_img.sub_url
-                    .rsplit('/')
-                    .next()
-                    .unwrap()
-                    .split('.')
-                    .next()
-                    .unwrap()
-                    .to_string();
-
-                // 插入缓存
-                let mut map = WBI_KEY_MAP.write().unwrap();
-                map.insert(img_key_key.clone(), img.clone());
-                map.insert(sub_key_key.clone(), sub.clone());
-
-                (img, sub)
+            match (map.get(&img_key_key), map.get(&sub_key_key)) {
+                (Some(img), Some(sub)) => Some((img.clone(), sub.clone())),
+                _ => None,
             }
+        };
+
+        let (img_key, sub_key) = if let Some(keys) = cached {
+            keys
+        } else {
+            // 缓存没有 -> 请求 API（此时无锁持有，可安全 await）
+            let resp: BpiResponse<NavData> = self
+                .get("https://api.bilibili.com/x/web-interface/nav")
+                .send_bpi("获取 wbi 签名").await?;
+
+            let data = resp.data.ok_or_else(|| BpiError::parse("获取 wbi 签名失败"))?;
+
+            let img = data.wbi_img.img_url
+                .rsplit('/')
+                .next()
+                .unwrap()
+                .split('.')
+                .next()
+                .unwrap()
+                .to_string();
+
+            let sub = data.wbi_img.sub_url
+                .rsplit('/')
+                .next()
+                .unwrap()
+                .split('.')
+                .next()
+                .unwrap()
+                .to_string();
+
+            // 独立作用域写缓存
+            {
+                let mut map = WBI_KEY_MAP.write().unwrap();
+                map.insert(img_key_key, img.clone());
+                map.insert(sub_key_key, sub.clone());
+            }
+
+            (img, sub)
         };
 
         // 构造参数
