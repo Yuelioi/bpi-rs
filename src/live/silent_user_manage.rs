@@ -24,9 +24,9 @@ pub struct SilentUserInfo {
     pub msg: String,
     /// 发起者权限
     pub admin_level: i8,
-    // 未知
+    /// 是否注销
     pub is_mystery: bool,
-    // 禁言结束时间，空代表永久或本场禁言
+    /// 禁言结束时间，空代表永久或本场禁言
     pub block_end_time: String,
     /// 禁言模式，0代表永久，1代表正常，2代表本场禁言
     pub r#type: i8,
@@ -65,7 +65,7 @@ pub struct BannedUserInfo {
     pub operator_name: String,
     /// 发起者权限
     pub admin_level: i8,
-    // 未知
+    /// 是否注销
     pub is_mystery: bool,
 }
 
