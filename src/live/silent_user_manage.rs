@@ -41,10 +41,10 @@ pub struct SilentUserListData {
     /// 页码总数量，只有一页的时候没有
     #[serde(default)]
     pub total_page: i32,
-    /// 上限，只有一页的时候没有
+    /// 页码，只有一页的时候没有
     #[serde(default)]
     pub pn: i32,
-    /// 页码，只有一页的时候没有
+    /// 上限，只有一页的时候没有
     #[serde(default)]
     pub ps: i32,
 }
