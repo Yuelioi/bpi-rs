@@ -94,7 +94,7 @@ pub struct ShieldKeywordInfo {
     pub uid: i64,
     /// 添加者昵称
     pub name: String,
-    /// 是否是房主禁言的，0否，1是
+    /// 是否是房主添加的，0否，1是
     pub is_anchor: i8,
 }
 
