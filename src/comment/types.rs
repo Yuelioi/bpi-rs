@@ -207,7 +207,7 @@ pub struct EmoteMeta {
 pub struct Picture {
     pub img_src: String,
     pub img_width: Option<u64>,
-    pub img_height: u64,
+    pub img_height: Option<u64>,
     pub img_size: Option<f64>, // KB
 }
 
