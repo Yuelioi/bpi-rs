@@ -206,7 +206,7 @@ pub struct EmoteMeta {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Picture {
     pub img_src: String,
-    pub img_width: u64,
+    pub img_width: Option<u64>,
     pub img_height: u64,
     pub img_size: Option<f64>, // KB
 }
@@ -281,7 +281,7 @@ pub struct Cursor {
     pub mode: i64,
     pub mode_text: String,
     pub all_count: Option<std::num::NonZeroU64>,
-    pub support_mode: Vec<i64>,
+    pub support_mode: Option<Vec<i64>>,
 }
 
 /// 评论区顶部信息
