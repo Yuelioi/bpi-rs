@@ -1,6 +1,6 @@
 //! 歌单&音频收藏夹详细信息
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/music_list.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/music_list.md)
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
 
@@ -191,7 +191,7 @@ impl BpiClient {
     /// | `ps`   | u32    | 每页项数 |
     ///
     /// # 文档
-    /// [查询自己创建的歌单](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/music_list.md#查询自己创建的歌单)
+    /// [查询自己创建的歌单](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/music_list.md#查询自己创建的歌单)
     pub async fn audio_collections_list(
         &self,
         pn: u32,
@@ -216,7 +216,7 @@ impl BpiClient {
     /// | `sid`  | u64    | 音频收藏夹 mlid（必须为默认收藏夹 mlid） |
     ///
     /// # 文档
-    /// [查询音频收藏夹（默认歌单）信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/music_list.md#查询音频收藏夹默认歌单信息)
+    /// [查询音频收藏夹（默认歌单）信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/music_list.md#查询音频收藏夹默认歌单信息)
     pub async fn audio_collection_info(
         &self,
         sid: u64
@@ -236,7 +236,7 @@ impl BpiClient {
     /// | `ps`   | u32    | 每页项数 |
     ///
     /// # 文档
-    /// [查询热门歌单](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/music_list.md#查询热门歌单)
+    /// [查询热门歌单](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/music_list.md#查询热门歌单)
     pub async fn audio_hot_menu(
         &self,
         pn: u32,
@@ -262,7 +262,7 @@ impl BpiClient {
     /// | `ps`   | u32    | 每页项数 |
     ///
     /// # 文档
-    /// [查询热门榜单](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/music_list.md#查询热门榜单)
+    /// [查询热门榜单](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/music_list.md#查询热门榜单)
     pub async fn audio_rank_menu(
         &self,
         pn: u32,

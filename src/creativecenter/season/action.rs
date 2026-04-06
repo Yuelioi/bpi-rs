@@ -1,6 +1,6 @@
 //! 创建合集 API
 //!
-//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season.md)
+//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -35,7 +35,7 @@ impl BpiClient {
     /// | `season_price` | `Option<u32>` | 合集价格，可选，默认 0 |
     ///
     /// # 文档
-    /// [创建合集](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/create.md#创建合集)
+    /// [创建合集](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/create.md#创建合集)
     pub async fn season_create(
         &self,
         title: &str,
@@ -75,7 +75,7 @@ impl BpiClient {
     /// | `season_id` | u64 | 合集 ID |
     ///
     /// # 文档
-    /// [删除合集](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/del.md#删除合集)
+    /// [删除合集](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/del.md#删除合集)
     pub async fn season_delete(
         &self,
         season_id: u64
@@ -101,7 +101,7 @@ impl BpiClient {
     /// | `episodes` | `Vec<EpisodeAdd>` | 视频列表 |
     ///
     /// # 文档
-    /// [添加视频到合集](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/push.md#添加视频到合集)
+    /// [添加视频到合集](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/push.md#添加视频到合集)
     pub async fn season_episodes_add(
         &self,
         section_id: u64,

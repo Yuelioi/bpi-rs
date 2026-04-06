@@ -1,6 +1,6 @@
 //! 卡片信息
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/card.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/card.md)
 
 use super::models::{ ArticleAuthor, ArticleCategory, ArticleMedia, ArticleStats };
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
@@ -340,7 +340,7 @@ impl BpiClient {
     /// | `ids`  | String  | 被查询的 id 列表，以逗号分隔；可填视频完整 AV/BV 号、专栏 CV 号、直播间长/短 lv 号 |
     ///
     /// # 文档
-    /// [获取专栏显示卡片信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/card.md#获取专栏显示卡片信息)
+    /// [获取专栏显示卡片信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/card.md#获取专栏显示卡片信息)
     pub async fn article_cards(&self, ids: &str) -> Result<CardResponse, BpiError> {
         let params = vec![("ids", ids.to_string()), ("web_location", "333.1305".to_string())];
 

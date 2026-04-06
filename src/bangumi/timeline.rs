@@ -1,6 +1,6 @@
 //! 番剧或影视时间线
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/timeline.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/timeline.md)
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
 
@@ -58,7 +58,7 @@ impl BpiClient {
     /// * `before` - 开始于前几日（0-7）
     /// * `after` - 结束于后几日（0-7）
     /// # 文档
-    /// [获取番剧或影视时间线](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/timeline.md#获取番剧或影视时间线)
+    /// [获取番剧或影视时间线](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/timeline.md#获取番剧或影视时间线)
     pub async fn bangumi_timeline(
         &self,
         types: BangumiTimelineType,

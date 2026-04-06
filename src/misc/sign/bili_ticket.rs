@@ -3,7 +3,7 @@
 //! bili_ticket 位于请求头 Cookie 中, 非必需, 但存在可降低风控概率
 //! 是 JWT 令牌，有效时长为 259200 秒，即 3 天。
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/misc/sign/bili_ticket.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/misc/sign/bili_ticket.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use hmac::{ Hmac, Mac };

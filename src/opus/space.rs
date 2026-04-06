@@ -1,6 +1,6 @@
 //! 空间图文
 //!
-//! [空间图文](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/opus/space.md#空间图文)
+//! [空间图文](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/opus/space.md#空间图文)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };

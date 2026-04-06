@@ -1,8 +1,8 @@
 //! 活动主题信息
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/activity/info.md)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/info.md)
+use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use serde::{ Deserialize, Serialize };
 
 /// 活动主题信息数据
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,11 +47,11 @@ impl BpiClient {
     /// | `bvid` | String | 来源视频号 |
     ///
     /// # 文档
-    /// [查看API文档](<https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/activity/info.md#主题信息>)
+    /// [查看API文档](<https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/info.md#主题信息>)
     pub async fn activity_info(
         &self,
         sid: u64,
-        bvid: Option<&str>,
+        bvid: Option<&str>
     ) -> Result<BpiResponse<ActivityInfoData>, BpiError> {
         let mut params = vec![("sid", sid.to_string())];
 
@@ -62,8 +62,7 @@ impl BpiClient {
         let result = self
             .get("https://api.bilibili.com/x/activity/subject/info")
             .query(&params)
-            .send_bpi("获取活动主题信息")
-            .await?;
+            .send_bpi("获取活动主题信息").await?;
 
         Ok(result)
     }

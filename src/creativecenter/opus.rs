@@ -1,6 +1,6 @@
 //! 创作中心作品管理 API
 //!
-//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/opus.md)
+//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/opus.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde_json::json;
@@ -14,7 +14,7 @@ impl BpiClient {
     /// | `dyn_id` | &str | 动态 ID |
     ///
     /// # 文档
-    /// [删除动态](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/opus.md#删除动态)
+    /// [删除动态](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/opus.md#删除动态)
     pub async fn dynamic_delete(
         &self,
         dyn_id: &str
@@ -38,7 +38,7 @@ impl BpiClient {
     /// | `aid` | u64 | 专栏文章 ID |
     ///
     /// # 文档
-    /// [删除专栏](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/opus.md#删除专栏)
+    /// [删除专栏](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/opus.md#删除专栏)
     pub async fn article_delete(
         &self,
         aid: u64

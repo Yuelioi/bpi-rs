@@ -1,6 +1,6 @@
 //! 创作中心上传 API
 //!
-//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/upload.md)
+//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/upload.md)
 
 use std::collections::HashMap;
 
@@ -31,7 +31,7 @@ impl BpiClient {
     /// 文件不得超过 20M
     ///
     /// # 文档
-    /// [上传视频封面](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/upload.md#上传视频封面)
+    /// [上传视频封面](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/upload.md#上传视频封面)
     pub async fn upload_cover(
         &self,
         mime_type: &str,

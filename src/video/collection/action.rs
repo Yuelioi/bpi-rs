@@ -17,7 +17,7 @@ impl BpiClient {
     /// 创建视频列表并添加视频
     ///
     /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md)
+    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
@@ -61,7 +61,7 @@ impl BpiClient {
     /// 删除视频列表
     ///
     /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md)
+    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
@@ -91,7 +91,7 @@ impl BpiClient {
     /// 从视频列表中删除稿件
     ///
     /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md)
+    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
@@ -123,7 +123,7 @@ impl BpiClient {
     /// 添加稿件至视频列表
     ///
     /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md)
+    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |
@@ -155,7 +155,7 @@ impl BpiClient {
     /// 编辑视频列表信息
     ///
     /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/video/collection.md)
+    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
     ///
     /// # 参数
     /// | 名称         | 类型           | 说明                 |

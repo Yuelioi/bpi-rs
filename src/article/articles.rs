@@ -1,6 +1,6 @@
 //! 文集基本信息
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/articles.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/articles.md)
 
 use crate::article::models::{ ArticleAuthor, ArticleCategory, ArticleStats };
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
@@ -109,7 +109,7 @@ impl BpiClient {
     /// | `id`   | i64   | 文集 rlid (必要)  |
     ///
     /// # 文档
-    /// [获取文集基本信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/articles.md#获取文集基本信息)
+    /// [获取文集基本信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/articles.md#获取文集基本信息)
     pub async fn article_articles_info(
         &self,
         id: i64

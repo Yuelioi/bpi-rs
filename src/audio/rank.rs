@@ -1,6 +1,6 @@
 //! 音频榜单
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md)
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
 
@@ -71,7 +71,7 @@ impl BpiClient {
     /// | `list_type`| u32  | 榜单类型 1:hot 2:origin   |
     ///
     /// # 文档
-    /// [获取音频榜单每期列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md#获取音频榜单每期列表)
+    /// [获取音频榜单每期列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md#获取音频榜单每期列表)
     pub async fn audio_rank_period(
         &self,
         list_type: u32
@@ -93,7 +93,7 @@ impl BpiClient {
     /// | `list_id` | u64   | 榜单 id |
     ///
     /// # 文档
-    /// [查询音频榜单单期信息](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md#查询音频榜单单期信息)
+    /// [查询音频榜单单期信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md#查询音频榜单单期信息)
     pub async fn audio_rank_detail(
         &self,
         list_id: u64
@@ -116,7 +116,7 @@ impl BpiClient {
     /// | `csrf`    | String| CSRF Token（可选）   |
     ///
     /// # 文档
-    /// [获取音频榜单单期内容](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md#获取音频榜单单期内容)
+    /// [获取音频榜单单期内容](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md#获取音频榜单单期内容)
     pub async fn audio_rank_music_list(
         &self,
         list_id: u64
@@ -139,7 +139,7 @@ impl BpiClient {
     /// | `list_id` | `Option<u64>`    | 榜单 id（可选）            |
     ///
     /// # 文档
-    /// [订阅或退订榜单](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/audio/rank.md#订阅或退订榜单)
+    /// [订阅或退订榜单](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md#订阅或退订榜单)
     pub async fn audio_rank_subscribe(
         &self,
         state: u32,

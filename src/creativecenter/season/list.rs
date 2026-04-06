@@ -1,6 +1,6 @@
 //! 获取合集列表 API
 //!
-//! [参考文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/list.md)
+//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/list.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -103,7 +103,7 @@ impl BpiClient {
     /// | `sort` | `Option<&str>` | 升降序：asc 或 desc |
     ///
     /// # 文档
-    /// [获取合集列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/creativecenter/season/list.md#获取合集列表)
+    /// [获取合集列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/list.md#获取合集列表)
     pub async fn season_list(
         &self,
         pn: u32,

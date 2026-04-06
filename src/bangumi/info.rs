@@ -1,6 +1,6 @@
 //! 番剧基本信息
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/info.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md)
 use crate::models::VipLabel;
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -703,7 +703,7 @@ impl BpiClient {
     /// * `media_id` - 剧集mdid
     ///
     /// # 文档
-    /// [剧集基本信息（mdid方式）](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/info.md#剧集基本信息mdid方式)
+    /// [剧集基本信息（mdid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#剧集基本信息mdid方式)
     pub async fn bangumi_info(&self, media_id: u64) -> Result<BangumiInfoResponse, BpiError> {
         let result: BangumiInfoResponse = self
             .get("https://api.bilibili.com/pgc/review/user")
@@ -718,7 +718,7 @@ impl BpiClient {
     /// * `season_id` - 番剧ssid
     ///
     /// # 文档
-    /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/info.md#获取剧集明细web端ssidepid方式)
+    /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#获取剧集明细web端ssidepid方式)
     pub async fn bangumi_detail_by_season_id(
         &self,
         season_id: u64
@@ -736,7 +736,7 @@ impl BpiClient {
     /// * `ep_id` - 剧集epid
     ///
     /// # 文档
-    /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/info.md#获取剧集明细web端ssidepid方式)
+    /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#获取剧集明细web端ssidepid方式)
     pub async fn bangumi_detail_by_epid(
         &self,
         ep_id: u64
@@ -753,7 +753,7 @@ impl BpiClient {
     /// * `season_id` - 剧集ssid
     ///
     /// # 文档
-    /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/bangumi/info.md#获取剧集分集信息)
+    /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#获取剧集分集信息)
     pub async fn bangumi_sections_by_season_id(
         &self,
         season_id: u64

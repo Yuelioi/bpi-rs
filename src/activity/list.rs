@@ -1,6 +1,6 @@
 //! 活动列表
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/activity/list.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 use serde::{ Deserialize, Serialize };
@@ -95,7 +95,7 @@ impl BpiClient {
     /// | `ps`    | u32    | 每页条数 (可选，默认为 `15`)                       |
     ///
     /// # 文档
-    /// [获取活动列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/activity/list.md#获取活动列表)
+    /// [获取活动列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md#获取活动列表)
 
     pub async fn activity_list(
         &self,
@@ -124,7 +124,7 @@ impl BpiClient {
     /// 获取活动列表（简化版本，使用默认参数）
     ///
     /// # 文档
-    /// [获取活动列表](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/activity/list.md#获取活动列表)
+    /// [获取活动列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md#获取活动列表)
     pub async fn activity_list_default(&self) -> Result<BpiResponse<ActivityListData>, BpiError> {
         self.activity_list(Some("1,3"), None, None, Some(1), Some(15)).await
     }

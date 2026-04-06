@@ -1,6 +1,6 @@
 //! 专栏点赞&投币&收藏
 //!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/action.md)
+//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md)
 
 use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
 
@@ -21,7 +21,7 @@ impl BpiClient {
     /// | `like` | bool  | 是否点赞，`true` 点赞，`false` 取消点赞 |
     ///
     /// # 文档
-    /// [点赞文章](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/action.md#点赞文章)
+    /// [点赞文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#点赞文章)
     pub async fn article_like(
         &self,
         id: u64,
@@ -54,7 +54,7 @@ impl BpiClient {
     /// | `multiply` | u32   | 投币数量 (必要，上限为 2)   |
     ///
     /// # 文档
-    /// [投币文章](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/action.md#投币文章)
+    /// [投币文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#投币文章)
     pub async fn article_coin(
         &self,
         aid: u64,
@@ -88,7 +88,7 @@ impl BpiClient {
     /// | `id`   | u64   | 文章 cvid (必要) |
     ///
     /// # 文档
-    /// [收藏文章](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/action.md#收藏文章)
+    /// [收藏文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#收藏文章)
     pub async fn article_favorite(
         &self,
         id: u64
@@ -116,7 +116,7 @@ impl BpiClient {
     /// | `id`   | i64   | 文章 cvid (必要) |
     ///
     /// # 文档
-    /// [收藏文章](https://github.com/SocialSisterYi/bilibili-API-collect/blob/master/docs/article/action.md#收藏文章)
+    /// [收藏文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#收藏文章)
     pub async fn article_unfavorite(
         &self,
         id: i64
