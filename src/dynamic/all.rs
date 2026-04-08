@@ -8,7 +8,7 @@ pub struct DynamicAllData {
     pub items: Vec<DynamicItem>,
     pub offset: String,
     pub update_baseline: String,
-    pub update_num: String,
+    pub update_num: i64,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
