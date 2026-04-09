@@ -17,6 +17,9 @@ pub struct DynamicDetailItem {
 
     pub modules: serde_json::Value,
 
+    /// 当`type`字段的值为DYNAMIC_TYPE_FORWARD（转发动态）时，此字段不为null
+    pub orig: Option<Box<DynamicDetailItem>>,
+
     pub r#type: String,
 
     pub visible: bool,
@@ -313,6 +316,13 @@ mod tests {
 
         info!("动态详情: {:?}", data.item);
         assert_eq!(data.item.id_str, dynamic_id);
+
+        let dynamic_id = "1152614216889270274"; // 此动态为陈叔叔的一条转发动态
+        let resp = bpi.dynamic_detail("1152614216889270274", None).await?;
+        let data = resp.into_data()?;
+        info!("动态详情: {:?}", data.item);
+        assert_eq!(data.item.id_str, dynamic_id);
+        assert!(data.item.orig.is_some());
 
         Ok(())
     }
