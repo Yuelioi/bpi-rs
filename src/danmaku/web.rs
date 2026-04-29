@@ -203,3 +203,55 @@ impl BpiClient {
             .await
     }
 }
+
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+
+    // av 10001 772096113
+    const TEST_OID: u64 = 772096113;
+
+    #[tokio::test]
+    async fn test_danmaku_web_seg_proto() -> Result<(), Box<BpiError>> {
+        let bpi = BpiClient::new();
+        let data = bpi.danmaku_web_seg_proto(1, TEST_OID, 1, None, None, None, None).await?;
+
+        assert!(!data.is_empty(), "protobuf 响应不应为空");
+        tracing::info!("web seg.so 响应字节数: {}", data.len());
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_danmaku_web_seg_wbi_proto() -> Result<(), Box<BpiError>> {
+        let bpi = BpiClient::new();
+        let data = bpi.danmaku_web_seg_wbi_proto(1, TEST_OID, 1, None, None, None, None).await?;
+
+        assert!(!data.is_empty(), "protobuf 响应不应为空");
+        tracing::info!("wbi web seg.so 响应字节数: {}", data.len());
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_danmaku_web_view_proto() -> Result<(), Box<BpiError>> {
+        let bpi = BpiClient::new();
+        let data = bpi.danmaku_web_view_proto(1, TEST_OID, None).await?;
+
+        assert!(!data.is_empty(), "protobuf 响应不应为空");
+        tracing::info!("web/view 响应字节数: {}", data.len());
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_danmaku_mobile_seg_proto() -> Result<(), Box<BpiError>> {
+        let bpi = BpiClient::new();
+        let data = bpi.danmaku_mobile_seg_proto(1, TEST_OID, 1, None, None, None, None).await?;
+
+        assert!(!data.is_empty(), "protobuf 响应不应为空");
+        tracing::info!("mobile seg.so 响应字节数: {}", data.len());
+
+        Ok(())
+    }
+}

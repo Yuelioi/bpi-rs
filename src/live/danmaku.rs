@@ -113,6 +113,22 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
+    async fn test_live_get_danmu_info() -> Result<(), BpiError> {
+        let bpi = BpiClient::new();
+        let room_id = 21733448;
+
+        let resp = bpi.live_get_danmu_info(room_id, 0).await?;
+        assert_eq!(resp.code, 0);
+        let data = resp.into_data()?;
+
+        assert!(!data.token.is_empty(), "token 不应为空");
+        assert!(!data.host_list.is_empty(), "host_list 不应为空");
+        info!("token: {}..., host_list 数量: {}", &data.token[..20], data.host_list.len());
+
+        Ok(())
+    }
+
+    #[tokio::test]
     async fn test_send_live_danmu() -> Result<(), BpiError> {
         let bpi = BpiClient::new();
         // 替换为实际的直播间 ID，这是一个公开的直播间 ID
