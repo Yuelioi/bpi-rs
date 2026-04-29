@@ -6,3 +6,4 @@ pub mod history;
 
 pub mod snapshot;
 pub mod thumbup;
+pub mod web;
