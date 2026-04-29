@@ -12,7 +12,54 @@ pub struct SendDanmuData {
     pub dm_v2: Option<serde_json::Value>,
 }
 
+/// 直播弹幕 WebSocket 接入点（`getDanmuInfo` 返回的 `host_list` 一项）
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct LiveDanmuInfoHost {
+    pub host: String,
+    #[serde(default)]
+    pub port: u32,
+    #[serde(default)]
+    pub wss_port: u32,
+    #[serde(default)]
+    pub ws_port: u32,
+}
+
+/// 直播弹幕服务器信息（WebSocket token / 接入 host）
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct LiveDanmuInfoData {
+    #[serde(default)]
+    pub token: String,
+    #[serde(default)]
+    pub host_list: Vec<LiveDanmuInfoHost>,
+}
+
 impl BpiClient {
+    /// 获取直播弹幕服务器信息（WebSocket `token`、接入 `host` 等）
+    ///
+    /// `GET https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo`
+    ///
+    /// 内部已对查询参数执行 WBI 签名（`get_wbi_sign2`）；缺少签名时接口常见返回码为 `-352`。
+    ///
+    /// # 参数
+    /// - `room_id`: 直播间长号（真实房间号）
+    /// - `info_type`: 与官方接口 `type` 一致，一般为 `0`
+    pub async fn live_get_danmu_info(
+        &self,
+        room_id: u64,
+        info_type: u8
+    ) -> Result<BpiResponse<LiveDanmuInfoData>, BpiError> {
+        let signed = self
+            .get_wbi_sign2(vec![("id", room_id.to_string()), ("type", info_type.to_string())])
+            .await?;
+
+        self
+            .get("https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo")
+            .with_bilibili_headers()
+            .query(&signed)
+            .send_bpi("直播 getDanmuInfo")
+            .await
+    }
+
     /// 发送直播间弹幕
     ///
     /// # 参数
@@ -64,6 +111,22 @@ impl BpiClient {
 mod tests {
     use super::*;
     use tracing::info;
+
+    #[tokio::test]
+    async fn test_live_get_danmu_info() -> Result<(), BpiError> {
+        let bpi = BpiClient::new();
+        let room_id = 21733448;
+
+        let resp = bpi.live_get_danmu_info(room_id, 0).await?;
+        assert_eq!(resp.code, 0);
+        let data = resp.into_data()?;
+
+        assert!(!data.token.is_empty(), "token 不应为空");
+        assert!(!data.host_list.is_empty(), "host_list 不应为空");
+        info!("token: {}..., host_list 数量: {}", &data.token[..20], data.host_list.len());
+
+        Ok(())
+    }
 
     #[tokio::test]
     async fn test_send_live_danmu() -> Result<(), BpiError> {
