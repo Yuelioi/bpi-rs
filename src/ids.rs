@@ -98,6 +98,8 @@ numeric_id!(RoomId, "room_id", "Bilibili live room ID.");
 numeric_id!(MediaId, "media_id", "Bilibili media ID.");
 numeric_id!(SeasonId, "season_id", "Bilibili season ID.");
 numeric_id!(EpisodeId, "ep_id", "Bilibili episode ID.");
+numeric_id!(NoteId, "note_id", "Bilibili note ID.");
+numeric_id!(Cvid, "cvid", "Bilibili note/article CV ID.");
 
 macro_rules! string_id {
     ($name:ident, $field:literal, $doc:literal, $validate:ident) => {

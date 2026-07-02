@@ -1,4 +1,7 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{
+    BilibiliRequest, BpiClient, BpiError, BpiResponse,
+    note::{NoteIsForbidParams, NotePrivateInfoParams, NotePublicInfoParams},
+};
 use serde::{Deserialize, Serialize};
 
 // --- 查询该稿件是否禁止笔记 ---
@@ -95,13 +98,13 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
     ///
-    /// - aid: 稿件 avid
+    /// - params: 稿件 avid 参数
     pub async fn note_is_forbid(
         &self,
-        aid: u64,
+        params: NoteIsForbidParams,
     ) -> Result<BpiResponse<NoteIsForbidData>, BpiError> {
         self.get("https://api.bilibili.com/x/note/is_forbid")
-            .query(&[("aid", aid)])
+            .query(&params.query_pairs())
             .send_bpi("查询稿件是否禁止笔记")
             .await
     }
@@ -115,15 +118,13 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `oid` | u64 | 稿件 avid |
-    /// | `note_id` | u64 | 笔记 ID |
+    /// | `params` | `NotePrivateInfoParams` | 私有笔记查询参数 |
     pub async fn note_get_private_info(
         &self,
-        oid: u64,
-        note_id: u64,
+        params: NotePrivateInfoParams,
     ) -> Result<BpiResponse<PrivateNoteInfoData>, BpiError> {
         self.get("https://api.bilibili.com/x/note/info")
-            .query(&[("oid", oid), ("oid_type", 0), ("note_id", note_id)])
+            .query(&params.query_pairs())
             .send_bpi("查询私有笔记内容")
             .await
     }
@@ -133,13 +134,13 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
     ///
-    /// - cvid: 公开笔记 cvid
+    /// - params: 公开笔记 cvid 参数
     pub async fn note_get_public_info(
         &self,
-        cvid: u64,
+        params: NotePublicInfoParams,
     ) -> Result<BpiResponse<PublicNoteInfoData>, BpiError> {
         self.get("https://api.bilibili.com/x/note/publish/info")
-            .query(&[("cvid", cvid)])
+            .query(&params.query_pairs())
             .send_bpi("查询公开笔记内容")
             .await
     }
@@ -148,15 +149,24 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::{Aid, Cvid, NoteId};
+    use crate::note::{NoteIsForbidParams, NotePrivateInfoParams, NotePublicInfoParams};
     use tracing::info;
+
+    const TEST_AID: u64 = 338_677_252;
+    const TEST_PRIVATE_AID: u64 = 676_931_260;
+    const TEST_NOTE_ID: u64 = 83_577_722_856_540_160;
+    const TEST_CVID: u64 = 15_160_286;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_note_is_forbid() {
         let bpi = BpiClient::new().expect("client should build");
-        // 替换为一个有效的avid
-        let aid = 338677252;
-        let resp = bpi.note_is_forbid(aid).await;
+        let resp = bpi
+            .note_is_forbid(NoteIsForbidParams::new(
+                Aid::new(TEST_AID).expect("test aid should be valid"),
+            ))
+            .await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
@@ -172,9 +182,12 @@ mod tests {
     #[tokio::test]
     async fn test_note_get_private_info() {
         let bpi = BpiClient::new().expect("client should build");
-        let oid = 676931260;
-        let note_id = 83577722856540160;
-        let resp = bpi.note_get_private_info(oid, note_id).await;
+        let resp = bpi
+            .note_get_private_info(NotePrivateInfoParams::new(
+                Aid::new(TEST_PRIVATE_AID).expect("test aid should be valid"),
+                NoteId::new(TEST_NOTE_ID).expect("test note id should be valid"),
+            ))
+            .await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
@@ -191,8 +204,11 @@ mod tests {
     #[tokio::test]
     async fn test_note_get_public_info() {
         let bpi = BpiClient::new().expect("client should build");
-        let cvid = 15160286;
-        let resp = bpi.note_get_public_info(cvid).await;
+        let resp = bpi
+            .note_get_public_info(NotePublicInfoParams::new(
+                Cvid::new(TEST_CVID).expect("test cvid should be valid"),
+            ))
+            .await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
@@ -204,5 +220,39 @@ mod tests {
             info!("note content: {}", data.content);
             info!("author name: {}", data.author.name);
         }
+    }
+
+    #[test]
+    fn note_is_forbid_params_serializes_aid() -> Result<(), BpiError> {
+        let params = NoteIsForbidParams::new(Aid::new(TEST_AID)?);
+
+        assert_eq!(params.query_pairs(), vec![("aid", TEST_AID.to_string())]);
+        Ok(())
+    }
+
+    #[test]
+    fn note_private_info_params_serializes_required_query() -> Result<(), BpiError> {
+        let params =
+            NotePrivateInfoParams::new(Aid::new(TEST_PRIVATE_AID)?, NoteId::new(TEST_NOTE_ID)?);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("oid", TEST_PRIVATE_AID.to_string()),
+                ("oid_type", "0".to_string()),
+                ("note_id", TEST_NOTE_ID.to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn cvid_rejects_zero() {
+        let err = Cvid::new(0).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "cvid", .. }
+        ));
     }
 }
