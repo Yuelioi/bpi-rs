@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::login::LoginQrPollParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 /// 生成 QRCode 数据
@@ -45,11 +46,11 @@ impl BpiClient {
     /// 检查二维码状态
     pub async fn login_check_qrcode_status(
         &self,
-        qrcode_key: &str,
+        params: LoginQrPollParams,
     ) -> Result<BpiResponse<CheckQrCodeStatusData>, BpiError> {
         let response = self
             .get("https://passport.bilibili.com/x/passport-login/web/qrcode/poll")
-            .query(&[("qrcode_key", qrcode_key)])
+            .query(&params.query_pairs())
             .send()
             .await?;
 
@@ -105,9 +106,8 @@ mod tests {
                 for _ in 1..=3 {
                     // 每次循环延迟 5 秒
                     sleep(Duration::from_secs(20)).await;
-                    let resp = bpi
-                        .login_check_qrcode_status(data.qrcode_key.as_str())
-                        .await;
+                    let params = LoginQrPollParams::new(data.qrcode_key.as_str()).unwrap();
+                    let resp = bpi.login_check_qrcode_status(params).await;
 
                     if resp.is_ok() {
                         tracing::info!("扫码成功{:?}", resp);

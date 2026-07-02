@@ -67,6 +67,24 @@ impl LoginLogParams {
     }
 }
 
+/// Parameters for `/x/passport-login/web/qrcode/poll`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LoginQrPollParams {
+    qrcode_key: String,
+}
+
+impl LoginQrPollParams {
+    pub fn new(qrcode_key: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            qrcode_key: normalize_non_blank("qrcode_key", qrcode_key.into())?,
+        })
+    }
+
+    pub(crate) fn query_pairs(&self) -> [(&'static str, String); 1] {
+        [("qrcode_key", self.qrcode_key.clone())]
+    }
+}
+
 fn normalize_non_blank(field: &'static str, value: String) -> BpiResult<String> {
     let value = value.trim();
     if value.is_empty() {
@@ -139,5 +157,29 @@ mod tests {
             ]
         );
         Ok(())
+    }
+
+    #[test]
+    fn login_qr_poll_params_serializes_qrcode_key() -> BpiResult<()> {
+        let params = LoginQrPollParams::new("qr-key-123")?;
+
+        assert_eq!(
+            params.query_pairs(),
+            [("qrcode_key", "qr-key-123".to_string())]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn login_qr_poll_params_rejects_blank_key() {
+        let err = LoginQrPollParams::new("   ").unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "qrcode_key",
+                ..
+            }
+        ));
     }
 }

@@ -16,4 +16,4 @@ pub use model::{
     LoginAccountInfo, LoginCoinBalance, LoginDailyReward, LoginNav, LoginStats, LoginTodayCoinExp,
     LoginVipInfo, LoginWbiImg,
 };
-pub use params::{LoginLogParams, LoginNoticeParams};
+pub use params::{LoginLogParams, LoginNoticeParams, LoginQrPollParams};
