@@ -1,3 +1,4 @@
+use crate::audio::musicstream_url::AudioQuality;
 use crate::ids::AudioId;
 use crate::{BpiError, BpiResult};
 
@@ -122,6 +123,98 @@ impl AudioRankListParams {
     }
 }
 
+/// Parameters for `/audio/music-service-c/web/url`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AudioStreamUrlWebParams {
+    sid: AudioId,
+    quality: AudioQuality,
+    privilege: u32,
+}
+
+impl AudioStreamUrlWebParams {
+    pub fn new(sid: AudioId) -> Self {
+        Self {
+            sid,
+            quality: AudioQuality::HighQuality,
+            privilege: 2,
+        }
+    }
+
+    pub fn with_quality(mut self, quality: AudioQuality) -> Self {
+        self.quality = quality;
+        self
+    }
+
+    pub fn with_privilege(mut self, privilege: u32) -> BpiResult<Self> {
+        self.privilege = validate_nonzero("privilege", privilege)?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("sid", self.sid.to_string()),
+            ("quality", self.quality.as_u32().to_string()),
+            ("privilege", self.privilege.to_string()),
+        ]
+    }
+}
+
+/// Parameters for `/audio/music-service-c/url`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AudioStreamUrlParams {
+    song_id: AudioId,
+    quality: AudioQuality,
+    privilege: u32,
+    mid: u64,
+    platform: String,
+}
+
+impl AudioStreamUrlParams {
+    pub fn new(song_id: AudioId, quality: AudioQuality) -> Self {
+        Self {
+            song_id,
+            quality,
+            privilege: 2,
+            mid: 2,
+            platform: "android".to_string(),
+        }
+    }
+
+    pub fn with_privilege(mut self, privilege: u32) -> BpiResult<Self> {
+        self.privilege = validate_nonzero("privilege", privilege)?;
+        Ok(self)
+    }
+
+    pub fn with_mid(mut self, mid: u64) -> BpiResult<Self> {
+        self.mid = validate_nonzero("mid", mid)?;
+        Ok(self)
+    }
+
+    pub fn with_platform(mut self, platform: impl Into<String>) -> BpiResult<Self> {
+        let platform = platform.into();
+        let platform = platform.trim();
+        if platform.is_empty() {
+            return Err(BpiError::invalid_parameter(
+                "platform",
+                "value cannot be blank",
+            ));
+        }
+
+        self.platform = platform.to_string();
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("songid", self.song_id.to_string()),
+            ("quality", self.quality.as_u32().to_string()),
+            ("privilege", self.privilege.to_string()),
+            ("mid", self.mid.to_string()),
+            ("platform", self.platform.clone()),
+        ]
+    }
+}
+
 fn validate_nonzero<T>(field: &'static str, value: T) -> BpiResult<T>
 where
     T: PartialEq + From<u8>,
@@ -221,5 +314,75 @@ mod tests {
             ]
         );
         Ok(())
+    }
+
+    #[test]
+    fn audio_stream_url_web_params_serializes_default_query() -> BpiResult<()> {
+        let params = AudioStreamUrlWebParams::new(AudioId::new(13603)?);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("sid", "13603".to_string()),
+                ("quality", "2".to_string()),
+                ("privilege", "2".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_stream_url_params_serializes_default_query() -> BpiResult<()> {
+        let params = AudioStreamUrlParams::new(AudioId::new(15664)?, AudioQuality::HighQuality);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("songid", "15664".to_string()),
+                ("quality", "2".to_string()),
+                ("privilege", "2".to_string()),
+                ("mid", "2".to_string()),
+                ("platform", "android".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_stream_url_params_serializes_custom_query() -> BpiResult<()> {
+        let params = AudioStreamUrlParams::new(AudioId::new(15664)?, AudioQuality::Lossless)
+            .with_privilege(3)?
+            .with_mid(42)?
+            .with_platform("ios")?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("songid", "15664".to_string()),
+                ("quality", "3".to_string()),
+                ("privilege", "3".to_string()),
+                ("mid", "42".to_string()),
+                ("platform", "ios".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_stream_url_params_rejects_blank_platform() {
+        let err = AudioStreamUrlParams::new(
+            AudioId::new(15664).expect("valid audio id"),
+            AudioQuality::HighQuality,
+        )
+        .with_platform("  ")
+        .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "platform",
+                ..
+            }
+        ));
     }
 }

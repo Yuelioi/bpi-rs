@@ -1,6 +1,7 @@
 //! 音频流URL
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/musicstream_url.md)
+use crate::audio::params::{AudioStreamUrlParams, AudioStreamUrlWebParams};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -67,24 +68,18 @@ impl BpiClient {
     /// 本接口仅能获取 192K 音质的音频
     ///
     /// # 参数
-    /// | 名称   | 类型  | 说明         |
-    /// | ------ | ----- | ------------ |
-    /// | `sid`  | u64   | 音频 auid    |
+    /// | 名称     | 类型                      | 说明          |
+    /// | -------- | ------------------------- | ------------- |
+    /// | `params` | `AudioStreamUrlWebParams` | 音频流 URL 参数 |
     ///
     /// # 文档
     /// [获取音频流URL(web端)](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/musicstream_url.md#获取音频流urlweb端)
     pub async fn audio_stream_url_web(
         &self,
-        sid: u64,
+        params: AudioStreamUrlWebParams,
     ) -> Result<BpiResponse<AudioStreamUrlWebData>, BpiError> {
-        let params = [
-            ("sid", sid.to_string()),
-            ("quality", "2".to_string()),
-            ("privilege", "2".to_string()),
-        ];
-
         self.get("https://www.bilibili.com/audio/music-service-c/web/url")
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("获取音频流URL(web端)")
             .await
     }
@@ -95,27 +90,19 @@ impl BpiClient {
     /// 无损音质需要登录的用户为会员
     ///
     /// # 参数
-    /// | 名称     | 类型          | 说明               |
-    /// | -------- | ------------- | ----------------- |
-    /// | `songid` | u64           | 音频 auid         |
-    /// | `quality`| AudioQuality  | 音质代码           |
+    /// | 名称     | 类型                   | 说明             |
+    /// | -------- | ---------------------- | ---------------- |
+    /// | `params` | `AudioStreamUrlParams` | 音频流 URL 参数  |
     ///
     /// # 文档
     /// [获取音频流URL（可获取付费音频）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/musicstream_url.md#获取音频流url可获取付费音频)
     pub async fn audio_stream_url(
         &self,
-        songid: u64,
-        quality: AudioQuality,
+        params: AudioStreamUrlParams,
     ) -> Result<BpiResponse<AudioStreamUrlData>, BpiError> {
         self.get("https://api.bilibili.com/audio/music-service-c/url")
             .with_bilibili_headers()
-            .query(&[
-                ("songid", songid.to_string()),
-                ("quality", quality.as_u32().to_string()),
-                ("privilege", "2".to_string()),
-                ("mid", "2".to_string()),
-                ("platform", "android".to_string()),
-            ])
+            .query(&params.query_pairs())
             .send_bpi("获取音频流URL")
             .await
     }
@@ -124,6 +111,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::AudioId;
 
     const TEST_SID: u64 = 13603;
 
@@ -131,7 +119,11 @@ mod tests {
     #[tokio::test]
     async fn test_audio_stream_url_web() {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.audio_stream_url_web(TEST_SID).await;
+        let result = bpi
+            .audio_stream_url_web(AudioStreamUrlWebParams::new(
+                AudioId::new(TEST_SID).expect("valid audio id"),
+            ))
+            .await;
         assert!(result.is_ok());
         let response = result.unwrap();
         assert_eq!(response.code, 0);
@@ -146,7 +138,12 @@ mod tests {
     #[tokio::test]
     async fn test_audio_stream_url() {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.audio_stream_url(15664, AudioQuality::HighQuality).await;
+        let result = bpi
+            .audio_stream_url(AudioStreamUrlParams::new(
+                AudioId::new(15664).expect("valid audio id"),
+                AudioQuality::HighQuality,
+            ))
+            .await;
         assert!(result.is_ok());
         let response = result.unwrap();
         assert_eq!(response.code, 0);

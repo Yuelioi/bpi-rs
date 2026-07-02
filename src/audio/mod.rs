@@ -18,5 +18,5 @@ pub mod status_number;
 
 pub use params::{
     AudioCollectionInfoParams, AudioPageParams, AudioRankListParams, AudioRankListType,
-    AudioRankPeriodParams, AudioSongParams,
+    AudioRankPeriodParams, AudioSongParams, AudioStreamUrlParams, AudioStreamUrlWebParams,
 };
