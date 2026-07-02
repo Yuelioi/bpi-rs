@@ -3,15 +3,21 @@ use serde::{Deserialize, Serialize};
 use crate::login::LoginQrPollParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
+const QR_GENERATE_ENDPOINT: &str =
+    "https://passport.bilibili.com/x/passport-login/web/qrcode/generate";
+const QR_POLL_ENDPOINT: &str = "https://passport.bilibili.com/x/passport-login/web/qrcode/poll";
+
 /// 生成 QRCode 数据
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct GenerateQrCodeData {
-    pub url: String,        // 二维码登录url
-    pub qrcode_key: String, // 扫码登录标识
+    /// QR login URL rendered by callers.
+    pub url: String,
+    /// Temporary key used to poll QR login state.
+    pub qrcode_key: String,
 }
 
 /// 二维码状态数据
-#[derive(Debug, Deserialize, Serialize, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub struct CheckQrCodeStatusData {
     pub url: String,           // 游戏分站跨域登录 url
     pub refresh_token: String, // 刷新令牌
@@ -19,17 +25,13 @@ pub struct CheckQrCodeStatusData {
     pub code: i32,             // 状态码
     pub message: String,       // 扫码状态信息
 
-    /// cookie 仅在扫码成功后写入
-    ///
-    ///  [("SESSDATA", "xxx")]
-    ///
-    /// sessdata
+    /// Cookies returned only after a successful QR login.
     #[serde(default)]
     pub cookies: Vec<(String, String)>,
 }
 
 /// 二维码图片数据
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct QrcodeImageData {
     pub qr_image: String, // base64 编码的二维码图片
     pub expires_in: u64,  // 过期时间（秒）
@@ -38,9 +40,7 @@ pub struct QrcodeImageData {
 impl BpiClient {
     /// 发送二维码请求
     pub async fn login_send_qrcode(&self) -> Result<BpiResponse<GenerateQrCodeData>, BpiError> {
-        self.get("https://passport.bilibili.com/x/passport-login/web/qrcode/generate")
-            .send_bpi("发送二维码")
-            .await
+        self.get(QR_GENERATE_ENDPOINT).send_bpi("发送二维码").await
     }
 
     /// 检查二维码状态
@@ -49,7 +49,7 @@ impl BpiClient {
         params: LoginQrPollParams,
     ) -> Result<BpiResponse<CheckQrCodeStatusData>, BpiError> {
         let response = self
-            .get("https://passport.bilibili.com/x/passport-login/web/qrcode/poll")
+            .get(QR_POLL_ENDPOINT)
             .query(&params.query_pairs())
             .send()
             .await?;
@@ -84,7 +84,62 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ApiEnvelope;
+    use crate::probe::contract::{ApiContract, HttpMethod};
     use tokio;
+
+    fn local_qr_probe_body(endpoint: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/login/qr/{endpoint}/anonymous.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn qr_generate_contract_matches_endpoint_request() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(include_bytes!(
+            "../../../tests/contracts/login/qr/generate/anonymous.request.json"
+        ))?;
+
+        assert_eq!(contract.name, "login.qr_generate.anonymous");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), QR_GENERATE_ENDPOINT);
+        assert!(contract.request.query.is_empty());
+        assert_eq!(contract.expect["api_code"], 0);
+        assert!(!contract.request.auth.requires_cookie());
+        Ok(())
+    }
+
+    #[test]
+    fn qr_generate_model_matches_local_probe_output_when_available() -> Result<(), BpiError> {
+        let Some(body) = local_qr_probe_body("generate") else {
+            return Ok(());
+        };
+
+        let data =
+            serde_json::from_value::<ApiEnvelope<GenerateQrCodeData>>(body)?.into_payload()?;
+
+        assert!(data.url.starts_with("https://"));
+        assert!(!data.qrcode_key.trim().is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn qr_poll_model_matches_local_probe_output_when_available() -> Result<(), BpiError> {
+        let Some(body) = local_qr_probe_body("poll") else {
+            return Ok(());
+        };
+
+        let response = serde_json::from_value::<BpiResponse<CheckQrCodeStatusData>>(body)?;
+        let data = response.into_data()?;
+
+        assert_eq!(data.code, 86101);
+        assert!(!data.message.trim().is_empty());
+        Ok(())
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -101,7 +156,7 @@ mod tests {
 
                 let data = response.data.unwrap();
                 tracing::info!("二维码URL: {}", data.url);
-                tracing::info!("QR Key: {}", data.qrcode_key);
+                tracing::info!("已获取二维码轮询 key");
 
                 for _ in 1..=3 {
                     // 每次循环延迟 5 秒
