@@ -1,3 +1,4 @@
+use crate::fav::params::FavResourceIdsParams;
 use crate::ids::MediaId;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
 use serde::{Deserialize, Serialize};
@@ -238,16 +239,13 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `media_id` | u64 | 收藏夹 media_id |
+    /// | `params` | `FavResourceIdsParams` | 收藏夹内容 ID 参数 |
     pub async fn fav_resource_ids(
         &self,
-        media_id: u64,
+        params: FavResourceIdsParams,
     ) -> Result<BpiResponse<Vec<FavResourceIdItem>>, BpiError> {
         self.get("https://api.bilibili.com/x/v3/fav/resource/ids")
-            .query(&[
-                ("media_id", media_id.to_string()),
-                ("platform", "web".to_string()),
-            ])
+            .query(&params.query_pairs())
             .send_bpi("获取收藏夹全部内容id")
             .await
     }
@@ -291,8 +289,10 @@ mod tests {
     #[tokio::test]
     async fn test_get_fav_resource_ids() {
         let bpi = BpiClient::new().expect("client should build");
-        let media_id = 1572769770;
-        let resp = bpi.fav_resource_ids(media_id).await;
+        let params = FavResourceIdsParams::new(
+            MediaId::new(1572769770).expect("fixture media id should be valid"),
+        );
+        let resp = bpi.fav_resource_ids(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());

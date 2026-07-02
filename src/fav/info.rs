@@ -1,3 +1,6 @@
+use crate::fav::params::{
+    FavCollectedListParams, FavCreatedListParams, FavFolderInfoParams, FavResourceInfosParams,
+};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -156,13 +159,13 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `media_id` | u64 | 收藏夹 media_id |
+    /// | `params` | `FavFolderInfoParams` | 收藏夹元数据参数 |
     pub async fn fav_folder_info(
         &self,
-        media_id: u64,
+        params: FavFolderInfoParams,
     ) -> Result<BpiResponse<FavFolderInfo>, BpiError> {
         self.get("https://api.bilibili.com/x/v3/fav/folder/info")
-            .query(&[("media_id", media_id)])
+            .query(&params.query_pairs())
             .send_bpi("获取收藏夹元数据")
             .await
     }
@@ -176,28 +179,13 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `up_mid` | u64 | 用户 mid |
-    /// | `typ` | `Option<u8>` | 类型过滤 |
-    /// | `rid` | `Option<u64>` | 关联资源 id |
+    /// | `params` | `FavCreatedListParams` | 用户创建收藏夹列表参数 |
     pub async fn fav_created_list(
         &self,
-        up_mid: u64,
-        typ: Option<u8>,
-        rid: Option<u64>,
+        params: FavCreatedListParams,
     ) -> Result<BpiResponse<CreatedFolderListData>, BpiError> {
-        let mut request = self
-            .get("https://api.bilibili.com/x/v3/fav/folder/created/list-all")
-            .query(&[("up_mid", up_mid.to_string())]);
-
-        if let Some(t) = typ {
-            request = request.query(&[("type", t)]);
-        }
-        if let Some(r) = rid {
-            request = request.query(&[("rid", r)]);
-        }
-
-        request
-            .query(&[("web_location", "333.1387")])
+        self.get("https://api.bilibili.com/x/v3/fav/folder/created/list-all")
+            .query(&params.query_pairs())
             .send_bpi("获取指定用户创建的所有收藏夹信息")
             .await
     }
@@ -211,22 +199,13 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `up_mid` | u64 | 用户 mid |
-    /// | `pn` | u32 | 页码 |
-    /// | `ps` | u32 | 页大小 |
+    /// | `params` | `FavCollectedListParams` | 用户收藏视频收藏夹列表参数 |
     pub async fn fav_collected_list(
         &self,
-        up_mid: u64,
-        pn: u32,
-        ps: u32,
+        params: FavCollectedListParams,
     ) -> Result<BpiResponse<CollectedFolderListData>, BpiError> {
         self.get("https://api.bilibili.com/x/v3/fav/folder/collected/list")
-            .query(&[
-                ("up_mid", up_mid.to_string()),
-                ("pn", pn.to_string()),
-                ("ps", ps.to_string()),
-                ("platform", "web".to_string()),
-            ])
+            .query(&params.query_pairs())
             .send_bpi("查询用户收藏的视频收藏夹")
             .await
     }
@@ -241,13 +220,13 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `resources` | &str | 形如 "{内容id}:{内容类型},..." |
+    /// | `params` | `FavResourceInfosParams` | 批量内容信息参数 |
     pub async fn fav_resource_infos(
         &self,
-        resources: &str,
+        params: FavResourceInfosParams,
     ) -> Result<BpiResponse<Vec<ResourceInfoItem>>, BpiError> {
         self.get("https://api.bilibili.com/x/v3/fav/resource/infos")
-            .query(&[("resources", resources), ("platform", "web")])
+            .query(&params.query_pairs())
             .send_bpi("批量获取指定收藏id的内容")
             .await
     }
@@ -263,8 +242,10 @@ mod tests {
     async fn test_get_fav_folder_info() {
         let bpi = BpiClient::new().expect("client should build");
         // 替换为一个公开收藏夹的media_id
-        let media_id = 3717139570;
-        let resp = bpi.fav_folder_info(media_id).await;
+        let params = FavFolderInfoParams::new(
+            crate::ids::MediaId::new(3717139570).expect("fixture media id should be valid"),
+        );
+        let resp = bpi.fav_folder_info(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
@@ -283,8 +264,10 @@ mod tests {
     async fn test_get_fav_created_list() {
         let bpi = BpiClient::new().expect("client should build");
 
-        let up_mid = 4279370;
-        let resp = bpi.fav_created_list(up_mid, None, None).await;
+        let params = FavCreatedListParams::new(
+            crate::ids::Mid::new(4279370).expect("fixture mid should be valid"),
+        );
+        let resp = bpi.fav_created_list(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
@@ -302,8 +285,14 @@ mod tests {
     async fn test_get_fav_collected_list() {
         let bpi = BpiClient::new().expect("client should build");
 
-        let up_mid = 4279370;
-        let resp = bpi.fav_collected_list(up_mid, 1, 20).await;
+        let params = FavCollectedListParams::new(
+            crate::ids::Mid::new(4279370).expect("fixture mid should be valid"),
+        )
+        .with_page(1)
+        .expect("fixture page should be valid")
+        .with_page_size(20)
+        .expect("fixture page size should be valid");
+        let resp = bpi.fav_collected_list(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
@@ -320,8 +309,9 @@ mod tests {
     #[tokio::test]
     async fn test_get_fav_resource_infos() {
         let bpi = BpiClient::new().expect("client should build");
-        let resources = "115087859779103:2";
-        let resp = bpi.fav_resource_infos(resources).await;
+        let params = FavResourceInfosParams::new("115087859779103:2")
+            .expect("fixture resources should be valid");
+        let resp = bpi.fav_resource_infos(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
