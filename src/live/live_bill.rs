@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 // ================= 数据结构 =================
 
@@ -23,7 +23,8 @@ impl BpiClient {
     pub async fn live_gift_types(&self) -> Result<BpiResponse<Vec<GiftTypeItem>>, BpiError> {
         let resp = self
             .get("https://api.live.bilibili.com/gift/v1/master/getGiftTypes")
-            .send_bpi("获取所有礼物列表").await?;
+            .send_bpi("获取所有礼物列表")
+            .await?;
 
         Ok(resp)
     }
@@ -35,7 +36,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_gift_types() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.live_gift_types().await?;
 
         assert_eq!(resp.code, 0);

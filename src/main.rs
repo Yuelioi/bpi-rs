@@ -1,8 +1,8 @@
-use bpi_rs::{ Account, BpiClient };
+use bpi_rs::{Account, BpiClient};
 
 #[tokio::main]
 async fn main() {
-    let bpi = BpiClient::new();
+    let bpi = BpiClient::new().expect("client should build");
     bpi.set_account(Account {
         dede_user_id: "".to_string(),
         dede_user_id_ckmd5: "".to_string(),

@@ -1,8 +1,8 @@
 //! 番剧或影视时间线
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/timeline.md)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 番剧类型
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -63,7 +63,7 @@ impl BpiClient {
         &self,
         types: BangumiTimelineType,
         before: i32,
-        after: i32
+        after: i32,
     ) -> Result<BpiResponse<Vec<BangumiTimelineDay>>, BpiError> {
         // 验证参数
         if before < 0 || before > 7 {
@@ -79,16 +79,14 @@ impl BpiClient {
             });
         }
 
-        self
-            .get("https://api.bilibili.com/pgc/web/timeline")
-            .query(
-                &[
-                    ("types", types.as_i32().to_string()),
-                    ("before", before.to_string()),
-                    ("after", after.to_string()),
-                ]
-            )
-            .send_bpi("获取番剧或影视时间线").await
+        self.get("https://api.bilibili.com/pgc/web/timeline")
+            .query(&[
+                ("types", types.as_i32().to_string()),
+                ("before", before.to_string()),
+                ("after", after.to_string()),
+            ])
+            .send_bpi("获取番剧或影视时间线")
+            .await
     }
 }
 
@@ -98,7 +96,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bangumi_timeline() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.bangumi_timeline(BangumiTimelineType::Anime, 3, 7).await;
         assert!(result.is_ok());
         let response = result.unwrap();
@@ -119,7 +117,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bangumi_timeline_invalid_before() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.bangumi_timeline(BangumiTimelineType::Anime, 8, 7).await;
         assert!(result.is_err());
         let error = result.unwrap_err();
@@ -134,7 +132,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bangumi_timeline_invalid_after() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.bangumi_timeline(BangumiTimelineType::Anime, 3, 8).await;
         assert!(result.is_err());
         let error = result.unwrap_err();

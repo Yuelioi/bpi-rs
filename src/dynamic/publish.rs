@@ -1,11 +1,11 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use reqwest::Body;
-use reqwest::multipart::{ Form, Part };
-use serde::{ Deserialize, Serialize };
+use reqwest::multipart::{Form, Part};
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::path::Path;
 use tokio::fs::File;
-use tokio_util::codec::{ BytesCodec, FramedRead };
+use tokio_util::codec::{BytesCodec, FramedRead};
 
 // --- 图片上传 API 结构体 ---
 
@@ -140,25 +140,27 @@ impl BpiClient {
     pub async fn dynamic_upload_pic(
         &self,
         file_path: &Path,
-        category: Option<&str>
+        category: Option<&str>,
     ) -> Result<BpiResponse<UploadPicData>, BpiError> {
         let csrf = self.csrf()?;
 
-        let file = File::open(file_path).await.map_err(|_| BpiError::parse("打开文件失败"))?;
+        let file = File::open(file_path)
+            .await
+            .map_err(|_| BpiError::parse("打开文件失败"))?;
         let stream = FramedRead::new(file, BytesCodec::new());
         let body = Body::wrap_stream(stream);
 
-        let file_name = file_path
-            .file_name()
-            .ok_or_else(|| {
-                BpiError::parse("Invalid file path, cannot get file name".to_string())
-            })?;
+        let file_name = file_path.file_name().ok_or_else(|| {
+            BpiError::parse("Invalid file path, cannot get file name".to_string())
+        })?;
 
         let file_part = Part::stream(body)
             .file_name(file_name.to_string_lossy().into_owned())
             .mime_str("image/jpeg")?;
 
-        let mut form = Form::new().part("file_up", file_part).text("csrf", csrf.clone());
+        let mut form = Form::new()
+            .part("file_up", file_part)
+            .text("csrf", csrf.clone());
 
         if let Some(cat) = category {
             form = form.text("category", cat.to_string());
@@ -168,10 +170,10 @@ impl BpiClient {
 
         form = form.text("biz", "new_dyn".to_string());
 
-        self
-            .post("https://api.bilibili.com/x/dynamic/feed/draw/upload_bfs")
+        self.post("https://api.bilibili.com/x/dynamic/feed/draw/upload_bfs")
             .multipart(form)
-            .send_bpi("上传图片动态图片").await
+            .send_bpi("上传图片动态图片")
+            .await
     }
 
     /// 发布纯文本动态
@@ -186,7 +188,7 @@ impl BpiClient {
     /// | `content` | &str | 动态内容 |
     pub async fn dynamic_create_text(
         &self,
-        content: &str
+        content: &str,
     ) -> Result<BpiResponse<CreateDynamicData>, BpiError> {
         let csrf = self.csrf()?;
         let form = Form::new()
@@ -197,10 +199,10 @@ impl BpiClient {
             .text("csrf", csrf.clone())
             .text("csrf_token", csrf);
 
-        self
-            .post("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/create")
+        self.post("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/create")
             .multipart(form)
-            .send_bpi("发布纯文本动态").await
+            .send_bpi("发布纯文本动态")
+            .await
     }
 
     /// 发表复杂动态
@@ -221,21 +223,19 @@ impl BpiClient {
         scene: u8,
         contents: Vec<DynamicContentItem>,
         pics: Option<Vec<DynamicPic>>,
-        topic: Option<DynamicTopic>
+        topic: Option<DynamicTopic>,
     ) -> Result<BpiResponse<CreateComplexDynamicData>, BpiError> {
         let csrf = self.csrf()?;
 
         let dyn_req = DynamicRequest {
             attach_card: None,
             content: DynamicContent { contents },
-            meta: Some(
-                json!({
+            meta: Some(json!({
                 "app_meta": {
                     "from": "create.dynamic.web",
                     "mobi_app": "web"
                 }
-            })
-            ),
+            })),
             scene,
             pics,
             topic,
@@ -246,12 +246,12 @@ impl BpiClient {
             "dyn_req": dyn_req,
         });
 
-        self
-            .post("https://api.bilibili.com/x/dynamic/feed/create/dyn")
+        self.post("https://api.bilibili.com/x/dynamic/feed/create/dyn")
             .header("Content-Type", "application/json")
             .query(&[("csrf", csrf)])
             .body(request_body.to_string())
-            .send_bpi("发表复杂动态").await
+            .send_bpi("发表复杂动态")
+            .await
     }
 }
 
@@ -262,10 +262,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_upload_dynamic_pic() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let test_file = Path::new("./assets/test.jpg");
         if !test_file.exists() {
-            return Err(BpiError::parse("Test file 'test.jpg' not found.".to_string()));
+            return Err(BpiError::parse(
+                "Test file 'test.jpg' not found.".to_string(),
+            ));
         }
 
         let resp = bpi.dynamic_upload_pic(test_file, None).await?;
@@ -279,7 +281,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_text_dynamic() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let content = format!("Rust Bilibili API 指南测试动态：{}", chrono::Local::now());
 
         let resp = bpi.dynamic_create_text(&content).await?;
@@ -293,7 +295,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_complex_dynamic_text() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let contents = vec![DynamicContentItem {
             type_num: 1,
             biz_id: None,
@@ -311,10 +313,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_complex_dynamic_with_pic() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let test_file = Path::new("./assets/test.jpg");
         if !test_file.exists() {
-            return Err(BpiError::parse("Test file 'test.jpg' not found.".to_string()));
+            return Err(BpiError::parse(
+                "Test file 'test.jpg' not found.".to_string(),
+            ));
         }
 
         let resp = bpi.dynamic_upload_pic(test_file, None).await?;
@@ -334,7 +338,9 @@ mod tests {
             raw_text: format!("Rust Bilibili API 复杂动态图片测试：{}", 234),
         }];
 
-        let resp = bpi.dynamic_create_complex(2, contents, Some(pics), None).await?;
+        let resp = bpi
+            .dynamic_create_complex(2, contents, Some(pics), None)
+            .await?;
         let data = resp.into_data()?;
 
         info!("复杂动态（带图）发布成功！动态ID: {}", data.dyn_id_str);

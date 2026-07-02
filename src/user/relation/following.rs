@@ -1,8 +1,8 @@
 //! B站用户关注列表相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
 
@@ -113,7 +113,7 @@ impl BpiClient {
         vmid: u64,
         order_type: Option<&str>,
         ps: Option<u32>,
-        pn: Option<u32>
+        pn: Option<u32>,
     ) -> Result<BpiResponse<FollowingListResponseData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/relation/followings")
@@ -145,8 +145,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_user_followings() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.user_followings(TEST_VMID, None, Some(50), Some(1)).await?;
+        if std::env::var_os("BPI_LIVE_TEST").is_none() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .user_followings(TEST_VMID, None, Some(50), Some(1))
+            .await?;
         let data = resp.into_data()?;
 
         info!("用户关注明细: {:?}", data);

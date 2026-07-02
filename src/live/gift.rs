@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 // ================= 数据结构 =================
 
@@ -100,11 +100,11 @@ impl BpiClient {
         &self,
         room_id: i64,
         area_parent_id: Option<i32>,
-        area_id: Option<i32>
+        area_id: Option<i32>,
     ) -> Result<RoomGiftResponse, BpiError> {
         let mut params: Vec<(&str, String)> = vec![
             ("room_id", room_id.to_string()),
-            ("platform", "web".to_string())
+            ("platform", "web".to_string()),
         ];
 
         if let Some(area_parent_id) = area_parent_id {
@@ -118,7 +118,8 @@ impl BpiClient {
         let resp: RoomGiftResponse = self
             .get("https://api.live.bilibili.com/xlive/web-room/v1/giftPanel/roomGiftList")
             .query(&params)
-            .send_bpi("获取直播间礼物列表").await?;
+            .send_bpi("获取直播间礼物列表")
+            .await?;
 
         Ok(resp)
     }
@@ -140,7 +141,8 @@ impl BpiClient {
         let resp: BlindGiftResponse = self
             .get("https://api.live.bilibili.com/xlive/general-interface/v1/blindFirstWin/getInfo")
             .query(&params)
-            .send_bpi("获取盲盒概率").await?;
+            .send_bpi("获取盲盒概率")
+            .await?;
 
         Ok(resp)
     }
@@ -152,7 +154,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_room_gift_list() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.live_room_gift_list(23174842, None, None).await?;
 
         let data = resp.data.unwrap();
@@ -162,7 +164,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_blind_gift_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.live_blind_gift_info(32251).await?;
 
         let data = resp.data.unwrap();

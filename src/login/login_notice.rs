@@ -1,5 +1,5 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 // --- API 结构体 ---
@@ -44,7 +44,7 @@ impl BpiClient {
     pub async fn login_notice(
         &self,
         mid: u64,
-        buvid: Option<&str>
+        buvid: Option<&str>,
     ) -> Result<BpiResponse<LoginNoticeData>, BpiError> {
         let mut params = HashMap::new();
         params.insert("mid", mid.to_string());
@@ -52,10 +52,10 @@ impl BpiClient {
             params.insert("buvid", buvid_val.to_string());
         }
 
-        self
-            .get("https://api.bilibili.com/x/safecenter/login_notice")
+        self.get("https://api.bilibili.com/x/safecenter/login_notice")
             .query(&params)
-            .send_bpi("查询登录记录").await
+            .send_bpi("查询登录记录")
+            .await
     }
 
     /// 查询最近一周的登录情况。
@@ -63,15 +63,10 @@ impl BpiClient {
     /// # 参数
     /// 无。该接口自动使用当前登录用户的Session。
     pub async fn login_log(&self) -> Result<BpiResponse<LoginLogData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/member/web/login/log")
-            .query(
-                &[
-                    ("jsonp", "jsonp"),
-                    ("web_location", "333.33"),
-                ]
-            )
-            .send_bpi("查询最近一周登录情况").await
+        self.get("https://api.bilibili.com/x/member/web/login/log")
+            .query(&[("jsonp", "jsonp"), ("web_location", "333.33")])
+            .send_bpi("查询最近一周登录情况")
+            .await
     }
 }
 
@@ -81,7 +76,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_login_notice() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let mid = 4279370;
 
         let resp = bpi.login_notice(mid, None).await?;
@@ -101,7 +96,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_login_log() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let resp = bpi.login_log().await?;
         let data = resp.into_data()?;

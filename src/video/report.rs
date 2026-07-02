@@ -1,7 +1,7 @@
 //! 视频观看进度上报相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 impl BpiClient {
     /// 上报视频观看进度（双端）
@@ -19,12 +19,11 @@ impl BpiClient {
         &self,
         aid: u64,
         cid: u64,
-        progress: Option<u64>
+        progress: Option<u64>,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        let mut form = reqwest::multipart::Form
-            ::new()
+        let mut form = reqwest::multipart::Form::new()
             .text("aid", aid.to_string())
             .text("cid", cid.to_string())
             .text("csrf", csrf.to_string());
@@ -35,10 +34,10 @@ impl BpiClient {
             form = form.text("progress", "0");
         }
 
-        self
-            .post("https://api.bilibili.com/x/v2/history/report")
+        self.post("https://api.bilibili.com/x/v2/history/report")
             .multipart(form)
-            .send_bpi("上报观看进度").await
+            .send_bpi("上报观看进度")
+            .await
     }
 }
 
@@ -54,9 +53,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_report_watch_progress() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 上报观看进度为 1248 秒
-        let resp = bpi.video_report_watch_progress(TEST_AID, TEST_CID, Some(120)).await?;
+        let resp = bpi
+            .video_report_watch_progress(TEST_AID, TEST_CID, Some(120))
+            .await?;
 
         info!("上报观看进度结果: {:?}", resp);
 

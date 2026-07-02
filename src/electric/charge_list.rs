@@ -1,6 +1,6 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use chrono::NaiveDate;
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct ChargeVipInfo {
@@ -200,12 +200,12 @@ impl BpiClient {
 
     pub async fn electric_month_up_list(
         &self,
-        up_mid: i64
+        up_mid: i64,
     ) -> Result<BpiResponse<ChargeMonthUpData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/ugcpay-rank/elec/month/up")
+        self.get("https://api.bilibili.com/x/ugcpay-rank/elec/month/up")
             .query(&[("up_mid", up_mid)])
-            .send_bpi("获取空间充电公示列表").await
+            .send_bpi("获取空间充电公示列表")
+            .await
     }
 
     /// 获取视频充电鸣谢名单
@@ -224,7 +224,7 @@ impl BpiClient {
         &self,
         mid: i64,
         aid: Option<i64>,
-        bvid: Option<&str>
+        bvid: Option<&str>,
     ) -> Result<BpiResponse<VideoElecShowData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/web-interface/elec/show")
@@ -256,17 +256,12 @@ impl BpiClient {
         page: u64,
         page_size: u64,
         begin_time: Option<NaiveDate>,
-        end_time: Option<NaiveDate>
+        end_time: Option<NaiveDate>,
     ) -> Result<BpiResponse<RechargeData>, BpiError> {
         let mut req = self
             .get("https://pay.bilibili.com/bk/brokerage/listForCustomerRechargeRecord")
             .query(&[("customerId", "10026")])
-            .query(
-                &[
-                    ("currentPage", page),
-                    ("pageSize", page_size),
-                ]
-            );
+            .query(&[("currentPage", page), ("pageSize", page_size)]);
 
         if let Some(begin) = begin_time {
             req = req.query(&[("beginTime", begin.format("%Y-%m-%d").to_string())]);
@@ -292,7 +287,7 @@ impl BpiClient {
     pub async fn electric_rank_recent(
         &self,
         pn: Option<u64>,
-        ps: Option<u64>
+        ps: Option<u64>,
     ) -> Result<BpiResponse<ElecRankData>, BpiError> {
         let mut req = self.get("https://member.bilibili.com/x/h5/elec/rank/recent");
 
@@ -310,26 +305,28 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{ Duration, Utc };
+    use chrono::{Duration, Utc};
     use tracing::info;
 
     #[tokio::test]
     async fn test_electric_month_up_list() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.electric_month_up_list(53456).await;
         assert!(resp.is_ok());
     }
 
     #[tokio::test]
     async fn test_electric_video_show() {
-        let bpi = BpiClient::new();
-        let resp = bpi.electric_video_show(53456, None, Some("BV1Dh411S7sS")).await;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .electric_video_show(53456, None, Some("BV1Dh411S7sS"))
+            .await;
         assert!(resp.is_ok());
     }
 
     #[tokio::test]
     async fn test_get_recharge_list() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 测试获取第一页，每页10条记录
         let resp = bpi.electric_recharge_list(1, 10, None, None).await;
         info!("响应: {:?}", resp);
@@ -347,23 +344,28 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_recharge_list_with_dates() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let now = Utc::now().date_naive();
         let start_date = now - Duration::days(30);
         let end_date = now;
 
-        let resp = bpi.electric_recharge_list(1, 10, Some(start_date), Some(end_date)).await;
+        let resp = bpi
+            .electric_recharge_list(1, 10, Some(start_date), Some(end_date))
+            .await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
         if let Ok(response) = resp {
-            info!("在日期范围内获取到的总记录数: {}", response.data.unwrap().page.total_count);
+            info!(
+                "在日期范围内获取到的总记录数: {}",
+                response.data.unwrap().page.total_count
+            );
         }
     }
 
     #[tokio::test]
     async fn test_get_elec_rank_recent() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 测试获取第一页，每页10条记录
         let resp = bpi.electric_rank_recent(Some(1), Some(10)).await;
         info!("响应: {:?}", resp);

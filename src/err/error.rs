@@ -22,20 +22,32 @@ pub enum ErrorCategory {
 pub enum BpiError {
     /// 网络请求失败
     #[error("网络请求失败: {message}")]
-    Network {
-        message: String,
+    Network { message: String },
+
+    /// Transport-level request failure.
+    #[error("transport request failed: {source}")]
+    Transport {
+        #[serde(skip)]
+        source: reqwest::Error,
     },
 
     /// HTTP状态码错误
     #[error("HTTP请求失败，状态码: {status}")]
-    Http {
-        status: u16,
-    },
+    Http { status: u16 },
+
+    /// HTTP status error.
+    #[error("HTTP request failed with status {status}")]
+    HttpStatus { status: u16 },
 
     /// JSON解析失败
     #[error("数据解析失败: {message}")]
-    Parse {
-        message: String,
+    Parse { message: String },
+
+    /// Response decode failure.
+    #[error("failed to decode response: {source}")]
+    Decode {
+        #[serde(skip)]
+        source: serde_json::Error,
     },
 
     /// API返回的业务错误
@@ -48,9 +60,11 @@ pub enum BpiError {
 
     /// 验证错误
     #[error("验证失败: {message}")]
-    Authentication {
-        message: String,
-    },
+    Authentication { message: String },
+
+    /// Authentication or authorization error.
+    #[error("authentication failed: {message}")]
+    Auth { message: String },
 
     /// # 参数错误
     #[error("参数错误 [{field}]: {message}")]
@@ -58,6 +72,14 @@ pub enum BpiError {
         field: &'static str,
         message: &'static str,
     },
+
+    /// API response succeeded but did not include required payload data.
+    #[error("missing response data")]
+    MissingData,
+
+    /// Response format is not supported by the current parser.
+    #[error("unsupported response: {message}")]
+    UnsupportedResponse { message: String },
 }
 
 impl BpiError {
@@ -69,13 +91,11 @@ impl BpiError {
     }
 
     pub fn missing_data() -> Self {
-        BpiError::Parse {
-            message: "数据解析失败, 缺少data字段".to_string(),
-        }
+        BpiError::MissingData
     }
 
     pub fn auth_required() -> Self {
-        BpiError::Authentication {
+        BpiError::Auth {
             message: "需要登录".to_string(),
         }
     }
@@ -114,7 +134,12 @@ impl BpiError {
                 category: ErrorCategory::Unknown,
             };
         }
-        Self::from_code(resp.code)
+
+        if resp.message.is_empty() || resp.message == "0" {
+            Self::from_code(resp.code)
+        } else {
+            Self::from_code_message(resp.code, resp.message)
+        }
     }
 }
 
@@ -133,10 +158,16 @@ impl BpiError {
         match self {
             BpiError::Api { category, .. } => category.clone(),
             BpiError::Network { .. } => ErrorCategory::Network,
+            BpiError::Transport { .. } => ErrorCategory::Network,
             BpiError::Http { .. } => ErrorCategory::Network,
+            BpiError::HttpStatus { .. } => ErrorCategory::Network,
             BpiError::Parse { .. } => ErrorCategory::Request,
+            BpiError::Decode { .. } => ErrorCategory::Request,
             BpiError::InvalidParameter { .. } => ErrorCategory::Request,
             BpiError::Authentication { .. } => ErrorCategory::Auth,
+            BpiError::Auth { .. } => ErrorCategory::Auth,
+            BpiError::MissingData => ErrorCategory::Request,
+            BpiError::UnsupportedResponse { .. } => ErrorCategory::Request,
         }
     }
 }
@@ -152,7 +183,7 @@ impl BpiError {
 
     /// 创建HTTP错误
     pub fn http(status: u16) -> Self {
-        BpiError::Http { status }
+        BpiError::HttpStatus { status }
     }
 
     /// 创建解析错误
@@ -168,10 +199,15 @@ impl BpiError {
     }
 
     pub fn auth(message: impl Into<String>) -> Self {
-        BpiError::Api {
-            code: 401,
+        BpiError::Auth {
             message: message.into(),
-            category: ErrorCategory::Auth,
+        }
+    }
+
+    /// Creates an unsupported response error.
+    pub fn unsupported_response(message: impl Into<String>) -> Self {
+        BpiError::UnsupportedResponse {
+            message: message.into(),
         }
     }
 }
@@ -185,8 +221,8 @@ impl BpiError {
 
     /// 判断是否为权限问题
     pub fn is_permission_error(&self) -> bool {
-        matches!(self.category(), ErrorCategory::Auth) ||
-            matches!(self.code(), Some(-403) | Some(-4))
+        matches!(self.category(), ErrorCategory::Auth)
+            || matches!(self.code(), Some(-403) | Some(-4))
     }
 
     /// 判断是否需要VIP权限

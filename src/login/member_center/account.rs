@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/login/member_center.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// Bilibili 账号信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,7 +47,8 @@ impl BpiClient {
     pub async fn member_center_account_info(&self) -> Result<BpiResponse<AccountInfo>, BpiError> {
         let result = self
             .get("https://api.bilibili.com/x/member/web/account")
-            .send_bpi("获取我的信息").await?;
+            .send_bpi("获取我的信息")
+            .await?;
 
         Ok(result)
     }
@@ -59,7 +60,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_account_info() {
-        let bpi = BpiClient::new();
+        if std::env::var_os("BPI_LIVE_TEST").is_none() {
+            return;
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
 
         match bpi.member_center_account_info().await {
             Ok(resp) => {

@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 稿件简介响应
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -37,7 +37,7 @@ impl BpiClient {
     pub async fn video_desc(
         &self,
         aid: Option<u64>,
-        bvid: Option<&str>
+        bvid: Option<&str>,
     ) -> Result<BpiResponse<String>, BpiError> {
         let mut builder = self.get("http://api.bilibili.com/x/web-interface/archive/desc");
 
@@ -58,7 +58,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_desc() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         match bpi.video_desc(Some(10001), None).await {
             Ok(resp) => {

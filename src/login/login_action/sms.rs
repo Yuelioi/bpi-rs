@@ -83,6 +83,7 @@ impl BpiClient {
         ];
 
         let response = BpiClient::new()
+            .expect("client should build")
             .post("https://passport.bilibili.com/x/passport-login/web/login/sms")
             .form(&form)
             .send()

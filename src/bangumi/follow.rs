@@ -1,8 +1,8 @@
 //! 追番相关
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/follow.md)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BangumiFollowResult {
@@ -22,19 +22,17 @@ impl BpiClient {
     /// [追番](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/follow.md#追番)
     pub async fn bangumi_follow(
         &self,
-        season_id: u64
+        season_id: u64,
     ) -> Result<BpiResponse<BangumiFollowResult>, BpiError> {
         let csrf = self.csrf()?;
-        self
-            .post("https://api.bilibili.com/pgc/web/follow/add")
+        self.post("https://api.bilibili.com/pgc/web/follow/add")
             .with_bilibili_headers()
-            .form(
-                &[
-                    ("season_id", season_id.to_string()),
-                    ("csrf", csrf.to_string()),
-                ]
-            )
-            .send_bpi("追番").await
+            .form(&[
+                ("season_id", season_id.to_string()),
+                ("csrf", csrf.to_string()),
+            ])
+            .send_bpi("追番")
+            .await
     }
 
     /// 取消追番
@@ -45,19 +43,17 @@ impl BpiClient {
     /// [取消追番](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/follow.md#取消追番)
     pub async fn bangumi_unfollow(
         &self,
-        season_id: u64
+        season_id: u64,
     ) -> Result<BpiResponse<BangumiFollowResult>, BpiError> {
         let csrf = self.csrf()?;
-        self
-            .post("https://api.bilibili.com/pgc/web/follow/del")
+        self.post("https://api.bilibili.com/pgc/web/follow/del")
             .with_bilibili_headers()
-            .form(
-                &[
-                    ("season_id", season_id.to_string()),
-                    ("csrf", csrf.to_string()),
-                ]
-            )
-            .send_bpi("取消追番").await
+            .form(&[
+                ("season_id", season_id.to_string()),
+                ("csrf", csrf.to_string()),
+            ])
+            .send_bpi("取消追番")
+            .await
     }
 }
 
@@ -68,7 +64,7 @@ mod tests {
     const TEST_BANGUMI_ID: u64 = 99644; // 小城日常
     #[tokio::test]
     async fn test_follow_bangumi() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.bangumi_follow(TEST_BANGUMI_ID).await?;
 
         let data = result.into_data()?;
@@ -81,7 +77,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_unfollow_bangumi() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.bangumi_unfollow(TEST_BANGUMI_ID).await?;
 
         let data = result.into_data()?;

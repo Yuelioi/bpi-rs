@@ -4,9 +4,9 @@
 
 use std::collections::HashMap;
 
-use crate::models::{ DashStreams, Fnval, SupportFormat, VideoQuality };
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::models::{DashStreams, Fnval, SupportFormat, VideoQuality};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 课程视频流数据
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -139,13 +139,13 @@ impl BpiClient {
         ep_id: u64,
         cid: u64,
         qn: Option<VideoQuality>,
-        fnval: Option<Fnval>
+        fnval: Option<Fnval>,
     ) -> Result<BpiResponse<CourseVideoStreamData>, BpiError> {
         let mut params = vec![
             ("avid", avid.to_string()),
             ("ep_id", ep_id.to_string()),
             ("cid", cid.to_string()),
-            ("fnver", "0".to_string())
+            ("fnver", "0".to_string()),
         ];
 
         if fnval.is_some_and(|f| f.is_fourk()) {
@@ -159,11 +159,11 @@ impl BpiClient {
             params.push(("fnval", fv.bits().to_string()));
         }
 
-        self
-            .get("https://api.bilibili.com/pugv/player/web/playurl")
+        self.get("https://api.bilibili.com/pugv/player/web/playurl")
             .with_bilibili_headers()
             .query(&params)
-            .send_bpi("获取课程视频流 URL").await
+            .send_bpi("获取课程视频流 URL")
+            .await
     }
 }
 
@@ -181,7 +181,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_cheese_playurl() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let data = bpi
             .cheese_video_stream(
@@ -190,15 +190,16 @@ mod tests {
                 TEST_CID,
                 Some(VideoQuality::P8K),
                 Some(
-                    Fnval::DASH |
-                        Fnval::FOURK |
-                        Fnval::EIGHTK |
-                        Fnval::HDR |
-                        Fnval::DOLBY_AUDIO |
-                        Fnval::DOLBY_VISION |
-                        Fnval::AV1
-                )
-            ).await?
+                    Fnval::DASH
+                        | Fnval::FOURK
+                        | Fnval::EIGHTK
+                        | Fnval::HDR
+                        | Fnval::DOLBY_AUDIO
+                        | Fnval::DOLBY_VISION
+                        | Fnval::AV1,
+                ),
+            )
+            .await?
             .into_data()?;
 
         tracing::info!("{:#?}", data);

@@ -1,5 +1,5 @@
-use crate::models::{ Pendant, VipLabel };
-use serde::{ Deserialize, Serialize };
+use crate::models::{Pendant, VipLabel};
+use serde::{Deserialize, Serialize};
 
 /// 作者模块 √
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]

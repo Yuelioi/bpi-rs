@@ -1,8 +1,8 @@
 //! 视频 TAG 相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
 
@@ -39,7 +39,7 @@ impl BpiClient {
         &self,
         aid: Option<u64>,
         bvid: Option<&str>,
-        cid: Option<u64>
+        cid: Option<u64>,
     ) -> Result<BpiResponse<Vec<VideoTag>>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -74,7 +74,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_tags_by_aid() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.video_tags(Some(TEST_AID), None, Some(TEST_CID)).await?;
         let data = resp.into_data()?;
 
@@ -87,7 +87,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_tags_by_bvid() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.video_tags(None, Some(TEST_BVID), None).await?;
         let data = resp.into_data()?;
 

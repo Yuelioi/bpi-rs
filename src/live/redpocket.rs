@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 // ================= 数据结构 =================
 
@@ -110,7 +110,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_live_lottery_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         bpi.live_lottery_info(23174842).await?;
 
         // 注意：直播间可能没有红包，所以不做额外断言

@@ -2,7 +2,7 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/Comic.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::Serialize;
 
 // ================= 数据结构 =================
@@ -50,12 +50,13 @@ impl BpiClient {
     /// [网页入口](https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode)
     pub async fn manga_buy_episode(
         &self,
-        request: BuyEpisodeRequest
+        request: BuyEpisodeRequest,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let result = self
             .post("https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode?platform=web")
             .json(&request)
-            .send_bpi("购买漫画章节").await?;
+            .send_bpi("购买漫画章节")
+            .await?;
 
         Ok(result)
     }
@@ -66,7 +67,7 @@ impl BpiClient {
     pub async fn manga_buy_episode_with_coupon(
         &self,
         ep_id: i32,
-        coupon_id: i32
+        coupon_id: i32,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let request = BuyEpisodeRequest {
             ep_id: ep_id,
@@ -87,7 +88,7 @@ impl BpiClient {
     pub async fn manga_buy_episode_with_free(
         &self,
         comic_id: i32,
-        ep_id: i32
+        ep_id: i32,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let request = BuyEpisodeRequest {
             ep_id: ep_id,
@@ -108,7 +109,7 @@ impl BpiClient {
     pub async fn manga_buy_episode_with_general_coupon(
         &self,
         ep_id: i32,
-        pay_amount: i32
+        pay_amount: i32,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let request = BuyEpisodeRequest {
             ep_id: ep_id,
@@ -130,7 +131,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_manga_buy_episode_with_coupon() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let coupon_id = 12553634;
         let ep_id = 484360;

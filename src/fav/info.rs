@@ -1,5 +1,5 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 获取收藏夹元数据 ---
 
@@ -159,12 +159,12 @@ impl BpiClient {
     /// | `media_id` | u64 | 收藏夹 media_id |
     pub async fn fav_folder_info(
         &self,
-        media_id: u64
+        media_id: u64,
     ) -> Result<BpiResponse<FavFolderInfo>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/v3/fav/folder/info")
+        self.get("https://api.bilibili.com/x/v3/fav/folder/info")
             .query(&[("media_id", media_id)])
-            .send_bpi("获取收藏夹元数据").await
+            .send_bpi("获取收藏夹元数据")
+            .await
     }
 
     /// 获取指定用户创建的所有收藏夹信息
@@ -183,7 +183,7 @@ impl BpiClient {
         &self,
         up_mid: u64,
         typ: Option<u8>,
-        rid: Option<u64>
+        rid: Option<u64>,
     ) -> Result<BpiResponse<CreatedFolderListData>, BpiError> {
         let mut request = self
             .get("https://api.bilibili.com/x/v3/fav/folder/created/list-all")
@@ -198,7 +198,8 @@ impl BpiClient {
 
         request
             .query(&[("web_location", "333.1387")])
-            .send_bpi("获取指定用户创建的所有收藏夹信息").await
+            .send_bpi("获取指定用户创建的所有收藏夹信息")
+            .await
     }
 
     /// 查询用户收藏的视频收藏夹
@@ -217,19 +218,17 @@ impl BpiClient {
         &self,
         up_mid: u64,
         pn: u32,
-        ps: u32
+        ps: u32,
     ) -> Result<BpiResponse<CollectedFolderListData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/v3/fav/folder/collected/list")
-            .query(
-                &[
-                    ("up_mid", up_mid.to_string()),
-                    ("pn", pn.to_string()),
-                    ("ps", ps.to_string()),
-                    ("platform", "web".to_string()),
-                ]
-            )
-            .send_bpi("查询用户收藏的视频收藏夹").await
+        self.get("https://api.bilibili.com/x/v3/fav/folder/collected/list")
+            .query(&[
+                ("up_mid", up_mid.to_string()),
+                ("pn", pn.to_string()),
+                ("ps", ps.to_string()),
+                ("platform", "web".to_string()),
+            ])
+            .send_bpi("查询用户收藏的视频收藏夹")
+            .await
     }
 
     /// 批量获取指定收藏id的内容
@@ -245,17 +244,12 @@ impl BpiClient {
     /// | `resources` | &str | 形如 "{内容id}:{内容类型},..." |
     pub async fn fav_resource_infos(
         &self,
-        resources: &str
+        resources: &str,
     ) -> Result<BpiResponse<Vec<ResourceInfoItem>>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/v3/fav/resource/infos")
-            .query(
-                &[
-                    ("resources", resources),
-                    ("platform", "web"),
-                ]
-            )
-            .send_bpi("批量获取指定收藏id的内容").await
+        self.get("https://api.bilibili.com/x/v3/fav/resource/infos")
+            .query(&[("resources", resources), ("platform", "web")])
+            .send_bpi("批量获取指定收藏id的内容")
+            .await
     }
 }
 
@@ -266,7 +260,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_fav_folder_info() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为一个公开收藏夹的media_id
         let media_id = 3717139570;
         let resp = bpi.fav_folder_info(media_id).await;
@@ -285,7 +279,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_fav_created_list() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let up_mid = 4279370;
         let resp = bpi.fav_created_list(up_mid, None, None).await;
@@ -303,7 +297,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_fav_collected_list() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let up_mid = 4279370;
         let resp = bpi.fav_collected_list(up_mid, 1, 20).await;
@@ -321,7 +315,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_fav_resource_infos() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resources = "115087859779103:2";
         let resp = bpi.fav_resource_infos(resources).await;
 

@@ -1,203 +1,81 @@
-use serde::{ Deserialize, Serialize };
-use std::collections::{ BTreeMap, HashMap };
-use std::sync::{ RwLock, LazyLock };
-use chrono::Local;
-
 use crate::models::WbiData;
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use std::time::{ SystemTime, UNIX_EPOCH };
-
-const MIXIN_KEY_TAB: [usize; 64] = [
-    46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49, 33, 9, 42, 19, 29, 28,
-    14, 39, 12, 38, 41, 13, 37, 48, 7, 16, 24, 55, 40, 61, 26, 17, 0, 1, 60, 51, 30, 4, 22, 25, 54, 21,
-    56, 59, 6, 63, 57, 62, 11, 36, 20, 34, 44, 52,
-];
-
-pub static WBI_KEY_MAP: LazyLock<RwLock<HashMap<String, String>>> = LazyLock::new(||
-    RwLock::new(HashMap::new())
-);
-
-fn get_mixin_key(orig: &str) -> String {
-    let bytes = orig.as_bytes();
-    let mut s = Vec::new();
-    for &i in &MIXIN_KEY_TAB {
-        if i < bytes.len() {
-            s.push(bytes[i] as char);
-        }
-    }
-    s.into_iter().take(32).collect()
-}
-
-fn url_encode(s: &str) -> String {
-    let mut result = String::new();
-    for byte in s.bytes() {
-        match byte {
-            // 不编码的字符（字母数字和部分特殊字符）
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
-                result.push(byte as char);
-            }
-            // 空格编码为 %20
-            b' ' => result.push_str("%20"),
-            // 其他字符进行百分号编码，字母大写
-            _ => result.push_str(&format!("%{:02X}", byte)),
-        }
-    }
-    result
-}
-
-fn enc_wbi(params: &mut BTreeMap<String, String>, img_key: &str, sub_key: &str) {
-    let mixin_key = get_mixin_key(&(img_key.to_owned() + sub_key));
-    let wts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-    params.insert("wts".to_string(), wts.to_string());
-
-    // 过滤 value 中的 !'()* 字符
-    for value in params.values_mut() {
-        *value = value
-            .chars()
-            .filter(|c| !"!'()*".contains(*c))
-            .collect();
-    }
-
-    // 按 key 排序 (BTreeMap 默认排序)
-    let query = params
-        .iter()
-        .map(|(k, v)| format!("{}={}", url_encode(k), url_encode(v)))
-        .collect::<Vec<String>>()
-        .join("&");
-
-    let digest = md5::compute(format!("{}{}", query, mixin_key));
-    let w_rid = format!("{:x}", digest);
-    params.insert("w_rid".to_string(), w_rid);
-}
-
-#[derive(Deserialize, Serialize)]
-struct WbiImgData {
-    img_url: String,
-    sub_url: String,
-}
-
-#[derive(Deserialize, Serialize)]
-struct NavData {
-    wbi_img: WbiImgData,
-}
+use crate::{BpiClient, BpiError};
 
 impl BpiClient {
     pub async fn get_wbi_sign(&self) -> Result<WbiData, BpiError> {
-        let mut params = BTreeMap::new();
-
-        let resp: BpiResponse<NavData> = self
-            .get("https://api.bilibili.com/x/web-interface/nav")
-            .with_bilibili_headers()
-            .send_bpi("获取 wbi 签名").await?;
-
-        let data = resp.data.ok_or_else(|| BpiError::parse("获取 wbi 签名失败"))?;
-
-        let img_key = data.wbi_img.img_url.rsplit('/').next().unwrap().split('.').next().unwrap();
-        let sub_key = data.wbi_img.sub_url.rsplit('/').next().unwrap().split('.').next().unwrap();
-
-        enc_wbi(&mut params, img_key, sub_key);
+        let params = self
+            .sign_wbi_params(std::iter::empty::<(String, String)>())
+            .await?;
 
         Ok(WbiData {
-            wts: params
-                .get("wts")
-                .ok_or_else(|| BpiError::parse("缺少 wts"))?
+            wts: param_value(&params, "wts")?
                 .parse::<u64>()
                 .map_err(|_| BpiError::parse("wts 转换失败"))?,
-            w_rid: params
-                .get("w_rid")
-                .ok_or_else(|| BpiError::parse("缺少 w_rid"))?
-                .to_string(),
+            w_rid: param_value(&params, "w_rid")?.to_string(),
         })
     }
 
     pub async fn get_wbi_sign2<I, K, V>(&self, params: I) -> Result<Vec<(String, String)>, BpiError>
-        where I: IntoIterator<Item = (K, V)>, K: ToString, V: ToString
+    where
+        I: IntoIterator<Item = (K, V)>,
+        K: ToString,
+        V: ToString,
     {
-        let now = Local::now();
-        let s = now.format("%Y-%m-%d %H").to_string();
-
-        let img_key_key = format!("{}img_key", s);
-        let sub_key_key = format!("{}sub_key", s);
-
-        // 独立作用域读缓存，guard 在 await 前彻底释放
-        let cached = {
-            let map = WBI_KEY_MAP.read().unwrap();
-            match (map.get(&img_key_key), map.get(&sub_key_key)) {
-                (Some(img), Some(sub)) => Some((img.clone(), sub.clone())),
-                _ => None,
-            }
-        };
-
-        let (img_key, sub_key) = if let Some(keys) = cached {
-            keys
-        } else {
-            // 缓存没有 -> 请求 API（此时无锁持有，可安全 await）
-            let resp: BpiResponse<NavData> = self
-                .get("https://api.bilibili.com/x/web-interface/nav")
-                .send_bpi("获取 wbi 签名").await?;
-
-            let data = resp.data.ok_or_else(|| BpiError::parse("获取 wbi 签名失败"))?;
-
-            let img = data.wbi_img.img_url
-                .rsplit('/')
-                .next()
-                .unwrap()
-                .split('.')
-                .next()
-                .unwrap()
-                .to_string();
-
-            let sub = data.wbi_img.sub_url
-                .rsplit('/')
-                .next()
-                .unwrap()
-                .split('.')
-                .next()
-                .unwrap()
-                .to_string();
-
-            // 独立作用域写缓存
-            {
-                let mut map = WBI_KEY_MAP.write().unwrap();
-                map.insert(img_key_key, img.clone());
-                map.insert(sub_key_key, sub.clone());
-            }
-
-            (img, sub)
-        };
-
-        // 构造参数
-        let mut params: BTreeMap<String, String> = params
-            .into_iter()
-            .map(|(k, v)| (k.to_string(), v.to_string()))
-            .collect();
-
-        enc_wbi(&mut params, &img_key, &sub_key);
-
-        Ok(params.into_iter().collect())
+        self.sign_wbi_params(params).await
     }
+}
+
+fn param_value<'a>(params: &'a [(String, String)], key: &str) -> Result<&'a str, BpiError> {
+    params
+        .iter()
+        .find_map(|(param_key, value)| (param_key == key).then_some(value.as_str()))
+        .ok_or_else(|| BpiError::parse(format!("缺少 {key}")))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::sign::wbi::WbiKeys;
+    use crate::sign::wbi_client::current_wbi_cache_bucket;
 
     #[tokio::test]
-    async fn test_get_wts_and_rid2() {
-        let bpi = BpiClient::new();
+    async fn get_wbi_sign_uses_cached_client_keys() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+        client.wbi_key_cache().insert(
+            current_wbi_cache_bucket(),
+            WbiKeys::new(
+                "abcdefghijklmnopqrstuvwxyz123456",
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ654321",
+            )?,
+        )?;
+
+        let wbi = client.get_wbi_sign().await?;
+
+        assert!(wbi.wts > 0);
+        assert!(!wbi.w_rid.is_empty());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_get_wts_and_rid2() -> Result<(), BpiError> {
+        if std::env::var("BPI_LIVE_TEST").ok().as_deref() != Some("1") {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new()?;
 
         let params = vec![
             ("bvid", "BV18x411c74j".to_string()),
             ("cid", "21448".to_string()),
             ("up_mid", "46473".to_string()),
-            ("web_location", "0.0".to_string())
+            ("web_location", "0.0".to_string()),
         ];
 
-        let wbi = bpi.get_wbi_sign2(params.clone()).await.unwrap();
-        tracing::info!("{:?}", wbi);
-        tracing::info!("{:?}", WBI_KEY_MAP);
+        let wbi = bpi.get_wbi_sign2(params.clone()).await?;
+        assert!(wbi.iter().any(|(key, _)| key == "w_rid"));
 
-        let wbi = bpi.get_wbi_sign2(params).await.unwrap();
-        tracing::info!("{:?}", wbi);
+        let wbi = bpi.get_wbi_sign2(params).await?;
+        assert!(wbi.iter().any(|(key, _)| key == "wts"));
+        Ok(())
     }
 }

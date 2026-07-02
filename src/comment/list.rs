@@ -2,8 +2,8 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 use super::types::{
     Comment, // 评论条目对象，包含评论内容、发送者信息、回复等
@@ -21,29 +21,29 @@ pub type CommentListResponse = BpiResponse<CommentListData>;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommentListData {
     pub page: Option<PageInfo>,
-    pub cursor: Option<Cursor>, // 评论列表游标
+    pub cursor: Option<Cursor>,        // 评论列表游标
     pub replies: Option<Vec<Comment>>, // 评论列表，禁用时为 null
-    pub top: Option<Top>, // 评论列表顶部信息
+    pub top: Option<Top>,              // 评论列表顶部信息
     pub top_replies: Option<Vec<Comment>>,
     pub effects: Option<serde_json::Value>,
-    pub assist: Option<u64>, // 待确认
+    pub assist: Option<u64>,    // 待确认
     pub blacklist: Option<u64>, // 待确认
-    pub vote: Option<u64>, // 投票评论？
+    pub vote: Option<u64>,      // 投票评论？
     pub config: Option<Config>, // 评论区显示控制
-    pub upper: Option<Upper>, // 置顶评论
+    pub upper: Option<Upper>,   // 置顶评论
 
     pub control: Option<Control>, // 评论区输入属性
     pub note: Option<u32>,
     pub cm_info: Option<serde_json::Value>, // 评论区相关信息
 
-    // pub page: Option<PageInfo>, // 页信息
-    // pub hots: Option<Vec<Comment>>, // 热评列表，禁用时为 null
-    // pub notice: Option<Notice>, // 评论区公告信息，无效时为 null
-    // pub mode: Option<u64>, // 评论区类型 id
-    // pub support_mode: Option<Vec<u64>>, // 评论区支持的类型 id
-    // pub folder: Option<Folder>, // 折叠相关信息
-    // pub lottery_card: Option<()>, // 待确认
-    // pub show_bvid: Option<bool>, // 是否显示 bvid
+                                            // pub page: Option<PageInfo>, // 页信息
+                                            // pub hots: Option<Vec<Comment>>, // 热评列表，禁用时为 null
+                                            // pub notice: Option<Notice>, // 评论区公告信息，无效时为 null
+                                            // pub mode: Option<u64>, // 评论区类型 id
+                                            // pub support_mode: Option<Vec<u64>>, // 评论区支持的类型 id
+                                            // pub folder: Option<Folder>, // 折叠相关信息
+                                            // pub lottery_card: Option<()>, // 待确认
+                                            // pub show_bvid: Option<bool>, // 是否显示 bvid
 }
 
 /// 公告信息
@@ -66,9 +66,9 @@ pub struct HotCommentData {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct HotCommentPage {
     pub acount: i64, // 总评论数
-    pub count: i64, // 热评数
-    pub num: i32, // 当前页码
-    pub size: i32, // 每页项数
+    pub count: i64,  // 热评数
+    pub num: i32,    // 当前页码
+    pub size: i32,   // 每页项数
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -100,7 +100,7 @@ impl BpiClient {
         pn: Option<i32>,
         ps: Option<i32>,
         sort: Option<i32>,
-        nohot: Option<i32>
+        nohot: Option<i32>,
     ) -> Result<CommentListResponse, BpiError> {
         let mut params = vec![("type", r#type.to_string()), ("oid", oid.to_string())];
         if let Some(pn) = pn {
@@ -116,10 +116,10 @@ impl BpiClient {
             params.push(("nohot", nohot.to_string()));
         }
 
-        self
-            .get("https://api.bilibili.com/x/v2/reply")
+        self.get("https://api.bilibili.com/x/v2/reply")
             .query(&params)
-            .send_bpi("获取评论主列表").await
+            .send_bpi("获取评论主列表")
+            .await
     }
 
     /// 获取某条根评论下的子评论列表
@@ -143,12 +143,12 @@ impl BpiClient {
         oid: i64,
         root: i64,
         pn: Option<i32>,
-        ps: Option<i32>
+        ps: Option<i32>,
     ) -> Result<CommentListResponse, BpiError> {
         let mut params = vec![
             ("type", r#type.to_string()),
             ("oid", oid.to_string()),
-            ("root", root.to_string())
+            ("root", root.to_string()),
         ];
         if let Some(pn) = pn {
             params.push(("pn", pn.to_string()));
@@ -157,10 +157,10 @@ impl BpiClient {
             params.push(("ps", ps.to_string()));
         }
 
-        self
-            .get("https://api.bilibili.com/x/v2/reply/reply")
+        self.get("https://api.bilibili.com/x/v2/reply/reply")
             .query(&params)
-            .send_bpi("获取子评论列表").await
+            .send_bpi("获取子评论列表")
+            .await
     }
 
     /// 获取评论区热评列表
@@ -184,12 +184,12 @@ impl BpiClient {
         oid: i64,
         root: i64,
         pn: Option<i32>,
-        ps: Option<i32>
+        ps: Option<i32>,
     ) -> Result<HotCommentResponse, BpiError> {
         let mut params = vec![
             ("type", r#type.to_string()),
             ("oid", oid.to_string()),
-            ("root", root.to_string())
+            ("root", root.to_string()),
         ];
         if let Some(pn) = pn {
             params.push(("pn", pn.to_string()));
@@ -198,10 +198,10 @@ impl BpiClient {
             params.push(("ps", ps.to_string()));
         }
 
-        self
-            .get("https://api.bilibili.com/x/v2/reply/hot")
+        self.get("https://api.bilibili.com/x/v2/reply/hot")
             .query(&params)
-            .send_bpi("获取评论区热评列表").await
+            .send_bpi("获取评论区热评列表")
+            .await
     }
     /// 获取评论区评论总数
     ///
@@ -216,16 +216,13 @@ impl BpiClient {
     pub async fn comment_count(
         &self,
         r#type: i32,
-        oid: i64
+        oid: i64,
     ) -> Result<BpiResponse<CountData>, BpiError> {
-        let params = [
-            ("type", r#type.to_string()),
-            ("oid", oid.to_string()),
-        ];
-        self
-            .get("https://api.bilibili.com/x/v2/reply/count")
+        let params = [("type", r#type.to_string()), ("oid", oid.to_string())];
+        self.get("https://api.bilibili.com/x/v2/reply/count")
             .query(&params)
-            .send_bpi("获取评论区评论总数").await
+            .send_bpi("获取评论区评论总数")
+            .await
     }
 }
 
@@ -240,16 +237,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_comment_list() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi.comment_list(
-            TEST_TYPE,
-            TEST_OID,
-            Some(1),
-            Some(5),
-            Some(0),
-            Some(0)
-        ).await?;
+        let result = bpi
+            .comment_list(TEST_TYPE, TEST_OID, Some(1), Some(5), Some(0), Some(0))
+            .await?;
         let data = result.into_data()?;
         info!("总评论数: {}", data.replies.unwrap().len());
 
@@ -258,15 +250,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_comment_replies() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi.comment_replies(
-            TEST_TYPE,
-            TEST_OID,
-            TEST_ROOT_RPID,
-            Some(1),
-            Some(5)
-        ).await?;
+        let result = bpi
+            .comment_replies(TEST_TYPE, TEST_OID, TEST_ROOT_RPID, Some(1), Some(5))
+            .await?;
         let data = result.into_data()?;
         info!("总评论数: {}", data.replies.unwrap().len());
 
@@ -275,10 +263,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_comment_hot() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let root_rpid = 654321;
 
-        let result = bpi.comment_hot(TEST_TYPE, TEST_OID, root_rpid, Some(1), Some(5)).await?;
+        let result = bpi
+            .comment_hot(TEST_TYPE, TEST_OID, root_rpid, Some(1), Some(5))
+            .await?;
         let data = result.into_data()?;
 
         info!("热评数量: {}", data.replies.len());
@@ -291,7 +281,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_comment_count() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi.comment_count(TEST_TYPE, TEST_OID).await?;
 

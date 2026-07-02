@@ -1,7 +1,7 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use base64::{ Engine as _, engine::general_purpose };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use base64::{Engine as _, engine::general_purpose};
 
 // ================= 数据结构 =================
 
@@ -24,7 +24,7 @@ impl BpiClient {
         &self,
         room_id: i64,
         next_interval: Option<i32>,
-        platform: Option<&str>
+        platform: Option<&str>,
     ) -> Result<HeartBeatResponse, BpiError> {
         // 构建心跳数据
         let interval = next_interval.unwrap_or(60);
@@ -44,7 +44,8 @@ impl BpiClient {
         let resp: HeartBeatResponse = self
             .get("https://live-trace.bilibili.com/xlive/rdata-interface/v1/heartbeat/webHeartBeat")
             .query(&params)
-            .send_bpi("直播心跳上报").await?;
+            .send_bpi("直播心跳上报")
+            .await?;
 
         Ok(resp)
     }
@@ -56,7 +57,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_web_heart_beat() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.live_web_heart_beat(23174842, None, None).await?;
 
         let data = resp.data.unwrap();

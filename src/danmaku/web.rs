@@ -5,13 +5,13 @@
 
 use bytes::Bytes;
 
-use crate::{ BilibiliRequest, BpiClient, BpiError };
+use crate::{BilibiliRequest, BpiClient, BpiError};
 
 fn append_seg_extra_query(
     q: &mut Vec<(String, String)>,
     pull_mode: Option<u32>,
     ps: Option<u32>,
-    pe: Option<u32>
+    pe: Option<u32>,
 ) {
     if let Some(v) = pull_mode {
         q.push(("pull_mode".to_string(), v.to_string()));
@@ -42,7 +42,7 @@ impl BpiClient {
         pid: Option<u64>,
         pull_mode: Option<u32>,
         ps: Option<u32>,
-        pe: Option<u32>
+        pe: Option<u32>,
     ) -> Result<Bytes, BpiError> {
         let mut q = vec![
             ("type".to_string(), typ.to_string()),
@@ -54,8 +54,7 @@ impl BpiClient {
         }
         append_seg_extra_query(&mut q, pull_mode, ps, pe);
 
-        self
-            .get("https://api.bilibili.com/x/v2/dm/web/seg.so")
+        self.get("https://api.bilibili.com/x/v2/dm/web/seg.so")
             .with_bilibili_headers()
             .query(&q)
             .send_request("弹幕 web 分段 seg.so")
@@ -73,7 +72,7 @@ impl BpiClient {
         pid: Option<u64>,
         pull_mode: Option<u32>,
         ps: Option<u32>,
-        pe: Option<u32>
+        pe: Option<u32>,
     ) -> Result<Bytes, BpiError> {
         let mut params = vec![
             ("type".to_string(), typ.to_string()),
@@ -87,8 +86,7 @@ impl BpiClient {
 
         let signed = self.get_wbi_sign2(params).await?;
 
-        self
-            .get("https://api.bilibili.com/x/v2/dm/wbi/web/seg.so")
+        self.get("https://api.bilibili.com/x/v2/dm/wbi/web/seg.so")
             .with_bilibili_headers()
             .query(&signed)
             .send_request("弹幕 WBI web 分段 seg.so")
@@ -104,7 +102,7 @@ impl BpiClient {
         &self,
         typ: u8,
         oid: u64,
-        pid: Option<u64>
+        pid: Option<u64>,
     ) -> Result<Bytes, BpiError> {
         let mut q = vec![
             ("type".to_string(), typ.to_string()),
@@ -114,8 +112,7 @@ impl BpiClient {
             q.push(("pid".to_string(), p.to_string()));
         }
 
-        self
-            .get("https://api.bilibili.com/x/v2/dm/web/view")
+        self.get("https://api.bilibili.com/x/v2/dm/web/view")
             .with_bilibili_headers()
             .query(&q)
             .send_request("弹幕 web/view 元数据 protobuf")
@@ -133,7 +130,7 @@ impl BpiClient {
         pid: Option<u64>,
         pull_mode: Option<u32>,
         ps: Option<u32>,
-        pe: Option<u32>
+        pe: Option<u32>,
     ) -> Result<Bytes, BpiError> {
         let mut q = vec![
             ("type".to_string(), typ.to_string()),
@@ -145,8 +142,7 @@ impl BpiClient {
         }
         append_seg_extra_query(&mut q, pull_mode, ps, pe);
 
-        self
-            .get("https://api.bilibili.com/x/v2/dm/list/seg.so")
+        self.get("https://api.bilibili.com/x/v2/dm/list/seg.so")
             .with_bilibili_headers()
             .query(&q)
             .send_request("弹幕 APP list/seg.so")
@@ -162,7 +158,7 @@ impl BpiClient {
         &self,
         typ: u8,
         oid: u64,
-        date: &str
+        date: &str,
     ) -> Result<Bytes, BpiError> {
         let q = vec![
             ("type".to_string(), typ.to_string()),
@@ -170,8 +166,7 @@ impl BpiClient {
             ("date".to_string(), date.to_string()),
         ];
 
-        self
-            .get("https://api.bilibili.com/x/v2/dm/web/history/seg.so")
+        self.get("https://api.bilibili.com/x/v2/dm/web/history/seg.so")
             .with_bilibili_headers()
             .query(&q)
             .send_request("历史弹幕 web/history/seg.so")
@@ -187,7 +182,7 @@ impl BpiClient {
         &self,
         typ: u8,
         oid: u64,
-        date: &str
+        date: &str,
     ) -> Result<Bytes, BpiError> {
         let q = vec![
             ("type".to_string(), typ.to_string()),
@@ -195,8 +190,7 @@ impl BpiClient {
             ("date".to_string(), date.to_string()),
         ];
 
-        self
-            .get("https://api.bilibili.com/x/v2/dm/history")
+        self.get("https://api.bilibili.com/x/v2/dm/history")
             .with_bilibili_headers()
             .query(&q)
             .send_request("历史弹幕 XML /dm/history")
@@ -213,8 +207,10 @@ pub mod tests {
 
     #[tokio::test]
     async fn test_danmaku_web_seg_proto() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
-        let data = bpi.danmaku_web_seg_proto(1, TEST_OID, 1, None, None, None, None).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let data = bpi
+            .danmaku_web_seg_proto(1, TEST_OID, 1, None, None, None, None)
+            .await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("web seg.so 响应字节数: {}", data.len());
@@ -224,8 +220,10 @@ pub mod tests {
 
     #[tokio::test]
     async fn test_danmaku_web_seg_wbi_proto() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
-        let data = bpi.danmaku_web_seg_wbi_proto(1, TEST_OID, 1, None, None, None, None).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let data = bpi
+            .danmaku_web_seg_wbi_proto(1, TEST_OID, 1, None, None, None, None)
+            .await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("wbi web seg.so 响应字节数: {}", data.len());
@@ -235,7 +233,7 @@ pub mod tests {
 
     #[tokio::test]
     async fn test_danmaku_web_view_proto() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let data = bpi.danmaku_web_view_proto(1, TEST_OID, None).await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
@@ -246,8 +244,10 @@ pub mod tests {
 
     #[tokio::test]
     async fn test_danmaku_mobile_seg_proto() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
-        let data = bpi.danmaku_mobile_seg_proto(1, TEST_OID, 1, None, None, None, None).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let data = bpi
+            .danmaku_mobile_seg_proto(1, TEST_OID, 1, None, None, None, None)
+            .await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("mobile seg.so 响应字节数: {}", data.len());

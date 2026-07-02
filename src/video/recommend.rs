@@ -1,8 +1,8 @@
 //! 视频推荐相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 视频推荐相关数据结构体 ---
 
@@ -183,7 +183,7 @@ impl BpiClient {
     pub async fn video_related_videos(
         &self,
         aid: Option<u64>,
-        bvid: Option<&str>
+        bvid: Option<&str>,
     ) -> Result<BpiResponse<Vec<RelatedVideo>>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -216,7 +216,7 @@ impl BpiClient {
         &self,
         ps: Option<u8>,
         fresh_idx: Option<u32>,
-        fetch_row: Option<u32>
+        fetch_row: Option<u32>,
     ) -> Result<BpiResponse<RcmdFeedResponseData>, BpiError> {
         let ps_val = ps.unwrap_or(12);
         let fresh_idx_val = fresh_idx.unwrap_or(1);
@@ -227,7 +227,7 @@ impl BpiClient {
             ("fresh_idx", fresh_idx_val.to_string()),
             ("fresh_idx_1h", fresh_idx_val.to_string()),
             ("brush", fresh_idx_val.to_string()),
-            ("fetch_row", fetch_row_val.to_string())
+            ("fetch_row", fetch_row_val.to_string()),
         ];
         let params = self.get_wbi_sign2(params).await?;
 
@@ -250,7 +250,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_related_videos_by_aid() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.video_related_videos(Some(TEST_AID), None).await?;
         let data = resp.into_data()?;
 
@@ -264,8 +264,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_homepage_recommendations() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.video_homepage_recommendations(Some(12), Some(1), Some(1)).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .video_homepage_recommendations(Some(12), Some(1), Some(1))
+            .await?;
         let data = resp.into_data()?;
 
         info!("首页推荐列表: {:?}", data);

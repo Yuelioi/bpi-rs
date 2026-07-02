@@ -1,5 +1,5 @@
-use crate::models::{ Account, Vip };
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::models::{Account, Vip};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::Deserialize;
 
 /// 大会员中心信息响应结构体
@@ -77,10 +77,10 @@ impl BpiClient {
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/vip/center.html#获取大会员中心信息)
     ///
     pub async fn vip_center_info(&self) -> Result<BpiResponse<VipCenterData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/vip/web/vip_center/combine")
+        self.get("https://api.bilibili.com/x/vip/web/vip_center/combine")
             .query(&[("build", 0)])
-            .send_bpi("获取大会员中心信息").await
+            .send_bpi("获取大会员中心信息")
+            .await
     }
 }
 
@@ -92,7 +92,7 @@ mod tests {
     async fn test_vip_center_info_comprehensive() {
         tracing::info!("开始测试大会员中心信息的综合功能");
 
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.vip_center_info().await;
 
         match resp {
@@ -109,16 +109,22 @@ mod tests {
                 tracing::info!("用户性别: {}", account.sex);
                 tracing::info!("用户等级: {}", account.rank);
                 tracing::info!("用户签名: {}", account.sign);
-                tracing::info!("是否注销: {}", if account.is_deleted == 0 {
-                    "正常"
-                } else {
-                    "已注销"
-                });
-                tracing::info!("是否转正: {}", if account.is_senior_member == 1 {
-                    "正式会员"
-                } else {
-                    "未转正"
-                });
+                tracing::info!(
+                    "是否注销: {}",
+                    if account.is_deleted == 0 {
+                        "正常"
+                    } else {
+                        "已注销"
+                    }
+                );
+                tracing::info!(
+                    "是否转正: {}",
+                    if account.is_senior_member == 1 {
+                        "正式会员"
+                    } else {
+                        "未转正"
+                    }
+                );
 
                 // 2. 会员信息详细检查
                 tracing::info!("=== 会员信息 ===");
@@ -130,7 +136,14 @@ mod tests {
                     _ => "未知类型",
                 };
                 tracing::info!("会员类型: {} ({})", vip.vip_type, vip_type_text);
-                tracing::info!("会员状态: {}", if vip.vip_status == 1 { "有效" } else { "无效" });
+                tracing::info!(
+                    "会员状态: {}",
+                    if vip.vip_status == 1 {
+                        "有效"
+                    } else {
+                        "无效"
+                    }
+                );
 
                 if vip.vip_due_date > 0 {
                     let due_date = chrono::DateTime::from_timestamp_millis(vip.vip_due_date as i64);
@@ -153,7 +166,10 @@ mod tests {
                     _ => "未知类型",
                 };
                 tracing::info!("电视会员类型: {} ({})", tv.tv_type, tv_type_text);
-                tracing::info!("电视会员状态: {}", if tv.status == 1 { "有效" } else { "无效" });
+                tracing::info!(
+                    "电视会员状态: {}",
+                    if tv.status == 1 { "有效" } else { "无效" }
+                );
 
                 // 4. 头像框信息
                 tracing::info!("=== 头像框信息 ===");
@@ -196,7 +212,7 @@ mod tests {
     async fn test_time_calculation() {
         tracing::info!("开始测试时间计算功能");
 
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.vip_center_info().await;
 
         match resp {
@@ -258,10 +274,8 @@ mod tests {
                 // 分析会员到期时间
                 let vip = &user.vip;
                 if vip.vip_due_date > 0 {
-                    if
-                        let Some(due_date) = chrono::DateTime::from_timestamp_millis(
-                            vip.vip_due_date as i64
-                        )
+                    if let Some(due_date) =
+                        chrono::DateTime::from_timestamp_millis(vip.vip_due_date as i64)
                     {
                         let now = chrono::Utc::now();
                         let duration = due_date.signed_duration_since(now);

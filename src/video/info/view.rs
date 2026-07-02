@@ -3,8 +3,8 @@
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
 use crate::models::Account;
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 视频分辨率信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -351,20 +351,15 @@ impl BpiClient {
     pub async fn video_info(
         &self,
         aid: Option<u64>,
-        bvid: Option<&str>
+        bvid: Option<&str>,
     ) -> Result<VideoInfoResponse, BpiError> {
         let aid = aid.map(|v| v.to_string());
         let bvid = bvid.map(|v| v.to_string());
 
-        self
-            .get("https://api.bilibili.com/x/web-interface/view")
-            .query(
-                &[
-                    ("aid", aid),
-                    ("bvid", bvid),
-                ]
-            )
-            .send_bpi("视频详细信息").await
+        self.get("https://api.bilibili.com/x/web-interface/view")
+            .query(&[("aid", aid), ("bvid", bvid)])
+            .send_bpi("视频详细信息")
+            .await
     }
 }
 
@@ -374,7 +369,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_info() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let aid = Some(10001);
         let bvid = None;

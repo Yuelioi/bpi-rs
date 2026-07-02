@@ -1,7 +1,7 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use chrono::Utc;
 use reqwest::multipart::Form;
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
 // --- 弹幕发送响应数据结构体 ---
 
@@ -46,14 +46,16 @@ impl BpiClient {
     pub async fn live_get_danmu_info(
         &self,
         room_id: u64,
-        info_type: u8
+        info_type: u8,
     ) -> Result<BpiResponse<LiveDanmuInfoData>, BpiError> {
         let signed = self
-            .get_wbi_sign2(vec![("id", room_id.to_string()), ("type", info_type.to_string())])
+            .get_wbi_sign2(vec![
+                ("id", room_id.to_string()),
+                ("type", info_type.to_string()),
+            ])
             .await?;
 
-        self
-            .get("https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo")
+        self.get("https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo")
             .with_bilibili_headers()
             .query(&signed)
             .send_bpi("直播 getDanmuInfo")
@@ -72,7 +74,7 @@ impl BpiClient {
         room_id: u64,
         message: &str,
         color: Option<u32>,
-        font_size: Option<u32>
+        font_size: Option<u32>,
     ) -> Result<BpiResponse<SendDanmuData>, BpiError> {
         let csrf = self.csrf()?;
         let now = Utc::now().timestamp();
@@ -100,10 +102,10 @@ impl BpiClient {
             form = form.text("fontsize", "25"); // 默认 25
         }
 
-        self
-            .post("https://api.live.bilibili.com/msg/send")
+        self.post("https://api.live.bilibili.com/msg/send")
             .multipart(form)
-            .send_bpi("发送直播弹幕").await
+            .send_bpi("发送直播弹幕")
+            .await
     }
 }
 
@@ -114,7 +116,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_live_get_danmu_info() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let room_id = 21733448;
 
         let resp = bpi.live_get_danmu_info(room_id, 0).await?;
@@ -123,14 +125,18 @@ mod tests {
 
         assert!(!data.token.is_empty(), "token 不应为空");
         assert!(!data.host_list.is_empty(), "host_list 不应为空");
-        info!("token: {}..., host_list 数量: {}", &data.token[..20], data.host_list.len());
+        info!(
+            "token: {}..., host_list 数量: {}",
+            &data.token[..20],
+            data.host_list.len()
+        );
 
         Ok(())
     }
 
     #[tokio::test]
     async fn test_send_live_danmu() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为实际的直播间 ID，这是一个公开的直播间 ID
         let room_id = 21733448;
         let message = "牛";

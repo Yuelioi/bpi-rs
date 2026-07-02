@@ -1,7 +1,7 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 // --- Structs for `getChargeRecord` ---
 
@@ -331,17 +331,15 @@ impl BpiClient {
     pub async fn electric_charge_record(
         &self,
         page: u64,
-        charge_type: u32
+        charge_type: u32,
     ) -> Result<BpiResponse<ChargeRecordData>, BpiError> {
-        self
-            .get("https://api.live.bilibili.com/xlive/revenue/v1/guard/getChargeRecord")
-            .query(
-                &[
-                    ("page", page.to_string()),
-                    ("type", charge_type.to_string()),
-                ]
-            )
-            .send_bpi("获取包月充电列表").await
+        self.get("https://api.live.bilibili.com/xlive/revenue/v1/guard/getChargeRecord")
+            .query(&[
+                ("page", page.to_string()),
+                ("type", charge_type.to_string()),
+            ])
+            .send_bpi("获取包月充电列表")
+            .await
     }
 
     /// UP主包月充电详情
@@ -356,12 +354,12 @@ impl BpiClient {
     /// | `up_mid` | u64 | 目标用户 mid |
     pub async fn electric_upower_item_detail(
         &self,
-        up_mid: u64
+        up_mid: u64,
     ) -> Result<BpiResponse<UpowerItemDetail>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/upower/item/detail")
+        self.get("https://api.bilibili.com/x/upower/item/detail")
             .query(&[("up_mid", up_mid)])
-            .send_bpi("获取UP主包月充电详情").await
+            .send_bpi("获取UP主包月充电详情")
+            .await
     }
 
     /// 与UP主的包月充电关系
@@ -378,12 +376,12 @@ impl BpiClient {
     /// | `up_mid` | u64 | 目标用户 mid |
     pub async fn electric_charge_follow_info(
         &self,
-        up_mid: u64
+        up_mid: u64,
     ) -> Result<BpiResponse<ChargeFollowInfo>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/upower/charge/follow/info")
+        self.get("https://api.bilibili.com/x/upower/charge/follow/info")
             .query(&[("up_mid", up_mid)])
-            .send_bpi("获取与UP主的包月充电关系").await
+            .send_bpi("获取与UP主的包月充电关系")
+            .await
     }
 
     /// 包月充电用户排名
@@ -406,15 +404,11 @@ impl BpiClient {
         up_mid: u64,
         pn: u64,
         ps: u64,
-        privilege_type: Option<u64>
+        privilege_type: Option<u64>,
     ) -> Result<BpiResponse<MemberRankData>, BpiError> {
-        let mut req = self.get("https://api.bilibili.com/x/upower/up/member/rank/v2").query(
-            &[
-                ("up_mid", up_mid),
-                ("pn", pn),
-                ("ps", ps),
-            ]
-        );
+        let mut req = self
+            .get("https://api.bilibili.com/x/upower/up/member/rank/v2")
+            .query(&[("up_mid", up_mid), ("pn", pn), ("ps", ps)]);
 
         if let Some(ptype) = privilege_type {
             req = req.query(&[("privilege_type", ptype)]);
@@ -431,7 +425,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_charge_record() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 获取自己使用中的包月充电列表
         let resp = bpi.electric_charge_record(1, 1).await;
         info!("响应: {:?}", resp);
@@ -448,7 +442,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_upower_item_detail() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为有效的UP主mid
         let up_mid = 1265680561;
         let resp = bpi.electric_upower_item_detail(up_mid).await;
@@ -457,13 +451,16 @@ mod tests {
 
         if let Ok(response) = resp {
             let data = response.data.unwrap();
-            info!("UP主 {} 的充电总人数: {}", data.user_card.nickname, data.upower_rank.total);
+            info!(
+                "UP主 {} 的充电总人数: {}",
+                data.user_card.nickname, data.upower_rank.total
+            );
         }
     }
 
     #[tokio::test]
     async fn test_get_charge_follow_info() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let up_mid = 293793435;
         let resp = bpi.electric_charge_follow_info(up_mid).await;
         info!("响应: {:?}", resp);
@@ -471,13 +468,16 @@ mod tests {
 
         if let Ok(response) = resp {
             let data = response.data.unwrap();
-            info!("与UP主 {} 的充电关系：已保持 {} 天", data.up_card.nickname, data.days);
+            info!(
+                "与UP主 {} 的充电关系：已保持 {} 天",
+                data.up_card.nickname, data.days
+            );
         }
     }
 
     #[tokio::test]
     async fn test_get_upower_member_rank() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为有效的UP主mid
         let up_mid = 1265680561;
         // 获取所有档位的用户排名

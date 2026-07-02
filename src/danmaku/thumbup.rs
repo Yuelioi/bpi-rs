@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/danmaku/thumbup.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -24,7 +24,7 @@ impl BpiClient {
     pub async fn danmaku_thumbup_stats(
         &self,
         oid: i64,
-        ids: &[i64]
+        ids: &[i64],
     ) -> Result<ThumbupStatsResponse, BpiError> {
         let ids_join = ids
             .iter()
@@ -36,7 +36,8 @@ impl BpiClient {
         let resp: ThumbupStatsResponse = self
             .get("https://api.bilibili.com/x/v2/dm/thumbup/stats")
             .query(&params)
-            .send_bpi("查询弹幕点赞状态").await?;
+            .send_bpi("查询弹幕点赞状态")
+            .await?;
 
         Ok(resp)
     }

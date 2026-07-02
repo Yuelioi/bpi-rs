@@ -2,9 +2,9 @@
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
-use crate::models::{ LevelInfo, Nameplate, Official, OfficialVerify, Pendant, VipLabel };
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::models::{LevelInfo, Nameplate, Official, OfficialVerify, Pendant, VipLabel};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct VideoDetailData {
@@ -433,22 +433,16 @@ impl BpiClient {
         &self,
         aid: Option<u64>,
         bvid: Option<&str>,
-        need_elec: Option<u8>
+        need_elec: Option<u8>,
     ) -> Result<VideoDetailResponse, BpiError> {
         let aid = aid.map(|aid| aid.to_string());
         let bvid = bvid.map(|bvid| bvid.to_string());
         let need_elec = need_elec.map(|need_elec| need_elec.to_string());
 
-        self
-            .get("https://api.bilibili.com/x/web-interface/view/detail")
-            .query(
-                &[
-                    ("aid", aid),
-                    ("bvid", bvid),
-                    ("need_elec", need_elec),
-                ]
-            )
-            .send_bpi("视频超详细信息").await
+        self.get("https://api.bilibili.com/x/web-interface/view/detail")
+            .query(&[("aid", aid), ("bvid", bvid), ("need_elec", need_elec)])
+            .send_bpi("视频超详细信息")
+            .await
     }
 }
 
@@ -458,7 +452,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_detail() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let aid = Some(10001);
         // let aid = Some(114993303389765);

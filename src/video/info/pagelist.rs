@@ -4,8 +4,8 @@
 //!
 //! [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/video.html#查询视频分p列表)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 分P分辨率信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -61,19 +61,14 @@ impl BpiClient {
     pub async fn video_pagelist(
         &self,
         aid: Option<u64>,
-        bvid: Option<&str>
+        bvid: Option<&str>,
     ) -> Result<PageListResponse, BpiError> {
         let aid = aid.map(|v| v.to_string());
         let bvid = bvid.map(|v| v.to_string());
-        self
-            .get("https://api.bilibili.com/x/player/pagelist")
-            .query(
-                &[
-                    ("aid", aid),
-                    ("bvid", bvid),
-                ]
-            )
-            .send_bpi("查询视频分P列表").await
+        self.get("https://api.bilibili.com/x/player/pagelist")
+            .query(&[("aid", aid), ("bvid", bvid)])
+            .send_bpi("查询视频分P列表")
+            .await
     }
 }
 
@@ -83,7 +78,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_pagelist() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         match bpi.video_pagelist(Some(10001), None).await {
             Ok(resp) => {

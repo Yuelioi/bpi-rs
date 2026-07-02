@@ -2,8 +2,8 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/clientinfo/ip.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // ==========================
 // 数据结构
@@ -41,9 +41,8 @@ impl BpiClient {
     /// # 文档
     /// [IP 地址归属地查询](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/clientinfo/ip.md)
     pub async fn clientinfo_ip(&self, ip: Option<&str>) -> Result<BpiResponse<IpInfo>, BpiError> {
-        let mut req = self.get(
-            "https://api.live.bilibili.com/ip_service/v1/ip_service/get_ip_addr"
-        );
+        let mut req =
+            self.get("https://api.live.bilibili.com/ip_service/v1/ip_service/get_ip_addr");
 
         if let Some(ip) = ip {
             req = req.query(&[("ip", ip)]);
@@ -61,7 +60,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_clientinfo_ip() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let resp = bpi.clientinfo_ip(Some(TEST_IP)).await?;
         if resp.code == 0 {

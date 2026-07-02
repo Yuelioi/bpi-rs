@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
 use crate::models::Vip;
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 // --- 响应数据结构体 ---
 
 /// 用户认证信息
@@ -80,7 +80,7 @@ impl BpiClient {
         pn: Option<u32>,
         offset: Option<&str>,
         last_access_ts: Option<u64>,
-        from: Option<&str>
+        from: Option<&str>,
     ) -> Result<BpiResponse<FansListResponseData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/relation/fans")
@@ -118,8 +118,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_user_followers() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.user_followers(TEST_VMID, Some(50), Some(1), None, None, None).await?;
+        if std::env::var_os("BPI_LIVE_TEST").is_none() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .user_followers(TEST_VMID, Some(50), Some(1), None, None, None)
+            .await?;
         let data = resp.into_data()?;
 
         info!("用户粉丝明细: {:?}", data);

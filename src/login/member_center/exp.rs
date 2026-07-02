@@ -2,7 +2,7 @@
 //!
 //! [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/member_center.html#查询每日投币获得经验数)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 impl BpiClient {
     /// 查询每日投币获得经验数
@@ -10,9 +10,9 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login)
     pub async fn member_center_today_coin_exp(&self) -> Result<BpiResponse<u32>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/web-interface/coin/today/exp")
-            .send_bpi("每日投币经验").await
+        self.get("https://api.bilibili.com/x/web-interface/coin/today/exp")
+            .send_bpi("每日投币经验")
+            .await
     }
 }
 
@@ -22,7 +22,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_today_coin_exp() {
-        let bpi = BpiClient::new();
+        if std::env::var_os("BPI_LIVE_TEST").is_none() {
+            return;
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
 
         match bpi.member_center_today_coin_exp().await {
             Ok(resp) => {

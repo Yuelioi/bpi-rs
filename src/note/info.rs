@@ -1,5 +1,5 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 查询该稿件是否禁止笔记 ---
 
@@ -98,12 +98,12 @@ impl BpiClient {
     /// - aid: 稿件 avid
     pub async fn note_is_forbid(
         &self,
-        aid: u64
+        aid: u64,
     ) -> Result<BpiResponse<NoteIsForbidData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/note/is_forbid")
+        self.get("https://api.bilibili.com/x/note/is_forbid")
             .query(&[("aid", aid)])
-            .send_bpi("查询稿件是否禁止笔记").await
+            .send_bpi("查询稿件是否禁止笔记")
+            .await
     }
 
     /// 查询私有笔记内容
@@ -120,18 +120,12 @@ impl BpiClient {
     pub async fn note_get_private_info(
         &self,
         oid: u64,
-        note_id: u64
+        note_id: u64,
     ) -> Result<BpiResponse<PrivateNoteInfoData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/note/info")
-            .query(
-                &[
-                    ("oid", oid),
-                    ("oid_type", 0),
-                    ("note_id", note_id),
-                ]
-            )
-            .send_bpi("查询私有笔记内容").await
+        self.get("https://api.bilibili.com/x/note/info")
+            .query(&[("oid", oid), ("oid_type", 0), ("note_id", note_id)])
+            .send_bpi("查询私有笔记内容")
+            .await
     }
 
     /// 查询公开笔记内容
@@ -142,12 +136,12 @@ impl BpiClient {
     /// - cvid: 公开笔记 cvid
     pub async fn note_get_public_info(
         &self,
-        cvid: u64
+        cvid: u64,
     ) -> Result<BpiResponse<PublicNoteInfoData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/note/publish/info")
+        self.get("https://api.bilibili.com/x/note/publish/info")
             .query(&[("cvid", cvid)])
-            .send_bpi("查询公开笔记内容").await
+            .send_bpi("查询公开笔记内容")
+            .await
     }
 }
 
@@ -158,7 +152,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_note_is_forbid() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为一个有效的avid
         let aid = 338677252;
         let resp = bpi.note_is_forbid(aid).await;
@@ -175,7 +169,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_note_get_private_info() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let oid = 676931260;
         let note_id = 83577722856540160;
         let resp = bpi.note_get_private_info(oid, note_id).await;
@@ -193,7 +187,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_note_get_public_info() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let cvid = 15160286;
         let resp = bpi.note_get_public_info(cvid).await;
 

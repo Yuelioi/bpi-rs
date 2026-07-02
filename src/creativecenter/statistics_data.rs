@@ -2,9 +2,9 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md)
 
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 /// UP主视频状态数据
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -438,9 +438,9 @@ impl BpiClient {
     /// # 文档
     /// [获取 UP 主视频状态数据](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取-up-主视频状态数据)
     pub async fn up_stat(&self) -> Result<BpiResponse<UpStatData>, BpiError> {
-        self
-            .get("https://member.bilibili.com/x/web/index/stat")
-            .send_bpi("获取UP主视频状态数据").await
+        self.get("https://member.bilibili.com/x/web/index/stat")
+            .send_bpi("获取UP主视频状态数据")
+            .await
     }
 
     /// 获取 UP 主视频数据比较
@@ -458,7 +458,7 @@ impl BpiClient {
     pub async fn up_archive_compare(
         &self,
         t: Option<i64>,
-        size: Option<i64>
+        size: Option<i64>,
     ) -> Result<BpiResponse<ArchiveCompareData>, BpiError> {
         let mut req = self.get("https://member.bilibili.com/x/web/data/archive_diagnose/compare");
 
@@ -479,9 +479,9 @@ impl BpiClient {
     /// # 文档
     /// [获取UP主专栏状态数据](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主专栏状态数据)
     pub async fn up_article_stat(&self) -> Result<BpiResponse<UpArticleStatData>, BpiError> {
-        self
-            .get("https://member.bilibili.com/x/web/data/article")
-            .send_bpi("获取UP主专栏状态数据").await
+        self.get("https://member.bilibili.com/x/web/data/article")
+            .send_bpi("获取UP主专栏状态数据")
+            .await
     }
 
     /// 获取UP主视频数据增量趋势
@@ -497,12 +497,12 @@ impl BpiClient {
     /// [获取UP主视频数据增量趋势](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主视频数据增量趋势)
     pub async fn up_video_trend(
         &self,
-        type_code: i64
+        type_code: i64,
     ) -> Result<BpiResponse<Vec<VideoTrendItem>>, BpiError> {
-        self
-            .get("https://member.bilibili.com/x/web/data/pandect")
+        self.get("https://member.bilibili.com/x/web/data/pandect")
             .query(&[("type", type_code)])
-            .send_bpi("获取UP主视频数据增量趋势").await
+            .send_bpi("获取UP主视频数据增量趋势")
+            .await
     }
 
     /// 获取UP主专栏数据增量趋势
@@ -518,12 +518,12 @@ impl BpiClient {
     /// [获取UP主专栏数据增量趋势](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主专栏数据增量趋势)
     pub async fn up_article_trend(
         &self,
-        type_code: i64
+        type_code: i64,
     ) -> Result<BpiResponse<Vec<ArticleTrendItem>>, BpiError> {
-        self
-            .get("https://member.bilibili.com/x/web/data/article/thirty")
+        self.get("https://member.bilibili.com/x/web/data/article/thirty")
             .query(&[("type", type_code)])
-            .send_bpi("获取UP主专栏数据增量趋势").await
+            .send_bpi("获取UP主专栏数据增量趋势")
+            .await
     }
 
     /// 获取播放来源占比
@@ -534,10 +534,10 @@ impl BpiClient {
     /// [获取播放来源占比](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取播放来源占比)
     #[allow(dead_code)]
     async fn up_play_source(&self) -> Result<BpiResponse<PlaySourceData>, BpiError> {
-        self
-            .get("https://member.bilibili.com/x/web/data/playsource")
+        self.get("https://member.bilibili.com/x/web/data/playsource")
             .with_bilibili_headers()
-            .send_bpi("获取播放来源占比情况").await
+            .send_bpi("获取播放来源占比情况")
+            .await
     }
 
     /// 获取播放分布情况
@@ -547,7 +547,9 @@ impl BpiClient {
     /// # 文档
     /// [获取播放分布情况](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取播放分布情况)
     pub async fn up_viewer_data(&self) -> Result<BpiResponse<ViewerData>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/data/base").send_bpi("获取播放分布情况").await
+        self.get("https://member.bilibili.com/x/web/data/base")
+            .send_bpi("获取播放分布情况")
+            .await
     }
 }
 
@@ -556,9 +558,17 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    fn live_creativecenter_tests_enabled() -> bool {
+        std::env::var_os("BPI_LIVE_TEST").is_some() && std::env::var_os("BPI_COOKIE").is_some()
+    }
+
     #[tokio::test]
     async fn test_up_stat() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        if !live_creativecenter_tests_enabled() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
         let data = bpi.up_stat().await?.into_data()?;
         info!("UP主视频状态数据: {:?}", data);
         Ok(())
@@ -566,7 +576,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_archive_compare() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        if !live_creativecenter_tests_enabled() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
         let data = bpi.up_archive_compare(None, Some(3)).await?.into_data()?;
         info!("UP主视频数据比较: {:?}", data);
         Ok(())
@@ -574,7 +588,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_up_article_stat() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        if !live_creativecenter_tests_enabled() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
         let data = bpi.up_article_stat().await?.into_data()?;
         info!("UP主专栏状态数据: {:?}", data);
         Ok(())
@@ -582,7 +600,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_trend() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        if !live_creativecenter_tests_enabled() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
         let data = bpi.up_video_trend(1).await?.into_data()?; // 1 = 播放
         info!("UP主视频数据增量趋势: {:?}", data);
         Ok(())
@@ -590,7 +612,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_article_trend() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        if !live_creativecenter_tests_enabled() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
         let data = bpi.up_article_trend(1).await?.into_data()?; // 1 = 阅读
         info!("UP主专栏数据增量趋势: {:?}", data);
         Ok(())
@@ -598,7 +624,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_viewer_data() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        if !live_creativecenter_tests_enabled() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
         let data = bpi.up_viewer_data().await?.into_data()?;
         info!("播放分布情况: {:?}", data);
         Ok(())

@@ -1,8 +1,8 @@
 //! B站视频合集相关接口实现
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
 
@@ -33,11 +33,10 @@ impl BpiClient {
         name: &str,
         keywords: Option<&str>,
         description: Option<&str>,
-        aids: Option<&str>
+        aids: Option<&str>,
     ) -> Result<BpiResponse<CreateSeriesResponseData>, BpiError> {
         let csrf = self.csrf()?;
-        let mut form = reqwest::multipart::Form
-            ::new()
+        let mut form = reqwest::multipart::Form::new()
             .text("mid", mid.to_string())
             .text("name", name.to_string());
 
@@ -51,11 +50,11 @@ impl BpiClient {
             form = form.text("aids", a.to_string());
         }
 
-        self
-            .post("https://api.bilibili.com/x/series/series/createAndAddArchives")
+        self.post("https://api.bilibili.com/x/series/series/createAndAddArchives")
             .query(&[("csrf", csrf)])
             .multipart(form)
-            .send_bpi("创建视频列表并添加视频").await
+            .send_bpi("创建视频列表并添加视频")
+            .await
     }
 
     /// 删除视频列表
@@ -71,21 +70,19 @@ impl BpiClient {
     pub async fn collection_delete_series(
         &self,
         mid: u64,
-        series_id: u64
+        series_id: u64,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        self
-            .post("https://api.bilibili.com/x/series/series/delete")
-            .query(
-                &[
-                    ("csrf", csrf),
-                    ("mid", mid.to_string()),
-                    ("series_id", series_id.to_string()),
-                    ("aids", "".to_string()),
-                ]
-            )
-            .send_bpi("删除视频列表").await
+        self.post("https://api.bilibili.com/x/series/series/delete")
+            .query(&[
+                ("csrf", csrf),
+                ("mid", mid.to_string()),
+                ("series_id", series_id.to_string()),
+                ("aids", "".to_string()),
+            ])
+            .send_bpi("删除视频列表")
+            .await
     }
 
     /// 从视频列表中删除稿件
@@ -103,7 +100,7 @@ impl BpiClient {
         &self,
         mid: u64,
         series_id: u64,
-        aids: &str
+        aids: &str,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -113,11 +110,11 @@ impl BpiClient {
             ("aids", aids.to_string()),
         ];
 
-        self
-            .post("https://api.bilibili.com/x/series/series/delArchives")
+        self.post("https://api.bilibili.com/x/series/series/delArchives")
             .query(&[("csrf", csrf)])
             .form(&params)
-            .send_bpi("从视频列表中删除稿件").await
+            .send_bpi("从视频列表中删除稿件")
+            .await
     }
 
     /// 添加稿件至视频列表
@@ -135,7 +132,7 @@ impl BpiClient {
         &self,
         mid: u64,
         series_id: u64,
-        aids: &str
+        aids: &str,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -145,11 +142,11 @@ impl BpiClient {
             ("aids", aids.to_string()),
         ];
 
-        self
-            .post("https://api.bilibili.com/x/series/series/addArchives")
+        self.post("https://api.bilibili.com/x/series/series/addArchives")
             .query(&[("csrf", csrf)])
             .form(&params)
-            .send_bpi("添加稿件至视频列表").await
+            .send_bpi("添加稿件至视频列表")
+            .await
     }
 
     /// 编辑视频列表信息
@@ -175,12 +172,11 @@ impl BpiClient {
         keywords: Option<&str>,
         description: Option<&str>,
         add_aids: Option<&str>,
-        del_aids: Option<&str>
+        del_aids: Option<&str>,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        let mut form = reqwest::multipart::Form
-            ::new()
+        let mut form = reqwest::multipart::Form::new()
             .text("mid", mid.to_string())
             .text("series_id", series_id.to_string())
             .text("name", name.to_string());
@@ -198,11 +194,11 @@ impl BpiClient {
             form = form.text("del_aids", d.to_string());
         }
 
-        self
-            .post("https://api.bilibili.com/x/series/series/update")
+        self.post("https://api.bilibili.com/x/series/series/update")
             .query(&[("csrf", csrf)])
             .multipart(form)
-            .send_bpi("编辑视频列表信息").await
+            .send_bpi("编辑视频列表信息")
+            .await
     }
 }
 
@@ -225,14 +221,16 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_and_add_archives() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.collection_create_and_add_archives(
-            TEST_MID,
-            "Rust Bilibili API Test",
-            Some("rust,api"),
-            Some("这是一个用于 Rust Bilibili API 测试的视频列表"),
-            Some(TEST_AID)
-        ).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .collection_create_and_add_archives(
+                TEST_MID,
+                "Rust Bilibili API Test",
+                Some("rust,api"),
+                Some("这是一个用于 Rust Bilibili API 测试的视频列表"),
+                Some(TEST_AID),
+            )
+            .await?;
         let data = resp.into_data()?;
 
         info!("创建的视频列表 ID: {:?}", data.series_id);
@@ -243,8 +241,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_add_archives_to_series() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.collection_add_archives_to_series(TEST_MID, TEST_SERIES_ID, TEST_AID).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .collection_add_archives_to_series(TEST_MID, TEST_SERIES_ID, TEST_AID)
+            .await?;
 
         info!("添加稿件至视频列表成功: {:?}", resp);
 
@@ -253,16 +253,18 @@ mod tests {
 
     #[tokio::test]
     async fn test_update_series() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.collection_update_series(
-            TEST_MID,
-            TEST_SERIES_ID,
-            "Rust Bilibili API Test Updated",
-            Some("rust,api,update"),
-            Some("更新后的简介"),
-            Some(TEST_AID),
-            None
-        ).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .collection_update_series(
+                TEST_MID,
+                TEST_SERIES_ID,
+                "Rust Bilibili API Test Updated",
+                Some("rust,api,update"),
+                Some("更新后的简介"),
+                Some(TEST_AID),
+                None,
+            )
+            .await?;
 
         info!("编辑视频列表成功: {:?}", resp);
 
@@ -271,12 +273,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_delete_archives_from_series() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.collection_delete_archives_from_series(
-            TEST_MID,
-            TEST_SERIES_ID,
-            TEST_AID
-        ).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .collection_delete_archives_from_series(TEST_MID, TEST_SERIES_ID, TEST_AID)
+            .await?;
 
         info!("从视频列表中删除稿件成功: {:?}", resp);
 
@@ -285,9 +285,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_delete_series() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 假设 TEST_SERIES_ID 是一个需要被删除的测试用列表
-        let resp = bpi.collection_delete_series(TEST_MID, TEST_SERIES_ID).await?;
+        let resp = bpi
+            .collection_delete_series(TEST_MID, TEST_SERIES_ID)
+            .await?;
 
         info!("删除视频列表成功: {:?}", resp);
 

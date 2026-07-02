@@ -2,14 +2,14 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 /// 合集信息编辑
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SeasonEdit {
-    pub id: u64, // 合集 ID
+    pub id: u64,       // 合集 ID
     pub title: String, // 合集标题
     pub cover: String, // 封面图 URL
     #[serde(default)]
@@ -34,7 +34,7 @@ pub struct SeasonSectionEdit {
 /// 合集内视频排序信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SectionSort {
-    pub id: u64, // 合集内视频 ID
+    pub id: u64,    // 合集内视频 ID
     pub order: u32, // 排序位置
 }
 
@@ -68,7 +68,7 @@ pub struct EpisodeSort {
 /// 合集小节排序信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SeasonSectionSort {
-    pub id: u64, // 小节 ID
+    pub id: u64,   // 小节 ID
     pub sort: u32, // 排序位置
 }
 
@@ -105,7 +105,7 @@ impl BpiClient {
     pub async fn season_edit(
         &self,
         season: SeasonEdit,
-        sorts: Vec<SeasonSectionSort>
+        sorts: Vec<SeasonSectionSort>,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -114,11 +114,11 @@ impl BpiClient {
             "sorts": sorts
         });
 
-        self
-            .post("https://member.bilibili.com/x2/creative/web/season/edit")
+        self.post("https://member.bilibili.com/x2/creative/web/season/edit")
             .query(&[("csrf", csrf)])
             .json(&payload)
-            .send_bpi("编辑合集信息").await
+            .send_bpi("编辑合集信息")
+            .await
     }
     /// 编辑合集小节(需要开启小节功能)
     ///
@@ -135,7 +135,7 @@ impl BpiClient {
     pub async fn season_section_edit(
         &self,
         section: SeasonSectionEdit,
-        sorts: Vec<SectionSort>
+        sorts: Vec<SectionSort>,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -144,11 +144,11 @@ impl BpiClient {
             "sorts": sorts
         });
 
-        self
-            .post("https://member.bilibili.com/x2/creative/web/season/section/edit")
+        self.post("https://member.bilibili.com/x2/creative/web/season/section/edit")
             .query(&[("csrf", csrf)])
             .json(&payload)
-            .send_bpi("编辑合集小节").await
+            .send_bpi("编辑合集小节")
+            .await
     }
 
     /// 编辑小节中的章节
@@ -166,17 +166,17 @@ impl BpiClient {
     pub async fn season_section_episode_edit(
         &self,
         section: EpisodeEdit,
-        sorts: Vec<EpisodeSort>
+        sorts: Vec<EpisodeSort>,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
         let payload = EpisodeEditPayload { section, sorts };
 
-        self
-            .post("https://member.bilibili.com/x2/creative/web/season/section/episode/edit")
+        self.post("https://member.bilibili.com/x2/creative/web/season/section/episode/edit")
             .query(&[("csrf", csrf)])
             .json(&payload)
-            .send_bpi("编辑合集章节").await
+            .send_bpi("编辑合集章节")
+            .await
     }
 
     /// 切换小节/正常显示
@@ -187,19 +187,19 @@ impl BpiClient {
     pub async fn season_enable_section(
         &self,
         season_id: u64,
-        enable: bool
+        enable: bool,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let params = vec![
             ("csrf", csrf),
             ("season_id", season_id.to_string()),
-            ("no_section", (if enable { "0" } else { "1" }).to_string())
+            ("no_section", (if enable { "0" } else { "1" }).to_string()),
         ];
 
-        self
-            .post("https://member.bilibili.com/x2/creative/web/season/section/switch")
+        self.post("https://member.bilibili.com/x2/creative/web/season/section/switch")
             .form(&params)
-            .send_bpi("切换 小节/正常 模式").await
+            .send_bpi("切换 小节/正常 模式")
+            .await
     }
     /// 添加视频到小节(需要开启小节功能)
     ///
@@ -218,7 +218,7 @@ impl BpiClient {
     pub async fn season_section_add_episodes(
         &self,
         section_id: u64,
-        episodes: Vec<Episode>
+        episodes: Vec<Episode>,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -227,11 +227,11 @@ impl BpiClient {
             episodes,
         };
 
-        self
-            .post("https://member.bilibili.com/x2/creative/web/season/section/episodes/add")
+        self.post("https://member.bilibili.com/x2/creative/web/season/section/episodes/add")
             .json(&payload)
             .query(&[("csrf", csrf)])
-            .send_bpi("编辑投稿视频合集").await
+            .send_bpi("编辑投稿视频合集")
+            .await
     }
 }
 
@@ -248,7 +248,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_edit_season_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let season = SeasonEdit {
             id: TEST_SEASON_ID,
@@ -271,7 +271,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_edit_season_section() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let section = SeasonSectionEdit {
             id: TEST_SECTION_ID,
@@ -293,7 +293,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_edit_season_episode() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let section = EpisodeEdit {
             id: TEST_PART_ID,
@@ -319,22 +319,26 @@ mod tests {
 
     #[tokio::test]
     async fn test_add_episodes() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
-        bpi
-            .season_section_add_episodes(
-                TEST_SECTION_ID,
-                vec![Episode {
-                    title: "新增章节标题".to_string(),
-                    aid: TEST_AID,
-                    cid: TEST_CID,
-                    ..Default::default()
-                }]
-            ).await
-            .map(|_| ()) // 忽略 Ok 的内容
-            .or_else(|e| {
-                if e.code() == Some(20080) { Ok(()) } else { Err(e) }
-            })?;
+        bpi.season_section_add_episodes(
+            TEST_SECTION_ID,
+            vec![Episode {
+                title: "新增章节标题".to_string(),
+                aid: TEST_AID,
+                cid: TEST_CID,
+                ..Default::default()
+            }],
+        )
+        .await
+        .map(|_| ()) // 忽略 Ok 的内容
+        .or_else(|e| {
+            if e.code() == Some(20080) {
+                Ok(())
+            } else {
+                Err(e)
+            }
+        })?;
 
         Ok(())
     }

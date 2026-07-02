@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md)
 use crate::models::VipLabel;
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 剧集地区
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -708,7 +708,8 @@ impl BpiClient {
         let result: BangumiInfoResponse = self
             .get("https://api.bilibili.com/pgc/review/user")
             .query(&[("media_id", media_id.to_string())])
-            .send_bpi("获取剧集基本信息").await?;
+            .send_bpi("获取剧集基本信息")
+            .await?;
         Ok(result)
     }
 
@@ -721,12 +722,13 @@ impl BpiClient {
     /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#获取剧集明细web端ssidepid方式)
     pub async fn bangumi_detail_by_season_id(
         &self,
-        season_id: u64
+        season_id: u64,
     ) -> Result<BangumiDetailResponse, BpiError> {
         let result: BangumiDetailResponse = self
             .get("https://api.bilibili.com/pgc/view/web/season")
             .query(&[("season_id", season_id.to_string())])
-            .send_bpi("获取剧集明细").await?;
+            .send_bpi("获取剧集明细")
+            .await?;
         Ok(result)
     }
 
@@ -739,12 +741,12 @@ impl BpiClient {
     /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#获取剧集明细web端ssidepid方式)
     pub async fn bangumi_detail_by_epid(
         &self,
-        ep_id: u64
+        ep_id: u64,
     ) -> Result<BangumiDetailResponse, BpiError> {
-        self
-            .get("https://api.bilibili.com/pgc/view/web/season")
+        self.get("https://api.bilibili.com/pgc/view/web/season")
             .query(&[("ep_id", ep_id.to_string())])
-            .send_bpi("获取剧集明细").await
+            .send_bpi("获取剧集明细")
+            .await
     }
 
     /// 获取剧集分集信息
@@ -756,12 +758,12 @@ impl BpiClient {
     /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#获取剧集分集信息)
     pub async fn bangumi_sections_by_season_id(
         &self,
-        season_id: u64
+        season_id: u64,
     ) -> Result<BpiResponse<BangumiSectionResult>, BpiError> {
-        self
-            .get("https://api.bilibili.com/pgc/web/season/section")
+        self.get("https://api.bilibili.com/pgc/web/season/section")
             .query(&[("season_id", season_id.to_string())])
-            .send_bpi("获取剧集分集信息").await
+            .send_bpi("获取剧集分集信息")
+            .await
     }
 }
 
@@ -775,7 +777,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bangumi_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.bangumi_info(TEST_MEDIA_ID).await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
@@ -789,7 +791,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bangumi_detail_by_season_id() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.bangumi_detail_by_season_id(TEST_SEASON_ID).await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
@@ -803,7 +805,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bangumi_detail_by_epid() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.bangumi_detail_by_epid(TEST_EP_ID).await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
@@ -816,7 +818,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_bangumi_section() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.bangumi_sections_by_season_id(TEST_SEASON_ID).await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);

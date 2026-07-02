@@ -5,13 +5,10 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/misc/sign/bili_ticket.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use hmac::{ Hmac, Mac };
-use serde::{ Deserialize, Serialize };
-use sha2::Sha256;
-use std::time::{ SystemTime, UNIX_EPOCH };
-
-type HmacSha256 = Hmac<Sha256>;
+use crate::sign::bili_ticket::ticket_request_params;
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// bili_ticket 响应数据
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -44,31 +41,17 @@ impl BpiClient {
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/misc)
     pub async fn misc_sign_bili_ticket(&self) -> Result<BpiResponse<TicketData>, BpiError> {
         let csrf = self.csrf()?;
-        // 获取当前时间戳
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|e| BpiError::network(format!("获取时间戳失败: {}", e)))?
             .as_secs();
 
-        // 计算 hexsign
-        let message = format!("ts{}", timestamp);
-        let hexsign = self.hmac_sha256("XgwSnGZ1p", &message)?;
+        let params = ticket_request_params(timestamp, csrf.as_str())?;
 
-        // let now = Utc::now().timestamp().to_string();
-
-        // 构建请求参数
-        let params = [
-            ("key_id", "ec02"),
-            ("hexsign", &hexsign),
-            ("context[ts]", &timestamp.to_string()),
-            ("csrf", csrf.as_str()),
-        ];
-
-        // 发送请求
-        self
-            .post("https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
+        self.post("https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
             .query(&params)
-            .send_bpi("生成bili_ticket").await
+            .send_bpi("生成bili_ticket")
+            .await
     }
 
     /// 仅获取 bili_ticket 字符串
@@ -77,37 +60,27 @@ impl BpiClient {
         let data = resp.data.ok_or_else(BpiError::missing_data)?;
         Ok(data.ticket)
     }
-
-    /// 使用 HMAC-SHA256 算法计算哈希
-    fn hmac_sha256(&self, key: &str, message: &str) -> Result<String, BpiError> {
-        let mut mac = HmacSha256::new_from_slice(key.as_bytes()).map_err(|e|
-            BpiError::parse(format!("HMAC 密钥错误: {}", e))
-        )?;
-
-        mac.update(message.as_bytes());
-        let result = mac.finalize();
-        Ok(hex::encode(result.into_bytes()))
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::sign::bili_ticket::hexsign;
 
     #[tokio::test]
-    async fn test_hmac_sha256() {
-        let bpi = BpiClient::new();
-        let result = bpi.hmac_sha256("XgwSnGZ1p", "ts1234567890").unwrap();
+    async fn test_hmac_sha256() -> Result<(), BpiError> {
+        let result = hexsign("XgwSnGZ1p", 1_234_567_890)?;
 
-        // 验证结果是64位十六进制字符串
         assert_eq!(result.len(), 64);
         assert!(result.chars().all(|c| c.is_ascii_hexdigit()));
-        tracing::info!("HMAC-SHA256 测试通过: {}", result);
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_generate_bili_ticket() {
-        let bpi = BpiClient::new();
+    async fn test_generate_bili_ticket() -> Result<(), BpiError> {
+        let Some(bpi) = live_client_or_skip()? else {
+            return Ok(());
+        };
 
         match bpi.misc_sign_bili_ticket().await {
             Ok(resp) => {
@@ -135,11 +108,15 @@ mod tests {
                 panic!("生成 bili_ticket 失败: {}", err);
             }
         }
+
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_get_bili_ticket_string() {
-        let bpi = BpiClient::new();
+    async fn test_get_bili_ticket_string() -> Result<(), BpiError> {
+        let Some(bpi) = live_client_or_skip()? else {
+            return Ok(());
+        };
 
         match bpi.misc_sign_bili_ticket_string().await {
             Ok(ticket) => {
@@ -157,21 +134,45 @@ mod tests {
                 panic!("获取 bili_ticket 字符串失败: {}", err);
             }
         }
+
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_with_csrf() {
-        let bpi = BpiClient::new();
+    async fn test_with_csrf() -> Result<(), BpiError> {
+        let Some(bpi) = live_client_or_skip()? else {
+            return Ok(());
+        };
 
         // 测试带 CSRF 的情况
         match bpi.misc_sign_bili_ticket().await {
             Ok(resp) => {
-                tracing::info!("带 CSRF 的 bili_ticket 生成成功: {}", resp.data.unwrap().ticket);
+                tracing::info!(
+                    "带 CSRF 的 bili_ticket 生成成功: {}",
+                    resp.data.unwrap().ticket
+                );
             }
             Err(err) => {
                 tracing::info!("带 CSRF 测试失败（预期可能失败）: {}", err);
                 // 这里不 panic，因为没有真实的 CSRF token 可能会失败
             }
         }
+
+        Ok(())
+    }
+
+    fn live_client_or_skip() -> Result<Option<BpiClient>, BpiError> {
+        if std::env::var("BPI_LIVE_TEST").ok().as_deref() != Some("1") {
+            return Ok(None);
+        }
+
+        let Some(cookie) = std::env::var("BPI_COOKIE")
+            .ok()
+            .filter(|value| !value.is_empty())
+        else {
+            return Ok(None);
+        };
+
+        BpiClient::builder().cookie(cookie).build().map(Some)
     }
 }

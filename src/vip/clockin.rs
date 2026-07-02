@@ -24,7 +24,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_vip_sign_cookie() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let resp = bpi.vip_sign().await;
         assert!(resp.is_ok());

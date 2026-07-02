@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 活动列表数据
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -103,10 +103,12 @@ impl BpiClient {
         mold: Option<i32>,
         http: Option<i32>,
         pn: Option<i32>,
-        ps: Option<i32>
+        ps: Option<i32>,
     ) -> Result<BpiResponse<ActivityListData>, BpiError> {
         let params = ActivityListParams {
-            plat: plat.map(|s| s.to_string()).or_else(|| Some("1,3".to_string())),
+            plat: plat
+                .map(|s| s.to_string())
+                .or_else(|| Some("1,3".to_string())),
             mold: mold.or(Some(0)),
             http: http.or(Some(3)),
             pn: pn.or(Some(1)),
@@ -116,7 +118,8 @@ impl BpiClient {
         let result = self
             .get("https://api.bilibili.com/x/activity/page/list")
             .query(&params)
-            .send_bpi("获取活动列表").await?;
+            .send_bpi("获取活动列表")
+            .await?;
 
         Ok(result)
     }
@@ -126,7 +129,8 @@ impl BpiClient {
     /// # 文档
     /// [获取活动列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md#获取活动列表)
     pub async fn activity_list_default(&self) -> Result<BpiResponse<ActivityListData>, BpiError> {
-        self.activity_list(Some("1,3"), None, None, Some(1), Some(15)).await
+        self.activity_list(Some("1,3"), None, None, Some(1), Some(15))
+            .await
     }
 }
 
@@ -136,10 +140,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_activity_list() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         // 测试获取活动列表
-        let result = bpi.activity_list(Some("1,3"), None, None, Some(1), Some(4)).await?;
+        let result = bpi
+            .activity_list(Some("1,3"), None, None, Some(1), Some(4))
+            .await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
@@ -153,7 +159,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_activity_list_simple() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         // 测试简化版本获取活动列表
         let result = bpi.activity_list_default().await?;
@@ -169,9 +175,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_activity_item_fields() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi.activity_list(Some("1,3"), None, None, Some(1), Some(1)).await?;
+        let result = bpi
+            .activity_list(Some("1,3"), None, None, Some(1), Some(1))
+            .await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 

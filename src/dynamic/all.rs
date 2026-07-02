@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DynamicAllData {
@@ -55,7 +55,7 @@ impl BpiClient {
         &self,
         host_mid: Option<&str>,
         offset: Option<&str>,
-        update_baseline: Option<&str>
+        update_baseline: Option<&str>,
     ) -> Result<BpiResponse<DynamicAllData>, BpiError> {
         let mut req = self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all").query(
             &[
@@ -94,7 +94,7 @@ impl BpiClient {
     pub async fn dynamic_check_new(
         &self,
         update_baseline: &str,
-        type_str: Option<&str>
+        type_str: Option<&str>,
     ) -> Result<BpiResponse<DynamicUpdateData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all/update")
@@ -115,7 +115,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_dynamic_get_all() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.dynamic_all(None, None, None).await?;
         assert_eq!(resp.code, 0);
 
@@ -128,7 +128,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_dynamic_check_new() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let update_baseline = "0";
         let resp = bpi.dynamic_check_new(update_baseline, None).await?;
         let data = resp.into_data().unwrap();

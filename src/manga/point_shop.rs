@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/point_shop.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // ================= 数据结构 =================
 
@@ -94,9 +94,9 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_user_point(&self) -> Result<UserPointResponse, BpiError> {
-        self
-            .post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/GetUserPoint")
-            .send_bpi("获取当前持有点数").await
+        self.post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/GetUserPoint")
+            .send_bpi("获取当前持有点数")
+            .await
     }
 
     /// 获取兑换奖品列表
@@ -104,9 +104,9 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_point_products(&self) -> Result<ProductListResponse, BpiError> {
-        self
-            .post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/ListProduct")
-            .send_bpi("获取兑换奖品列表").await
+        self.post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/ListProduct")
+            .send_bpi("获取兑换奖品列表")
+            .await
     }
 
     /// 兑换物品
@@ -125,7 +125,7 @@ impl BpiClient {
         &self,
         product_id: i64,
         product_num: i32,
-        point: i32
+        point: i32,
     ) -> Result<ExchangeResponse, BpiError> {
         let req = ExchangeRequest {
             product_id: product_id.to_string(),
@@ -133,10 +133,10 @@ impl BpiClient {
             point,
         };
 
-        self
-            .post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/Exchange")
+        self.post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/Exchange")
             .form(&req)
-            .send_bpi("兑换物品").await
+            .send_bpi("兑换物品")
+            .await
     }
 }
 
@@ -146,7 +146,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_list_product() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.manga_point_products().await?;
 
         let data = resp.into_data()?;
@@ -156,7 +156,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_user_point() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let resp = bpi.manga_user_point().await?;
         let data = resp.into_data()?;

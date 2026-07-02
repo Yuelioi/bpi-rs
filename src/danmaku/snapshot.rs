@@ -2,7 +2,7 @@
 //!
 //! [文档入口](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 pub type SnapshotResponse = BpiResponse<Vec<String>>;
 
@@ -21,7 +21,8 @@ impl BpiClient {
         let resp: SnapshotResponse = self
             .get("https://api.bilibili.com/x/v2/dm/ajax")
             .query(&[("aid", aid_or_bvid.to_string())])
-            .send_bpi("获取弹幕快照").await?;
+            .send_bpi("获取弹幕快照")
+            .await?;
 
         Ok(resp)
     }
@@ -33,7 +34,7 @@ pub mod tests {
 
     #[tokio::test]
     async fn test_get_danmaku_snapshot() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.danmaku_snapshot("BV1fK4y1t741").await?;
 
         let data = result.into_data()?;

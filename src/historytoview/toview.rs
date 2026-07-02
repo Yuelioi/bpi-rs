@@ -1,5 +1,5 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 获取稍后再看视频列表 ---
 
@@ -107,7 +107,7 @@ impl BpiClient {
     pub async fn toview_add_video(
         &self,
         aid: Option<u64>,
-        bvid: Option<&str>
+        bvid: Option<&str>,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -119,10 +119,10 @@ impl BpiClient {
             form.push(("bvid", bvid_str.to_string()));
         }
 
-        self
-            .post("https://api.bilibili.com/x/v2/history/toview/add")
+        self.post("https://api.bilibili.com/x/v2/history/toview/add")
             .form(&form)
-            .send_bpi("添加稍后再看视频").await
+            .send_bpi("添加稍后再看视频")
+            .await
     }
 
     /// 获取稍后再看视频列表
@@ -130,9 +130,9 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
     pub async fn toview_list(&self) -> Result<BpiResponse<ToViewListData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/v2/history/toview")
-            .send_bpi("获取稍后再看视频列表").await
+        self.get("https://api.bilibili.com/x/v2/history/toview")
+            .send_bpi("获取稍后再看视频列表")
+            .await
     }
 
     /// 删除稍后再看视频
@@ -150,7 +150,7 @@ impl BpiClient {
     pub async fn toview_delete(
         &self,
         aid: Option<u64>,
-        viewed: Option<bool>
+        viewed: Option<bool>,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -162,10 +162,10 @@ impl BpiClient {
             form.push(("viewed", is_viewed.to_string()));
         }
 
-        self
-            .post("https://api.bilibili.com/x/v2/history/toview/del")
+        self.post("https://api.bilibili.com/x/v2/history/toview/del")
             .form(&form)
-            .send_bpi("删除稍后再看视频").await
+            .send_bpi("删除稍后再看视频")
+            .await
     }
 
     /// 清空稍后再看视频列表
@@ -177,10 +177,10 @@ impl BpiClient {
 
         let form = [("csrf", csrf)];
 
-        self
-            .post("https://api.bilibili.com/x/v2/history/toview/clear")
+        self.post("https://api.bilibili.com/x/v2/history/toview/clear")
             .form(&form)
-            .send_bpi("清空稍后再看视频列表").await
+            .send_bpi("清空稍后再看视频列表")
+            .await
     }
 }
 
@@ -191,7 +191,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_toview_add_and_get() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let aid = 10001;
 
         // 1. 添加视频

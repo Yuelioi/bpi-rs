@@ -4,10 +4,10 @@
 
 use std::collections::HashMap;
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
-use base64::{ Engine as _, engine::general_purpose };
-use serde::{ Deserialize, Serialize };
+use base64::{Engine as _, engine::general_purpose};
+use serde::{Deserialize, Serialize};
 use std::fs;
 
 /// 上传封面返回结果
@@ -35,17 +35,16 @@ impl BpiClient {
     pub async fn upload_cover(
         &self,
         mime_type: &str,
-        cover: impl AsRef<str>
+        cover: impl AsRef<str>,
     ) -> Result<BpiResponse<UploadCoverData>, BpiError> {
         let csrf = self.csrf()?;
         let cover_str = cover.as_ref();
 
         let final_cover = if cover_str.starts_with("data:") {
             cover_str.to_string()
-        } else if
-            cover_str
-                .chars()
-                .all(|c| (c.is_ascii_alphanumeric() || c == '+' || c == '/' || c == '='))
+        } else if cover_str
+            .chars()
+            .all(|c| (c.is_ascii_alphanumeric() || c == '+' || c == '/' || c == '='))
         {
             format!("data:{};base64,{}", mime_type, cover_str)
         } else {
@@ -60,10 +59,10 @@ impl BpiClient {
         form.insert("csrf", csrf);
         form.insert("cover", final_cover);
 
-        self
-            .post("https://member.bilibili.com/x/vu/web/cover/up")
+        self.post("https://member.bilibili.com/x/vu/web/cover/up")
             .form(&form)
-            .send_bpi("上传视频封面").await
+            .send_bpi("上传视频封面")
+            .await
     }
 }
 
@@ -71,13 +70,13 @@ impl BpiClient {
 mod tests {
     use super::*;
     #[allow(unused_imports)]
-    use base64::{ Engine as _, engine::general_purpose };
+    use base64::{Engine as _, engine::general_purpose};
     use std::fs;
 
     async fn run_upload_test(
         bpi: &BpiClient,
         mime_type: &str,
-        cover: &str
+        cover: &str,
     ) -> Result<(), Box<BpiError>> {
         let data = bpi.upload_cover(mime_type, cover).await?.into_data()?;
         tracing::info!("上传成功，封面地址: {}", data.url);
@@ -86,7 +85,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_cover_upload() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         // 1. 文件路径
         // run_upload_test(&bpi, "image/jpeg", "./assets/test.jpg").await?;
@@ -97,7 +96,8 @@ mod tests {
         // run_upload_test(&bpi, "image/jpeg", &img_base64).await?;
 
         // 3. 完整 Data URI
-        let img_data = fs::read("./assets/test.jpg").map_err(|_| BpiError::parse("读取图片失败"))?;
+        let img_data =
+            fs::read("./assets/test.jpg").map_err(|_| BpiError::parse("读取图片失败"))?;
         let img_base64 = general_purpose::STANDARD.encode(&img_data);
         let img_data_uri = format!("data:image/jpeg;base64,{}", img_base64);
         run_upload_test(&bpi, "image/jpeg", &img_data_uri).await?;

@@ -261,7 +261,7 @@ mod tests {
     #[tokio::test]
 
     async fn test_live_create_room() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         match bpi.live_create_room().await {
             Ok(resp) => resp,
             Err(err) => {
@@ -281,7 +281,7 @@ mod tests {
     #[tokio::test]
 
     async fn test_live_update_room_info() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let room_id = 3818081;
         let resp = bpi
             .live_update_room_info(room_id, Some("测试新标题"), None, None, None)
@@ -298,7 +298,7 @@ mod tests {
     #[tokio::test]
 
     async fn test_live_stop() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为您的直播间 ID
         let room_id = 3818081;
         let resp = bpi.live_stop(room_id, "pc_link").await?;
@@ -313,7 +313,7 @@ mod tests {
     #[tokio::test]
 
     async fn test_live_update_pre_live_info() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
             .live_update_pre_live_info(Some("测试预更新标题"), None)
             .await?;
@@ -329,7 +329,7 @@ mod tests {
     #[tokio::test]
 
     async fn test_live_update_room_news() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为您的直播间 ID
         let room_id = 3818081;
         let uid = 4279370;
@@ -344,7 +344,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_live_version() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.live_version().await?;
         assert_eq!(resp.code, 0);
         let data = resp.into_data()?;

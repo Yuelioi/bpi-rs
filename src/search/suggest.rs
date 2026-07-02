@@ -1,4 +1,4 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::Deserialize;
 
 /// 搜索建议结果
@@ -27,10 +27,10 @@ impl BpiClient {
     pub async fn search_suggest(&self, term: &str) -> Result<BpiResponse<SearchSuggest>, BpiError> {
         let params = [("term", term)];
 
-        self
-            .get("https://s.search.bilibili.com/main/suggest")
+        self.get("https://s.search.bilibili.com/main/suggest")
             .query(&params)
-            .send_bpi("获取搜索建议").await
+            .send_bpi("获取搜索建议")
+            .await
     }
 }
 
@@ -42,7 +42,7 @@ mod tests {
     #[tokio::test]
     async fn test_search_suggest() {
         // 创建一个 BilibiliRequest 实例
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 传入一个搜索关键词
         let term = "rust";
         let resp = bpi.search_suggest(term).await;

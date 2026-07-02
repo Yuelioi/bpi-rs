@@ -1,5 +1,5 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 // --- API 结构体 ---
@@ -7,13 +7,13 @@ use std::collections::HashMap;
 /// 未读消息数
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct UnreadCountData {
-    pub coin: u32, // 未读投币数
-    pub danmu: u32, // 未读弹幕数
-    pub favorite: u32, // 未读收藏数
-    pub recv_like: u32, // 未读收到喜欢数
+    pub coin: u32,       // 未读投币数
+    pub danmu: u32,      // 未读弹幕数
+    pub favorite: u32,   // 未读收藏数
+    pub recv_like: u32,  // 未读收到喜欢数
     pub recv_reply: u32, // 未读回复
-    pub sys_msg: u32, // 未读系统通知数
-    pub up: u32, // 未读UP主助手信息数
+    pub sys_msg: u32,    // 未读系统通知数
+    pub up: u32,         // 未读UP主助手信息数
 }
 
 /// "回复我的"信息
@@ -94,15 +94,10 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/message)
     pub async fn message_unread_count(&self) -> Result<BpiResponse<UnreadCountData>, BpiError> {
-        self
-            .get("https://api.vc.bilibili.com/x/im/web/msgfeed/unread")
-            .query(
-                &[
-                    ("build", "0"),
-                    ("mobi_app", "web"),
-                ]
-            )
-            .send_bpi("获取未读消息数").await
+        self.get("https://api.vc.bilibili.com/x/im/web/msgfeed/unread")
+            .query(&[("build", "0"), ("mobi_app", "web")])
+            .send_bpi("获取未读消息数")
+            .await
     }
 
     /// 获取"回复我的"信息列表。
@@ -119,7 +114,7 @@ impl BpiClient {
     pub async fn message_reply_feed(
         &self,
         start_id: Option<u64>,
-        start_time: Option<u64>
+        start_time: Option<u64>,
     ) -> Result<BpiResponse<ReplyFeedData>, BpiError> {
         let mut params = HashMap::new();
         params.insert("build", "0".to_string());
@@ -134,10 +129,10 @@ impl BpiClient {
             params.insert("reply_time", time.to_string());
         }
 
-        self
-            .get("https://api.bilibili.com/x/msgfeed/reply")
+        self.get("https://api.bilibili.com/x/msgfeed/reply")
             .query(&params)
-            .send_bpi("获取回复我的信息").await
+            .send_bpi("获取回复我的信息")
+            .await
     }
 }
 
@@ -147,7 +142,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_unread_count() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let new_resp = bpi.message_unread_count().await?;
         let new_data = new_resp.into_data()?;
@@ -157,7 +152,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_reply_feed() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let resp = bpi.message_reply_feed(None, None).await?;
         let data = resp.into_data()?;
@@ -180,8 +175,7 @@ mod tests {
             println!("---");
             println!(
                 "还有更多数据，下次请求可使用 id: {:?}, time: {:?}",
-                data.cursor.id,
-                data.cursor.time
+                data.cursor.id, data.cursor.time
             );
         }
 

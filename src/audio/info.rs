@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 歌曲基本信息数据
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -137,10 +137,10 @@ impl BpiClient {
     /// # 文档
     /// [查询歌曲基本信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#查询歌曲基本信息)
     pub async fn audio_info(&self, sid: u64) -> Result<BpiResponse<AudioInfoData>, BpiError> {
-        self
-            .get("https://www.bilibili.com/audio/music-service-c/web/song/info")
+        self.get("https://www.bilibili.com/audio/music-service-c/web/song/info")
             .query(&[("sid", sid.to_string())])
-            .send_bpi("查询歌曲基本信息").await
+            .send_bpi("查询歌曲基本信息")
+            .await
     }
 
     /// 查询歌曲 TAG
@@ -153,10 +153,10 @@ impl BpiClient {
     /// # 文档
     /// [查询歌曲 TAG](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#查询歌曲tag)
     pub async fn audio_tags(&self, sid: u64) -> Result<BpiResponse<Vec<AudioTag>>, BpiError> {
-        self
-            .get("https://www.bilibili.com/audio/music-service-c/web/tag/song")
+        self.get("https://www.bilibili.com/audio/music-service-c/web/tag/song")
             .query(&[("sid", sid.to_string())])
-            .send_bpi("查询歌曲TAG").await
+            .send_bpi("查询歌曲TAG")
+            .await
     }
 
     /// 查询歌曲创作成员列表
@@ -169,10 +169,10 @@ impl BpiClient {
     /// # 文档
     /// [查询歌曲创作成员列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#查询歌曲创作成员列表)
     pub async fn audio_members(&self, sid: u64) -> Result<AudioMemberResponse, BpiError> {
-        self
-            .get("https://www.bilibili.com/audio/music-service-c/web/member/song")
+        self.get("https://www.bilibili.com/audio/music-service-c/web/member/song")
             .query(&[("sid", sid.to_string())])
-            .send_bpi("查询歌曲创作成员列表").await
+            .send_bpi("查询歌曲创作成员列表")
+            .await
     }
 
     /// 获取歌曲歌词
@@ -185,10 +185,10 @@ impl BpiClient {
     /// # 文档
     /// [获取歌曲歌词](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#获取歌曲歌词)
     pub async fn audio_lyric(&self, sid: u64) -> Result<BpiResponse<String>, BpiError> {
-        self
-            .get("https://www.bilibili.com/audio/music-service-c/web/song/lyric")
+        self.get("https://www.bilibili.com/audio/music-service-c/web/song/lyric")
             .query(&[("sid", sid.to_string())])
-            .send_bpi("获取歌曲歌词").await
+            .send_bpi("获取歌曲歌词")
+            .await
     }
 }
 
@@ -198,7 +198,7 @@ mod tests {
     const TEST_SID: u64 = 13603;
     #[tokio::test]
     async fn test_audio_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.audio_info(TEST_SID).await?;
         let data = result.data.unwrap();
         assert!(!data.title.is_empty());
@@ -210,7 +210,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_audio_tags() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.audio_tags(TEST_SID).await?;
         let data = result.into_data()?;
 
@@ -221,7 +221,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_audio_members() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.audio_members(TEST_SID).await?;
         let data = result.into_data()?;
 
@@ -232,7 +232,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_audio_lyric() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi.audio_lyric(TEST_SID).await?;
 
@@ -245,7 +245,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_audio_info_fields() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi.audio_info(13598).await?;
 

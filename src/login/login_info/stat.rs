@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info.html#登录用户状态数-双端)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 登录用户状态数 - 信息体
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21,7 +21,8 @@ impl BpiClient {
     pub async fn login_info_user_stat(&self) -> Result<BpiResponse<UserStat>, BpiError> {
         let result = self
             .get("https://api.bilibili.com/x/web-interface/nav/stat")
-            .send_bpi("获取登录用户状态").await?;
+            .send_bpi("获取登录用户状态")
+            .await?;
         Ok(result)
     }
 }
@@ -30,14 +31,31 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    fn live_login_tests_enabled() -> bool {
+        std::env::var("BPI_LIVE_TEST").ok().as_deref() == Some("1")
+    }
+
+    fn live_client() -> Result<BpiClient, BpiError> {
+        match std::env::var("BPI_COOKIE") {
+            Ok(cookie) if !cookie.trim().is_empty() => BpiClient::builder().cookie(cookie).build(),
+            _ => BpiClient::new(),
+        }
+    }
+
     #[tokio::test]
-    async fn test_get_user_stat() {
-        let bpi = BpiClient::new();
+    async fn test_get_user_stat() -> Result<(), BpiError> {
+        if !live_login_tests_enabled() {
+            return Ok(());
+        }
+
+        let bpi = live_client()?;
 
         match bpi.login_info_user_stat().await {
             Ok(resp) => {
                 if resp.code == 0 {
-                    let data = resp.data.unwrap();
+                    let Some(data) = resp.data else {
+                        return Ok(());
+                    };
 
                     tracing::info!(
                         "关注数: {}, 粉丝数: {}, 动态数: {}",
@@ -50,8 +68,10 @@ mod tests {
                 }
             }
             Err(err) => {
-                panic!("请求出错: {}", err);
+                return Err(err);
             }
         }
+
+        Ok(())
     }
 }

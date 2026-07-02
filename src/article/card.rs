@@ -2,9 +2,9 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/card.md)
 
-use super::models::{ ArticleAuthor, ArticleCategory, ArticleMedia, ArticleStats };
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use super::models::{ArticleAuthor, ArticleCategory, ArticleMedia, ArticleStats};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 卡片信息响应类型
 pub type CardResponse = BpiResponse<std::collections::HashMap<String, CardItem>>;
@@ -342,7 +342,10 @@ impl BpiClient {
     /// # 文档
     /// [获取专栏显示卡片信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/card.md#获取专栏显示卡片信息)
     pub async fn article_cards(&self, ids: &str) -> Result<CardResponse, BpiError> {
-        let params = vec![("ids", ids.to_string()), ("web_location", "333.1305".to_string())];
+        let params = vec![
+            ("ids", ids.to_string()),
+            ("web_location", "333.1305".to_string()),
+        ];
 
         let params = self.get_wbi_sign2(params).await?;
 
@@ -350,7 +353,8 @@ impl BpiClient {
             .get("https://api.bilibili.com/x/article/cards")
             .with_bilibili_headers()
             .query(&params)
-            .send_bpi("获取专栏显示卡片信息").await?;
+            .send_bpi("获取专栏显示卡片信息")
+            .await?;
 
         Ok(result)
     }
@@ -362,7 +366,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_article_cards() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let ids = "av2,cv1,cv2";
 

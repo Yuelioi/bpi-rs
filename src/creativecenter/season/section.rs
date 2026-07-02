@@ -2,8 +2,8 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 小节中的视频信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -84,12 +84,12 @@ impl BpiClient {
     /// [获取合集小节中的视频](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/section.md#获取合集小节中的视频)
     pub async fn season_section_episodes(
         &self,
-        season_id: u64
+        season_id: u64,
     ) -> Result<BpiResponse<SeasonSectionEpisodesData>, BpiError> {
-        self
-            .get("https://member.bilibili.com/x2/creative/web/season/section")
+        self.get("https://member.bilibili.com/x2/creative/web/season/section")
             .query(&[("id", season_id.to_string())])
-            .send_bpi("获取合集小节中的视频").await
+            .send_bpi("获取合集小节中的视频")
+            .await
     }
 }
 
@@ -99,7 +99,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_season_section_episodes() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let season_id = 176088;
         let data = bpi.season_section_episodes(season_id).await?.into_data()?;

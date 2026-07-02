@@ -1,5 +1,5 @@
-use serde::de::{ self, Deserializer, MapAccess, Visitor };
-use serde::{ Deserialize, Serialize };
+use serde::de::{self, Deserializer, MapAccess, Visitor};
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// 会员信息
@@ -56,7 +56,10 @@ pub struct VipLabel {
 }
 
 impl<'de> Deserialize<'de> for Vip {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         struct VipVisitor;
 
         impl<'de> Visitor<'de> for VipVisitor {
@@ -66,7 +69,10 @@ impl<'de> Deserialize<'de> for Vip {
                 formatter.write_str("a Vip object")
             }
 
-            fn visit_map<M>(self, mut map: M) -> Result<Vip, M::Error> where M: MapAccess<'de> {
+            fn visit_map<M>(self, mut map: M) -> Result<Vip, M::Error>
+            where
+                M: MapAccess<'de>,
+            {
                 let mut vip_type = None;
                 let mut vip_status = None;
                 let mut vip_due_date = None;
@@ -172,14 +178,13 @@ impl<'de> Deserialize<'de> for Vip {
 
                 // 检查必需字段
                 let vip_type = vip_type.ok_or_else(|| de::Error::missing_field("vip_type"))?;
-                let vip_status = vip_status.ok_or_else(|| de::Error::missing_field("vip_status"))?;
-                let vip_due_date = vip_due_date.ok_or_else(||
-                    de::Error::missing_field("vip_due_date")
-                )?;
+                let vip_status =
+                    vip_status.ok_or_else(|| de::Error::missing_field("vip_status"))?;
+                let vip_due_date =
+                    vip_due_date.ok_or_else(|| de::Error::missing_field("vip_due_date"))?;
                 let label = label.ok_or_else(|| de::Error::missing_field("label"))?;
-                let nickname_color = nickname_color.ok_or_else(||
-                    de::Error::missing_field("nickname_color")
-                )?;
+                let nickname_color =
+                    nickname_color.ok_or_else(|| de::Error::missing_field("nickname_color"))?;
 
                 Ok(Vip {
                     vip_type,

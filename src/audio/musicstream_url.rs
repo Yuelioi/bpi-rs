@@ -1,8 +1,8 @@
 //! 音频流URL
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/musicstream_url.md)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 音质参数定义
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -75,7 +75,7 @@ impl BpiClient {
     /// [获取音频流URL(web端)](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/musicstream_url.md#获取音频流urlweb端)
     pub async fn audio_stream_url_web(
         &self,
-        sid: u64
+        sid: u64,
     ) -> Result<BpiResponse<AudioStreamUrlWebData>, BpiError> {
         let params = [
             ("sid", sid.to_string()),
@@ -83,10 +83,10 @@ impl BpiClient {
             ("privilege", "2".to_string()),
         ];
 
-        self
-            .get("https://www.bilibili.com/audio/music-service-c/web/url")
+        self.get("https://www.bilibili.com/audio/music-service-c/web/url")
             .query(&params)
-            .send_bpi("获取音频流URL(web端)").await
+            .send_bpi("获取音频流URL(web端)")
+            .await
     }
 
     /// 获取音频流 URL（可获取付费音频）
@@ -105,21 +105,19 @@ impl BpiClient {
     pub async fn audio_stream_url(
         &self,
         songid: u64,
-        quality: AudioQuality
+        quality: AudioQuality,
     ) -> Result<BpiResponse<AudioStreamUrlData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/audio/music-service-c/url")
+        self.get("https://api.bilibili.com/audio/music-service-c/url")
             .with_bilibili_headers()
-            .query(
-                &[
-                    ("songid", songid.to_string()),
-                    ("quality", quality.as_u32().to_string()),
-                    ("privilege", "2".to_string()),
-                    ("mid", "2".to_string()),
-                    ("platform", "android".to_string()),
-                ]
-            )
-            .send_bpi("获取音频流URL").await
+            .query(&[
+                ("songid", songid.to_string()),
+                ("quality", quality.as_u32().to_string()),
+                ("privilege", "2".to_string()),
+                ("mid", "2".to_string()),
+                ("platform", "android".to_string()),
+            ])
+            .send_bpi("获取音频流URL")
+            .await
     }
 }
 
@@ -131,7 +129,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_audio_stream_url_web() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.audio_stream_url_web(TEST_SID).await;
         assert!(result.is_ok());
         let response = result.unwrap();
@@ -145,7 +143,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_audio_stream_url() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.audio_stream_url(15664, AudioQuality::HighQuality).await;
         assert!(result.is_ok());
         let response = result.unwrap();

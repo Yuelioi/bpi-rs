@@ -1,8 +1,8 @@
 //! B站视频合集信息相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 稿件信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -208,14 +208,14 @@ impl BpiClient {
         season_id: u64,
         sort_reverse: Option<bool>,
         page_num: Option<u64>,
-        page_size: Option<u64>
+        page_size: Option<u64>,
     ) -> Result<BpiResponse<GetSeasonsArchivesData>, BpiError> {
         let mut params = vec![
             ("mid", mid.to_string()),
             ("season_id", season_id.to_string()),
             // 默认分页参数
             ("page_num", "1".to_string()),
-            ("page_size", "20".to_string())
+            ("page_size", "20".to_string()),
         ];
 
         if let Some(sort) = sort_reverse {
@@ -231,11 +231,11 @@ impl BpiClient {
         // 签名
         let params = self.get_wbi_sign2(params).await?;
 
-        self
-            .get("https://api.bilibili.com/x/polymer/web-space/seasons_archives_list")
+        self.get("https://api.bilibili.com/x/polymer/web-space/seasons_archives_list")
             .with_bilibili_headers()
             .query(&params)
-            .send_bpi("获取视频合集信息").await
+            .send_bpi("获取视频合集信息")
+            .await
     }
 
     /// 只获取系列视频列表
@@ -250,21 +250,21 @@ impl BpiClient {
         &self,
         mid: u64,
         page_num: u64,
-        page_size: u64
+        page_size: u64,
     ) -> Result<BpiResponse<GetSeasonsSeriesData>, BpiError> {
         let params = vec![
             ("mid", mid.to_string()),
             ("page_num", page_num.to_string()),
-            ("page_size", page_size.to_string())
+            ("page_size", page_size.to_string()),
         ];
 
         // 签名
         let params = self.get_wbi_sign2(params).await?;
 
-        self
-            .get("https://api.bilibili.com/x/polymer/web-space/home/seasons_series")
+        self.get("https://api.bilibili.com/x/polymer/web-space/home/seasons_series")
             .query(&params)
-            .send_bpi("只获取系列视频列表").await
+            .send_bpi("只获取系列视频列表")
+            .await
     }
 
     /// 获取系列和合集视频列表
@@ -279,7 +279,7 @@ impl BpiClient {
         &self,
         mid: u64,
         page_num: Option<u64>,
-        page_size: Option<u64>
+        page_size: Option<u64>,
     ) -> Result<BpiResponse<GetSeasonsSeriesData>, BpiError> {
         let mut params = vec![("mid", mid.to_string())];
 
@@ -293,10 +293,10 @@ impl BpiClient {
         // 签名
         let params = self.get_wbi_sign2(params).await?;
 
-        self
-            .get("https://api.bilibili.com/x/polymer/web-space/seasons_series_list")
+        self.get("https://api.bilibili.com/x/polymer/web-space/seasons_series_list")
             .query(&params)
-            .send_bpi("获取系列和合集视频列表").await
+            .send_bpi("获取系列和合集视频列表")
+            .await
     }
 
     /// 查询指定系列信息
@@ -307,7 +307,7 @@ impl BpiClient {
     /// * `series_id` - 系列ID，必填。
     pub async fn video_series_info(
         &self,
-        series_id: u64
+        series_id: u64,
     ) -> Result<BpiResponse<GetSeriesData>, BpiError> {
         let req = self
             .get("https://api.bilibili.com/x/series/series")
@@ -334,14 +334,14 @@ impl BpiClient {
         only_normal: Option<bool>,
         sort: Option<&str>,
         page_num: Option<u64>,
-        page_size: Option<u64>
+        page_size: Option<u64>,
     ) -> Result<BpiResponse<GetSeriesArchivesData>, BpiError> {
-        let mut req = self.get("https://api.bilibili.com/x/series/archives").query(
-            &[
+        let mut req = self
+            .get("https://api.bilibili.com/x/series/archives")
+            .query(&[
                 ("mid", &mid.to_string()),
                 ("series_id", &series_id.to_string()),
-            ]
-        );
+            ]);
 
         if let Some(normal) = only_normal {
             req = req.query(&[("only_normal", &normal.to_string())]);
@@ -377,8 +377,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_seasons_archives_list() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.video_seasons_list(TEST_MID, TEST_SEASON_ID, Some(false), None, None).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .video_seasons_list(TEST_MID, TEST_SEASON_ID, Some(false), None, None)
+            .await?;
         let data = resp.into_data()?;
 
         info!("测试结果: {:?}", data);
@@ -389,7 +391,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_seasons_series_only() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.video_series_list(TEST_MID, 1, 10).await?;
         let data = resp.into_data()?;
 
@@ -400,12 +402,17 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_seasons_series_list() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.video_seasons_series_list(TEST_MID, Some(1), Some(5)).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .video_seasons_series_list(TEST_MID, Some(1), Some(5))
+            .await?;
         let data = resp.into_data()?;
 
         info!("测试结果: {:?}", data);
-        assert!(!data.items_lists.series_list.is_empty(), "返回的系列列表不应为空");
+        assert!(
+            !data.items_lists.series_list.is_empty(),
+            "返回的系列列表不应为空"
+        );
         // 注意：合集列表可能为空，无法直接断言不为空
         assert_eq!(data.items_lists.page.page_size, 5, "返回的每页数量应为5");
         Ok(())
@@ -413,27 +420,32 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_series_info() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.video_series_info(TEST_SERIES_ID).await?;
         let data = resp.into_data()?;
 
         info!("测试结果: {:?}", data);
-        assert_eq!(data.meta.series_id, TEST_SERIES_ID, "返回的系列ID应与请求ID一致");
+        assert_eq!(
+            data.meta.series_id, TEST_SERIES_ID,
+            "返回的系列ID应与请求ID一致"
+        );
         assert!(!data.recent_aids.is_empty(), "最近的aid列表不应为空");
         Ok(())
     }
 
     #[tokio::test]
     async fn test_video_series_archives() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.video_series_archives(
-            TEST_MID,
-            TEST_SERIES_ID,
-            None,
-            Some("asc"),
-            Some(1),
-            Some(10)
-        ).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .video_series_archives(
+                TEST_MID,
+                TEST_SERIES_ID,
+                None,
+                Some("asc"),
+                Some(1),
+                Some(10),
+            )
+            .await?;
         let data = resp.into_data()?;
 
         info!("测试结果: {:?}", data);

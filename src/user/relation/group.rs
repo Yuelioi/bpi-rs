@@ -1,8 +1,8 @@
 //! B站用户分组相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
 
@@ -27,18 +27,17 @@ impl BpiClient {
     /// | `group_name` | &str      | 分组名，最长16字|
     pub async fn user_group_create_tag(
         &self,
-        group_name: &str
+        group_name: &str,
     ) -> Result<BpiResponse<CreateTagResponseData>, BpiError> {
         let csrf = self.csrf()?;
-        let form = reqwest::multipart::Form
-            ::new()
+        let form = reqwest::multipart::Form::new()
             .text("tag", group_name.to_string())
             .text("csrf", csrf.to_string());
 
-        self
-            .post("https://api.bilibili.com/x/relation/tag/create")
+        self.post("https://api.bilibili.com/x/relation/tag/create")
             .multipart(form)
-            .send_bpi("创建分组").await
+            .send_bpi("创建分组")
+            .await
     }
 
     /// 重命名分组
@@ -54,19 +53,18 @@ impl BpiClient {
     pub async fn user_group_update_tag(
         &self,
         tag_id: i64,
-        new_name: &str
+        new_name: &str,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
-        let form = reqwest::multipart::Form
-            ::new()
+        let form = reqwest::multipart::Form::new()
             .text("tagid", tag_id.to_string())
             .text("name", new_name.to_string())
             .text("csrf", csrf.to_string());
 
-        self
-            .post("https://api.bilibili.com/x/relation/tag/update")
+        self.post("https://api.bilibili.com/x/relation/tag/update")
             .multipart(form)
-            .send_bpi("重命名分组").await
+            .send_bpi("重命名分组")
+            .await
     }
 
     /// 删除分组
@@ -80,18 +78,17 @@ impl BpiClient {
     /// | `tag_id`  | i64         | 分组ID         |
     pub async fn user_group_delete_tag(
         &self,
-        tag_id: i64
+        tag_id: i64,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
-        let form = reqwest::multipart::Form
-            ::new()
+        let form = reqwest::multipart::Form::new()
             .text("tagid", tag_id.to_string())
             .text("csrf", csrf.to_string());
 
-        self
-            .post("https://api.bilibili.com/x/relation/tag/del")
+        self.post("https://api.bilibili.com/x/relation/tag/del")
             .multipart(form)
-            .send_bpi("删除分组").await
+            .send_bpi("删除分组")
+            .await
     }
 
     /// 修改分组成员（添加）
@@ -107,7 +104,7 @@ impl BpiClient {
     pub async fn user_group_add_users_to_tags(
         &self,
         fids: &[u64],
-        tagids: &[i64]
+        tagids: &[i64],
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let fids_str = fids
@@ -121,16 +118,15 @@ impl BpiClient {
             .collect::<Vec<_>>()
             .join(",");
 
-        let form = reqwest::multipart::Form
-            ::new()
+        let form = reqwest::multipart::Form::new()
             .text("fids", fids_str)
             .text("tagids", tagids_str)
             .text("csrf", csrf.to_string());
 
-        self
-            .post("https://api.bilibili.com/x/relation/tags/addUsers")
+        self.post("https://api.bilibili.com/x/relation/tags/addUsers")
             .multipart(form)
-            .send_bpi("修改分组成员").await
+            .send_bpi("修改分组成员")
+            .await
     }
 
     // 修改分组成员（删除）
@@ -144,7 +140,7 @@ impl BpiClient {
     /// | `fids`    | &`[u64]`      | 目标用户 mid 列表|
     pub async fn user_group_remove_users_(
         &self,
-        fids: &[u64]
+        fids: &[u64],
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let fids_str = fids
@@ -153,16 +149,15 @@ impl BpiClient {
             .collect::<Vec<_>>()
             .join(",");
 
-        let form = reqwest::multipart::Form
-            ::new()
+        let form = reqwest::multipart::Form::new()
             .text("fids", fids_str)
             .text("tagids", "0".to_string())
             .text("csrf", csrf.to_string());
 
-        self
-            .post("https://api.bilibili.com/x/relation/tags/addUsers")
+        self.post("https://api.bilibili.com/x/relation/tags/addUsers")
             .multipart(form)
-            .send_bpi("修改分组成员").await
+            .send_bpi("修改分组成员")
+            .await
     }
 
     /// 复制关注到分组
@@ -178,7 +173,7 @@ impl BpiClient {
     pub async fn user_group_copy_users_to_tags(
         &self,
         fids: &[u64],
-        tagids: &[i64]
+        tagids: &[i64],
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let fids_str = fids
@@ -192,16 +187,15 @@ impl BpiClient {
             .collect::<Vec<_>>()
             .join(",");
 
-        let form = reqwest::multipart::Form
-            ::new()
+        let form = reqwest::multipart::Form::new()
             .text("fids", fids_str)
             .text("tagids", tagids_str)
             .text("csrf", csrf.to_string());
 
-        self
-            .post("https://api.bilibili.com/x/relation/tags/copyUsers")
+        self.post("https://api.bilibili.com/x/relation/tags/copyUsers")
             .multipart(form)
-            .send_bpi("复制关注到分组").await
+            .send_bpi("复制关注到分组")
+            .await
     }
 
     /// 移动关注到分组
@@ -219,7 +213,7 @@ impl BpiClient {
         &self,
         fids: &[u64],
         before_tag_ids: &[i64],
-        after_tag_ids: &[i64]
+        after_tag_ids: &[i64],
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let fids_str = fids
@@ -238,17 +232,16 @@ impl BpiClient {
             .collect::<Vec<_>>()
             .join(",");
 
-        let form = reqwest::multipart::Form
-            ::new()
+        let form = reqwest::multipart::Form::new()
             .text("fids", fids_str)
             .text("beforeTagids", before_tag_ids_str)
             .text("afterTagids", after_tag_ids_str)
             .text("csrf", csrf.to_string());
 
-        self
-            .post("https://api.bilibili.com/x/relation/tags/moveUsers")
+        self.post("https://api.bilibili.com/x/relation/tags/moveUsers")
             .multipart(form)
-            .send_bpi("移动关注到分组").await
+            .send_bpi("移动关注到分组")
+            .await
     }
 }
 
@@ -265,7 +258,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_tag_operations() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let test_tag_name = "测试分组1";
         let new_tag_name = "新测试分组2";
 
@@ -283,24 +276,26 @@ mod tests {
 
         // 3. 修改分组成员
         info!("正在将用户添加到默认分组...");
-        let add_resp = bpi.user_group_add_users_to_tags(&[TEST_FID], &[-10]).await?;
+        let add_resp = bpi
+            .user_group_add_users_to_tags(&[TEST_FID], &[-10])
+            .await?;
         info!("添加用户到默认分组成功");
         assert_eq!(add_resp.code, 0);
 
         // 5. 移动关注到分组
         // 假设存在一个默认分组（tagid=-10）
         info!("正在将用户从默认分组移动到新分组...");
-        let move_resp = bpi.user_group_move_users_to_tags(
-            &[DEFAULT_GROUP_FID],
-            &[-10],
-            &[tag_id]
-        ).await?;
+        let move_resp = bpi
+            .user_group_move_users_to_tags(&[DEFAULT_GROUP_FID], &[-10], &[tag_id])
+            .await?;
         info!("移动用户到分组成功");
         assert_eq!(move_resp.code, 0);
 
         // 4. 复制关注到分组
         info!("正在将用户复制到分组...");
-        let copy_resp = bpi.user_group_copy_users_to_tags(&[TEST_FID], &[tag_id]).await?;
+        let copy_resp = bpi
+            .user_group_copy_users_to_tags(&[TEST_FID], &[tag_id])
+            .await?;
         info!("复制用户到分组成功");
         assert_eq!(copy_resp.code, 0);
 

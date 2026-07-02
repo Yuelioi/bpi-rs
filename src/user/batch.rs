@@ -1,8 +1,8 @@
 //! B站用户批量信息相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// UID 查询返回的单个条目
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -29,14 +29,14 @@ impl BpiClient {
     /// - `names`: 用户名列表，多个用户名以逗号分隔
     pub async fn user_name_to_uid(
         &self,
-        names: &[&str]
+        names: &[&str],
     ) -> Result<BpiResponse<NameToUidData>, BpiError> {
         let names_str = names.join(",");
 
-        self
-            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/name-to-uid")
+        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/name-to-uid")
             .query(&[("names", names_str)])
-            .send_bpi("用户名查 UID").await
+            .send_bpi("用户名查 UID")
+            .await
     }
 }
 
@@ -46,12 +46,18 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
-    async fn test_user_name_to_uid() {
-        let bpi = BpiClient::new();
-        let resp = bpi.user_name_to_uid(&["LexBurner", "某科学"]).await;
-        assert!(resp.is_ok());
-        if let Ok(r) = resp {
-            info!("用户名查 UID 返回: {:?}", r);
+    async fn test_user_name_to_uid() -> Result<(), BpiError> {
+        if std::env::var_os("BPI_LIVE_TEST").is_none() {
+            return Ok(());
         }
+
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi.user_name_to_uid(&["LexBurner", "某科学"]).await?;
+        let data = resp.into_data()?;
+
+        info!("用户名查 UID 返回: {:?}", data);
+        assert!(!data.uid_list.is_empty());
+
+        Ok(())
     }
 }

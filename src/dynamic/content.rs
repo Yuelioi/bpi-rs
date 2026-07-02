@@ -1,5 +1,5 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 直播的已关注者列表项
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -66,11 +66,10 @@ impl BpiClient {
     /// | `size` | `Option<u32>` | 每页显示数，默认 10 |
     pub async fn dynamic_live_users(
         &self,
-        size: Option<u32>
+        size: Option<u32>,
     ) -> Result<BpiResponse<LiveUsersData>, BpiError> {
-        let mut req = self.get(
-            "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_live_users"
-        );
+        let mut req =
+            self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_live_users");
 
         if let Some(s) = size {
             req = req.query(&[("size", &s.to_string())]);
@@ -91,11 +90,10 @@ impl BpiClient {
     /// | `teenagers_mode` | `Option<u8>` | 是否开启青少年模式：0 否，1 是 |
     pub async fn dynamic_up_users(
         &self,
-        teenagers_mode: Option<u8>
+        teenagers_mode: Option<u8>,
     ) -> Result<BpiResponse<DynUpUsersData>, BpiError> {
-        let mut req = self.get(
-            "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist"
-        );
+        let mut req =
+            self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist");
 
         if let Some(mode) = teenagers_mode {
             req = req.query(&[("teenagers_mode", &mode.to_string())]);
@@ -118,7 +116,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_live_users() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.dynamic_live_users(Some(1)).await?;
         let data = resp.into_data()?;
 
@@ -130,7 +128,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_dyn_up_users() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.dynamic_up_users(None).await?;
         let data = resp.into_data()?;
 

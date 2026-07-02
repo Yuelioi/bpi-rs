@@ -2,9 +2,9 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/videos.md)
 
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 /// 稿件统计信息
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -116,7 +116,7 @@ impl BpiClient {
     pub async fn up_archives_list(
         &self,
         pn: i64,
-        ps: Option<i64>
+        ps: Option<i64>,
     ) -> Result<BpiResponse<SpArchivesData>, BpiError> {
         let mut req = self
             .get("https://member.bilibili.com/x2/creative/web/archives/sp")
@@ -140,12 +140,12 @@ impl BpiClient {
     /// [获取视频基础信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/videos.md#获取视频基础信息)
     pub async fn up_archive_videos(
         &self,
-        aid: i64
+        aid: i64,
     ) -> Result<BpiResponse<ArchiveVideosData>, BpiError> {
-        self
-            .get("https://member.bilibili.com/x/web/archive/videos")
+        self.get("https://member.bilibili.com/x/web/archive/videos")
             .query(&[("aid", aid)])
-            .send_bpi("获取视频基础信息").await
+            .send_bpi("获取视频基础信息")
+            .await
     }
 }
 
@@ -158,7 +158,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_archives_list() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let data = bpi.up_archives_list(1, Some(10)).await?.into_data()?;
         info!("稿件列表: {:?}", data);
         Ok(())
@@ -166,7 +166,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_archive_videos() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let data = bpi.up_archive_videos(TEST_AID).await?.into_data()?;
         info!("视频基础信息: {:?}", data);
         Ok(())

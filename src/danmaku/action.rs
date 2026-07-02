@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 // -------------------
 // 发送视频弹幕
@@ -43,7 +43,7 @@ impl BpiClient {
         progress: Option<u32>,
         color: Option<u32>,
         fontsize: Option<u8>,
-        pool: Option<u8>
+        pool: Option<u8>,
     ) -> Result<BpiResponse<DanmakuPostData>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -64,7 +64,7 @@ impl BpiClient {
             ("polaris_app_id", "100".to_string()),
             ("polaris_platform", "5".to_string()),
             ("spmid", "333.788.0.0".to_string()),
-            ("from_spmid", "333.788.0.0".to_string())
+            ("from_spmid", "333.788.0.0".to_string()),
         ];
 
         if let Some(m) = mode {
@@ -95,10 +95,10 @@ impl BpiClient {
         // 签名参数加入表单
         let signed_params = self.get_wbi_sign2(form.clone()).await?;
 
-        self
-            .post("https://api.bilibili.com/x/v2/dm/post")
+        self.post("https://api.bilibili.com/x/v2/dm/post")
             .form(&signed_params)
-            .send_bpi("发送视频弹幕").await
+            .send_bpi("发送视频弹幕")
+            .await
     }
 
     /// 发送视频弹幕（精简参数版本）
@@ -118,7 +118,7 @@ impl BpiClient {
         oid: u64,
         msg: &str,
         avid: Option<u64>,
-        bvid: Option<&str>
+        bvid: Option<&str>,
     ) -> Result<BpiResponse<DanmakuPostData>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -127,7 +127,7 @@ impl BpiClient {
             ("oid", oid.to_string()),
             ("msg", msg.to_string()),
             ("mode", "1".to_string()),
-            ("csrf", csrf)
+            ("csrf", csrf),
         ];
 
         if let Some(b) = bvid {
@@ -140,10 +140,10 @@ impl BpiClient {
         // 使用 get_wbi_sign2 自动生成 w_rid / wts
         let signed_form = self.get_wbi_sign2(form).await?;
 
-        self
-            .post("https://api.bilibili.com/x/v2/dm/post")
+        self.post("https://api.bilibili.com/x/v2/dm/post")
             .form(&signed_form)
-            .send_bpi("发送视频弹幕").await
+            .send_bpi("发送视频弹幕")
+            .await
     }
 }
 
@@ -167,20 +167,18 @@ impl BpiClient {
     pub async fn danmaku_recall(
         &self,
         cid: u64,
-        dmid: u64
+        dmid: u64,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
-        self
-            .post("https://api.bilibili.com/x/dm/recall")
-            .form(
-                &[
-                    ("cid", &cid.to_string()),
-                    ("dmid", &dmid.to_string()),
-                    ("type", &"1".to_string()),
-                    ("csrf", &csrf),
-                ]
-            )
-            .send_bpi("撤回弹幕").await
+        self.post("https://api.bilibili.com/x/dm/recall")
+            .form(&[
+                ("cid", &cid.to_string()),
+                ("dmid", &dmid.to_string()),
+                ("type", &"1".to_string()),
+                ("csrf", &csrf),
+            ])
+            .send_bpi("撤回弹幕")
+            .await
     }
 }
 
@@ -200,19 +198,17 @@ impl BpiClient {
     /// | `cid` | u64 | 视频 cid |
     pub async fn danmaku_buy_adv(
         &self,
-        cid: u64
+        cid: u64,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
-        self
-            .post("https://api.bilibili.com/x/dm/adv/buy")
-            .form(
-                &[
-                    ("cid", cid.to_string()),
-                    ("mode", "sp".to_string()),
-                    ("csrf", csrf),
-                ]
-            )
-            .send_bpi("购买高级弹幕发送权限").await
+        self.post("https://api.bilibili.com/x/dm/adv/buy")
+            .form(&[
+                ("cid", cid.to_string()),
+                ("mode", "sp".to_string()),
+                ("csrf", csrf),
+            ])
+            .send_bpi("购买高级弹幕发送权限")
+            .await
     }
 }
 
@@ -241,17 +237,12 @@ impl BpiClient {
     /// | `cid` | u64 | 视频 cid |
     pub async fn danmaku_adv_state(
         &self,
-        cid: u64
+        cid: u64,
     ) -> Result<BpiResponse<DanmakuAdvState>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/dm/adv/state")
-            .query(
-                &[
-                    ("cid", cid.to_string()),
-                    ("mode", "sp".to_string()),
-                ]
-            )
-            .send_bpi("检测高级弹幕发送权限").await
+        self.get("https://api.bilibili.com/x/dm/adv/state")
+            .query(&[("cid", cid.to_string()), ("mode", "sp".to_string())])
+            .send_bpi("检测高级弹幕发送权限")
+            .await
     }
 }
 
@@ -275,22 +266,22 @@ impl BpiClient {
         &self,
         oid: u64,
         dmid: u64,
-        op: u8
+        op: u8,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let mut form = vec![
             ("oid", oid.to_string()),
             ("dmid", dmid.to_string()),
             ("op", op.to_string()),
-            ("csrf", csrf)
+            ("csrf", csrf),
         ];
 
         form.push(("platform", "web_player".to_string()));
 
-        self
-            .post("https://api.bilibili.com/x/v2/dm/thumbup/add")
+        self.post("https://api.bilibili.com/x/v2/dm/thumbup/add")
             .form(&form)
-            .send_bpi("点赞弹幕").await
+            .send_bpi("点赞弹幕")
+            .await
     }
 }
 
@@ -316,21 +307,24 @@ impl BpiClient {
         cid: u64,
         dmid: u64,
         reason: u8,
-        content: Option<&str>
+        content: Option<&str>,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let mut form = vec![
             ("cid", cid.to_string()),
             ("dmid", dmid.to_string()),
             ("reason", reason.to_string()),
-            ("csrf", csrf)
+            ("csrf", csrf),
         ];
 
         if let Some(c) = content {
             form.push(("content", c.to_string()));
         }
 
-        self.post("https://api.bilibili.com/x/dm/report/add").form(&form).send_bpi("举报弹幕").await
+        self.post("https://api.bilibili.com/x/dm/report/add")
+            .form(&form)
+            .send_bpi("举报弹幕")
+            .await
     }
 }
 
@@ -354,7 +348,7 @@ impl BpiClient {
         &self,
         oid: u64,
         dmids: &[u64],
-        state: u8
+        state: u8,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let dmids_str = dmids
@@ -363,18 +357,16 @@ impl BpiClient {
             .collect::<Vec<_>>()
             .join(",");
 
-        self
-            .post("https://api.bilibili.com/x/v2/dm/edit/state")
-            .form(
-                &[
-                    ("type", "1"),
-                    ("oid", &oid.to_string()),
-                    ("dmids", &dmids_str),
-                    ("state", &state.to_string()),
-                    ("csrf", &csrf),
-                ]
-            )
-            .send_bpi("保护&删除弹幕").await
+        self.post("https://api.bilibili.com/x/v2/dm/edit/state")
+            .form(&[
+                ("type", "1"),
+                ("oid", &oid.to_string()),
+                ("dmids", &dmids_str),
+                ("state", &state.to_string()),
+                ("csrf", &csrf),
+            ])
+            .send_bpi("保护&删除弹幕")
+            .await
     }
 }
 
@@ -398,7 +390,7 @@ impl BpiClient {
         &self,
         oid: u64,
         dmids: &[u64],
-        pool: u8
+        pool: u8,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
         let dmids_str = dmids
@@ -407,18 +399,16 @@ impl BpiClient {
             .collect::<Vec<_>>()
             .join(",");
 
-        self
-            .post("https://api.bilibili.com/x/v2/dm/edit/pool")
-            .form(
-                &[
-                    ("type", "1"),
-                    ("oid", &oid.to_string()),
-                    ("dmids", &dmids_str),
-                    ("pool", &pool.to_string()),
-                    ("csrf", &csrf),
-                ]
-            )
-            .send_bpi("修改字幕池").await
+        self.post("https://api.bilibili.com/x/v2/dm/edit/pool")
+            .form(&[
+                ("type", "1"),
+                ("oid", &oid.to_string()),
+                ("dmids", &dmids_str),
+                ("pool", &pool.to_string()),
+                ("csrf", &csrf),
+            ])
+            .send_bpi("修改字幕池")
+            .await
     }
 }
 
@@ -430,20 +420,22 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_danmaku_post() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
-        let resp = bpi.danmaku_send(
-            413195701,
-            "测试22",
-            Some(590635620),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None
-        ).await;
+        let resp = bpi
+            .danmaku_send(
+                413195701,
+                "测试22",
+                Some(590635620),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
+            .await;
         info!("{:#?}", resp);
         assert!(resp.is_ok());
         info!("dmid{}", resp.unwrap().data.unwrap().dmid);
@@ -452,7 +444,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_danmaku_recall() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let resp = bpi.danmaku_recall(413195701, 1932013422544416768).await;
         info!("{:#?}", resp);
@@ -462,7 +454,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_danmaku_buy_adv() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let resp = bpi.danmaku_buy_adv(413195701).await;
         info!("{:#?}", resp);
@@ -472,7 +464,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_danmaku_get_adv_state() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let resp = bpi.danmaku_adv_state(413195701).await;
         info!("{:#?}", resp);
@@ -482,7 +474,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_danmaku_thumbup() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let resp = bpi.danmaku_thumbup(413195701, 1932011031958944000, 1).await;
         info!("{:#?}", resp);
@@ -492,7 +484,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_danmaku_edit_state() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let dmids = vec![1932011031958944000];
         let resp = bpi.danmaku_edit_state(413195701, &dmids, 1).await;
@@ -503,7 +495,7 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn test_danmaku_edit_pool() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let dmids = vec![1932011031958944000];
         let resp = bpi.danmaku_edit_pool(413195701, &dmids, 1).await;

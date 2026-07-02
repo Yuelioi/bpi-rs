@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct LiveInfo {
@@ -89,7 +89,7 @@ impl BpiClient {
     pub async fn live_replay_list(
         &self,
         page: Option<i32>,
-        page_size: Option<i32>
+        page_size: Option<i32>,
     ) -> Result<BpiResponse<ReplayListData>, BpiError> {
         let mut query = Vec::new();
 
@@ -101,10 +101,10 @@ impl BpiClient {
             query.push(("page_size", page_size.to_string()));
         }
 
-        self
-            .get("https://api.live.bilibili.com/xlive/app-blink/v1/anchorVideo/AnchorGetReplayList")
+        self.get("https://api.live.bilibili.com/xlive/app-blink/v1/anchorVideo/AnchorGetReplayList")
             .query(&query)
-            .send_bpi("获取直播回放列表").await
+            .send_bpi("获取直播回放列表")
+            .await
     }
 }
 
@@ -114,7 +114,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_live_replay_list() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.live_replay_list(Some(1), Some(2)).await.unwrap();
         tracing::info!("{:?}", resp);
     }

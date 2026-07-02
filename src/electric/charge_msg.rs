@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 /// 发送充电留言的请求体
 #[derive(Debug, Clone, Serialize)]
@@ -102,7 +102,7 @@ impl BpiClient {
     pub async fn electric_message_send(
         &self,
         order_id: &str,
-        message: &str
+        message: &str,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -112,10 +112,10 @@ impl BpiClient {
             ("csrf", &csrf),
         ];
 
-        self
-            .post("https://api.bilibili.com/x/ugcpay/trade/elec/message")
+        self.post("https://api.bilibili.com/x/ugcpay/trade/elec/message")
             .form(&body)
-            .send_bpi("发送充电留言").await
+            .send_bpi("发送充电留言")
+            .await
     }
 
     /// 查询我收到的充电留言
@@ -138,7 +138,7 @@ impl BpiClient {
         pn: Option<u64>,
         ps: Option<u64>,
         begin: Option<NaiveDate>,
-        end: Option<NaiveDate>
+        end: Option<NaiveDate>,
     ) -> Result<BpiResponse<ElecRemarkList>, BpiError> {
         let mut req = self.get("https://member.bilibili.com/x/web/elec/remark/list");
 
@@ -172,12 +172,12 @@ impl BpiClient {
     /// | `id` | u64 | 留言 id |
     pub async fn electric_remark_detail(
         &self,
-        id: u64
+        id: u64,
     ) -> Result<BpiResponse<ElecRemarkDetail>, BpiError> {
-        self
-            .get("https://member.bilibili.com/x/web/elec/remark/detail")
+        self.get("https://member.bilibili.com/x/web/elec/remark/detail")
             .query(&[("id", id)])
-            .send_bpi("查询充电留言详情").await
+            .send_bpi("查询充电留言详情")
+            .await
     }
 
     /// 回复充电留言
@@ -196,7 +196,7 @@ impl BpiClient {
     pub async fn electric_remark_reply(
         &self,
         id: u64,
-        msg: &str
+        msg: &str,
     ) -> Result<BpiResponse<u64>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -206,10 +206,10 @@ impl BpiClient {
             ("csrf", csrf.to_string()),
         ];
 
-        self
-            .post("https://member.bilibili.com/x/web/elec/remark/reply")
+        self.post("https://member.bilibili.com/x/web/elec/remark/reply")
             .form(&body)
-            .send_bpi("回复充电留言").await
+            .send_bpi("回复充电留言")
+            .await
     }
 }
 
@@ -221,7 +221,7 @@ mod tests {
     #[tokio::test]
     /// 未测试
     async fn test_send_elec_message() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为有效的 order_id 和留言
         let resp = bpi.electric_message_send("ORDER_ID_HERE", "测试留言").await;
         info!("响应: {:?}", resp);
@@ -230,8 +230,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_elec_remark_list() {
-        let bpi = BpiClient::new();
-        let resp = bpi.electric_remark_list(Some(1), Some(10), None, None).await;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .electric_remark_list(Some(1), Some(10), None, None)
+            .await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
@@ -244,7 +246,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_elec_remark_detail() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为有效的留言id
         let resp = bpi.electric_remark_detail(6507563).await;
         info!("响应: {:?}", resp);
@@ -253,7 +255,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_reply_elec_remark() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为有效的留言id和回复内容
         let resp = bpi.electric_remark_reply(6507563, "测试回复").await;
         info!("响应: {:?}", resp);

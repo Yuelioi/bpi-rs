@@ -1,8 +1,8 @@
 //! B站用户粉丝勋章相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 粉丝勋章响应数据
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -81,12 +81,12 @@ impl BpiClient {
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
     pub async fn user_medal_wall(
         &self,
-        target_id: u64
+        target_id: u64,
     ) -> Result<BpiResponse<MedalWallData>, BpiError> {
-        self
-            .get("https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall")
+        self.get("https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall")
             .query(&[("target_id", target_id.to_string())])
-            .send_bpi("获取用户粉丝勋章").await
+            .send_bpi("获取用户粉丝勋章")
+            .await
     }
 }
 
@@ -96,9 +96,15 @@ mod tests {
     use tracing::info;
 
     #[tokio::test]
-    async fn test_user_medal_wall() {
-        let bpi = BpiClient::new();
-        let resp = bpi.user_medal_wall(2).await.unwrap(); // UID=2: 碧诗
+    async fn test_user_medal_wall() -> Result<(), BpiError> {
+        if std::env::var_os("BPI_LIVE_TEST").is_none() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi.user_medal_wall(2).await?; // UID=2: 碧诗
         info!("粉丝勋章墙: {:?}", resp.data);
+
+        Ok(())
     }
 }

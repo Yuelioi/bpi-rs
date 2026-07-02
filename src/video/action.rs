@@ -4,8 +4,8 @@
 
 use std::collections::HashMap;
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 点赞视频 - 请求参数
 #[derive(Debug, Clone, Serialize)]
@@ -69,22 +69,21 @@ impl BpiClient {
         &self,
         aid: Option<u64>,
         bvid: Option<String>,
-        like: u8
+        like: u8,
     ) -> Result<BpiResponse<CoinData>, BpiError> {
         let csrf = self.csrf()?;
 
         let result = self
             .post("https://api.bilibili.com/x/web-interface/archive/like")
             .with_bilibili_headers()
-            .form(
-                &[
-                    ("aid", aid.unwrap_or(0).to_string()),
-                    ("bvid", bvid.unwrap_or("".to_string())),
-                    ("like", like.to_string()),
-                    ("csrf", csrf),
-                ]
-            )
-            .send_bpi("点赞").await?;
+            .form(&[
+                ("aid", aid.unwrap_or(0).to_string()),
+                ("bvid", bvid.unwrap_or("".to_string())),
+                ("like", like.to_string()),
+                ("csrf", csrf),
+            ])
+            .send_bpi("点赞")
+            .await?;
 
         Ok(result)
     }
@@ -106,23 +105,21 @@ impl BpiClient {
         aid: Option<u64>,
         bvid: Option<String>,
         multiply: u8,
-        select_like: Option<u8>
+        select_like: Option<u8>,
     ) -> Result<BpiResponse<CoinData>, BpiError> {
         let csrf = self.csrf()?;
 
-        self
-            .post("https://api.bilibili.com/x/web-interface/coin/add")
+        self.post("https://api.bilibili.com/x/web-interface/coin/add")
             .with_bilibili_headers()
-            .form(
-                &[
-                    ("aid", aid.unwrap_or(0).to_string()),
-                    ("bvid", bvid.unwrap_or("".to_string())),
-                    ("multiply", multiply.to_string()),
-                    ("select_like", select_like.unwrap_or(0).to_string()),
-                    ("csrf", csrf),
-                ]
-            )
-            .send_bpi("投币").await
+            .form(&[
+                ("aid", aid.unwrap_or(0).to_string()),
+                ("bvid", bvid.unwrap_or("".to_string())),
+                ("multiply", multiply.to_string()),
+                ("select_like", select_like.unwrap_or(0).to_string()),
+                ("csrf", csrf),
+            ])
+            .send_bpi("投币")
+            .await
     }
 
     /// 收藏视频
@@ -140,7 +137,7 @@ impl BpiClient {
         &self,
         rid: u64,
         add_media_ids: Option<Vec<&str>>,
-        del_media_ids: Option<Vec<&str>>
+        del_media_ids: Option<Vec<&str>>,
     ) -> Result<FavoriteResponse, BpiError> {
         if add_media_ids.is_none() && del_media_ids.is_none() {
             return Err(BpiError::InvalidParameter {
@@ -176,11 +173,11 @@ impl BpiClient {
             params.insert("del_media_ids", s);
         }
 
-        self
-            .post("https://api.bilibili.com/x/v3/fav/resource/deal")
+        self.post("https://api.bilibili.com/x/v3/fav/resource/deal")
             .with_bilibili_headers()
             .form(&params)
-            .send_bpi("收藏视频").await
+            .send_bpi("收藏视频")
+            .await
     }
 }
 
@@ -190,37 +187,46 @@ mod tests {
 
     #[tokio::test]
     async fn test_like_video() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         match bpi.video_like(Some(10001), None, 1).await {
             Ok(resp) => tracing::info!("点赞响应: {:?}", resp),
-            Err(e) =>
-                match e.code() {
-                    Some(65006) => { tracing::info!("已赞过") }
-                    _ => { panic!("请求失败: {}", e) }
+            Err(e) => match e.code() {
+                Some(65006) => {
+                    tracing::info!("已赞过")
                 }
+                _ => {
+                    panic!("请求失败: {}", e)
+                }
+            },
         }
     }
 
     #[tokio::test]
     async fn test_coin_video() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         match bpi.video_coin(Some(10001), None, 1, Some(1)).await {
             Ok(resp) => tracing::info!("投币响应: {:?}", resp),
-            Err(e) =>
-                match e.code() {
-                    Some(34005) => { tracing::info!("超过投币上限") }
-                    _ => { panic!("请求失败: {}", e) }
+            Err(e) => match e.code() {
+                Some(34005) => {
+                    tracing::info!("超过投币上限")
                 }
+                _ => {
+                    panic!("请求失败: {}", e)
+                }
+            },
         }
     }
 
     #[tokio::test]
     async fn test_favorite_video() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
-        match bpi.video_favorite(10001, Some(vec!["44717370"]), None).await {
+        match bpi
+            .video_favorite(10001, Some(vec!["44717370"]), None)
+            .await
+        {
             Ok(resp) => tracing::info!("收藏响应: {:?}", resp),
             Err(e) => panic!("请求失败: {}", e),
         }

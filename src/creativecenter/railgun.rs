@@ -2,8 +2,8 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/railgun.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 电磁力等级信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -28,11 +28,11 @@ impl BpiClient {
     /// # 文档
     /// [获取电磁力等级](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/railgun.md#获取电磁力等级)
     pub async fn up_electromagnetic_info(
-        &self
+        &self,
     ) -> Result<BpiResponse<ElectromagneticInfo>, BpiError> {
-        self
-            .get("https://api.bilibili.com/studio/up-rating/v3/rating/info")
-            .send_bpi("获取电磁力等级").await
+        self.get("https://api.bilibili.com/studio/up-rating/v3/rating/info")
+            .send_bpi("获取电磁力等级")
+            .await
     }
 }
 
@@ -42,7 +42,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_electromagnetic_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let data = bpi.up_electromagnetic_info().await?.into_data()?;
 

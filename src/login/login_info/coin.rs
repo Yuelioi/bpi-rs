@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info_info.html#获取硬币数)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 获取硬币数 - 响应结构体
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -18,7 +18,9 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login)
     pub async fn login_info_coin(&self) -> Result<BpiResponse<CoinInfo>, BpiError> {
-        self.get("https://account.bilibili.com/site/getCoin").send_bpi("获取硬币数").await
+        self.get("https://account.bilibili.com/site/getCoin")
+            .send_bpi("获取硬币数")
+            .await
     }
 }
 
@@ -26,21 +28,40 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    fn live_login_tests_enabled() -> bool {
+        std::env::var("BPI_LIVE_TEST").ok().as_deref() == Some("1")
+    }
+
+    fn live_client() -> Result<BpiClient, BpiError> {
+        match std::env::var("BPI_COOKIE") {
+            Ok(cookie) if !cookie.trim().is_empty() => BpiClient::builder().cookie(cookie).build(),
+            _ => BpiClient::new(),
+        }
+    }
+
     #[tokio::test]
-    async fn test_get_coin() {
-        let bpi = BpiClient::new();
+    async fn test_get_coin() -> Result<(), BpiError> {
+        if !live_login_tests_enabled() {
+            return Ok(());
+        }
+
+        let bpi = live_client()?;
 
         match bpi.login_info_coin().await {
             Ok(resp) => {
                 if resp.code == 0 {
-                    tracing::info!("获取硬币数成功: {:?}", resp.data.unwrap().money);
+                    if let Some(data) = resp.data {
+                        tracing::info!("获取硬币数成功: {:?}", data.money);
+                    }
                 } else {
                     tracing::info!("请求失败: code={}", resp.code);
                 }
             }
             Err(err) => {
-                panic!("请求出错: {}", err);
+                return Err(err);
             }
         }
+
+        Ok(())
     }
 }

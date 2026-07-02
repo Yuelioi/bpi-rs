@@ -218,7 +218,7 @@ impl ArticleCategories {
                 id: 42,
                 parent_id: 41,
                 name: "全部笔记".to_string(),
-            }
+            },
         ]
     }
 
@@ -232,16 +232,12 @@ impl ArticleCategories {
 
     /// 根据ID获取分类
     pub fn find_by_id(id: i32) -> Option<ArticleCategory> {
-        Self::all()
-            .into_iter()
-            .find(|cat| cat.id == id)
+        Self::all().into_iter().find(|cat| cat.id == id)
     }
 
     /// 根据名称获取分类
     pub fn find_by_name(name: &str) -> Option<ArticleCategory> {
-        Self::all()
-            .into_iter()
-            .find(|cat| cat.name == name)
+        Self::all().into_iter().find(|cat| cat.name == name)
     }
 
     /// 获取子分类

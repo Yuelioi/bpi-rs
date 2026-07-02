@@ -2,7 +2,7 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/opus.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde_json::json;
 
 impl BpiClient {
@@ -17,17 +17,17 @@ impl BpiClient {
     /// [删除动态](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/opus.md#删除动态)
     pub async fn dynamic_delete(
         &self,
-        dyn_id: &str
+        dyn_id: &str,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        self
-            .post("https://api.bilibili.com/x/dynamic/feed/operate/remove")
+        self.post("https://api.bilibili.com/x/dynamic/feed/operate/remove")
             .query(&[("csrf", csrf)])
             .json(&json!({
               "dyn_id_str": dyn_id
             }))
-            .send_bpi("删除动态").await
+            .send_bpi("删除动态")
+            .await
     }
 
     /// 删除专栏
@@ -41,19 +41,14 @@ impl BpiClient {
     /// [删除专栏](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/opus.md#删除专栏)
     pub async fn article_delete(
         &self,
-        aid: u64
+        aid: u64,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
-        self
-            .post("https://member.bilibili.com/x/web/article/delete")
-            .form(
-                &[
-                    ("aid", aid.to_string()),
-                    ("csrf", csrf),
-                ]
-            )
-            .send_bpi("删除专栏").await
+        self.post("https://member.bilibili.com/x/web/article/delete")
+            .form(&[("aid", aid.to_string()), ("csrf", csrf)])
+            .send_bpi("删除专栏")
+            .await
     }
 }
 
@@ -67,7 +62,7 @@ mod tests {
     #[ignore]
     #[tokio::test]
     async fn test_dynamic_delete() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         bpi.dynamic_delete(TEST_DYN_ID).await?;
 
@@ -76,7 +71,7 @@ mod tests {
     #[ignore]
     #[tokio::test]
     async fn test_article_delete() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         bpi.article_delete(TEST_AID).await?;
 

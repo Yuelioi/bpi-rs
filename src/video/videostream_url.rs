@@ -1,8 +1,8 @@
 //! 视频流地址相关接口 (web端)
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 视频流URL相关数据结构体 ---
 
@@ -138,7 +138,7 @@ impl BpiClient {
         fourk: Option<u8>,
         platform: Option<&str>,
         high_quality: Option<u8>,
-        try_look: Option<u8>
+        try_look: Option<u8>,
     ) -> Result<BpiResponse<PlayUrlResponseData>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -179,11 +179,11 @@ impl BpiClient {
         // 签名
         let params = self.get_wbi_sign2(params).await?;
 
-        self
-            .get("https://api.bilibili.com/x/player/wbi/playurl")
+        self.get("https://api.bilibili.com/x/player/wbi/playurl")
             .with_bilibili_headers()
             .query(&params)
-            .send_bpi("获取视频流地址").await
+            .send_bpi("获取视频流地址")
+            .await
     }
 }
 
@@ -199,20 +199,22 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_playurl_mp4_by_aid() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 请求 MP4 格式，720P
-        let resp = bpi.video_playurl(
-            Some(TEST_AID),
-            None,
-            TEST_CID,
-            Some(64),
-            Some(1),
-            None,
-            None,
-            None,
-            None,
-            None
-        ).await?;
+        let resp = bpi
+            .video_playurl(
+                Some(TEST_AID),
+                None,
+                TEST_CID,
+                Some(64),
+                Some(1),
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
+            .await?;
         let data = resp.into_data()?;
 
         info!("MP4 视频流信息: {:?}", data);
@@ -224,20 +226,22 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_playurl_4k() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 请求 4K
-        let resp = bpi.video_playurl(
-            Some(TEST_AID),
-            None,
-            TEST_CID,
-            Some(120),
-            Some(16 | 128),
-            Some(0),
-            Some(1),
-            None,
-            None,
-            None
-        ).await?;
+        let resp = bpi
+            .video_playurl(
+                Some(TEST_AID),
+                None,
+                TEST_CID,
+                Some(120),
+                Some(16 | 128),
+                Some(0),
+                Some(1),
+                None,
+                None,
+                None,
+            )
+            .await?;
         let data = resp.into_data()?;
 
         info!("4K 视频流信息: {:?}", data);

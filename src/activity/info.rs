@@ -1,8 +1,8 @@
 //! 活动主题信息
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/info.md)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 活动主题信息数据
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -51,7 +51,7 @@ impl BpiClient {
     pub async fn activity_info(
         &self,
         sid: u64,
-        bvid: Option<&str>
+        bvid: Option<&str>,
     ) -> Result<BpiResponse<ActivityInfoData>, BpiError> {
         let mut params = vec![("sid", sid.to_string())];
 
@@ -62,7 +62,8 @@ impl BpiClient {
         let result = self
             .get("https://api.bilibili.com/x/activity/subject/info")
             .query(&params)
-            .send_bpi("获取活动主题信息").await?;
+            .send_bpi("获取活动主题信息")
+            .await?;
 
         Ok(result)
     }
@@ -74,7 +75,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_activity_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let sid = 4017552;
         let bvid = Some("BV1mKY4e8ELy");
 
@@ -87,7 +88,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_activity_info_without_bvid() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let sid = 4017552;
 
         let result = bpi.activity_info(sid, None).await?;

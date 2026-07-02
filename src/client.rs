@@ -1,224 +1,457 @@
-use crate::{ BpiError };
-use reqwest::RequestBuilder;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+
 use reqwest::cookie::CookieStore;
-use reqwest::{ Client, Url, cookie::Jar };
-use std::sync::{ Arc, Mutex };
-use tracing;
+use reqwest::header::{COOKIE, HeaderValue, ORIGIN, REFERER, USER_AGENT};
+use reqwest::{Client, RequestBuilder, Url};
 
-use super::auth::Account;
-use super::request::BilibiliRequest;
+use crate::BpiError;
+use crate::auth::Account;
+#[cfg(feature = "login")]
+use crate::login::LoginClient;
+use crate::session::cookie::{format_cookie_pairs, parse_cookie_header as parse_cookie_pairs};
+use crate::sign::wbi::WbiKeyCache;
+#[cfg(feature = "user")]
+use crate::user::UserClient;
+#[cfg(feature = "video")]
+use crate::video::VideoClient;
 
-/// 使用示例：
-///
-///
-/// ```rust
-/// use bpi_rs::{ Account, BpiClient };
-///
-/// #[tokio::main]
-/// async fn main() {
-///     let bpi = BpiClient::new();
-///     bpi.set_account(Account {
-///         dede_user_id: "".to_string(),
-///         dede_user_id_ckmd5: "".to_string(),
-///         sessdata: "".to_string(),
-///         bili_jct: "".to_string(),
-///         buvid3: "".to_string(),
-///     });
-///
-///     // bpi.set_account_from_cookie_str("dede_user_id=123;bili_jct=456...");
-///
-///     let result = bpi.bangumi_info(28220978).await;
-///     match result {
-///         Ok(result) => {
-///             tracing::info!("{:#?}", result.data);
-///         }
-///         Err(e) => {
-///             tracing::error!("{:#?}", e);
-///         }
-///     }
-/// }
+const DEFAULT_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+    AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+const DEFAULT_REFERER: &str = "https://www.bilibili.com/";
+const DEFAULT_ORIGIN: &str = "https://www.bilibili.com";
+const BILIBILI_URL: &str = "https://www.bilibili.com";
+const API_BILIBILI_URL: &str = "https://api.bilibili.com";
 
-/// ```
+/// Configures a [`BpiClient`] before construction.
+#[derive(Debug)]
+pub struct BpiClientBuilder {
+    timeout: Duration,
+    connect_timeout: Duration,
+    user_agent: String,
+    referer: String,
+    origin: String,
+    no_proxy: bool,
+    proxies: Vec<reqwest::Proxy>,
+    cookie: Option<String>,
+    account: Option<Account>,
+    reqwest_client: Option<Client>,
+}
+
+impl Default for BpiClientBuilder {
+    fn default() -> Self {
+        Self {
+            timeout: Duration::from_secs(10),
+            connect_timeout: Duration::from_secs(10),
+            user_agent: DEFAULT_USER_AGENT.to_string(),
+            referer: DEFAULT_REFERER.to_string(),
+            origin: DEFAULT_ORIGIN.to_string(),
+            no_proxy: true,
+            proxies: Vec::new(),
+            cookie: None,
+            account: None,
+            reqwest_client: None,
+        }
+    }
+}
+
+impl BpiClientBuilder {
+    /// Sets the total request timeout.
+    pub fn timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = timeout;
+        self
+    }
+
+    /// Sets the TCP connect timeout.
+    pub fn connect_timeout(mut self, timeout: Duration) -> Self {
+        self.connect_timeout = timeout;
+        self
+    }
+
+    /// Sets the default user-agent applied by [`BpiClient::get`] and [`BpiClient::post`].
+    pub fn user_agent(mut self, user_agent: impl Into<String>) -> Self {
+        self.user_agent = user_agent.into();
+        self
+    }
+
+    /// Sets the default referer header applied by [`BpiClient::get`] and [`BpiClient::post`].
+    pub fn referer(mut self, referer: impl Into<String>) -> Self {
+        self.referer = referer.into();
+        self
+    }
+
+    /// Sets the default origin header applied by [`BpiClient::get`] and [`BpiClient::post`].
+    pub fn origin(mut self, origin: impl Into<String>) -> Self {
+        self.origin = origin.into();
+        self
+    }
+
+    /// Controls whether reqwest should bypass system proxies.
+    pub fn no_proxy(mut self, enabled: bool) -> Self {
+        self.no_proxy = enabled;
+        self
+    }
+
+    /// Adds an explicit proxy to the reqwest client builder.
+    pub fn proxy(mut self, proxy: reqwest::Proxy) -> Self {
+        self.proxies.push(proxy);
+        self
+    }
+
+    /// Seeds the client session from a raw Cookie header string.
+    pub fn cookie(mut self, cookie: impl Into<String>) -> Self {
+        self.cookie = Some(cookie.into());
+        self
+    }
+
+    /// Seeds the client session from structured account values.
+    pub fn account(mut self, account: Account) -> Self {
+        self.account = Some(account);
+        self
+    }
+
+    /// Uses an externally configured reqwest client.
+    pub fn reqwest_client(mut self, client: Client) -> Self {
+        self.reqwest_client = Some(client);
+        self
+    }
+
+    /// Builds a client without reading files, initializing global logging, or using shared state.
+    pub fn build(self) -> Result<BpiClient, BpiError> {
+        let jar = Arc::new(reqwest::cookie::Jar::default());
+        let mut account = self.account;
+        let mut cookie_header = None;
+
+        if let Some(cookie) = self.cookie {
+            let pairs = parse_cookie_pairs(&cookie)?;
+            add_cookie_pairs(&jar, &pairs);
+            cookie_header = Some(format_cookie_pairs(&pairs));
+
+            if account.is_none() {
+                account = Some(Account::from_cookie_pairs(&pairs));
+            }
+        }
+
+        if let Some(account) = account.as_ref() {
+            let pairs = account.cookie_pairs();
+            add_cookie_pairs(&jar, &pairs);
+            cookie_header.get_or_insert_with(|| format_cookie_pairs(&pairs));
+        }
+
+        let client = match self.reqwest_client {
+            Some(client) => client,
+            None => {
+                let mut builder = Client::builder()
+                    .timeout(self.timeout)
+                    .connect_timeout(self.connect_timeout)
+                    .gzip(true)
+                    .deflate(true)
+                    .brotli(true)
+                    .cookie_provider(jar.clone())
+                    .pool_max_idle_per_host(0);
+
+                if self.no_proxy {
+                    builder = builder.no_proxy();
+                }
+
+                for proxy in self.proxies {
+                    builder = builder.proxy(proxy);
+                }
+
+                builder.build()?
+            }
+        };
+
+        Ok(BpiClient {
+            client,
+            jar,
+            account: Mutex::new(account),
+            user_agent: validate_header("user_agent", &self.user_agent)?,
+            referer: validate_header("referer", &self.referer)?,
+            origin: validate_header("origin", &self.origin)?,
+            cookie_header: Mutex::new(cookie_header),
+            wbi_key_cache: WbiKeyCache::default(),
+        })
+    }
+}
+
+/// Bilibili API client.
 pub struct BpiClient {
     client: Client,
-    jar: Arc<Jar>,
+    jar: Arc<reqwest::cookie::Jar>,
     account: Mutex<Option<Account>>,
+    user_agent: HeaderValue,
+    referer: HeaderValue,
+    origin: HeaderValue,
+    cookie_header: Mutex<Option<String>>,
+    wbi_key_cache: WbiKeyCache,
 }
 
 impl BpiClient {
-    /// 创建client
-    pub fn new() -> &'static Self {
-        static INSTANCE: std::sync::OnceLock<BpiClient> = std::sync::OnceLock::new();
-        INSTANCE.get_or_init(|| {
-            let jar = Arc::new(Jar::default());
-            let client = Client::builder()
-                .timeout(std::time::Duration::from_secs(10))
-                .gzip(true) // 启用gzip自动解压缩
-                .deflate(true) // 启用deflate解压缩
-                .brotli(true) // 启用brotli解压缩
-                .no_proxy()
-                .cookie_provider(jar.clone())
-                .pool_max_idle_per_host(0)
-                .build()
-                .unwrap();
-
-            let instance = Self {
-                client,
-                jar,
-                account: Mutex::new(None),
-            };
-
-            // 在 debug 模式下自动从account.toml加载测试账号
-            #[cfg(any(test, debug_assertions))]
-            {
-                use super::log::init_log;
-
-                init_log();
-                if let Ok(test_account) = Account::load_test_account() {
-                    instance.set_account(test_account);
-                    tracing::info!("已自动加载测试账号");
-                } else {
-                    tracing::warn!("无法加载测试账号，使用默认配置");
-                }
-            }
-
-            instance
-        })
+    /// Creates an owned client with default configuration.
+    pub fn new() -> Result<Self, BpiError> {
+        Self::builder().build()
     }
 
-    /// 设置账号信息
+    /// Starts configuring a client.
+    pub fn builder() -> BpiClientBuilder {
+        BpiClientBuilder::default()
+    }
+
+    /// Sets account information and updates this client's cookie state.
     pub fn set_account(&self, account: Account) {
         if account.is_complete() {
-            self.load_cookies_from_account(&account);
-            let mut acc = self.account.lock().unwrap();
-            *acc = Some(account);
-            tracing::info!("设置账号信息完成，使用[登录]模式");
+            let pairs = account.cookie_pairs();
+            add_cookie_pairs(&self.jar, &pairs);
+            *self
+                .cookie_header
+                .lock()
+                .expect("cookie header mutex poisoned") = Some(format_cookie_pairs(&pairs));
+            *self.account.lock().expect("account mutex poisoned") = Some(account);
+            tracing::info!("Bilibili account configured");
         } else {
-            tracing::warn!("账号信息不完整，使用[游客]模式");
+            tracing::warn!("Bilibili account is incomplete; continuing as guest");
         }
     }
 
-    /// 从账号信息设置登录 cookies
-    fn load_cookies_from_account(&self, account: &Account) {
-        tracing::info!("开始从账号信息加载cookies...");
-
-        let cookies = vec![
-            ("DedeUserID", account.dede_user_id.clone()),
-            ("DedeUserID__ckMd5", account.dede_user_id_ckmd5.clone()),
-            ("SESSDATA", account.sessdata.clone()),
-            ("bili_jct", account.bili_jct.clone()),
-            ("buvid3", account.buvid3.clone())
-        ];
-        self.add_cookies(cookies);
-        tracing::info!("从账号信息加载登录 cookies 完成");
-    }
-
-    /// 清除账号信息
+    /// Clears account information from this client.
     pub fn clear_account(&self) {
-        let mut acc = self.account.lock().unwrap();
-        *acc = None;
-        self.clear_cookies();
-        tracing::info!("清除账号信息完成");
+        *self.account.lock().expect("account mutex poisoned") = None;
+        *self
+            .cookie_header
+            .lock()
+            .expect("cookie header mutex poisoned") = None;
+        tracing::info!("Bilibili account cleared");
     }
 
-    fn add_cookie_pair(&self, key: &str, value: &str) {
-        let url = Url::parse("https://www.bilibili.com").unwrap();
-        let cookie = format!("{}={}; Domain=.bilibili.com; Path=/", key, value);
-        self.jar.add_cookie_str(&cookie, &url);
-        tracing::debug!("添加 cookie: {} = {}", key, value);
+    /// Sets account information from a raw Cookie header string.
+    pub fn set_account_from_cookie_str(&self, cookie_str: &str) -> Result<(), BpiError> {
+        let pairs = parse_cookie_pairs(cookie_str)?;
+        add_cookie_pairs(&self.jar, &pairs);
+        *self
+            .cookie_header
+            .lock()
+            .expect("cookie header mutex poisoned") = Some(format_cookie_pairs(&pairs));
+        *self.account.lock().expect("account mutex poisoned") =
+            Some(Account::from_cookie_pairs(&pairs));
+        Ok(())
     }
 
-    /// 批量添加 cookies
-    fn add_cookies<I, K, V>(&self, cookies: I)
-        where I: IntoIterator<Item = (K, V)>, K: ToString, V: ToString
-    {
-        for (key, value) in cookies {
-            self.add_cookie_pair(&key.to_string(), &value.to_string());
-        }
-    }
-
-    /// 清空所有 cookies
-    /// todo
-    fn clear_cookies(&self) {
-        // 注意：reqwest 的 Jar 没有直接的 clear 方法
-        // 这里需要重新创建 jar，但由于 Arc 的限制，需要在上层重置整个 Bpi
-        tracing::info!("清空 cookies（需要重置整个客户端）");
-    }
-
-    pub fn set_account_from_cookie_str(&self, cookie_str: &str) {
-        // 先解析成 map
-        let mut map = std::collections::HashMap::new();
-        for kv in cookie_str.split(';') {
-            let kv = kv.trim();
-            if let Some(pos) = kv.find('=') {
-                let (key, value) = kv.split_at(pos);
-                map.insert(key.trim().to_string(), value[1..].trim().to_string());
-            }
-        }
-
-        let account = Account {
-            dede_user_id: map.get("DedeUserID").cloned().unwrap_or_default(),
-            dede_user_id_ckmd5: map.get("DedeUserID__ckMd5").cloned().unwrap_or_default(),
-            sessdata: map.get("SESSDATA").cloned().unwrap_or_default(),
-            bili_jct: map.get("bili_jct").cloned().unwrap_or_default(),
-            buvid3: map.get("buvid3").cloned().unwrap_or_default(),
-        };
-
-        self.set_account(account);
-    }
-
-    /// 检查是否有登录 cookies
+    /// Checks whether this client has login cookies.
     pub fn has_login_cookies(&self) -> bool {
-        let url = Url::parse("https://api.bilibili.com").unwrap();
+        if self
+            .cookie_header
+            .lock()
+            .expect("cookie header mutex poisoned")
+            .is_some()
+        {
+            return true;
+        }
+
+        let url = Url::parse(API_BILIBILI_URL).expect("static Bilibili API URL is valid");
         self.jar.cookies(&url).is_some()
     }
 
-    /// 获取当前账号信息
+    /// Returns the current account information.
     pub fn get_account(&self) -> Option<Account> {
-        self.account.lock().unwrap().clone()
+        self.account.lock().expect("account mutex poisoned").clone()
     }
 
-    /// 从账号信息获取 CSRF token
+    /// Gets the current CSRF token from account information.
     pub fn csrf(&self) -> Result<String, BpiError> {
-        let account = self.account.lock().unwrap();
-        account
-            .as_ref()
-            .filter(|acc| !acc.bili_jct.is_empty())
-            .map(|acc| acc.bili_jct.clone())
-            .ok_or_else(BpiError::missing_csrf)
+        let account = self.account.lock().expect("account mutex poisoned");
+        let account = account.as_ref().ok_or_else(BpiError::auth_required)?;
+
+        account.csrf().map(str::to_owned)
     }
 
-    /// reqwest的get请求包装, 自带user_agent
+    /// Creates a GET request with this client's default Bilibili headers.
     pub fn get(&self, url: &str) -> RequestBuilder {
-        self.client.get(url).with_user_agent()
+        self.apply_default_headers(url, self.client.get(url))
     }
-    /// reqwest的post请求包装, 自带user_agent
+
+    /// Creates a POST request with this client's default Bilibili headers.
     pub fn post(&self, url: &str) -> RequestBuilder {
-        self.client.post(url).with_user_agent()
+        self.apply_default_headers(url, self.client.post(url))
+    }
+
+    fn apply_default_headers(&self, url: &str, builder: RequestBuilder) -> RequestBuilder {
+        let builder = builder
+            .header(USER_AGENT, self.user_agent.clone())
+            .header(REFERER, self.referer.clone())
+            .header(ORIGIN, self.origin.clone());
+
+        if !is_bilibili_url(url) {
+            return builder;
+        }
+
+        match self
+            .cookie_header
+            .lock()
+            .expect("cookie header mutex poisoned")
+            .as_ref()
+        {
+            Some(cookie_header) => builder.header(COOKIE, cookie_header),
+            None => builder,
+        }
+    }
+
+    pub(crate) fn wbi_key_cache(&self) -> &WbiKeyCache {
+        &self.wbi_key_cache
+    }
+
+    #[cfg(test)]
+    fn cookie_header_for_test(&self) -> Option<String> {
+        self.cookie_header
+            .lock()
+            .expect("cookie header mutex poisoned")
+            .clone()
+    }
+
+    #[cfg(test)]
+    fn insert_wbi_keys_for_test(
+        &self,
+        bucket: impl Into<String>,
+        keys: crate::sign::wbi::WbiKeys,
+    ) -> Result<(), BpiError> {
+        self.wbi_key_cache.insert(bucket, keys)
+    }
+
+    #[cfg(test)]
+    fn wbi_keys_for_test(
+        &self,
+        bucket: &str,
+    ) -> Result<Option<crate::sign::wbi::WbiKeys>, BpiError> {
+        self.wbi_key_cache.get(bucket)
     }
 }
 
 impl BpiClient {
-    /// 从配置创建Client
-    pub fn from_config(config: &Account) -> &Self {
-        let bpi = Self::new();
+    /// Creates a login domain client.
+    #[cfg(feature = "login")]
+    pub fn login(&self) -> LoginClient<'_> {
+        LoginClient::new(self)
+    }
 
-        if
-            !config.dede_user_id.is_empty() &&
-            !config.sessdata.is_empty() &&
-            !config.bili_jct.is_empty() &&
-            !config.buvid3.is_empty()
-        {
-            let account = Account::new(
-                config.dede_user_id.clone(),
-                config.dede_user_id_ckmd5.clone(),
-                config.sessdata.clone(),
-                config.bili_jct.clone(),
-                config.buvid3.clone()
-            );
-            bpi.set_account(account);
-        }
+    /// Creates a video domain client.
+    #[cfg(feature = "video")]
+    pub fn video(&self) -> VideoClient<'_> {
+        VideoClient::new(self)
+    }
 
-        bpi
+    /// Creates a user domain client.
+    #[cfg(feature = "user")]
+    pub fn user(&self) -> UserClient<'_> {
+        UserClient::new(self)
+    }
+
+    /// Creates a client from structured account configuration.
+    pub fn from_config(config: &Account) -> Result<Self, BpiError> {
+        Self::builder().account(config.clone()).build()
+    }
+}
+
+fn add_cookie_pairs(jar: &reqwest::cookie::Jar, pairs: &[(String, String)]) {
+    let url = Url::parse(BILIBILI_URL).expect("static Bilibili URL is valid");
+    for (key, value) in pairs {
+        let cookie = format!("{key}={value}; Domain=.bilibili.com; Path=/");
+        jar.add_cookie_str(&cookie, &url);
+    }
+}
+
+fn validate_header(field: &'static str, value: &str) -> Result<HeaderValue, BpiError> {
+    HeaderValue::from_str(value)
+        .map_err(|_| BpiError::invalid_parameter(field, "invalid header value"))
+}
+
+fn is_bilibili_url(url: &str) -> bool {
+    Url::parse(url)
+        .ok()
+        .and_then(|url| url.host_str().map(|host| host.ends_with("bilibili.com")))
+        .unwrap_or(false)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn builder_creates_owned_client_without_account_side_effects() -> Result<(), BpiError> {
+        let client = BpiClient::builder().build()?;
+
+        assert!(client.get_account().is_none());
+        Ok(())
+    }
+
+    #[test]
+    fn builder_keeps_cookie_state_isolated_between_clients() -> Result<(), BpiError> {
+        let first = BpiClient::builder().cookie("SESSDATA=first").build()?;
+        let second = BpiClient::builder().cookie("SESSDATA=second").build()?;
+
+        assert_ne!(
+            first.cookie_header_for_test(),
+            second.cookie_header_for_test()
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn builder_rejects_cookie_strings_without_pairs() {
+        let result = BpiClient::builder().cookie("not-a-cookie").build();
+
+        assert!(matches!(
+            result,
+            Err(BpiError::InvalidParameter {
+                field: "cookie",
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn builder_applies_default_headers_to_requests() -> Result<(), BpiError> {
+        let client = BpiClient::builder()
+            .user_agent("test-agent")
+            .referer("https://example.com/referer")
+            .origin("https://example.com")
+            .build()?;
+
+        let request = client.get("https://api.bilibili.com/x/test").build()?;
+
+        assert_eq!(request.headers()[USER_AGENT], "test-agent");
+        assert_eq!(request.headers()[REFERER], "https://example.com/referer");
+        assert_eq!(request.headers()[ORIGIN], "https://example.com");
+        Ok(())
+    }
+
+    #[test]
+    fn builder_accepts_explicit_proxy_configuration() -> Result<(), BpiError> {
+        let proxy = reqwest::Proxy::http("http://127.0.0.1:8080")?;
+
+        let client = BpiClient::builder().no_proxy(false).proxy(proxy).build()?;
+
+        assert!(client.get_account().is_none());
+        Ok(())
+    }
+
+    #[test]
+    fn builder_keeps_wbi_key_cache_isolated_between_clients() -> Result<(), BpiError> {
+        let first = BpiClient::new()?;
+        let second = BpiClient::new()?;
+
+        first.insert_wbi_keys_for_test(
+            "2026-07-02T10",
+            crate::sign::wbi::WbiKeys::new("abcdefghijklmnopqrstuvwxyz123456", "sub-key-a")?,
+        )?;
+        second.insert_wbi_keys_for_test(
+            "2026-07-02T10",
+            crate::sign::wbi::WbiKeys::new("ABCDEFGHIJKLMNOPQRSTUVWXYZ654321", "sub-key-b")?,
+        )?;
+
+        assert_ne!(
+            first.wbi_keys_for_test("2026-07-02T10")?,
+            second.wbi_keys_for_test("2026-07-02T10")?
+        );
+        Ok(())
     }
 }

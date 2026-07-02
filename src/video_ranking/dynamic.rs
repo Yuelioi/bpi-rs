@@ -1,5 +1,5 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 获取分区最新视频列表 ---
 
@@ -107,7 +107,7 @@ impl BpiClient {
         &self,
         rid: u32,
         pn: Option<u32>,
-        ps: Option<u32>
+        ps: Option<u32>,
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
         let mut request = self
             .get("https://api.bilibili.com/x/web-interface/dynamic/region")
@@ -140,14 +140,11 @@ impl BpiClient {
         rid: u32,
         tag_id: u64,
         pn: Option<u32>,
-        ps: Option<u32>
+        ps: Option<u32>,
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        let mut request = self.get("https://api.bilibili.com/x/web-interface/dynamic/tag").query(
-            &[
-                ("rid", rid.to_string()),
-                ("tag_id", tag_id.to_string()),
-            ]
-        );
+        let mut request = self
+            .get("https://api.bilibili.com/x/web-interface/dynamic/tag")
+            .query(&[("rid", rid.to_string()), ("tag_id", tag_id.to_string())]);
 
         if let Some(pn) = pn {
             request = request.query(&[("pn", pn.to_string())]);
@@ -176,7 +173,7 @@ impl BpiClient {
         rid: u32,
         pn: Option<u32>,
         ps: Option<u32>,
-        typ: Option<u32>
+        typ: Option<u32>,
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
         let mut request = self
             .get("https://api.bilibili.com/x/web-interface/newlist")
@@ -216,20 +213,20 @@ impl BpiClient {
         page: Option<u32>,
         pagesize: u32,
         time_from: &str,
-        time_to: &str
+        time_to: &str,
     ) -> Result<BpiResponse<NewListRankData>, BpiError> {
         let cate_id = cate_id.to_string();
         let pagesize = pagesize.to_string();
-        let mut request = self.get("https://api.bilibili.com/x/web-interface/newlist_rank").query(
-            &[
+        let mut request = self
+            .get("https://api.bilibili.com/x/web-interface/newlist_rank")
+            .query(&[
                 ("search_type", "video"),
                 ("view_type", "hot_rank"),
                 ("cate_id", cate_id.as_str()),
                 ("pagesize", pagesize.as_str()),
                 ("time_from", time_from),
                 ("time_to", time_to),
-            ]
-        );
+            ]);
 
         if let Some(o) = order {
             request = request.query(&[("order", o)]);
@@ -245,12 +242,12 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{ Duration, Local };
+    use chrono::{Duration, Local};
     use tracing::info;
 
     #[tokio::test]
     async fn test_video_region_dynamic() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let rid = 21; // 日常分区
         let ps = Some(2);
         let pn = Some(1);
@@ -269,7 +266,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_region_tag_dynamic() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let rid = 136; // 音游分区
         let tag_id = 10026108; // Phigros
         let ps = Some(2);
@@ -289,7 +286,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_region_newlist_rank() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let cate_id = 231; // 计算机技术
         let pagesize = 2;
         let today = Local::now().date_naive();
@@ -298,14 +295,16 @@ mod tests {
         let time_from = seven_days_ago.format("%Y%m%d").to_string();
         let time_to = today.format("%Y%m%d").to_string();
 
-        let resp = bpi.video_region_newlist_rank(
-            cate_id,
-            Some("click"),
-            Some(1),
-            pagesize,
-            &time_from,
-            &time_to
-        ).await;
+        let resp = bpi
+            .video_region_newlist_rank(
+                cate_id,
+                Some("click"),
+                Some(1),
+                pagesize,
+                &time_from,
+                &time_to,
+            )
+            .await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());

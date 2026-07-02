@@ -56,7 +56,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_dynamic_feed_banner() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.dynamic_feed_banner().await?;
         let data = resp.into_data()?;
 

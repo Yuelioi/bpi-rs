@@ -1,8 +1,8 @@
 //! 视频 AI 总结相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
 
@@ -73,7 +73,7 @@ impl BpiClient {
         aid: Option<u64>,
         bvid: Option<&str>,
         cid: u64,
-        up_mid: u64
+        up_mid: u64,
     ) -> Result<BpiResponse<AiSummaryResponseData>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -113,8 +113,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_ai_summary_by_aid() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.video_ai_summary(Some(TEST_AID), None, TEST_CID, TEST_UP_MID).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .video_ai_summary(Some(TEST_AID), None, TEST_CID, TEST_UP_MID)
+            .await?;
         let data = resp.into_data()?;
 
         info!("视频 AI 总结: {:?}", data);

@@ -1,7 +1,6 @@
 version: '3'
 
 vars:
-  GREETING: Hello, World!
   CARGO_TEST_ARGS: ":: -- --test-threads=1 --nocapture"
 
 tasks:
@@ -9,107 +8,151 @@ tasks:
     cmds:
       - cargo check
 
-  
+  fmt_check:
+    cmds:
+      - cargo fmt --check
+
+  test_compile:
+    desc: Compile all library tests without running legacy live tests.
+    cmds:
+      - cargo test --all-features --lib --no-run
+
+  test_offline:
+    desc: Run only tests known to be offline in the pre-migration codebase.
+    cmds:
+      - cargo test --all-features --lib utils::aid_bvid
+
+  check_all:
+    desc: Safe default checks for the pre-migration baseline.
+    cmds:
+      - cargo fmt --check
+      - cargo clippy --all-targets --all-features --locked -- -D warnings
+      - cargo check --all-features
+      - cargo test --all-features --lib --no-run
+      - cargo test --all-features --lib utils::aid_bvid
+
+  test_live_readonly:
+    desc: Run legacy live tests only when BPI_LIVE_TEST=1.
+    preconditions:
+      - sh: test "$BPI_LIVE_TEST" = "1"
+        msg: Set BPI_LIVE_TEST=1 before running live Bilibili API tests.
+    cmds:
+      - cargo test --all-features --lib -- --test-threads=1 --nocapture
+
+  test_live_mutating:
+    desc: Run legacy live tests that may mutate account state.
+    preconditions:
+      - sh: test "$BPI_LIVE_TEST" = "1"
+        msg: Set BPI_LIVE_TEST=1 before running live Bilibili API tests.
+      - sh: test "$BPI_MUTATING_TEST" = "1"
+        msg: Set BPI_MUTATING_TEST=1 before running mutating Bilibili API tests.
+    cmds:
+      - cargo test --all-features --lib -- --test-threads=1 --nocapture
+
   test_activity:
     cmds:
       - cargo test --features activity activity{{.CARGO_TEST_ARGS}}
-  
+
   test_article:
     cmds:
       - cargo test --features article article{{.CARGO_TEST_ARGS}}
-  
+
   test_audio:
     cmds:
       - cargo test --features audio audio{{.CARGO_TEST_ARGS}}
-  
+
   test_bangumi:
     cmds:
       - cargo test --features bangumi bangumi{{.CARGO_TEST_ARGS}}
-  
-  test_blackroom:
-    cmds:
-      - cargo test --features blackroom blackroom{{.CARGO_TEST_ARGS}}
-  
+
   test_cheese:
     cmds:
       - cargo test --features cheese cheese{{.CARGO_TEST_ARGS}}
-  
+
   test_clientinfo:
     cmds:
       - cargo test --features clientinfo clientinfo{{.CARGO_TEST_ARGS}}
-  
+
   test_comment:
     cmds:
       - cargo test --features comment comment{{.CARGO_TEST_ARGS}}
-  
+
   test_creativecenter:
     cmds:
       - cargo test --features creativecenter creativecenter{{.CARGO_TEST_ARGS}}
-  
+
+  test_danmaku:
+    cmds:
+      - cargo test --features danmaku danmaku{{.CARGO_TEST_ARGS}}
+
   test_dynamic:
     cmds:
       - cargo test --features dynamic dynamic{{.CARGO_TEST_ARGS}}
-  
+
   test_electric:
     cmds:
       - cargo test --features electric electric{{.CARGO_TEST_ARGS}}
-  
-  test_emoji:
-    cmds:
-      - cargo test --features emoji emoji{{.CARGO_TEST_ARGS}}
-  
+
   test_fav:
     cmds:
       - cargo test --features fav fav{{.CARGO_TEST_ARGS}}
-  
-  test_garb:
-    cmds:
-      - cargo test --features garb garb{{.CARGO_TEST_ARGS}}
-  
+
   test_historytoview:
     cmds:
       - cargo test --features historytoview historytoview{{.CARGO_TEST_ARGS}}
-  
+
   test_live:
     cmds:
       - cargo test --features live live{{.CARGO_TEST_ARGS}}
-  
+
   test_login:
     cmds:
       - cargo test --features login login{{.CARGO_TEST_ARGS}}
-  
+
   test_manga:
     cmds:
       - cargo test --features manga manga{{.CARGO_TEST_ARGS}}
-  
+
   test_message:
     cmds:
       - cargo test --features message message{{.CARGO_TEST_ARGS}}
-  
+
   test_misc:
     cmds:
       - cargo test --features misc misc{{.CARGO_TEST_ARGS}}
-  
+
+  test_note:
+    cmds:
+      - cargo test --features note note{{.CARGO_TEST_ARGS}}
+
+  test_opus:
+    cmds:
+      - cargo test --features opus opus{{.CARGO_TEST_ARGS}}
+
   test_search:
     cmds:
       - cargo test --features search search{{.CARGO_TEST_ARGS}}
-  
+
   test_user:
     cmds:
       - cargo test --features user user{{.CARGO_TEST_ARGS}}
-  
+
   test_video:
     cmds:
       - cargo test --features video video{{.CARGO_TEST_ARGS}}
-  
+
+  test_video_ranking:
+    cmds:
+      - cargo test --features video_ranking video_ranking{{.CARGO_TEST_ARGS}}
+
   test_vip:
     cmds:
       - cargo test --features vip vip{{.CARGO_TEST_ARGS}}
-  
+
   test_wallet:
     cmds:
       - cargo test --features wallet wallet{{.CARGO_TEST_ARGS}}
-  
+
   test_web_widget:
     cmds:
       - cargo test --features web_widget web_widget{{.CARGO_TEST_ARGS}}

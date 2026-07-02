@@ -3,8 +3,8 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md)
 //!
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -28,7 +28,7 @@ impl BpiClient {
         &self,
         rid: u64,
         add_media_ids: Option<Vec<&str>>,
-        del_media_ids: Option<Vec<&str>>
+        del_media_ids: Option<Vec<&str>>,
     ) -> Result<BpiResponse<PromptData>, BpiError> {
         if add_media_ids.is_none() && del_media_ids.is_none() {
             return Err(BpiError::InvalidParameter {
@@ -64,7 +64,8 @@ impl BpiClient {
         let result = self
             .get("https://api.bilibili.com/medialist/gateway/coll/resource/deal")
             .form(&params)
-            .send_bpi("收藏音频到收藏夹").await?;
+            .send_bpi("收藏音频到收藏夹")
+            .await?;
         Ok(result)
     }
 
@@ -82,20 +83,19 @@ impl BpiClient {
     pub async fn audio_collection_to(
         &self,
         sid: u64,
-        cids: u64
+        cids: u64,
     ) -> Result<BpiResponse<bool>, BpiError> {
         let csrf = self.csrf()?;
 
         let result = self
             .get("https://www.bilibili.com/audio/music-service-c/web/collections/songs-coll")
-            .form(
-                &[
-                    ("sid", sid.to_string()),
-                    ("cids", cids.to_string()),
-                    ("csrf", csrf),
-                ]
-            )
-            .send_bpi("收藏音频到歌单").await?;
+            .form(&[
+                ("sid", sid.to_string()),
+                ("cids", cids.to_string()),
+                ("csrf", csrf),
+            ])
+            .send_bpi("收藏音频到歌单")
+            .await?;
         Ok(result)
     }
 
@@ -119,7 +119,8 @@ impl BpiClient {
         let result = self
             .get("https://www.bilibili.com/audio/music-service-c/web/collections/songs-coll")
             .query(&[("sid", sid.to_string())])
-            .send_bpi("查询音频收藏状态").await?;
+            .send_bpi("查询音频收藏状态")
+            .await?;
         Ok(result)
     }
 
@@ -140,7 +141,8 @@ impl BpiClient {
         let result = self
             .get("https://www.bilibili.com/audio/music-service-c/web/coin/audio")
             .query(&[("sid", sid.to_string())])
-            .send_bpi("查询音频投币数").await?;
+            .send_bpi("查询音频投币数")
+            .await?;
         Ok(result)
     }
 
@@ -160,20 +162,18 @@ impl BpiClient {
     pub async fn audio_coin(
         &self,
         sid: u64,
-        multiply: u32
+        multiply: u32,
     ) -> Result<BpiResponse<String>, BpiError> {
         let multiply = multiply.min(1).max(2);
         let csrf = self.csrf()?;
-        self
-            .post("https://www.bilibili.com/audio/music-service-c/web/coin/add")
-            .form(
-                &[
-                    ("sid", sid.to_string()),
-                    ("multiply", multiply.to_string()),
-                    ("csrf", csrf),
-                ]
-            )
-            .send_bpi("投币音频").await
+        self.post("https://www.bilibili.com/audio/music-service-c/web/coin/add")
+            .form(&[
+                ("sid", sid.to_string()),
+                ("multiply", multiply.to_string()),
+                ("csrf", csrf),
+            ])
+            .send_bpi("投币音频")
+            .await
     }
 }
 
@@ -187,7 +187,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_audio_collection_status() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.audio_collection_status(TEST_SID).await?;
 
         let data = result.into_data()?;
@@ -198,7 +198,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_audio_coin_count() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.audio_coin_count(TEST_SID).await?;
 
         let data = result.data.unwrap();
@@ -209,16 +209,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_coin_audio() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
-        bpi.audio_coin(TEST_SID, 1).await
-            .map(|_| ())
-            .or_else(|e| {
-                // 34005 代表投币已经投过2个了  API错误 [34005]: 未知错误
-                if e.code() == Some(34005) {
-                    Ok(())
-                } else {
-                    Err(Box::new(e))
-                }
-            })
+        let bpi = BpiClient::new().expect("client should build");
+        bpi.audio_coin(TEST_SID, 1).await.map(|_| ()).or_else(|e| {
+            // 34005 代表投币已经投过2个了  API错误 [34005]: 未知错误
+            if e.code() == Some(34005) {
+                Ok(())
+            } else {
+                Err(Box::new(e))
+            }
+        })
     }
 }

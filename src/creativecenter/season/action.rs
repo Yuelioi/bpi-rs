@@ -2,8 +2,8 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 /// 合集视频条目（添加用）
@@ -41,7 +41,7 @@ impl BpiClient {
         title: &str,
         desc: Option<&str>,
         cover: &str,
-        season_price: Option<u32>
+        season_price: Option<u32>,
     ) -> Result<BpiResponse<u64>, BpiError> {
         // 校验 csrf
         let csrf = self.csrf()?;
@@ -49,7 +49,7 @@ impl BpiClient {
         let mut form = vec![
             ("title", title.to_string()),
             ("cover", cover.to_string()),
-            ("csrf", csrf)
+            ("csrf", csrf),
         ];
 
         if let Some(d) = desc {
@@ -59,10 +59,10 @@ impl BpiClient {
             form.push(("season_price", price.to_string()));
         }
 
-        self
-            .post("https://member.bilibili.com/x2/creative/web/season/add")
+        self.post("https://member.bilibili.com/x2/creative/web/season/add")
             .form(&form)
-            .send_bpi("创建合集").await
+            .send_bpi("创建合集")
+            .await
     }
 
     /// 删除合集
@@ -78,16 +78,16 @@ impl BpiClient {
     /// [删除合集](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/del.md#删除合集)
     pub async fn season_delete(
         &self,
-        season_id: u64
+        season_id: u64,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
         let form = vec![("id", season_id.to_string()), ("csrf", csrf)];
 
-        self
-            .post("https://member.bilibili.com/x2/creative/web/season/del")
+        self.post("https://member.bilibili.com/x2/creative/web/season/del")
             .form(&form)
-            .send_bpi("删除合集").await
+            .send_bpi("删除合集")
+            .await
     }
 
     /// 添加视频到合集
@@ -105,29 +105,28 @@ impl BpiClient {
     pub async fn season_episodes_add(
         &self,
         section_id: u64,
-        episodes: Vec<EpisodeAdd>
+        episodes: Vec<EpisodeAdd>,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         // 校验 csrf
         let csrf = self.csrf()?;
 
-        let payload =
-            json!({
+        let payload = json!({
             "sectionId": section_id,
             "episodes": episodes
         });
 
-        self
-            .post("https://member.bilibili.com/x2/creative/web/season/section/episodes/add")
+        self.post("https://member.bilibili.com/x2/creative/web/season/section/episodes/add")
             .with_bilibili_headers()
             .query(&[("csrf", csrf)])
             .json(&payload)
-            .send_bpi("添加视频到合集").await
+            .send_bpi("添加视频到合集")
+            .await
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use base64::{ Engine as _, engine::general_purpose };
+    use base64::{Engine as _, engine::general_purpose};
     use std::fs;
 
     const TEST_AID: u64 = 772876546;
@@ -139,19 +138,22 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_season() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
-        let img_data = fs::read("./assets/test.jpg").map_err(|_| BpiError::parse("读取图片失败"))?;
+        let img_data =
+            fs::read("./assets/test.jpg").map_err(|_| BpiError::parse("读取图片失败"))?;
         let img_base64 = general_purpose::STANDARD.encode(&img_data);
         let img_data_uri = format!("data:image/jpeg;base64,{}", img_base64);
         let resp = bpi.upload_cover("image/jpeg", &img_data_uri).await?;
 
-        let result = bpi.season_create(
-            "测试合集 - Powered by Rust",
-            Some("这是一个通过 API 创建的测试合集"),
-            resp.data.unwrap().url.as_str(),
-            Some(0)
-        ).await?;
+        let result = bpi
+            .season_create(
+                "测试合集 - Powered by Rust",
+                Some("这是一个通过 API 创建的测试合集"),
+                resp.data.unwrap().url.as_str(),
+                Some(0),
+            )
+            .await?;
 
         let season_id = result.data.unwrap();
 
@@ -176,7 +178,7 @@ mod tests {
     }
     #[tokio::test]
     async fn test_add_season() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let episodes = vec![EpisodeAdd {
             aid: TEST_AID,
             cid: TEST_CID,

@@ -1,6 +1,6 @@
-use crate::models::{ Official, Pendant, Vip };
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::models::{Official, Pendant, Vip};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 // --- 动态详情 API 结构体 ---
 
 /// 动态详情响应数据
@@ -117,7 +117,7 @@ pub struct DynamicLotteryData {
     pub second_prize_cmt: Option<String>,
     pub third_prize_cmt: Option<String>,
     pub lottery_result: Option<serde_json::Value>, // 使用 Value 以应对可选的嵌套对象
-    // ... 其他字段
+                                                   // ... 其他字段
 }
 
 // --- 动态转发列表 API 结构体 ---
@@ -167,7 +167,7 @@ impl BpiClient {
     pub async fn dynamic_detail(
         &self,
         id: &str,
-        features: Option<&str>
+        features: Option<&str>,
     ) -> Result<BpiResponse<DynamicDetailData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail")
@@ -197,7 +197,7 @@ impl BpiClient {
     pub async fn dynamic_reactions(
         &self,
         id: &str,
-        offset: Option<&str>
+        offset: Option<&str>,
     ) -> Result<BpiResponse<DynamicReactionData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/reaction")
@@ -222,19 +222,17 @@ impl BpiClient {
     /// | `business_id` | &str | 动态 ID |
     pub async fn dynamic_lottery_notice(
         &self,
-        business_id: &str
+        business_id: &str,
     ) -> Result<BpiResponse<DynamicLotteryData>, BpiError> {
         let csrf = self.csrf()?;
-        self
-            .get("https://api.vc.bilibili.com/lottery_svr/v1/lottery_svr/lottery_notice")
-            .query(
-                &[
-                    ("business_id", business_id),
-                    ("business_type", "1"),
-                    ("csrf", &csrf),
-                ]
-            )
-            .send_bpi("获取动态抽奖详情").await
+        self.get("https://api.vc.bilibili.com/lottery_svr/v1/lottery_svr/lottery_notice")
+            .query(&[
+                ("business_id", business_id),
+                ("business_type", "1"),
+                ("csrf", &csrf),
+            ])
+            .send_bpi("获取动态抽奖详情")
+            .await
     }
 
     /// 获取动态转发列表
@@ -251,7 +249,7 @@ impl BpiClient {
     pub async fn dynamic_forwards(
         &self,
         id: &str,
-        offset: Option<&str>
+        offset: Option<&str>,
     ) -> Result<BpiResponse<DynamicForwardData>, BpiError> {
         let mut req = self
             .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/forward")
@@ -275,10 +273,10 @@ impl BpiClient {
     /// | ---- | ---- | ---- |
     /// | `id` | &str | 动态 ID |
     pub async fn dynamic_pics(&self, id: &str) -> Result<BpiResponse<Vec<DynamicPic>>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/pic")
+        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/pic")
             .query(&[("id", id)])
-            .send_bpi("获取动态图片列表").await
+            .send_bpi("获取动态图片列表")
+            .await
     }
 
     /// 获取转发动态信息
@@ -293,12 +291,12 @@ impl BpiClient {
     /// | `id` | &str | 动态 ID |
     pub async fn dynamic_forward_item(
         &self,
-        id: &str
+        id: &str,
     ) -> Result<BpiResponse<DynamicForwardInfoData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/forward/item")
+        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/forward/item")
             .query(&[("id", id)])
-            .send_bpi("获取转发动态信息").await
+            .send_bpi("获取转发动态信息")
+            .await
     }
 }
 
@@ -309,7 +307,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_dynamic_detail() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "1099138163191840776";
         let resp = bpi.dynamic_detail(dynamic_id, None).await?;
         let data = resp.into_data()?;
@@ -329,7 +327,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_dynamic_reactions() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "1099138163191840776";
         let resp = bpi.dynamic_reactions(dynamic_id, None).await?;
         let data = resp.into_data()?;
@@ -342,7 +340,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_lottery_notice() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "969916293954142214";
         let resp = bpi.dynamic_lottery_notice(dynamic_id).await?;
         let data = resp.into_data()?;
@@ -355,7 +353,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_dynamic_forwards() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "1099138163191840776";
         let resp = bpi.dynamic_forwards(dynamic_id, None).await?;
         let data = resp.into_data()?;
@@ -368,7 +366,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_dynamic_pics() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "1099138163191840776";
         let resp = bpi.dynamic_pics(dynamic_id).await?;
         let data = resp.into_data()?;
@@ -381,7 +379,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_forward_item() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "1110902525317349376";
         let resp = bpi.dynamic_forward_item(dynamic_id).await?;
         let data = resp.into_data()?;

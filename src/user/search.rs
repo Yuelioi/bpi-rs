@@ -1,8 +1,8 @@
 //! B站用户搜索相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
 
@@ -141,7 +141,7 @@ impl BpiClient {
         tid: Option<u64>,
         keyword: Option<&str>,
         pn: Option<u32>,
-        ps: Option<u32>
+        ps: Option<u32>,
     ) -> Result<BpiResponse<ContributedVideosResponseData>, BpiError> {
         let pn_val = pn.unwrap_or(1);
         let ps_val = ps.unwrap_or(30);
@@ -153,16 +153,18 @@ impl BpiClient {
             ("order", order_val.to_string()),
             ("tid", tid_val.to_string()),
             ("pn", pn_val.to_string()),
-            ("ps", ps_val.to_string())
+            ("ps", ps_val.to_string()),
         ];
 
         if let Some(k) = keyword {
             params.push(("keyword", k.to_string()));
         }
 
-        let params = self.get_wbi_sign2(params).await?;
+        let params = self.sign_wbi_params(params).await?;
 
-        let req = self.get("https://api.bilibili.com/x/space/wbi/arc/search").query(&params);
+        let req = self
+            .get("https://api.bilibili.com/x/space/wbi/arc/search")
+            .query(&params);
 
         req.send_bpi("查询用户投稿视频明细").await
     }
@@ -181,8 +183,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_user_contributed_videos_default() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.user_contributed_videos(TEST_MID, None, None, None, Some(1), Some(2)).await?;
+        if std::env::var_os("BPI_LIVE_TEST").is_none() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .user_contributed_videos(TEST_MID, None, None, None, Some(1), Some(2))
+            .await?;
         let data = resp.into_data()?;
 
         info!("用户投稿视频明细: {:?}", data);
@@ -196,15 +204,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_user_contributed_videos_with_keyword() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.user_contributed_videos(
-            TEST_MID,
-            None,
-            None,
-            Some(TEST_KEYWORD),
-            Some(1),
-            Some(10)
-        ).await?;
+        if std::env::var_os("BPI_LIVE_TEST").is_none() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .user_contributed_videos(TEST_MID, None, None, Some(TEST_KEYWORD), Some(1), Some(10))
+            .await?;
         let data = resp.into_data()?;
 
         info!("用户投稿视频明细（关键词）: {:?}", data);

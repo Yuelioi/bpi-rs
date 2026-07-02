@@ -2,8 +2,8 @@
 //!
 //! [文档入口](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HistoryDatesResponseData(Vec<String>);
@@ -25,18 +25,19 @@ impl BpiClient {
     pub async fn danmaku_history_dates(
         &self,
         oid: i64,
-        month: &str
+        month: &str,
     ) -> Result<HistoryDatesResponse, BpiError> {
         let params = vec![
             ("type", "1".to_string()),
             ("oid", oid.to_string()),
-            ("month", month.to_string())
+            ("month", month.to_string()),
         ];
 
         let resp: HistoryDatesResponse = self
             .get("https://api.bilibili.com/x/v2/dm/history/index")
             .query(&params)
-            .send_bpi("查询历史弹幕日期").await?;
+            .send_bpi("查询历史弹幕日期")
+            .await?;
 
         Ok(resp)
     }
@@ -48,7 +49,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_history_dates() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.danmaku_history_dates(144541892, "2022-01").await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);

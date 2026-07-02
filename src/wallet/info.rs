@@ -1,7 +1,7 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 /// 用户钱包数据
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -39,8 +39,7 @@ impl BpiClient {
 
         let timestamp = chrono::Utc::now().timestamp_millis();
 
-        let body =
-            json!({
+        let body = json!({
             "csrf": csrf,
             "platformType": 3,
             "timestamp": timestamp,
@@ -48,10 +47,10 @@ impl BpiClient {
             "version": "1.0",
         });
 
-        self
-            .post("https://pay.bilibili.com/paywallet/wallet/getUserWallet")
+        self.post("https://pay.bilibili.com/paywallet/wallet/getUserWallet")
             .json(&body)
-            .send_bpi("获取用户钱包").await
+            .send_bpi("获取用户钱包")
+            .await
     }
 }
 
@@ -62,7 +61,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_user_wallet() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.wallet_info().await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());

@@ -2,8 +2,8 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 合集信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -101,10 +101,10 @@ impl BpiClient {
     /// # 文档
     /// [根据 aid 反查合集信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/aid.md#根据-aid-反查合集信息)
     pub async fn season_by_aid(&self, aid: u64) -> Result<BpiResponse<SeasonInfoData>, BpiError> {
-        self
-            .get("https://member.bilibili.com/x2/creative/web/season/aid")
+        self.get("https://member.bilibili.com/x2/creative/web/season/aid")
             .query(&[("id", aid.to_string())])
-            .send_bpi("根据 aid 查询合集").await
+            .send_bpi("根据 aid 查询合集")
+            .await
     }
 }
 
@@ -116,7 +116,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_season_by_aid() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let data = bpi.season_by_aid(TEST_AID).await?.into_data()?;
         tracing::info!("视频 {} 所属合集 {} - {}", TEST_AID, data.id, data.title);

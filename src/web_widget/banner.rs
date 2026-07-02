@@ -2,17 +2,17 @@
 //!
 //! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/banner.html)
 use crate::video::video_zone_v2::VideoPartitionV2;
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 轮播图对象
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct RegionBanner {
-    pub image: String, // 封面资源路径
-    pub title: String, // 封面标题
+    pub image: String,     // 封面资源路径
+    pub title: String,     // 封面标题
     pub sub_title: String, // 封面子标题
-    pub url: String, // 点击后的跳转链接
-    pub rid: i64, // 分区 ID
+    pub url: String,       // 点击后的跳转链接
+    pub rid: i64,          // 分区 ID
 }
 
 /// 轮播图响应数据
@@ -33,29 +33,31 @@ impl BpiClient {
     /// | `region_id` | VideoPartitionV2    | 分区 ID      |
     pub async fn web_widget_region_banner(
         &self,
-        region_id: VideoPartitionV2
+        region_id: VideoPartitionV2,
     ) -> Result<BpiResponse<RegionBannerData>, BpiError> {
         let query = vec![("region_id", region_id.tid().to_string())];
 
-        self
-            .get("https://api.bilibili.com/x/web-show/region/banner")
+        self.get("https://api.bilibili.com/x/web-show/region/banner")
             .query(&query)
-            .send_bpi("获取各分区的轮播图").await
+            .send_bpi("获取各分区的轮播图")
+            .await
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::video::video_zone_v2::{ Douga, VideoPartitionV2 };
+    use crate::video::video_zone_v2::{Douga, VideoPartitionV2};
 
     use tracing::info;
 
     #[tokio::test]
     async fn test_get_region_banner() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 例如 region_id = 1 (动画)
-        let resp = bpi.web_widget_region_banner(VideoPartitionV2::Douga(Douga::Douga)).await;
+        let resp = bpi
+            .web_widget_region_banner(VideoPartitionV2::Douga(Douga::Douga))
+            .await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 

@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct QualityDescription {
@@ -67,7 +67,7 @@ impl BpiClient {
         cid: i64,
         platform: Option<&str>,
         quality: Option<i32>,
-        qn: Option<i32>
+        qn: Option<i32>,
     ) -> Result<BpiResponse<LiveStreamData>, BpiError> {
         let mut query = vec![("cid", cid.to_string())];
 
@@ -83,10 +83,10 @@ impl BpiClient {
             query.push(("qn", qn.to_string()));
         }
 
-        self
-            .get("https://api.live.bilibili.com/room/v1/Room/playUrl")
+        self.get("https://api.live.bilibili.com/room/v1/Room/playUrl")
             .query(&query)
-            .send_bpi("获取直播视频流").await
+            .send_bpi("获取直播视频流")
+            .await
     }
 }
 
@@ -96,8 +96,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_live_stream() {
-        let bpi = BpiClient::new();
-        let resp = bpi.live_stream(14073662, Some("web"), None, Some(10000)).await.unwrap();
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .live_stream(14073662, Some("web"), None, Some(10000))
+            .await
+            .unwrap();
         tracing::info!("{:?}", resp);
     }
 }

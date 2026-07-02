@@ -1,5 +1,5 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 获取入站必刷视频 ---
 
@@ -23,9 +23,9 @@ impl BpiClient {
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/precious_videos.html#获取入站必刷视频)
     ///
     pub async fn video_popular_precious(&self) -> Result<BpiResponse<PreciousVideoData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/web-interface/popular/precious")
-            .send_bpi("获取入站必刷视频").await
+        self.get("https://api.bilibili.com/x/web-interface/popular/precious")
+            .send_bpi("获取入站必刷视频")
+            .await
     }
 }
 
@@ -36,7 +36,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_popular_precious() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.video_popular_precious().await;
 
         info!("{:?}", resp);

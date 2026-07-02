@@ -2,8 +2,8 @@
 //!
 //! [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/member_center.html#查询每日奖励状态)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 每日奖励状态信息体
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -44,10 +44,10 @@ pub struct DailyReward {
 impl BpiClient {
     /// 查询每日奖励状态
     pub async fn member_center_daily_reward(&self) -> Result<BpiResponse<DailyReward>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/member/web/exp/reward")
+        self.get("https://api.bilibili.com/x/member/web/exp/reward")
             .header("Referer", "")
-            .send_bpi("查询每日奖励状态").await
+            .send_bpi("查询每日奖励状态")
+            .await
     }
 }
 
@@ -57,7 +57,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_daily_reward() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
+        if std::env::var_os("BPI_LIVE_TEST").is_none() {
+            return Ok(());
+        }
+
+        let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi.member_center_daily_reward().await?;
         println!("{:?}", result);

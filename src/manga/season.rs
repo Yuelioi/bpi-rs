@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/Season.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // ================= 数据结构 =================
 
@@ -87,9 +87,9 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_season_info(&self) -> Result<SeasonInfoResponse, BpiError> {
-        self
-            .post("https://manga.bilibili.com/twirp/user.v1.Season/GetSeasonInfo")
-            .send_bpi("获取漫画赛季信息").await
+        self.post("https://manga.bilibili.com/twirp/user.v1.Season/GetSeasonInfo")
+            .send_bpi("获取漫画赛季信息")
+            .await
     }
 }
 
@@ -99,7 +99,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_manga_season_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi.manga_season_info().await?;
 

@@ -2,8 +2,8 @@
 //!
 //! [空间图文](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/opus/space.md#空间图文)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 空间图文封面信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -72,20 +72,20 @@ impl BpiClient {
         mid: u64,
         page: Option<u32>,
         offset: Option<&str>,
-        typ: Option<&str> // all/article/dynamic
+        typ: Option<&str>, // all/article/dynamic
     ) -> Result<BpiResponse<SpaceData>, BpiError> {
         let query = vec![
             ("host_mid", mid.to_string()),
             ("page", page.unwrap_or(0).to_string()),
             ("offset", offset.unwrap_or("").to_string()),
             ("type", typ.unwrap_or("all").to_string()),
-            ("web_location", "333.1387".to_string())
+            ("web_location", "333.1387".to_string()),
         ];
 
-        self
-            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space")
+        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space")
             .query(&query)
-            .send_bpi("获取用户空间图文").await
+            .send_bpi("获取用户空间图文")
+            .await
     }
 }
 
@@ -96,7 +96,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_opus_space_feed() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.opus_space_feed(4279370, Some(1), None, None).await;
         assert!(resp.is_ok());
         if let Ok(r) = resp {

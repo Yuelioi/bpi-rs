@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/Comic.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 漫画图片信息
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -95,10 +95,10 @@ impl BpiClient {
             "ep_id": ep_id
         });
 
-        self
-            .post("https://manga.bilibili.com/twirp/comic.v1.Comic/GetImageIndex")
+        self.post("https://manga.bilibili.com/twirp/comic.v1.Comic/GetImageIndex")
             .json(&params)
-            .send_bpi("获取漫画图片索引").await
+            .send_bpi("获取漫画图片索引")
+            .await
     }
 
     /// 获取某一图片的token
@@ -114,17 +114,17 @@ impl BpiClient {
     #[allow(dead_code)]
     async fn manga_image_token(
         &self,
-        image_path: &str
+        image_path: &str,
     ) -> Result<BpiResponse<Vec<ImageToken>>, BpiError> {
         // 构建请求的图片URL
         let url = format!("[\"https://i0.hdslb.com{}\"]", image_path);
 
         let params = ImageTokenRequest { urls: url };
 
-        self
-            .post("https://manga.bilibili.com/twirp/comic.v1.Comic/ImageToken")
+        self.post("https://manga.bilibili.com/twirp/comic.v1.Comic/ImageToken")
             .json(&params)
-            .send_bpi("获取漫画图片token").await
+            .send_bpi("获取漫画图片token")
+            .await
     }
 }
 
@@ -134,7 +134,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_manga_image_index() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let ep_id = 482133;
 

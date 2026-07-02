@@ -2,8 +2,8 @@
 //!
 //! [文档](https://api.bilibili.com/x/web-frontend/getbuvid)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 获取 buvid3 - 响应数据
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -18,7 +18,9 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/misc)
     pub async fn misc_buvid3(&self) -> Result<BpiResponse<Buvid3Data>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-frontend/getbuvid").send_bpi("获取 buvid3").await
+        self.get("https://api.bilibili.com/x/web-frontend/getbuvid")
+            .send_bpi("获取 buvid3")
+            .await
     }
 }
 
@@ -40,7 +42,9 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/misc)
     pub async fn misc_buvid(&self) -> Result<BpiResponse<BuvidData>, BpiError> {
-        self.get("https://api.bilibili.com/x/frontend/finger/spi").send_bpi("获取 buvid3/4").await
+        self.get("https://api.bilibili.com/x/frontend/finger/spi")
+            .send_bpi("获取 buvid3/4")
+            .await
     }
 }
 
@@ -50,7 +54,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_buvid3() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         match bpi.misc_buvid3().await {
             Ok(resp) => {
@@ -69,7 +73,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_buvid() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         match bpi.misc_buvid().await {
             Ok(resp) => {

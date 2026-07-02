@@ -1,5 +1,5 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 稿件私有笔记列表数据
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -112,17 +112,12 @@ impl BpiClient {
     /// - oid: 稿件 avid
     pub async fn note_list_archive(
         &self,
-        oid: u64
+        oid: u64,
     ) -> Result<BpiResponse<NoteListArchiveData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/note/list/archive")
-            .query(
-                &[
-                    ("oid", oid),
-                    ("oid_type", 0),
-                ]
-            )
-            .send_bpi("查询稿件私有笔记").await
+        self.get("https://api.bilibili.com/x/note/list/archive")
+            .query(&[("oid", oid), ("oid_type", 0)])
+            .send_bpi("查询稿件私有笔记")
+            .await
     }
 
     /// 查询用户私有笔记
@@ -139,17 +134,12 @@ impl BpiClient {
     pub async fn note_list_user_private(
         &self,
         pn: u32,
-        ps: u32
+        ps: u32,
     ) -> Result<BpiResponse<PrivateNoteListData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/note/list")
-            .query(
-                &[
-                    ("pn", pn),
-                    ("ps", ps),
-                ]
-            )
-            .send_bpi("查询用户私有笔记").await
+        self.get("https://api.bilibili.com/x/note/list")
+            .query(&[("pn", pn), ("ps", ps)])
+            .send_bpi("查询用户私有笔记")
+            .await
     }
 
     /// 查询稿件公开笔记
@@ -168,19 +158,17 @@ impl BpiClient {
         &self,
         oid: u64,
         pn: u32,
-        ps: u32
+        ps: u32,
     ) -> Result<BpiResponse<PublicNoteListArchiveData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/note/publish/list/archive")
-            .query(
-                &[
-                    ("oid", oid.to_string()),
-                    ("oid_type", (0).to_string()),
-                    ("pn", pn.to_string()),
-                    ("ps", ps.to_string()),
-                ]
-            )
-            .send_bpi("查询稿件公开笔记").await
+        self.get("https://api.bilibili.com/x/note/publish/list/archive")
+            .query(&[
+                ("oid", oid.to_string()),
+                ("oid_type", (0).to_string()),
+                ("pn", pn.to_string()),
+                ("ps", ps.to_string()),
+            ])
+            .send_bpi("查询稿件公开笔记")
+            .await
     }
 
     /// 查询用户公开笔记
@@ -197,17 +185,12 @@ impl BpiClient {
     pub async fn note_list_public_user(
         &self,
         pn: u32,
-        ps: u32
+        ps: u32,
     ) -> Result<BpiResponse<PublicNoteListUserData>, BpiError> {
-        self
-            .get("https://api.bilibili.com/x/note/publish/list/user")
-            .query(
-                &[
-                    ("pn", pn),
-                    ("ps", ps),
-                ]
-            )
-            .send_bpi("查询用户公开笔记").await
+        self.get("https://api.bilibili.com/x/note/publish/list/user")
+            .query(&[("pn", pn), ("ps", ps)])
+            .send_bpi("查询用户公开笔记")
+            .await
     }
 }
 
@@ -218,7 +201,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_note_list_archive() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为一个有效的avid
         let oid = 676931260;
         let resp = bpi.note_list_archive(oid).await;
@@ -235,14 +218,15 @@ mod tests {
 
     #[tokio::test]
     async fn test_note_list_user_private() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.note_list_user_private(1, 10).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
         let resp_data = resp.unwrap();
-        resp_data.data
+        resp_data
+            .data
             .as_ref()
             .and_then(|data| data.list.as_ref())
             .and_then(|list| {
@@ -253,7 +237,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_note_list_public_archive() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 替换为一个有效的avid
         let oid = 338677252;
         let resp = bpi.note_list_public_archive(oid, 1, 10).await;
@@ -270,7 +254,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_note_list_public_user() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.note_list_public_user(1, 10).await;
 
         info!("{:?}", resp);

@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/ClockIn.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // ================= 数据结构 =================
 
@@ -67,10 +67,10 @@ impl BpiClient {
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_clock_in(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let params = [("platform", "android")];
-        self
-            .post("https://manga.bilibili.com/twirp/activity.v1.Activity/ClockIn")
+        self.post("https://manga.bilibili.com/twirp/activity.v1.Activity/ClockIn")
             .form(&params)
-            .send_bpi("漫画签到").await
+            .send_bpi("漫画签到")
+            .await
     }
 
     /// 漫画补签
@@ -85,16 +85,16 @@ impl BpiClient {
     /// | `date` | &str | 补签日期，YYYY-MM-DD |
     pub async fn manga_clock_in_makeup(
         &self,
-        date: &str
+        date: &str,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let params = ClockInMakeupRequest {
             r#type: 0,
             date: date.to_string(),
         };
-        self
-            .post("https://manga.bilibili.com/twirp/activity.v1.Activity/ClockIn?platform=android")
+        self.post("https://manga.bilibili.com/twirp/activity.v1.Activity/ClockIn?platform=android")
             .json(&params)
-            .send_bpi("漫画补签").await
+            .send_bpi("漫画补签")
+            .await
     }
 
     /// 获取漫画签到信息
@@ -102,9 +102,9 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_clock_in_info(&self) -> Result<ClockInInfoResponse, BpiError> {
-        self
-            .post("https://manga.bilibili.com/twirp/activity.v1.Activity/GetClockInInfo")
-            .send_bpi("获取漫画签到信息").await
+        self.post("https://manga.bilibili.com/twirp/activity.v1.Activity/GetClockInInfo")
+            .send_bpi("获取漫画签到信息")
+            .await
     }
 }
 
@@ -114,7 +114,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_manga_clock_in() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi.manga_clock_in().await;
         match result {
@@ -127,7 +127,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_manga_clock_in_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi.manga_clock_in_info().await?;
 

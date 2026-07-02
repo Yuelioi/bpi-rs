@@ -78,7 +78,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_electric_bcoin_quick_pay_min() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
             .electric_bcoin_quick_pay(2, true, 107997089, "up", 107997089)
             .await;

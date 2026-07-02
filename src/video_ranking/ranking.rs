@@ -1,5 +1,5 @@
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 获取分区视频排行榜列表 ---
 
@@ -35,7 +35,7 @@ impl BpiClient {
     pub async fn video_ranking_list(
         &self,
         rid: Option<u32>,
-        type_name: Option<&str>
+        type_name: Option<&str>,
     ) -> Result<BpiResponse<RankingListData>, BpiError> {
         let mut request = self.get("https://api.bilibili.com/x/web-interface/ranking/v2");
 
@@ -66,7 +66,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_ranking_list() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 获取全站排行榜
         let resp = bpi.video_ranking_list(None, None).await;
 
@@ -80,14 +80,17 @@ mod tests {
             info!("排行榜视频数: {}", data.list.len());
             if let Some(first_item) = data.list.first() {
                 // 因为 RankingVideoItem 使用了 serde_json::Value，这里打印原始 JSON
-                info!("first item: {}", serde_json::to_string_pretty(&first_item).unwrap());
+                info!(
+                    "first item: {}",
+                    serde_json::to_string_pretty(&first_item).unwrap()
+                );
             }
         }
     }
 
     #[tokio::test]
     async fn test_video_ranking_list_with_rid() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 获取日常分区排行榜 (rid=21)
         let resp = bpi.video_ranking_list(Some(21), None).await;
 
@@ -104,7 +107,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_ranking_list_with_type() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         // 获取新人排行榜
         let resp = bpi.video_ranking_list(None, Some("rookie")).await;
 

@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 // ================= 数据结构 =================
 
@@ -129,14 +129,15 @@ impl BpiClient {
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_room_info(
         &self,
-        room_id: i64
+        room_id: i64,
     ) -> Result<BpiResponse<RoomInfoData>, BpiError> {
         let params = [("room_id", room_id.to_string())];
 
         let resp = self
             .get("https://api.live.bilibili.com/room/v1/Room/get_info")
             .query(&params)
-            .send_bpi("获取直播间信息").await?;
+            .send_bpi("获取直播间信息")
+            .await?;
 
         Ok(resp)
     }
@@ -148,7 +149,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_room_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let result = bpi.live_room_info(23174842).await?;
 
         let data = result.data.unwrap();

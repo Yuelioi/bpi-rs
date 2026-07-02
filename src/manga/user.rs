@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/User.md)
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 漫读券信息
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -79,7 +79,7 @@ impl BpiClient {
     pub async fn manga_coupons(
         &self,
         page_num: i32,
-        page_size: i32
+        page_size: i32,
     ) -> Result<BpiResponse<CouponsData>, BpiError> {
         let params = GetCouponsRequest {
             page_num: page_num,
@@ -89,10 +89,10 @@ impl BpiClient {
             r#type: Some(0),
         };
 
-        self
-            .post("https://manga.bilibili.com/twirp/user.v1.User/GetCoupons")
+        self.post("https://manga.bilibili.com/twirp/user.v1.User/GetCoupons")
             .json(&params)
-            .send_bpi("获取漫读券列表").await
+            .send_bpi("获取漫读券列表")
+            .await
     }
 }
 
@@ -102,7 +102,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_manga_coupons() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi.manga_coupons(1, 20).await?;
 

@@ -1,8 +1,8 @@
 //! 互动视频相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
 
@@ -181,7 +181,7 @@ impl BpiClient {
         aid: Option<u64>,
         bvid: Option<&str>,
         graph_version: u64,
-        edge_id: Option<u64>
+        edge_id: Option<u64>,
     ) -> Result<BpiResponse<InteractiveVideoInfoResponseData>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -217,13 +217,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_interactive_video_info_by_aid() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.video_interactive_video_info(
-            Some(TEST_AID),
-            None,
-            TEST_GRAPH_VERSION,
-            None
-        ).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .video_interactive_video_info(Some(TEST_AID), None, TEST_GRAPH_VERSION, None)
+            .await?;
         let data = resp.into_data()?;
 
         info!("互动视频信息: {:?}", data);

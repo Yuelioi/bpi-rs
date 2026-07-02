@@ -1,8 +1,8 @@
 //! B站 web 播放器相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
-use serde::{ Deserialize, Serialize };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
 
@@ -216,7 +216,7 @@ impl BpiClient {
         bvid: Option<&str>,
         cid: u64,
         season_id: Option<u64>,
-        ep_id: Option<u64>
+        ep_id: Option<u64>,
     ) -> Result<BpiResponse<PlayerInfoResponseData>, BpiError> {
         if aid.is_none() && bvid.is_none() {
             return Err(BpiError::parse("必须提供 aid 或 bvid"));
@@ -237,10 +237,10 @@ impl BpiClient {
         }
         let params = self.get_wbi_sign2(params).await?;
 
-        self
-            .get("https://api.bilibili.com/x/player/wbi/v2")
+        self.get("https://api.bilibili.com/x/player/wbi/v2")
             .query(&params)
-            .send_bpi("获取 web 播放器信息").await
+            .send_bpi("获取 web 播放器信息")
+            .await
     }
 }
 
@@ -256,8 +256,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_player_info_v2_by_aid() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.video_player_info_v2(Some(TEST_AID), None, TEST_CID, None, None).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .video_player_info_v2(Some(TEST_AID), None, TEST_CID, None, None)
+            .await?;
         let data = resp.into_data()?;
 
         info!("播放器信息: {:?}", data);
@@ -270,8 +272,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_video_player_info_v2_by_bvid() -> Result<(), BpiError> {
-        let bpi = BpiClient::new();
-        let resp = bpi.video_player_info_v2(Some(TEST_AID), None, TEST_CID, None, None).await?;
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .video_player_info_v2(Some(TEST_AID), None, TEST_CID, None, None)
+            .await?;
         let data = resp.into_data()?;
 
         info!("播放器信息: {:?}", data);

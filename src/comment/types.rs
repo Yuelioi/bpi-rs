@@ -75,9 +75,9 @@ pub struct Member {
     #[serde(default)]
     pub user_sailing: serde_json::Value, // 评论条目装饰信息
     #[serde(default)]
-    pub is_contractor: bool,             // 是否合作用户
+    pub is_contractor: bool, // 是否合作用户
     #[serde(default)]
-    pub contract_desc: String,           // 合作用户说明
+    pub contract_desc: String, // 合作用户说明
 
     pub rank: Option<String>,
     pub display_rank: Option<String>,

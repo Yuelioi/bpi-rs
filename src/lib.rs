@@ -85,9 +85,13 @@ pub mod auth;
 
 pub mod client;
 pub mod err;
+pub mod ids;
 pub mod log;
 pub mod request;
 pub mod response;
+pub mod session;
+pub mod sign;
+pub mod transport;
 
 // bv aid互转, 以及生成wbi
 pub mod utils;
@@ -96,4 +100,4 @@ pub use auth::Account;
 pub use client::BpiClient;
 pub use err::error::BpiError;
 pub use request::BilibiliRequest;
-pub use response::BpiResponse;
+pub use response::{ApiEnvelope, BpiResponse, BpiResult};

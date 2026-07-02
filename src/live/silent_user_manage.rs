@@ -1,6 +1,6 @@
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 
-use crate::{ BilibiliRequest, BpiClient, BpiError, BpiResponse };
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct SilentUserInfo {
@@ -125,20 +125,27 @@ impl BpiClient {
             ("tuid", tuid.to_string()),
             ("msg", msg.unwrap_or(String::new())),
             ("mobile_app", "web".to_string()),
-            ("type", if hour == 0 {"2".to_string()} else {"1".to_string()}),
+            (
+                "type",
+                if hour == 0 {
+                    "2".to_string()
+                } else {
+                    "1".to_string()
+                },
+            ),
             ("hour", hour.to_string()),
             ("csrf_token", csrf.clone()),
-            ("csrf", csrf)
+            ("csrf", csrf),
         ];
 
         // if let Some(msg) = msg {
         //     form.push(("msg", msg.to_string()));
         // }
 
-        self
-            .post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/AddSilentUser")
+        self.post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/AddSilentUser")
             .form(&form)
-            .send_bpi("禁言观众").await
+            .send_bpi("禁言观众")
+            .await
     }
 
     /// 查询直播间禁言列表
@@ -157,13 +164,13 @@ impl BpiClient {
             ("pn", pn.to_string()),
             ("ps", ps.to_string()),
             ("csrf_token", csrf.clone()),
-            ("csrf", csrf)
+            ("csrf", csrf),
         ];
 
-        self
-            .post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/GetSilentUserList")
+        self.post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/GetSilentUserList")
             .form(&form)
-            .send_bpi("查询直播间禁言列表").await
+            .send_bpi("查询直播间禁言列表")
+            .await
     }
 
     /// 解除禁言
@@ -171,7 +178,7 @@ impl BpiClient {
     pub async fn live_del_block_user(
         &self,
         roomid: i64,
-        tuid: i64
+        tuid: i64,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let csrf = self.csrf()?;
 
@@ -179,13 +186,13 @@ impl BpiClient {
             ("room_id", roomid.to_string()),
             ("tuid", tuid.to_string()),
             ("csrf_token", csrf.clone()),
-            ("csrf", csrf)
+            ("csrf", csrf),
         ];
 
-        self
-            .post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/DelSilentUser")
+        self.post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/DelSilentUser")
             .form(&form)
-            .send_bpi("解除禁言").await
+            .send_bpi("解除禁言")
+            .await
     }
 
     /// 拉黑观众
@@ -207,13 +214,13 @@ impl BpiClient {
             ("visit_id", "".to_string()),
         ];
 
-        self
-            .post("https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/AddBlack")
+        self.post("https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/AddBlack")
             .header("Referer", format!("https://live.bilibili.com/{}", room_id))
             .form(&form)
-            .send_bpi("拉黑观众").await
+            .send_bpi("拉黑观众")
+            .await
     }
-    
+
     /// 查询直播间拉黑列表
     /// pn: 页码，默认1
     /// ps: 每页数量
@@ -237,10 +244,10 @@ impl BpiClient {
             ("visit_id", "".to_string()),
         ];
 
-        self
-            .get("https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/GetBlackList")
+        self.get("https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/GetBlackList")
             .query(&query)
-            .send_bpi("查询直播间拉黑列表").await
+            .send_bpi("查询直播间拉黑列表")
+            .await
     }
 
     /// 解除拉黑
@@ -291,12 +298,12 @@ impl BpiClient {
             ("platform", "android".to_string()),
         ];
 
-        self
-            .post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/AddShieldKeyword")
+        self.post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/AddShieldKeyword")
             .form(&form)
-            .send_bpi("添加屏蔽词").await
+            .send_bpi("添加屏蔽词")
+            .await
     }
-    
+
     /// 查询直播间屏蔽词列表
     /// 没有ps和pn，返回全部屏蔽词
     pub async fn live_list_shield_keyword(
@@ -315,10 +322,10 @@ impl BpiClient {
             ("platform", "android".to_string()),
         ];
 
-        self
-            .post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/GetShieldKeywordList")
+        self.post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/GetShieldKeywordList")
             .form(&form)
-            .send_bpi("查询直播间屏蔽词列表").await
+            .send_bpi("查询直播间屏蔽词列表")
+            .await
     }
 
     /// 删除屏蔽词
@@ -341,12 +348,11 @@ impl BpiClient {
             ("platform", "android".to_string()),
         ];
 
-        self
-            .post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/DelShieldKeyword")
+        self.post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/DelShieldKeyword")
             .form(&form)
-            .send_bpi("删除屏蔽词").await
+            .send_bpi("删除屏蔽词")
+            .await
     }
-    
 }
 
 #[cfg(test)]
@@ -355,63 +361,78 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_silent_user_list() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.live_list_silent_users(3818081, 1, 10).await.unwrap();
         tracing::info!("{:?}", resp);
     }
 
     #[tokio::test]
     async fn test_add_silent_user() {
-        let bpi = BpiClient::new();
-        let resp = bpi.live_add_silent_user(3818081, 316183842, 0, None).await.unwrap();
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .live_add_silent_user(3818081, 316183842, 0, None)
+            .await
+            .unwrap();
         tracing::info!("{:?}", resp);
     }
 
     #[tokio::test]
     async fn test_del_silent_user_list() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.live_del_block_user(3818081, 316183842).await.unwrap();
         tracing::info!("{:?}", resp);
     }
 
     #[tokio::test]
     async fn test_get_banned_user_list() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.live_list_banned_users(4279370, 1, 10).await.unwrap();
         tracing::info!("{:?}", resp);
     }
 
     #[tokio::test]
     async fn test_add_banned_user() {
-        let bpi = BpiClient::new();
-        let resp = bpi.live_add_banned_user(3818081, 4279370, 316183842).await.unwrap();
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .live_add_banned_user(3818081, 4279370, 316183842)
+            .await
+            .unwrap();
         tracing::info!("{:?}", resp);
     }
 
     #[tokio::test]
     async fn test_del_banned_user_list() {
-        let bpi = BpiClient::new();
-        let resp = bpi.live_del_banned_user(3818081, 4279370, 316183842).await.unwrap();
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .live_del_banned_user(3818081, 4279370, 316183842)
+            .await
+            .unwrap();
         tracing::info!("{:?}", resp);
     }
     #[tokio::test]
     async fn test_get_keyword_list() {
-        let bpi = BpiClient::new();
+        let bpi = BpiClient::new().expect("client should build");
         let resp = bpi.live_list_shield_keyword(3818081).await.unwrap();
         tracing::info!("{:?}", resp);
     }
 
     #[tokio::test]
     async fn test_add_keyword() {
-        let bpi = BpiClient::new();
-        let resp = bpi.live_add_shield_keyword(3818081, "test keyword".to_string()).await.unwrap();
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .live_add_shield_keyword(3818081, "test keyword".to_string())
+            .await
+            .unwrap();
         tracing::info!("{:?}", resp);
     }
 
     #[tokio::test]
     async fn test_del_keyword() {
-        let bpi = BpiClient::new();
-        let resp = bpi.live_del_shield_keyword(3818081, "test keyword".to_string()).await.unwrap();
+        let bpi = BpiClient::new().expect("client should build");
+        let resp = bpi
+            .live_del_shield_keyword(3818081, "test keyword".to_string())
+            .await
+            .unwrap();
         tracing::info!("{:?}", resp);
     }
 }
