@@ -1,3 +1,4 @@
+use crate::historytoview::params::HistoryListParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -125,38 +126,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `max` | `Option<u64>` | 截止目标 id（0/avid/ssid/直播间 id/rlid/cvid） |
-    /// | `business` | `Option<&str>` | 业务类型：archive/pgc/live/article-list/article |
-    /// | `view_at` | `Option<u64>` | 时间戳 |
-    /// | `typ` | `Option<&str>` | 分类筛选：all/archive/live/article 等 |
-    /// | `ps` | `Option<u32>` | 每页项数 |
+    /// | `params` | `HistoryListParams` | 历史记录游标查询参数 |
     pub async fn history_list(
         &self,
-        max: Option<u64>,
-        business: Option<&str>,
-        view_at: Option<u64>,
-        typ: Option<&str>,
-        ps: Option<u32>,
+        params: HistoryListParams,
     ) -> Result<BpiResponse<HistoryListData>, BpiError> {
-        let mut request = self.get("https://api.bilibili.com/x/web-interface/history/cursor");
-
-        if let Some(m) = max {
-            request = request.query(&[("max", m)]);
-        }
-        if let Some(b) = business {
-            request = request.query(&[("business", b)]);
-        }
-        if let Some(v) = view_at {
-            request = request.query(&[("view_at", v)]);
-        }
-        if let Some(t) = typ {
-            request = request.query(&[("type", t)]);
-        }
-        if let Some(p) = ps {
-            request = request.query(&[("ps", p)]);
-        }
-
-        request.send_bpi("获取历史记录列表").await
+        self.get("https://api.bilibili.com/x/web-interface/history/cursor")
+            .query(&params.query_pairs())
+            .send_bpi("获取历史记录列表")
+            .await
     }
 
     /// 删除历史记录
@@ -242,7 +220,10 @@ mod tests {
     #[tokio::test]
     async fn test_history_get_list() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.history_list(None, None, None, None, Some(10)).await;
+        let params = HistoryListParams::new()
+            .with_page_size(10)
+            .expect("fixture page size should be valid");
+        let resp = bpi.history_list(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
