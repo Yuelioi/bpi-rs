@@ -32,6 +32,16 @@ pub struct ProbeAccountProfile {
 #[derive(Debug, Clone, Default, Deserialize)]
 pub(crate) struct FlatProbeAccountConfig {
     #[serde(default)]
+    bili_jct: Option<String>,
+    #[serde(default)]
+    dede_user_id: Option<String>,
+    #[serde(default)]
+    dede_user_id_ckmd5: Option<String>,
+    #[serde(default)]
+    sessdata: Option<String>,
+    #[serde(default)]
+    buvid3: Option<String>,
+    #[serde(default)]
     bili_jct_vip: Option<String>,
     #[serde(default)]
     dede_user_id_vip: Option<String>,
@@ -126,7 +136,16 @@ impl FlatProbeAccountConfig {
                 &self.dede_user_id_ckmd5_vip,
                 &self.sessdata_vip,
                 &self.buvid3_vip,
-            ),
+            )
+            .or_else(|| {
+                build_profile(
+                    &self.bili_jct,
+                    &self.dede_user_id,
+                    &self.dede_user_id_ckmd5,
+                    &self.sessdata,
+                    &self.buvid3,
+                )
+            }),
             ProbeAccountProfileName::Normal => build_profile(
                 &self.bili_jct_normal,
                 &self.dede_user_id_normal,
@@ -318,6 +337,52 @@ mod tests {
         assert_eq!(vip.dede_user_id_ckmd5, "vip-ck");
         assert_eq!(normal.dede_user_id, "43");
         assert_eq!(normal.dede_user_id_ckmd5, "");
+        Ok(())
+    }
+
+    #[test]
+    fn account_config_uses_legacy_flat_fields_as_vip_fallback() -> Result<(), BpiError> {
+        let raw: RawProbeConfig = Config::builder()
+            .add_source(File::from_str(
+                r#"
+                bili_jct = "legacy-csrf"
+                dede_user_id = "42"
+                dede_user_id_ckmd5 = "legacy-ck"
+                sessdata = "legacy-session"
+                buvid3 = "legacy-buvid"
+                "#,
+                config::FileFormat::Toml,
+            ))
+            .build()
+            .and_then(Config::try_deserialize)
+            .map_err(|err| BpiError::parse(err.to_string()))?;
+
+        let vip = raw
+            .account("vip")?
+            .expect("legacy vip profile should exist");
+
+        assert_eq!(vip.dede_user_id, "42");
+        assert_eq!(vip.bili_jct, "legacy-csrf");
+        Ok(())
+    }
+
+    #[test]
+    fn account_config_does_not_treat_numbered_fields_as_normal_profile() -> Result<(), BpiError> {
+        let raw: RawProbeConfig = Config::builder()
+            .add_source(File::from_str(
+                r#"
+                bili_jct2 = "normal-csrf"
+                dede_user_id2 = "43"
+                sessdata2 = "normal-session"
+                buvid3_2 = "normal-buvid"
+                "#,
+                config::FileFormat::Toml,
+            ))
+            .build()
+            .and_then(Config::try_deserialize)
+            .map_err(|err| BpiError::parse(err.to_string()))?;
+
+        assert!(raw.account("normal")?.is_none());
         Ok(())
     }
 }
