@@ -1,8 +1,11 @@
 //! B站用户搜索相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+use crate::ids::Mid;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
+
+use super::params::{UserUploadedVideoOrder, UserUploadedVideosParams};
 
 // --- 响应数据结构体 ---
 
@@ -143,24 +146,25 @@ impl BpiClient {
         pn: Option<u32>,
         ps: Option<u32>,
     ) -> Result<BpiResponse<ContributedVideosResponseData>, BpiError> {
-        let pn_val = pn.unwrap_or(1);
-        let ps_val = ps.unwrap_or(30);
-        let order_val = order.unwrap_or("pubdate");
-        let tid_val = tid.unwrap_or(0);
+        let mut params = UserUploadedVideosParams::new(Mid::new(mid)?);
 
-        let mut params = vec![
-            ("mid", mid.to_string()),
-            ("order", order_val.to_string()),
-            ("tid", tid_val.to_string()),
-            ("pn", pn_val.to_string()),
-            ("ps", ps_val.to_string()),
-        ];
-
-        if let Some(k) = keyword {
-            params.push(("keyword", k.to_string()));
+        if let Some(order) = order {
+            params = params.with_order(UserUploadedVideoOrder::try_from(order)?);
+        }
+        if let Some(tid) = tid {
+            params = params.with_tid(tid);
+        }
+        if let Some(keyword) = keyword {
+            params = params.with_keyword(keyword);
+        }
+        if let Some(pn) = pn {
+            params = params.with_page(pn)?;
+        }
+        if let Some(ps) = ps {
+            params = params.with_page_size(ps)?;
         }
 
-        let params = self.sign_wbi_params(params).await?;
+        let params = self.sign_wbi_params(params.query_pairs()).await?;
 
         let req = self
             .get("https://api.bilibili.com/x/space/wbi/arc/search")

@@ -511,6 +511,22 @@ impl UserUploadedVideoOrder {
     }
 }
 
+impl TryFrom<&str> for UserUploadedVideoOrder {
+    type Error = BpiError;
+
+    fn try_from(value: &str) -> BpiResult<Self> {
+        match value.trim() {
+            "pubdate" => Ok(Self::Pubdate),
+            "click" => Ok(Self::Click),
+            "stow" => Ok(Self::Stow),
+            _ => Err(BpiError::invalid_parameter(
+                "order",
+                "uploaded video order must be pubdate, click, or stow",
+            )),
+        }
+    }
+}
+
 /// Parameters for `/x/space/wbi/arc/search`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserUploadedVideosParams {
@@ -549,20 +565,37 @@ impl UserUploadedVideosParams {
 
     /// Sets a keyword filter.
     pub fn with_keyword(mut self, keyword: impl Into<String>) -> Self {
-        self.keyword = Some(keyword.into());
+        let keyword = keyword.into().trim().to_string();
+        if !keyword.is_empty() {
+            self.keyword = Some(keyword);
+        }
         self
     }
 
     /// Sets the 1-based page number.
-    pub fn with_page(mut self, page: u32) -> Self {
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        if page == 0 {
+            return Err(BpiError::invalid_parameter(
+                "page",
+                "page number must be at least 1",
+            ));
+        }
+
         self.page = page;
-        self
+        Ok(self)
     }
 
     /// Sets the page size.
-    pub fn with_page_size(mut self, page_size: u32) -> Self {
+    pub fn with_page_size(mut self, page_size: u32) -> BpiResult<Self> {
+        if page_size == 0 {
+            return Err(BpiError::invalid_parameter(
+                "page_size",
+                "page size must be at least 1",
+            ));
+        }
+
         self.page_size = page_size;
-        self
+        Ok(self)
     }
 
     pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
@@ -574,11 +607,7 @@ impl UserUploadedVideosParams {
             ("ps", self.page_size.to_string()),
         ];
 
-        if let Some(keyword) = self
-            .keyword
-            .as_ref()
-            .filter(|value| !value.trim().is_empty())
-        {
+        if let Some(keyword) = &self.keyword {
             pairs.push(("keyword", keyword.to_string()));
         }
 
@@ -763,13 +792,40 @@ mod tests {
     }
 
     #[test]
+    fn user_uploaded_video_order_parses_supported_values() -> Result<(), BpiError> {
+        assert_eq!(
+            UserUploadedVideoOrder::try_from("pubdate")?,
+            UserUploadedVideoOrder::Pubdate
+        );
+        assert_eq!(
+            UserUploadedVideoOrder::try_from("click")?,
+            UserUploadedVideoOrder::Click
+        );
+        assert_eq!(
+            UserUploadedVideoOrder::try_from("stow")?,
+            UserUploadedVideoOrder::Stow
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn user_uploaded_video_order_rejects_unknown_value() {
+        let err = UserUploadedVideoOrder::try_from("invalid").unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "order", .. }
+        ));
+    }
+
+    #[test]
     fn user_uploaded_videos_params_serializes_optional_filters() -> Result<(), BpiError> {
         let params = UserUploadedVideosParams::new(Mid::new(1001)?)
             .with_order(UserUploadedVideoOrder::Click)
             .with_tid(33)
             .with_keyword("rust")
-            .with_page(2)
-            .with_page_size(20);
+            .with_page(2)?
+            .with_page_size(20)?;
 
         assert_eq!(
             params.query_pairs(),
@@ -782,6 +838,70 @@ mod tests {
                 ("keyword", "rust".to_string()),
             ]
         );
+        Ok(())
+    }
+
+    #[test]
+    fn user_uploaded_videos_params_trims_keyword() -> Result<(), BpiError> {
+        let params = UserUploadedVideosParams::new(Mid::new(1001)?).with_keyword("  rust  ");
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("mid", "1001".to_string()),
+                ("order", "pubdate".to_string()),
+                ("tid", "0".to_string()),
+                ("pn", "1".to_string()),
+                ("ps", "30".to_string()),
+                ("keyword", "rust".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn user_uploaded_videos_params_ignores_blank_keyword() -> Result<(), BpiError> {
+        let params = UserUploadedVideosParams::new(Mid::new(1001)?).with_keyword("   ");
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("mid", "1001".to_string()),
+                ("order", "pubdate".to_string()),
+                ("tid", "0".to_string()),
+                ("pn", "1".to_string()),
+                ("ps", "30".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn user_uploaded_videos_params_rejects_zero_page() -> Result<(), BpiError> {
+        let err = UserUploadedVideosParams::new(Mid::new(1001)?)
+            .with_page(0)
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "page", .. }
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn user_uploaded_videos_params_rejects_zero_page_size() -> Result<(), BpiError> {
+        let err = UserUploadedVideosParams::new(Mid::new(1001)?)
+            .with_page_size(0)
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "page_size",
+                ..
+            }
+        ));
         Ok(())
     }
 
