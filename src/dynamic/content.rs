@@ -1,5 +1,7 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
+
+use crate::dynamic::params::{DynamicLiveUsersParams, DynamicUpUsersParams};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 /// 直播的已关注者列表项
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -63,19 +65,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `size` | `Option<u32>` | 每页显示数，默认 10 |
+    /// | `params` | [`DynamicLiveUsersParams`] | 直播关注者列表参数 |
     pub async fn dynamic_live_users(
         &self,
-        size: Option<u32>,
+        params: DynamicLiveUsersParams,
     ) -> Result<BpiResponse<LiveUsersData>, BpiError> {
-        let mut req =
-            self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_live_users");
-
-        if let Some(s) = size {
-            req = req.query(&[("size", &s.to_string())]);
-        }
-
-        req.send_bpi("获取正在直播的已关注者").await
+        self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_live_users")
+            .query(&params.query_pairs())
+            .send_bpi("获取正在直播的已关注者")
+            .await
     }
 
     /// 获取发布新动态的已关注者
@@ -87,22 +85,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `teenagers_mode` | `Option<u8>` | 是否开启青少年模式：0 否，1 是 |
+    /// | `params` | [`DynamicUpUsersParams`] | 新动态关注者列表参数 |
     pub async fn dynamic_up_users(
         &self,
-        teenagers_mode: Option<u8>,
+        params: DynamicUpUsersParams,
     ) -> Result<BpiResponse<DynUpUsersData>, BpiError> {
-        let mut req =
-            self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist");
-
-        if let Some(mode) = teenagers_mode {
-            req = req.query(&[("teenagers_mode", &mode.to_string())]);
-        } else {
-            // 默认值处理
-            req = req.query(&[("teenagers_mode", "0")]);
-        }
-
-        req.send_bpi("获取发布新动态的已关注者").await
+        self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist")
+            .query(&params.query_pairs())
+            .send_bpi("获取发布新动态的已关注者")
+            .await
     }
 }
 
@@ -118,7 +109,9 @@ mod tests {
     #[tokio::test]
     async fn test_get_live_users() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.dynamic_live_users(Some(1)).await?;
+        let resp = bpi
+            .dynamic_live_users(DynamicLiveUsersParams::new().with_size(1)?)
+            .await?;
         let data = resp.into_data()?;
 
         info!("直播中的关注者数量: {}", data.count);
@@ -131,7 +124,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_dyn_up_users() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.dynamic_up_users(None).await?;
+        let resp = bpi.dynamic_up_users(DynamicUpUsersParams::new()).await?;
         let data = resp.into_data()?;
 
         info!("发布新动态的关注者列表: {:?}", data.items);

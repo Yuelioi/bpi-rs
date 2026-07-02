@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::dynamic::params::DynamicCardDetailParams;
 use crate::models::{LevelInfo, Official, Pendant, Vip};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
@@ -137,13 +138,13 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `dynamic_id` | &str | 动态 ID |
+    /// | `params` | [`DynamicCardDetailParams`] | 动态 ID 参数 |
     pub async fn dynamic_card_detail(
         &self,
-        dynamic_id: &str,
+        params: DynamicCardDetailParams,
     ) -> Result<BpiResponse<DynamicCardData>, BpiError> {
         self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail")
-            .query(&[("dynamic_id", dynamic_id)])
+            .query(&params.query_pairs())
             .send_bpi("获取特定动态卡片信息")
             .await
     }
@@ -162,13 +163,19 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::DynamicId;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    async fn test_dynamic_get_card_detail() {
+    async fn test_dynamic_get_card_detail() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.dynamic_card_detail("1099138163191840776").await;
+        let resp = bpi
+            .dynamic_card_detail(DynamicCardDetailParams::new(DynamicId::new(
+                "1099138163191840776",
+            )?))
+            .await;
         assert!(resp.is_ok());
+        Ok(())
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]

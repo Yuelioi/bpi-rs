@@ -17,6 +17,8 @@ pub mod topic;
 mod module;
 
 pub use params::{
-    DynamicDetailParams, DynamicForwardItemParams, DynamicForwardsParams,
-    DynamicLotteryNoticeParams, DynamicPicsParams, DynamicReactionsParams,
+    DynamicAllParams, DynamicCardDetailParams, DynamicCheckNewParams, DynamicDetailParams,
+    DynamicForwardItemParams, DynamicForwardsParams, DynamicLiveUsersParams,
+    DynamicLotteryNoticeParams, DynamicNavFeedParams, DynamicPicsParams, DynamicReactionsParams,
+    DynamicUpUsersParams,
 };

@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::dynamic::params::{DynamicAllParams, DynamicCheckNewParams};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -48,36 +49,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `host_mid` | `Option<&str>` | UP 主 UID |
-    /// | `offset` | `Option<&str>` | 分页偏移量 |
-    /// | `update_baseline` | `Option<&str>` | 更新基线，用于获取新动态 |
+    /// | `params` | [`DynamicAllParams`] | 动态流筛选和翻页参数 |
     pub async fn dynamic_all(
         &self,
-        host_mid: Option<&str>,
-        offset: Option<&str>,
-        update_baseline: Option<&str>,
+        params: DynamicAllParams,
     ) -> Result<BpiResponse<DynamicAllData>, BpiError> {
-        let mut req = self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all").query(
-            &[
-                (
-                    "features",
-                    "itemOpusStyle,listOnlyfans,opusBigCover,onlyfansVote,decorationCard,onlyfansAssetsV2,forwardListHidden,ugcDelete",
-                ),
-                ("web_location", "333.1365"),
-            ]
-        );
-
-        if let Some(mid) = host_mid {
-            req = req.query(&[("host_mid", mid)]);
-        }
-        if let Some(off) = offset {
-            req = req.query(&[("offset", off)]);
-        }
-        if let Some(baseline) = update_baseline {
-            req = req.query(&[("update_baseline", baseline)]);
-        }
-
-        req.send_bpi("获取全部动态列表").await
+        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all")
+            .query(&params.query_pairs())
+            .send_bpi("获取全部动态列表")
+            .await
     }
 
     /// 检测是否有新动态
@@ -89,22 +69,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `update_baseline` | &str | 上次列表返回的 update_baseline |
-    /// | `type_str` | `Option<&str>` | 动态类型 |
+    /// | `params` | [`DynamicCheckNewParams`] | 更新基线和类型筛选参数 |
     pub async fn dynamic_check_new(
         &self,
-        update_baseline: &str,
-        type_str: Option<&str>,
+        params: DynamicCheckNewParams,
     ) -> Result<BpiResponse<DynamicUpdateData>, BpiError> {
-        let mut req = self
-            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all/update")
-            .query(&[("update_baseline", update_baseline)]);
-
-        if let Some(typ) = type_str {
-            req = req.query(&[("type", typ)]);
-        }
-
-        req.send_bpi("检测新动态").await
+        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all/update")
+            .query(&params.query_pairs())
+            .send_bpi("检测新动态")
+            .await
     }
 }
 
@@ -117,7 +90,7 @@ mod tests {
     #[tokio::test]
     async fn test_dynamic_get_all() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.dynamic_all(None, None, None).await?;
+        let resp = bpi.dynamic_all(DynamicAllParams::new()).await?;
         assert_eq!(resp.code, 0);
 
         let data = resp.into_data()?;
@@ -132,7 +105,9 @@ mod tests {
     async fn test_dynamic_check_new() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let update_baseline = "0";
-        let resp = bpi.dynamic_check_new(update_baseline, None).await?;
+        let resp = bpi
+            .dynamic_check_new(DynamicCheckNewParams::new(update_baseline)?)
+            .await?;
         let data = resp.into_data().unwrap();
 
         info!("成功检测到 {} 条新动态", data.update_num);

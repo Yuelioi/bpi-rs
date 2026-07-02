@@ -1,5 +1,7 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
+
+use crate::dynamic::params::DynamicNavFeedParams;
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 // --- 导航栏动态 API 结构体 ---
 
@@ -61,24 +63,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `update_baseline` | `Option<&str>` | 更新基线，获取新动态时使用 |
-    /// | `offset` | `Option<&str>` | 分页偏移量，翻页时使用 |
+    /// | `params` | [`DynamicNavFeedParams`] | 导航栏动态翻页参数 |
     pub async fn dynamic_nav_feed(
         &self,
-        update_baseline: Option<&str>,
-        offset: Option<&str>,
+        params: DynamicNavFeedParams,
     ) -> Result<BpiResponse<DynamicNavData>, BpiError> {
-        let mut req = self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/nav");
-
-        if let Some(baseline) = update_baseline {
-            req = req.query(&[("update_baseline", baseline)]);
-        }
-
-        if let Some(off) = offset {
-            req = req.query(&[("offset", off)]);
-        }
-
-        req.send_bpi("获取导航栏动态列表").await
+        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/nav")
+            .query(&params.query_pairs())
+            .send_bpi("获取导航栏动态列表")
+            .await
     }
 }
 
@@ -91,7 +84,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_dynamic_nav_feed() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.dynamic_nav_feed(None, None).await?;
+        let resp = bpi.dynamic_nav_feed(DynamicNavFeedParams::new()).await?;
         let data = resp.into_data()?;
 
         info!("获取到 {} 条动态", data.items.len());
