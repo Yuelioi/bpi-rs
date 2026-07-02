@@ -5,7 +5,9 @@
 use super::result::{
     Article, Bangumi, BiliUser, LiveData, LiveRoom, LiveUser, Movie, SearchData, Video,
 };
-use super::search_params::{CategoryId, Duration, OrderSort, SearchOrder, SearchType, UserType};
+use super::search_params::{
+    CategoryId, OrderSort, SearchOrder, SearchType, SearchVideoParams, UserType,
+};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 impl BpiClient {
@@ -289,37 +291,12 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `keyword` | &str | 搜索关键词 |
-    /// | `order` | `Option<SearchOrder>` | 排序方式 |
-    /// | `duration` | `Option<Duration>` | 时长筛选 |
-    /// | `tids` | `Option<u32>` | 分区 ID |
-    /// | `page` | `Option<i32>` | 页码（默认1） |
+    /// | `params` | `SearchVideoParams` | 视频搜索参数 |
     pub async fn search_video(
         &self,
-        keyword: &str,
-        order: Option<SearchOrder>,
-        duration: Option<Duration>,
-        tids: Option<u32>,
-        page: Option<i32>,
+        params: SearchVideoParams,
     ) -> Result<BpiResponse<SearchData<Vec<Video>>>, BpiError> {
-        let page_str = page.unwrap_or(1).to_string();
-
-        let params = vec![
-            ("search_type", SearchType::Video.as_str().to_string()),
-            ("keyword", keyword.to_string()),
-            (
-                "order",
-                order.unwrap_or(SearchOrder::TotalRank).as_str().to_string(),
-            ),
-            (
-                "duration",
-                duration.unwrap_or(Duration::All).as_num().to_string(),
-            ),
-            ("tids", tids.unwrap_or(0).to_string()),
-            ("page", page_str),
-        ];
-
-        let signed_params = self.get_wbi_sign2(params).await?;
+        let signed_params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         self.get("https://api.bilibili.com/x/web-interface/wbi/search/type")
             .query(&signed_params)
@@ -330,7 +307,9 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::search::search_params::{CategoryId, Duration, OrderSort, SearchOrder, UserType};
+    use crate::search::{
+        CategoryId, Duration, OrderSort, SearchOrder, SearchVideoParams, UserType,
+    };
     use tracing::info;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -484,15 +463,12 @@ mod tests {
     #[tokio::test]
     async fn test_search_video() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .search_video(
-                "Rust 教程",
-                Some(SearchOrder::Online),
-                Some(Duration::From10To30),
-                Some(171),
-                None,
-            )
-            .await;
+        let params = SearchVideoParams::new("Rust 教程")
+            .expect("keyword should be valid")
+            .with_order(SearchOrder::Online)
+            .with_duration(Duration::From10To30)
+            .with_tid(171);
+        let resp = bpi.search_video(params).await;
         assert!(resp.is_ok());
         if let Ok(r) = resp {
             info!("搜索视频返回: {:?}", r);
