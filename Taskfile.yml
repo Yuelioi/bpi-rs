@@ -26,11 +26,12 @@ tasks:
     desc: Safe default checks for the migration baseline.
     cmds:
       - cargo fmt --check
+      - cargo clippy --all-targets --all-features --locked -- -D warnings
       - cargo check --all-features
       - cargo test --all-features --lib
 
   lint_strict:
-    desc: Run strict clippy; expected to fail until legacy migration debt is cleaned up.
+    desc: Run strict clippy for all targets and features.
     cmds:
       - cargo clippy --all-targets --all-features --locked -- -D warnings
 
