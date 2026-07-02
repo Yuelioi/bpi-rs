@@ -16,6 +16,37 @@ pub struct Account {
     pub buvid3: String,
 }
 
+#[cfg(any(test, debug_assertions))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TestAccountProfile {
+    Vip,
+    Normal,
+}
+
+#[cfg(any(test, debug_assertions))]
+impl TestAccountProfile {
+    fn section(self) -> &'static str {
+        match self {
+            Self::Vip => "vip",
+            Self::Normal => "normal",
+        }
+    }
+
+    fn legacy_section(self) -> &'static str {
+        match self {
+            Self::Vip => "account_vip",
+            Self::Normal => "account_normal",
+        }
+    }
+
+    fn suffix(self) -> &'static str {
+        match self {
+            Self::Vip => "_vip",
+            Self::Normal => "_normal",
+        }
+    }
+}
+
 impl Account {
     pub fn new(
         dede_user_id: String,
@@ -128,11 +159,24 @@ fn redact_if_present(value: &str) -> &'static str {
 impl Account {
     #[cfg(any(test, debug_assertions))]
     pub fn load_test_account() -> BpiResult<Account> {
-        Self::load_test_account_from("account.toml")
+        Self::load_test_account_profile(TestAccountProfile::Vip)
+    }
+
+    #[cfg(any(test, debug_assertions))]
+    pub fn load_test_account_profile(profile: TestAccountProfile) -> BpiResult<Account> {
+        Self::load_test_account_profile_from("account.toml", profile)
     }
 
     #[cfg(any(test, debug_assertions))]
     pub fn load_test_account_from(path: impl AsRef<std::path::Path>) -> BpiResult<Account> {
+        Self::load_test_account_profile_from(path, TestAccountProfile::Vip)
+    }
+
+    #[cfg(any(test, debug_assertions))]
+    pub fn load_test_account_profile_from(
+        path: impl AsRef<std::path::Path>,
+        profile: TestAccountProfile,
+    ) -> BpiResult<Account> {
         use config::{Config, File};
 
         let path = path.as_ref();
@@ -149,10 +193,113 @@ impl Account {
             .build()
             .map_err(|err| BpiError::parse(format!("failed to load account config: {err}")))?;
 
-        settings
-            .try_deserialize()
-            .map_err(|err| BpiError::parse(format!("failed to parse account config: {err}")))
+        load_profile_from_settings(&settings, profile)
     }
+}
+
+#[cfg(any(test, debug_assertions))]
+fn load_profile_from_settings(
+    settings: &config::Config,
+    profile: TestAccountProfile,
+) -> BpiResult<Account> {
+    if let Some(account) = read_account_section(settings, profile.section())? {
+        return Ok(account);
+    }
+
+    if let Some(account) = read_account_section(settings, profile.legacy_section())? {
+        return Ok(account);
+    }
+
+    if let Some(account) = read_suffixed_account(settings, profile.suffix())? {
+        return Ok(account);
+    }
+
+    if profile == TestAccountProfile::Vip {
+        return settings
+            .clone()
+            .try_deserialize()
+            .map_err(|err| BpiError::parse(format!("failed to parse account config: {err}")));
+    }
+
+    Err(BpiError::invalid_parameter(
+        "account_profile",
+        "account profile does not exist",
+    ))
+}
+
+#[cfg(any(test, debug_assertions))]
+fn read_account_section(
+    settings: &config::Config,
+    section: &'static str,
+) -> BpiResult<Option<Account>> {
+    match settings.get::<Account>(section) {
+        Ok(account) => Ok(Some(account)),
+        Err(config::ConfigError::NotFound(_)) => Ok(None),
+        Err(err) => Err(BpiError::parse(format!(
+            "failed to parse account profile {section}: {err}"
+        ))),
+    }
+}
+
+#[cfg(any(test, debug_assertions))]
+fn read_suffixed_account(
+    settings: &config::Config,
+    suffix: &'static str,
+) -> BpiResult<Option<Account>> {
+    let dede_user_id = read_config_string(settings, &format!("dede_user_id{suffix}"))?;
+    let dede_user_id_ckmd5 = read_config_string(settings, &format!("dede_user_id_ckmd5{suffix}"))?;
+    let sessdata = read_config_string(settings, &format!("sessdata{suffix}"))?;
+    let bili_jct = read_config_string(settings, &format!("bili_jct{suffix}"))?;
+    let buvid3 = read_config_string(settings, &format!("buvid3{suffix}"))?;
+
+    if dede_user_id.is_none()
+        && dede_user_id_ckmd5.is_none()
+        && sessdata.is_none()
+        && bili_jct.is_none()
+        && buvid3.is_none()
+    {
+        return Ok(None);
+    }
+
+    let Some(dede_user_id) = dede_user_id else {
+        return Err(incomplete_account_profile());
+    };
+    let Some(dede_user_id_ckmd5) = dede_user_id_ckmd5 else {
+        return Err(incomplete_account_profile());
+    };
+    let Some(sessdata) = sessdata else {
+        return Err(incomplete_account_profile());
+    };
+    let Some(bili_jct) = bili_jct else {
+        return Err(incomplete_account_profile());
+    };
+    let Some(buvid3) = buvid3 else {
+        return Err(incomplete_account_profile());
+    };
+
+    Ok(Some(Account::new(
+        dede_user_id,
+        dede_user_id_ckmd5,
+        sessdata,
+        bili_jct,
+        buvid3,
+    )))
+}
+
+#[cfg(any(test, debug_assertions))]
+fn read_config_string(settings: &config::Config, key: &str) -> BpiResult<Option<String>> {
+    match settings.get_string(key) {
+        Ok(value) => Ok(Some(value)),
+        Err(config::ConfigError::NotFound(_)) => Ok(None),
+        Err(err) => Err(BpiError::parse(format!(
+            "failed to parse account config key {key}: {err}"
+        ))),
+    }
+}
+
+#[cfg(any(test, debug_assertions))]
+fn incomplete_account_profile() -> BpiError {
+    BpiError::invalid_parameter("account_profile", "account profile is incomplete")
 }
 
 #[cfg(test)]
@@ -251,6 +398,59 @@ mod tests {
         std::fs::remove_file(&path).map_err(|err| BpiError::parse(err.to_string()))?;
         assert_eq!(account.dede_user_id, "42");
         assert_eq!(account.bili_jct, "csrf");
+        Ok(())
+    }
+
+    #[test]
+    fn load_test_account_profile_from_reads_normal_suffix() -> Result<(), BpiError> {
+        let path = unique_test_account_path("normal-suffix");
+        std::fs::write(
+            &path,
+            r#"
+            bili_jct_vip = "csrf-vip"
+            dede_user_id_vip = "42"
+            dede_user_id_ckmd5_vip = "ck-vip"
+            sessdata_vip = "session-vip"
+            buvid3_vip = "buvid-vip"
+
+            bili_jct_normal = "csrf-normal"
+            dede_user_id_normal = "84"
+            dede_user_id_ckmd5_normal = "ck-normal"
+            sessdata_normal = "session-normal"
+            buvid3_normal = "buvid-normal"
+            "#,
+        )
+        .map_err(|err| BpiError::parse(err.to_string()))?;
+
+        let account = Account::load_test_account_profile_from(&path, TestAccountProfile::Normal)?;
+
+        std::fs::remove_file(&path).map_err(|err| BpiError::parse(err.to_string()))?;
+        assert_eq!(account.dede_user_id, "84");
+        assert_eq!(account.bili_jct, "csrf-normal");
+        Ok(())
+    }
+
+    #[test]
+    fn load_test_account_profile_from_reads_vip_section() -> Result<(), BpiError> {
+        let path = unique_test_account_path("vip-section");
+        std::fs::write(
+            &path,
+            r#"
+            [vip]
+            bili_jct = "csrf-vip"
+            dede_user_id = "42"
+            dede_user_id_ckmd5 = "ck-vip"
+            sessdata = "session-vip"
+            buvid3 = "buvid-vip"
+            "#,
+        )
+        .map_err(|err| BpiError::parse(err.to_string()))?;
+
+        let account = Account::load_test_account_profile_from(&path, TestAccountProfile::Vip)?;
+
+        std::fs::remove_file(&path).map_err(|err| BpiError::parse(err.to_string()))?;
+        assert_eq!(account.dede_user_id, "42");
+        assert_eq!(account.bili_jct, "csrf-vip");
         Ok(())
     }
 
