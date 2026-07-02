@@ -32,13 +32,6 @@ impl TestAccountProfile {
         }
     }
 
-    fn legacy_section(self) -> &'static str {
-        match self {
-            Self::Vip => "account_vip",
-            Self::Normal => "account_normal",
-        }
-    }
-
     fn suffix(self) -> &'static str {
         match self {
             Self::Vip => "_vip",
@@ -203,10 +196,6 @@ fn load_profile_from_settings(
     profile: TestAccountProfile,
 ) -> BpiResult<Account> {
     if let Some(account) = read_account_section(settings, profile.section())? {
-        return Ok(account);
-    }
-
-    if let Some(account) = read_account_section(settings, profile.legacy_section())? {
         return Ok(account);
     }
 
@@ -451,6 +440,36 @@ mod tests {
         std::fs::remove_file(&path).map_err(|err| BpiError::parse(err.to_string()))?;
         assert_eq!(account.dede_user_id, "42");
         assert_eq!(account.bili_jct, "csrf-vip");
+        Ok(())
+    }
+
+    #[test]
+    fn load_test_account_profile_from_ignores_arbitrary_profile_section() -> Result<(), BpiError> {
+        let path = unique_test_account_path("arbitrary-section");
+        std::fs::write(
+            &path,
+            r#"
+            [account_normal]
+            bili_jct = "csrf-normal"
+            dede_user_id = "84"
+            dede_user_id_ckmd5 = "ck-normal"
+            sessdata = "session-normal"
+            buvid3 = "buvid-normal"
+            "#,
+        )
+        .map_err(|err| BpiError::parse(err.to_string()))?;
+
+        let err =
+            Account::load_test_account_profile_from(&path, TestAccountProfile::Normal).unwrap_err();
+
+        std::fs::remove_file(&path).map_err(|err| BpiError::parse(err.to_string()))?;
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "account_profile",
+                ..
+            }
+        ));
         Ok(())
     }
 
