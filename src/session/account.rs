@@ -116,50 +116,39 @@ fn redact_if_present(value: &str) -> &'static str {
 
 impl Account {
     #[cfg(any(test, debug_assertions))]
-    pub fn load_test_account() -> Result<Account, Box<dyn std::error::Error>> {
-        use std::path::Path;
+    pub fn load_test_account() -> BpiResult<Account> {
+        Self::load_test_account_from("account.toml")
+    }
 
+    #[cfg(any(test, debug_assertions))]
+    pub fn load_test_account_from(path: impl AsRef<std::path::Path>) -> BpiResult<Account> {
         use config::{Config, File};
 
-        let config_path = "account.toml";
+        let path = path.as_ref();
 
-        if !Path::new(config_path).exists() {
-            create_test_account_template(config_path)?;
-            return Err("测试账号配置文件已创建，请填写后重新运行".into());
+        if !path.exists() {
+            return Err(BpiError::invalid_parameter(
+                "account_path",
+                "account config file does not exist",
+            ));
         }
 
         let settings = Config::builder()
-            .add_source(File::with_name("account"))
-            .build()?;
+            .add_source(File::from(path.to_path_buf()))
+            .build()
+            .map_err(|err| BpiError::parse(format!("failed to load account config: {err}")))?;
 
-        Ok(settings.try_deserialize()?)
+        settings
+            .try_deserialize()
+            .map_err(|err| BpiError::parse(format!("failed to parse account config: {err}")))
     }
-}
-
-#[cfg(any(test, debug_assertions))]
-fn create_test_account_template(path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    use std::fs;
-
-    let template = r#"# 测试账号配置文件
-# 请填写您的 B站 账号信息用于测试
-
-bili_jct = "your_bili_jct_here"
-dede_user_id = "your_dede_user_id_here"
-dede_user_id_ckmd5 = "your_dede_user_id_ckmd5_here"
-sessdata = "your_sessdata_here"
-buvid3 = "your_buvid3_here"
-
-# 注意: 这个文件包含敏感信息，请不要提交到版本控制系统
-"#;
-
-    fs::write(path, template)?;
-    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::BpiError;
+    use std::path::PathBuf;
 
     #[test]
     fn account_from_cookie_header_extracts_known_fields() -> Result<(), BpiError> {
@@ -212,5 +201,57 @@ mod tests {
 
         assert!(account.is_complete());
         Ok(())
+    }
+
+    #[test]
+    fn load_test_account_from_missing_path_does_not_create_file() {
+        let path = unique_test_account_path("missing");
+        assert!(!path.exists());
+
+        let err = Account::load_test_account_from(&path).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "account_path",
+                ..
+            }
+        ));
+        assert!(!path.exists());
+    }
+
+    #[test]
+    fn load_test_account_from_reads_explicit_path() -> Result<(), BpiError> {
+        let path = unique_test_account_path("valid");
+        std::fs::write(
+            &path,
+            r#"
+            bili_jct = "csrf"
+            dede_user_id = "42"
+            dede_user_id_ckmd5 = "ck"
+            sessdata = "session"
+            buvid3 = "buvid"
+            "#,
+        )
+        .map_err(|err| BpiError::parse(err.to_string()))?;
+
+        let account = Account::load_test_account_from(&path)?;
+
+        std::fs::remove_file(&path).map_err(|err| BpiError::parse(err.to_string()))?;
+        assert_eq!(account.dede_user_id, "42");
+        assert_eq!(account.bili_jct, "csrf");
+        Ok(())
+    }
+
+    fn unique_test_account_path(label: &str) -> PathBuf {
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock should be after unix epoch")
+            .as_nanos();
+
+        std::env::temp_dir().join(format!(
+            "bpi-rs-{label}-account-{}-{nanos}.toml",
+            std::process::id(),
+        ))
     }
 }
