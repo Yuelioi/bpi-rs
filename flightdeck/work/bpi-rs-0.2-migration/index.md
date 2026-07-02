@@ -8,6 +8,15 @@ This topic owns the staged migration plan and should keep all active design and 
 
 The current migration execution protocol is `api-upgrade-protocol.md`. Agents must follow module-batch migration, real Probe evidence, local-only raw Probe output under `target/...`, and low commit count rules from that protocol.
 
+The accepted promoted contract shape is now one endpoint contract plus response fixtures:
+
+```text
+tests/contracts/<domain>/<endpoint>/contract.json
+tests/contracts/<domain>/<endpoint>/responses/<case>.json
+```
+
+Do not resume the old committed shape `tests/contracts/<domain>/<endpoint>/<profile>.request.json` for promoted endpoint contracts.
+
 `migration-status.md` is a local temporary status board for context recovery. It tracks pinned execution order, current batch, module status, evidence, and next action. It must not be committed. This workspace excludes it through `.git/info/exclude`; if another workspace needs the board, create the local file again instead of adding it to version control.
 
 ## Next
@@ -43,12 +52,16 @@ Done:
 - Wrote `api-upgrade-protocol.md` with Probe-first module-batch migration rules.
 - Wrote local-only `migration-status.md` for pinned execution order and resumable batch state.
 - Completed pilot `clientinfo/ip` request-contract validation in commit `c261e4f`.
+- Migrated existing pilot contracts to endpoint `contract.json` plus `responses/*.json` fixtures in commit `6383119`.
+- Covered `clientinfo/ip`, `login/vip-info`, `login/read-info`, and `login/qr` in the accepted contract shape.
 
 Current:
+- Continue future module batches using the endpoint fixture shape from commit `6383119`.
 - Use the local status board to select and execute the next module batch.
 
 Verified:
-- `task check_all` passed after the pilot batch: 337 passed, 0 failed, 302 ignored.
+- After commit `6383119`, `cargo fmt --check`, `cargo check --all-features`, and `cargo test --all-features --lib` passed.
+- `cargo test --all-features --lib`: 358 passed, 0 failed, 302 ignored.
 
 ## Local-only Constraints
 
@@ -56,7 +69,7 @@ Verified:
 - Do not commit raw Probe outputs, account-specific response data, cookies, `SESSDATA`, `bili_jct`, `buvid`, or local account notes.
 - Keep raw Probe output under `target/bpi-probe-runs/...`.
 - Keep request drafts under `target/bpi-contract-drafts/...`.
-- Commit only reviewed contracts under `tests/contracts/...` and reviewed sanitized fixtures under `tests/fixtures/...`.
+- Commit only reviewed endpoint contracts and sanitized response fixtures under `tests/contracts/...`.
 - Prefer one commit per completed module batch; do not create endpoint-sized commit spam.
 
 ## Open questions

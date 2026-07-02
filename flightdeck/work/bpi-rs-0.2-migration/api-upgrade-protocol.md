@@ -273,7 +273,8 @@ A batch is done only when:
 - Observed API errors are tested.
 - Failed endpoints are split out with notes.
 - Sensitive values are not committed.
-- `task check_all` passes.
+- The batch passes `cargo fmt --check`, `cargo check --all-features`, and `cargo test --all-features --lib`.
+- If `task check_all` exists and is practical for the batch, run it as an additional project-level gate.
 
 ## Commit Policy
 
@@ -286,14 +287,25 @@ A batch is done only when:
 
 ## Current Pilot Batch
 
-`clientinfo/ip` is the first reviewed pilot batch for this protocol.
+The accepted pilot contract shape was promoted in commit `6383119`.
+
+Covered endpoints:
+
+- `clientinfo/ip`
+- `login/vip-info`
+- `login/read-info`: `account-info`, `coin`, `nav`, `stat`, `today-coin-exp`
+- `login/qr`: `generate`, `poll`, and QR flow
 
 It demonstrates:
 
-- anonymous/normal/vip profile probing for a public read-only endpoint
-- promoted request contracts under `tests/contracts/clientinfo/ip/`
+- one `contract.json` per endpoint
+- response fixtures under `responses/*.json`
+- anonymous/normal/vip profile cases without duplicating identical requests
+- public, authenticated, and dynamic-flow endpoint examples
 - local raw Probe output kept under `target/bpi-probe-runs/...`
 - request-contract validation against endpoint construction
-- response model validation from local Probe output when present
+- response fixture validation through declared Rust models
+- error fixture validation for observed semantic errors such as `requires_login`
+- sanitized private/account fields before commit
 
-Future migrations should apply the same evidence rules at module-batch scale.
+Future migrations must apply this shape and evidence rule at module-batch scale. The old promoted shape, `<profile>.request.json`, is deprecated except for local drafts or legacy flow step internals.
