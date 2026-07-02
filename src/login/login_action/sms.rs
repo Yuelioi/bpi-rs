@@ -3,7 +3,7 @@ use reqwest::header::SET_COOKIE;
 use serde::{Deserialize, Serialize};
 use tracing::{error, info};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SMSSendData {
@@ -17,42 +17,91 @@ struct SMSLoginData {
     url: String,  // 跳转url
 }
 
+/// Parameters for sending a web SMS login verification code.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LoginSmsCodeParams {
+    cid: u32,
+    tel: String,
+    source: String,
+    token: String,
+    challenge: String,
+    validate: String,
+    seccode: String,
+}
+
+impl LoginSmsCodeParams {
+    /// Creates SMS-code request parameters.
+    pub fn new(
+        cid: u32,
+        tel: impl Into<String>,
+        token: impl Into<String>,
+        challenge: impl Into<String>,
+        validate: impl Into<String>,
+        seccode: impl Into<String>,
+    ) -> BpiResult<Self> {
+        let params = Self {
+            cid,
+            tel: tel.into(),
+            source: "main_web".to_string(),
+            token: token.into(),
+            challenge: challenge.into(),
+            validate: validate.into(),
+            seccode: seccode.into(),
+        };
+        params.validate()?;
+        Ok(params)
+    }
+
+    /// Sets the Bilibili login source marker. Defaults to `main_web`.
+    pub fn source(mut self, source: impl Into<String>) -> BpiResult<Self> {
+        self.source = source.into();
+        self.validate()?;
+        Ok(self)
+    }
+
+    fn validate(&self) -> BpiResult<()> {
+        if self.cid == 0 {
+            return Err(BpiError::invalid_parameter("cid", "cid must be non-zero"));
+        }
+        validate_required("tel", &self.tel)?;
+        validate_required("source", &self.source)?;
+        validate_required("token", &self.token)?;
+        validate_required("challenge", &self.challenge)?;
+        validate_required("validate", &self.validate)?;
+        validate_required("seccode", &self.seccode)?;
+        Ok(())
+    }
+
+    fn form_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("cid", self.cid.to_string()),
+            ("tel", self.tel.clone()),
+            ("source", self.source.clone()),
+            ("token", self.token.clone()),
+            ("challenge", self.challenge.clone()),
+            ("validate", self.validate.clone()),
+            ("seccode", self.seccode.clone()),
+        ]
+    }
+}
+
+fn validate_required(field: &'static str, value: &str) -> BpiResult<()> {
+    if value.trim().is_empty() {
+        return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
+    }
+
+    Ok(())
+}
+
 impl BpiClient {
     /// 发送短信验证码（Web端）
-    ///
-    /// # 参数
-    /// * `cid` - 国际冠字码
-    /// * `tel` - 手机号码
-    /// * `source` - 登录来源 "main_web" 或 "main_mini"
-    /// * `token` - 登录 API token
-    /// * `challenge` - 极验 challenge
-    /// * `validate` - 极验 result
-    /// * `seccode` - 极验 result + "|jordan"
     pub async fn login_send_sms_code(
         &self,
-        cid: u32,
-        tel: u32,
-        source: &str,
-        token: &str,
-        challenge: &str,
-        validate: &str,
-        seccode: &str,
+        params: LoginSmsCodeParams,
     ) -> Result<BpiResponse<SMSSendData>, BpiError> {
-        // 构建表单
-        let form = vec![
-            ("cid", cid.to_string()),
-            ("tel", tel.to_string()),
-            ("source", source.to_string()),
-            ("token", token.to_string()),
-            ("challenge", challenge.to_string()),
-            ("validate", validate.to_string()),
-            ("seccode", seccode.to_string()),
-        ];
-
-        // 发送请求
         let result = self
             .post("https://passport.bilibili.com/x/passport-login/web/sms/send")
-            .form(&form)
+            .form(&params.form_pairs())
             .send_bpi("发送短信验证码")
             .await?;
 
@@ -132,5 +181,85 @@ impl BpiClient {
                 Err(msg)
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn login_sms_code_params_serializes_required_form() -> Result<(), BpiError> {
+        let params = LoginSmsCodeParams::new(
+            86,
+            "13800138000",
+            "token",
+            "challenge",
+            "validate",
+            "validate|jordan",
+        )?;
+
+        assert_eq!(
+            params.form_pairs(),
+            vec![
+                ("cid", "86".to_string()),
+                ("tel", "13800138000".to_string()),
+                ("source", "main_web".to_string()),
+                ("token", "token".to_string()),
+                ("challenge", "challenge".to_string()),
+                ("validate", "validate".to_string()),
+                ("seccode", "validate|jordan".to_string())
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn login_sms_code_params_preserves_long_phone_numbers() -> Result<(), BpiError> {
+        let params = LoginSmsCodeParams::new(
+            86,
+            "13800138000",
+            "token",
+            "challenge",
+            "validate",
+            "validate|jordan",
+        )?;
+
+        assert_eq!(params.form_pairs()[1], ("tel", "13800138000".to_string()));
+        Ok(())
+    }
+
+    #[test]
+    fn login_sms_code_params_allows_source_override() -> Result<(), BpiError> {
+        let params = LoginSmsCodeParams::new(
+            86,
+            "13800138000",
+            "token",
+            "challenge",
+            "validate",
+            "validate|jordan",
+        )?
+        .source("main_mini")?;
+
+        assert_eq!(params.form_pairs()[2], ("source", "main_mini".to_string()));
+        Ok(())
+    }
+
+    #[test]
+    fn login_sms_code_params_rejects_blank_token() {
+        let err = LoginSmsCodeParams::new(
+            86,
+            "13800138000",
+            " ",
+            "challenge",
+            "validate",
+            "validate|jordan",
+        )
+        .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "token", .. }
+        ));
     }
 }
