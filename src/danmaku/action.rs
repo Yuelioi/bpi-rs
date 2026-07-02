@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::ids::{Aid, Bvid, Cid};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
 
 // -------------------
 // 发送视频弹幕
@@ -13,51 +14,107 @@ pub struct DanmakuPostData {
     pub dmid_str: String,
 }
 
-impl BpiClient {
-    /// 发送视频弹幕
-    ///
-    /// 文档: [弹幕相关](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `oid` | u64 | 视频 cid |
-    /// | `msg` | &str | 弹幕内容 |
-    /// | `avid` | `Option<u64>` | 稿件 aid（`avid` 与 `bvid` 二选一） |
-    /// | `bvid` | `Option<&str>` | 稿件 bvid（`avid` 与 `bvid` 二选一） |
-    /// | `mode` | `Option<u8>` | 弹幕模式：1 滚动，4 底端，5 顶端，7 高级，9 BAS（`pool=2`） |
-    /// | `typ` | `Option<u8>` | 弹幕类型：1 视频弹幕，2 漫画弹幕 |
-    /// | `progress` | `Option<u32>` | 弹幕出现时间（毫秒） |
-    /// | `color` | `Option<u32>` | 颜色（rgb888），如 16777215 为白色 |
-    /// | `fontsize` | `Option<u8>` | 字号，默认 25（12/16/18/25/36/45/64） |
-    /// | `pool` | `Option<u8>` | 弹幕池：0 普通池，1 字幕池，2 特殊池（代码/BAS） |
-    pub async fn danmaku_send(
-        &self,
-        oid: u64,
-        msg: &str,
-        avid: Option<u64>,
-        bvid: Option<&str>,
-        mode: Option<u8>,
-        typ: Option<u8>,
-        progress: Option<u32>,
-        color: Option<u32>,
-        fontsize: Option<u8>,
-        pool: Option<u8>,
-    ) -> Result<BpiResponse<DanmakuPostData>, BpiError> {
-        let csrf = self.csrf()?;
+/// Parameters for sending a video danmaku.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DanmakuSendParams {
+    oid: Cid,
+    msg: String,
+    aid: Option<Aid>,
+    bvid: Option<Bvid>,
+    mode: u8,
+    typ: u8,
+    progress: u32,
+    color: u32,
+    font_size: u8,
+    pool: u8,
+}
 
+impl DanmakuSendParams {
+    /// Creates parameters with Bilibili web defaults.
+    pub fn new(oid: Cid, msg: impl Into<String>) -> BpiResult<Self> {
+        let msg = msg.into();
+        if msg.trim().is_empty() {
+            return Err(BpiError::invalid_parameter(
+                "msg",
+                "danmaku message cannot be blank",
+            ));
+        }
+
+        Ok(Self {
+            oid,
+            msg,
+            aid: None,
+            bvid: None,
+            mode: 1,
+            typ: 1,
+            progress: 1878,
+            color: 16_777_215,
+            font_size: 25,
+            pool: 0,
+        })
+    }
+
+    /// Sets the optional AV numeric video ID.
+    pub fn aid(mut self, aid: Aid) -> Self {
+        self.aid = Some(aid);
+        self
+    }
+
+    /// Sets the optional BV string video ID.
+    pub fn bvid(mut self, bvid: Bvid) -> Self {
+        self.bvid = Some(bvid);
+        self
+    }
+
+    /// Sets the danmaku display mode.
+    pub fn mode(mut self, mode: u8) -> Self {
+        self.mode = mode;
+        self
+    }
+
+    /// Sets the danmaku type.
+    pub fn danmaku_type(mut self, typ: u8) -> Self {
+        self.typ = typ;
+        self
+    }
+
+    /// Sets the danmaku timestamp in milliseconds.
+    pub fn progress(mut self, progress: u32) -> Self {
+        self.progress = progress;
+        self
+    }
+
+    /// Sets the RGB888 color value.
+    pub fn color(mut self, color: u32) -> Self {
+        self.color = color;
+        self
+    }
+
+    /// Sets the font size.
+    pub fn font_size(mut self, font_size: u8) -> Self {
+        self.font_size = font_size;
+        self
+    }
+
+    /// Sets the danmaku pool.
+    pub fn pool(mut self, pool: u8) -> Self {
+        self.pool = pool;
+        self
+    }
+
+    fn form_pairs(&self, csrf: impl Into<String>) -> Vec<(&'static str, String)> {
         let mut form = vec![
-            ("oid", oid.to_string()),
-            ("msg", msg.to_string()),
-            ("mode", "1".to_string()),
-            ("fontsize", "25".to_string()),
-            ("color", "16777215".to_string()),
-            ("pool", "0".to_string()),
-            ("progress", "1878".to_string()),
+            ("type", self.typ.to_string()),
+            ("oid", self.oid.to_string()),
+            ("msg", self.msg.clone()),
+            ("mode", self.mode.to_string()),
+            ("fontsize", self.font_size.to_string()),
+            ("color", self.color.to_string()),
+            ("pool", self.pool.to_string()),
+            ("progress", self.progress.to_string()),
             ("rnd", "2".to_string()),
             ("plat", "1".to_string()),
-            ("csrf", csrf),
+            ("csrf", csrf.into()),
             ("checkbox_type", "0".to_string()),
             ("colorful", "".to_string()),
             ("gaiasource", "main_web".to_string()),
@@ -67,30 +124,29 @@ impl BpiClient {
             ("from_spmid", "333.788.0.0".to_string()),
         ];
 
-        if let Some(m) = mode {
-            form.push(("mode", m.to_string()));
+        if let Some(aid) = self.aid {
+            form.push(("avid", aid.to_string()));
         }
-        if let Some(t) = typ {
-            form.push(("type", t.to_string()));
+        if let Some(bvid) = self.bvid.as_ref() {
+            form.push(("bvid", bvid.to_string()));
         }
-        if let Some(p) = progress {
-            form.push(("progress", p.to_string()));
-        }
-        if let Some(c) = color {
-            form.push(("color", c.to_string()));
-        }
-        if let Some(f) = fontsize {
-            form.push(("fontsize", f.to_string()));
-        }
-        if let Some(p) = pool {
-            form.push(("pool", p.to_string()));
-        }
-        if let Some(b) = bvid {
-            form.push(("bvid", b.to_string()));
-        }
-        if let Some(a) = avid {
-            form.push(("avid", a.to_string()));
-        }
+
+        form
+    }
+}
+
+impl BpiClient {
+    /// 发送视频弹幕
+    ///
+    /// 文档: [弹幕相关](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
+    ///
+    pub async fn danmaku_send(
+        &self,
+        params: DanmakuSendParams,
+    ) -> Result<BpiResponse<DanmakuPostData>, BpiError> {
+        let csrf = self.csrf()?;
+
+        let form = params.form_pairs(csrf);
 
         // 签名参数加入表单
         let signed_params = self.get_wbi_sign2(form.clone()).await?;
@@ -415,6 +471,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::{Aid, Bvid, Cid};
     use tracing::info;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -422,20 +479,10 @@ mod tests {
     async fn test_danmaku_post() {
         let bpi = BpiClient::new().expect("client should build");
 
-        let resp = bpi
-            .danmaku_send(
-                413195701,
-                "测试22",
-                Some(590635620),
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
-            )
-            .await;
+        let params = DanmakuSendParams::new(Cid::new(413195701).expect("cid is valid"), "测试22")
+            .expect("message is valid")
+            .aid(Aid::new(590635620).expect("aid is valid"));
+        let resp = bpi.danmaku_send(params).await;
         info!("{:#?}", resp);
         assert!(resp.is_ok());
         info!("dmid{}", resp.unwrap().data.unwrap().dmid);
@@ -501,5 +548,72 @@ mod tests {
         let resp = bpi.danmaku_edit_pool(413195701, &dmids, 1).await;
         info!("{:#?}", resp);
         assert!(resp.is_ok());
+    }
+
+    #[test]
+    fn danmaku_send_params_serializes_default_form() -> Result<(), BpiError> {
+        let params = DanmakuSendParams::new(Cid::new(413195701)?, "hello")?;
+
+        assert_eq!(
+            params.form_pairs("csrf-token"),
+            vec![
+                ("type", "1".to_string()),
+                ("oid", "413195701".to_string()),
+                ("msg", "hello".to_string()),
+                ("mode", "1".to_string()),
+                ("fontsize", "25".to_string()),
+                ("color", "16777215".to_string()),
+                ("pool", "0".to_string()),
+                ("progress", "1878".to_string()),
+                ("rnd", "2".to_string()),
+                ("plat", "1".to_string()),
+                ("csrf", "csrf-token".to_string()),
+                ("checkbox_type", "0".to_string()),
+                ("colorful", "".to_string()),
+                ("gaiasource", "main_web".to_string()),
+                ("polaris_app_id", "100".to_string()),
+                ("polaris_platform", "5".to_string()),
+                ("spmid", "333.788.0.0".to_string()),
+                ("from_spmid", "333.788.0.0".to_string())
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_send_params_serializes_optional_fields() -> Result<(), BpiError> {
+        let params = DanmakuSendParams::new(Cid::new(413195701)?, "hello")?
+            .aid(Aid::new(590635620)?)
+            .bvid(Bvid::new("BV1xx411c7mD")?)
+            .mode(5)
+            .danmaku_type(2)
+            .progress(3600)
+            .color(0)
+            .font_size(36)
+            .pool(1);
+
+        let form = params.form_pairs("csrf-token");
+
+        assert_eq!(form.iter().filter(|(key, _)| *key == "mode").count(), 1);
+        assert!(form.contains(&("mode", "5".to_string())));
+        assert!(form.contains(&("type", "2".to_string())));
+        assert!(form.contains(&("progress", "3600".to_string())));
+        assert!(form.contains(&("color", "0".to_string())));
+        assert!(form.contains(&("fontsize", "36".to_string())));
+        assert!(form.contains(&("pool", "1".to_string())));
+        assert!(form.contains(&("avid", "590635620".to_string())));
+        assert!(form.contains(&("bvid", "BV1xx411c7mD".to_string())));
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_send_params_rejects_blank_message() {
+        let err =
+            DanmakuSendParams::new(Cid::new(413195701).expect("cid is valid"), "   ").unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "msg", .. }
+        ));
     }
 }
