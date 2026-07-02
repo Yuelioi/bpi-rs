@@ -5,22 +5,105 @@
 
 use bytes::Bytes;
 
-use crate::{BilibiliRequest, BpiClient, BpiError};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResult};
 
-fn append_seg_extra_query(
-    q: &mut Vec<(String, String)>,
+/// Parameters for realtime protobuf danmaku segment endpoints.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DanmakuSegmentParams {
+    typ: u8,
+    oid: u64,
+    segment_index: u32,
+    pid: Option<u64>,
     pull_mode: Option<u32>,
     ps: Option<u32>,
     pe: Option<u32>,
-) {
-    if let Some(v) = pull_mode {
-        q.push(("pull_mode".to_string(), v.to_string()));
+}
+
+impl DanmakuSegmentParams {
+    /// Creates parameters for a realtime danmaku segment request.
+    pub fn new(typ: u8, oid: u64, segment_index: u32) -> BpiResult<Self> {
+        if typ == 0 {
+            return Err(BpiError::invalid_parameter(
+                "type",
+                "danmaku type must be non-zero",
+            ));
+        }
+        if oid == 0 {
+            return Err(BpiError::invalid_parameter(
+                "oid",
+                "danmaku oid must be non-zero",
+            ));
+        }
+        if segment_index == 0 {
+            return Err(BpiError::invalid_parameter(
+                "segment_index",
+                "segment index must be non-zero",
+            ));
+        }
+
+        Ok(Self {
+            typ,
+            oid,
+            segment_index,
+            pid: None,
+            pull_mode: None,
+            ps: None,
+            pe: None,
+        })
     }
-    if let Some(v) = ps {
-        q.push(("ps".to_string(), v.to_string()));
+
+    /// Sets the optional archive avid.
+    pub fn pid(mut self, pid: u64) -> BpiResult<Self> {
+        if pid == 0 {
+            return Err(BpiError::invalid_parameter(
+                "pid",
+                "archive id must be non-zero",
+            ));
+        }
+        self.pid = Some(pid);
+        Ok(self)
     }
-    if let Some(v) = pe {
-        q.push(("pe".to_string(), v.to_string()));
+
+    /// Sets the optional pull mode.
+    pub fn pull_mode(mut self, pull_mode: u32) -> Self {
+        self.pull_mode = Some(pull_mode);
+        self
+    }
+
+    /// Sets the optional millisecond range for segment content.
+    pub fn range(mut self, ps: u32, pe: u32) -> BpiResult<Self> {
+        if pe < ps {
+            return Err(BpiError::invalid_parameter(
+                "pe",
+                "range end must be greater than or equal to range start",
+            ));
+        }
+        self.ps = Some(ps);
+        self.pe = Some(pe);
+        Ok(self)
+    }
+
+    fn query_pairs(&self) -> Vec<(String, String)> {
+        let mut q = vec![
+            ("type".to_string(), self.typ.to_string()),
+            ("oid".to_string(), self.oid.to_string()),
+            ("segment_index".to_string(), self.segment_index.to_string()),
+        ];
+
+        if let Some(pid) = self.pid {
+            q.push(("pid".to_string(), pid.to_string()));
+        }
+        if let Some(pull_mode) = self.pull_mode {
+            q.push(("pull_mode".to_string(), pull_mode.to_string()));
+        }
+        if let Some(ps) = self.ps {
+            q.push(("ps".to_string(), ps.to_string()));
+        }
+        if let Some(pe) = self.pe {
+            q.push(("pe".to_string(), pe.to_string()));
+        }
+
+        q
     }
 }
 
@@ -36,27 +119,11 @@ impl BpiClient {
     /// - `pid`: 稿件 avid（可选，建议填写）
     pub async fn danmaku_web_seg_proto(
         &self,
-        typ: u8,
-        oid: u64,
-        segment_index: u32,
-        pid: Option<u64>,
-        pull_mode: Option<u32>,
-        ps: Option<u32>,
-        pe: Option<u32>,
+        params: DanmakuSegmentParams,
     ) -> Result<Bytes, BpiError> {
-        let mut q = vec![
-            ("type".to_string(), typ.to_string()),
-            ("oid".to_string(), oid.to_string()),
-            ("segment_index".to_string(), segment_index.to_string()),
-        ];
-        if let Some(p) = pid {
-            q.push(("pid".to_string(), p.to_string()));
-        }
-        append_seg_extra_query(&mut q, pull_mode, ps, pe);
-
         self.get("https://api.bilibili.com/x/v2/dm/web/seg.so")
             .with_bilibili_headers()
-            .query(&q)
+            .query(&params.query_pairs())
             .send_request("弹幕 web 分段 seg.so")
             .await
     }
@@ -66,25 +133,9 @@ impl BpiClient {
     /// `GET https://api.bilibili.com/x/v2/dm/wbi/web/seg.so`
     pub async fn danmaku_web_seg_wbi_proto(
         &self,
-        typ: u8,
-        oid: u64,
-        segment_index: u32,
-        pid: Option<u64>,
-        pull_mode: Option<u32>,
-        ps: Option<u32>,
-        pe: Option<u32>,
+        params: DanmakuSegmentParams,
     ) -> Result<Bytes, BpiError> {
-        let mut params = vec![
-            ("type".to_string(), typ.to_string()),
-            ("oid".to_string(), oid.to_string()),
-            ("segment_index".to_string(), segment_index.to_string()),
-        ];
-        if let Some(p) = pid {
-            params.push(("pid".to_string(), p.to_string()));
-        }
-        append_seg_extra_query(&mut params, pull_mode, ps, pe);
-
-        let signed = self.get_wbi_sign2(params).await?;
+        let signed = self.get_wbi_sign2(params.query_pairs()).await?;
 
         self.get("https://api.bilibili.com/x/v2/dm/wbi/web/seg.so")
             .with_bilibili_headers()
@@ -124,27 +175,11 @@ impl BpiClient {
     /// `GET https://api.bilibili.com/x/v2/dm/list/seg.so`
     pub async fn danmaku_mobile_seg_proto(
         &self,
-        typ: u8,
-        oid: u64,
-        segment_index: u32,
-        pid: Option<u64>,
-        pull_mode: Option<u32>,
-        ps: Option<u32>,
-        pe: Option<u32>,
+        params: DanmakuSegmentParams,
     ) -> Result<Bytes, BpiError> {
-        let mut q = vec![
-            ("type".to_string(), typ.to_string()),
-            ("oid".to_string(), oid.to_string()),
-            ("segment_index".to_string(), segment_index.to_string()),
-        ];
-        if let Some(p) = pid {
-            q.push(("pid".to_string(), p.to_string()));
-        }
-        append_seg_extra_query(&mut q, pull_mode, ps, pe);
-
         self.get("https://api.bilibili.com/x/v2/dm/list/seg.so")
             .with_bilibili_headers()
-            .query(&q)
+            .query(&params.query_pairs())
             .send_request("弹幕 APP list/seg.so")
             .await
     }
@@ -209,9 +244,8 @@ pub mod tests {
     #[tokio::test]
     async fn test_danmaku_web_seg_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi
-            .danmaku_web_seg_proto(1, TEST_OID, 1, None, None, None, None)
-            .await?;
+        let params = DanmakuSegmentParams::new(1, TEST_OID, 1)?;
+        let data = bpi.danmaku_web_seg_proto(params).await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("web seg.so 响应字节数: {}", data.len());
@@ -223,9 +257,8 @@ pub mod tests {
     #[tokio::test]
     async fn test_danmaku_web_seg_wbi_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi
-            .danmaku_web_seg_wbi_proto(1, TEST_OID, 1, None, None, None, None)
-            .await?;
+        let params = DanmakuSegmentParams::new(1, TEST_OID, 1)?;
+        let data = bpi.danmaku_web_seg_wbi_proto(params).await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("wbi web seg.so 响应字节数: {}", data.len());
@@ -249,13 +282,62 @@ pub mod tests {
     #[tokio::test]
     async fn test_danmaku_mobile_seg_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi
-            .danmaku_mobile_seg_proto(1, TEST_OID, 1, None, None, None, None)
-            .await?;
+        let params = DanmakuSegmentParams::new(1, TEST_OID, 1)?;
+        let data = bpi.danmaku_mobile_seg_proto(params).await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("mobile seg.so 响应字节数: {}", data.len());
 
         Ok(())
+    }
+
+    #[test]
+    fn danmaku_segment_params_serializes_required_query() -> Result<(), BpiError> {
+        let params = DanmakuSegmentParams::new(1, TEST_OID, 1)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("type".to_string(), "1".to_string()),
+                ("oid".to_string(), TEST_OID.to_string()),
+                ("segment_index".to_string(), "1".to_string())
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_segment_params_serializes_optional_query() -> Result<(), BpiError> {
+        let params = DanmakuSegmentParams::new(1, TEST_OID, 2)?
+            .pid(590635620)?
+            .pull_mode(1)
+            .range(0, 360_000)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("type".to_string(), "1".to_string()),
+                ("oid".to_string(), TEST_OID.to_string()),
+                ("segment_index".to_string(), "2".to_string()),
+                ("pid".to_string(), "590635620".to_string()),
+                ("pull_mode".to_string(), "1".to_string()),
+                ("ps".to_string(), "0".to_string()),
+                ("pe".to_string(), "360000".to_string())
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_segment_params_rejects_zero_segment_index() {
+        let err = DanmakuSegmentParams::new(1, TEST_OID, 0).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "segment_index",
+                ..
+            }
+        ));
     }
 }
