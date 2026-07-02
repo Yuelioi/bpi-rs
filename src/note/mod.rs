@@ -3,3 +3,5 @@
 pub mod action;
 pub mod info;
 pub mod list;
+
+pub use action::NoteAddParams;
