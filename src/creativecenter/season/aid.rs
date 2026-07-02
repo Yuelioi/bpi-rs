@@ -5,6 +5,8 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+use super::SeasonByAidParams;
+
 /// 合集信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SeasonInfoData {
@@ -96,13 +98,16 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `aid` | u64 | 视频 aid |
+    /// | `params` | [`SeasonByAidParams`] | 视频 aid 参数 |
     ///
     /// # 文档
     /// [根据 aid 反查合集信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/aid.md#根据-aid-反查合集信息)
-    pub async fn season_by_aid(&self, aid: u64) -> Result<BpiResponse<SeasonInfoData>, BpiError> {
+    pub async fn season_by_aid(
+        &self,
+        params: SeasonByAidParams,
+    ) -> Result<BpiResponse<SeasonInfoData>, BpiError> {
         self.get("https://member.bilibili.com/x2/creative/web/season/aid")
-            .query(&[("id", aid.to_string())])
+            .query(&params.query_pairs())
             .send_bpi("根据 aid 查询合集")
             .await
     }
@@ -111,17 +116,28 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::creativecenter::season::SeasonByAidParams;
+    use crate::ids::Aid;
 
     const TEST_AID: u64 = 113602455409683;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    async fn test_season_by_aid() -> Result<(), Box<BpiError>> {
+    async fn test_season_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
+        let params = SeasonByAidParams::new(Aid::new(TEST_AID)?);
 
-        let data = bpi.season_by_aid(TEST_AID).await?.into_data()?;
+        let data = bpi.season_by_aid(params).await?.into_data()?;
         tracing::info!("视频 {} 所属合集 {} - {}", TEST_AID, data.id, data.title);
 
+        Ok(())
+    }
+
+    #[test]
+    fn season_by_aid_params_serializes_query() -> Result<(), BpiError> {
+        let params = SeasonByAidParams::new(Aid::new(TEST_AID)?);
+
+        assert_eq!(params.query_pairs(), [("id", TEST_AID.to_string())]);
         Ok(())
     }
 }
