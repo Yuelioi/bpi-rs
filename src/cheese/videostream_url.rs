@@ -4,8 +4,8 @@
 
 use std::collections::HashMap;
 
-use crate::models::{DashStreams, Fnval, SupportFormat, VideoQuality};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::models::{DashStreams, SupportFormat};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, cheese::CheeseVideoStreamParams};
 use serde::{Deserialize, Serialize};
 
 /// 课程视频流数据
@@ -122,11 +122,7 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `avid` | u64 | 课程视频 avid |
-    /// | `ep_id` | u64 | 课程分集 ep_id |
-    /// | `cid` | u64 | 视频 cid |
-    /// | `qn` | `Option<VideoQuality>` | 视频质量，可选 |
-    /// | `fnval` | `Option<Fnval>` | 视频格式标志，可选 |
+    /// | `params` | `CheeseVideoStreamParams` | 课程视频流参数 |
     ///
     /// # 注意
     /// 需要 Cookie（SESSDATA）和 Referer: `https://www.bilibili.com`
@@ -135,33 +131,11 @@ impl BpiClient {
     /// [获取课程视频流 URL](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/cheese/videostream_url.md)
     pub async fn cheese_video_stream(
         &self,
-        avid: u64,
-        ep_id: u64,
-        cid: u64,
-        qn: Option<VideoQuality>,
-        fnval: Option<Fnval>,
+        params: CheeseVideoStreamParams,
     ) -> Result<BpiResponse<CourseVideoStreamData>, BpiError> {
-        let mut params = vec![
-            ("avid", avid.to_string()),
-            ("ep_id", ep_id.to_string()),
-            ("cid", cid.to_string()),
-            ("fnver", "0".to_string()),
-        ];
-
-        if fnval.is_some_and(|f| f.is_fourk()) {
-            params.push(("fourk", "1".to_string()));
-        }
-
-        if let Some(q) = qn {
-            params.push(("qn", q.as_u32().to_string()));
-        }
-        if let Some(fv) = fnval {
-            params.push(("fnval", fv.bits().to_string()));
-        }
-
         self.get("https://api.bilibili.com/pugv/player/web/playurl")
             .with_bilibili_headers()
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("获取课程视频流 URL")
             .await
     }
@@ -174,6 +148,9 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cheese::CheeseVideoStreamParams;
+    use crate::ids::{Aid, Cid, EpisodeId};
+    use crate::models::{Fnval, VideoQuality};
 
     const TEST_AVID: u64 = 997984154;
     const TEST_EP_ID: u64 = 163956;
@@ -186,11 +163,13 @@ mod tests {
 
         let data = bpi
             .cheese_video_stream(
-                TEST_AVID,
-                TEST_EP_ID,
-                TEST_CID,
-                Some(VideoQuality::P8K),
-                Some(
+                CheeseVideoStreamParams::new(
+                    Aid::new(TEST_AVID)?,
+                    EpisodeId::new(TEST_EP_ID)?,
+                    Cid::new(TEST_CID)?,
+                )
+                .with_quality(VideoQuality::P8K)
+                .with_fnval(
                     Fnval::DASH
                         | Fnval::FOURK
                         | Fnval::EIGHTK
@@ -205,6 +184,31 @@ mod tests {
 
         tracing::info!("{:#?}", data);
 
+        Ok(())
+    }
+
+    #[test]
+    fn cheese_video_stream_params_serializes_playback_flags() -> Result<(), BpiError> {
+        let params = CheeseVideoStreamParams::new(
+            Aid::new(TEST_AVID)?,
+            EpisodeId::new(TEST_EP_ID)?,
+            Cid::new(TEST_CID)?,
+        )
+        .with_quality(VideoQuality::P8K)
+        .with_fnval(Fnval::DASH | Fnval::FOURK);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("avid", TEST_AVID.to_string()),
+                ("ep_id", TEST_EP_ID.to_string()),
+                ("cid", TEST_CID.to_string()),
+                ("fnver", "0".to_string()),
+                ("fourk", "1".to_string()),
+                ("qn", VideoQuality::P8K.as_u32().to_string()),
+                ("fnval", (Fnval::DASH | Fnval::FOURK).bits().to_string()),
+            ]
+        );
         Ok(())
     }
 }
