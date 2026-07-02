@@ -1,6 +1,6 @@
+use crate::message::params::MessageReplyFeedParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 // --- API 结构体 ---
 
@@ -109,28 +109,13 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `start_id` | `Option<u64>` | 起始 ID（上次返回的 cursor.id） |
-    /// | `start_time` | `Option<u64>` | 起始时间戳（上次返回的 cursor.time） |
+    /// | `params` | `MessageReplyFeedParams` | 回复消息分页参数 |
     pub async fn message_reply_feed(
         &self,
-        start_id: Option<u64>,
-        start_time: Option<u64>,
+        params: MessageReplyFeedParams,
     ) -> Result<BpiResponse<ReplyFeedData>, BpiError> {
-        let mut params = HashMap::new();
-        params.insert("build", "0".to_string());
-        params.insert("mobi_app", "web".to_string());
-        params.insert("platform", "web".to_string());
-        params.insert("web_location", "".to_string());
-
-        if let Some(id) = start_id {
-            params.insert("id", id.to_string());
-        }
-        if let Some(time) = start_time {
-            params.insert("reply_time", time.to_string());
-        }
-
         self.get("https://api.bilibili.com/x/msgfeed/reply")
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("获取回复我的信息")
             .await
     }
@@ -156,7 +141,9 @@ mod tests {
     async fn test_get_reply_feed() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let resp = bpi.message_reply_feed(None, None).await?;
+        let resp = bpi
+            .message_reply_feed(MessageReplyFeedParams::new())
+            .await?;
         let data = resp.into_data()?;
 
         println!("最近回复我的信息:");

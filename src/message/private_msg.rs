@@ -1,3 +1,4 @@
+use crate::message::params::MessageSingleUnreadParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -76,40 +77,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `unread_type` | `Option<u32>` | 未读类型（默认 All） |
-    /// | `show_unfollow_list` | `Option<u32>` | 是否返回未关注推送消息数 |
-    /// | `show_dustbin` | `Option<u32>` | 是否返回被拦截私信数 |
+    /// | `params` | `MessageSingleUnreadParams` | 未读私信查询参数 |
     ///
     /// 备注：若 `unread_type` 为 Blocked，`show_dustbin` 必须为 true。
     pub async fn message_single_unread(
         &self,
-        unread_type: Option<u32>,
-        show_unfollow_list: Option<u32>,
-        show_dustbin: Option<u32>,
+        params: MessageSingleUnreadParams,
     ) -> Result<BpiResponse<SingleUnreadData>, BpiError> {
-        let params = [
-            ("build", "0"),
-            ("mobi_app", "web"),
-            (
-                "unread_type",
-                &unread_type.map_or("0".to_string(), |v| v.to_string()),
-            ),
-            (
-                "show_unfollow_list",
-                if show_unfollow_list == Some(1) {
-                    "1"
-                } else {
-                    "0"
-                },
-            ),
-            (
-                "show_dustbin",
-                if show_dustbin.is_some() { "1" } else { "0" },
-            ),
-        ];
-
         self.get("https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread")
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("获取未读私信数")
             .await
     }
@@ -199,7 +175,9 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         // 默认查询所有未读私信数
-        let all_unread_resp = bpi.message_single_unread(None, None, None).await?;
+        let all_unread_resp = bpi
+            .message_single_unread(MessageSingleUnreadParams::new())
+            .await?;
         let all_unread_data = all_unread_resp.into_data()?;
         println!("所有未读私信数: {:?}", all_unread_data);
 
