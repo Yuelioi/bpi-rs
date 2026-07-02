@@ -73,6 +73,40 @@ Account setup should be explicit. Debug and test builds must not auto-load `acco
 
 Cookie clearing must be real. If reqwest's jar cannot clear individual cookies cleanly, the client/session design should allow replacing the session jar or rebuilding the inner client in a controlled way.
 
+## Configuration and Extension Points
+
+bpi-rs is a library that may be embedded in other applications, CLIs, services, bots, and developer tools. It must not make rigid process-wide choices for consumers.
+
+`BpiClientBuilder` should expose the common customization points:
+
+- timeout and connect timeout
+- user agent
+- default Bilibili headers such as referer/origin, with sensible defaults
+- proxy and no-proxy behavior where reqwest supports it
+- cookie/session initialization from `Account`, cookie string, or an explicit session object
+- optional externally built `reqwest::Client` for applications that already own HTTP policy
+- optional transport abstraction for tests and advanced integrations
+- base URL or endpoint host override for tests, mirrors, or fixture servers
+
+Defaults should be good enough for normal users, but advanced callers should not need to fork the crate to customize HTTP behavior.
+
+The transport abstraction should stay small. Its purpose is request execution and testability, not a full middleware framework in the first migration pass. If hooks are added, prefer explicit request/response observer hooks over hardcoded logging behavior.
+
+## Observability and Logging
+
+bpi-rs should use `tracing` internally, but it must not initialize a global subscriber. Applications embedding the library own their logging/tracing setup.
+
+The crate should emit structured spans/events for important operations:
+
+- request start, success, failure, duration, method, and sanitized URL/endpoint label
+- API error code and category
+- session state transitions, without secrets
+- WBI/bili_ticket refresh attempts and failures, without tokens
+
+Logs must never include `SESSDATA`, csrf tokens, raw cookie headers, full signed URLs, or other credential material. The default event level should be useful but quiet; detailed request diagnostics should be debug/trace level.
+
+Public logging customization should be through normal `tracing` subscriber/filter mechanisms first. A custom logging interface should be added only if a concrete consumer need appears that `tracing` cannot serve.
+
 ## Request Flow
 
 Endpoint methods should build typed request parameters, then call shared transport helpers:
@@ -252,7 +286,9 @@ The migration is successful when:
 - Public methods return `BpiResult<T>` for ordinary data access.
 - README and examples match the new API.
 - Public API design follows the Rust API Guidelines where applicable: meaningful newtypes, builders for complex construction, type-directed arguments instead of booleans, and documented public items.
+- Client configuration exposes customization points for HTTP policy, session setup, user agent, headers, base URLs, and test transport without requiring source patches.
 - Library code uses `thiserror`-backed typed errors and does not use `anyhow` in public/library APIs.
 - Async code does not hold locks across `.await`, does not spawn unbounded work, and uses structured tracing spans for important request/session operations.
+- The library emits tracing events but never initializes or overrides a process-wide tracing/logging subscriber.
 - Default tests are offline and deterministic; live Bilibili tests are opt-in.
 - `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, and `cargo test --all-features --lib` pass before release.

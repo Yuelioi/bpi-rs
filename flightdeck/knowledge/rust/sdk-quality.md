@@ -33,6 +33,15 @@ Use this as the working quality bar for bpi-rs 0.2 implementation.
 - Do not hold mutex/RwLock guards across `.await`.
 - Do not spawn unbounded async work; use structured concurrency, `JoinSet`, buffering limits, or semaphores when parallel work is needed.
 - Use `tracing` spans/events for request/session/signing operations. Avoid logging secrets such as cookies, csrf tokens, SESSDATA, or full signed URLs when they may expose credentials.
+- Libraries must not initialize global tracing/logging subscribers. Emit `tracing` spans/events and let the embedding application decide formatting, filtering, and sinks.
+- Keep default diagnostics quiet. Put verbose request details behind debug/trace-level events and sanitize URLs or headers before emitting them.
+
+## Customization and embedding
+
+- Assume bpi-rs may be embedded in CLIs, GUI tools, services, bots, and other SDKs.
+- Expose customization through `BpiClientBuilder` instead of hardcoding process behavior.
+- Builder/config should cover HTTP timeouts, user agent, default headers, proxy/no-proxy policy, session/cookie setup, base URL override, and optionally an externally built `reqwest::Client`.
+- Keep any transport abstraction small and test-driven. Add middleware-style hooks only when there is a concrete need.
 
 ## Tests
 
