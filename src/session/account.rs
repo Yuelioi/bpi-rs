@@ -83,6 +83,17 @@ impl Account {
         Ok(&self.bili_jct)
     }
 
+    pub fn validate_complete(&self) -> BpiResult<()> {
+        if self.is_complete() {
+            return Ok(());
+        }
+
+        Err(BpiError::invalid_parameter(
+            "account",
+            "account requires DedeUserID, SESSDATA, bili_jct, and buvid3",
+        ))
+    }
+
     pub fn is_complete(&self) -> bool {
         !self.dede_user_id.is_empty()
             && !self.sessdata.is_empty()

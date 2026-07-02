@@ -126,7 +126,7 @@ impl BpiClientBuilder {
     /// Builds a client without reading files, initializing global logging, or using shared state.
     pub fn build(self) -> Result<BpiClient, BpiError> {
         let jar = Arc::new(reqwest::cookie::Jar::default());
-        let mut account = self.account;
+        let mut account = None;
         let mut cookie_header = None;
 
         if let Some(cookie) = self.cookie {
@@ -134,15 +134,18 @@ impl BpiClientBuilder {
             add_cookie_pairs(&jar, &pairs);
             cookie_header = Some(format_cookie_pairs(&pairs));
 
-            if account.is_none() {
-                account = Some(Account::from_cookie_pairs(&pairs));
+            let cookie_account = Account::from_cookie_pairs(&pairs);
+            if cookie_account.is_complete() {
+                account = Some(cookie_account);
             }
         }
 
-        if let Some(account) = account.as_ref() {
-            let pairs = account.cookie_pairs();
+        if let Some(configured_account) = self.account {
+            configured_account.validate_complete()?;
+            let pairs = configured_account.cookie_pairs();
             add_cookie_pairs(&jar, &pairs);
-            cookie_header.get_or_insert_with(|| format_cookie_pairs(&pairs));
+            cookie_header = Some(format_cookie_pairs(&pairs));
+            account = Some(configured_account);
         }
 
         let client = match self.reqwest_client {
@@ -206,19 +209,18 @@ impl BpiClient {
     }
 
     /// Sets account information and updates this client's cookie state.
-    pub fn set_account(&self, account: Account) {
-        if account.is_complete() {
-            let pairs = account.cookie_pairs();
-            add_cookie_pairs(&self.jar, &pairs);
-            *self
-                .cookie_header
-                .lock()
-                .expect("cookie header mutex poisoned") = Some(format_cookie_pairs(&pairs));
-            *self.account.lock().expect("account mutex poisoned") = Some(account);
-            tracing::info!("Bilibili account configured");
-        } else {
-            tracing::warn!("Bilibili account is incomplete; continuing as guest");
-        }
+    pub fn set_account(&self, account: Account) -> Result<(), BpiError> {
+        account.validate_complete()?;
+
+        let pairs = account.cookie_pairs();
+        add_cookie_pairs(&self.jar, &pairs);
+        *self
+            .cookie_header
+            .lock()
+            .expect("cookie header mutex poisoned") = Some(format_cookie_pairs(&pairs));
+        *self.account.lock().expect("account mutex poisoned") = Some(account);
+        tracing::info!("Bilibili account configured");
+        Ok(())
     }
 
     /// Clears account information from this client.
@@ -235,13 +237,15 @@ impl BpiClient {
     /// Sets account information from a raw Cookie header string.
     pub fn set_account_from_cookie_str(&self, cookie_str: &str) -> Result<(), BpiError> {
         let pairs = parse_cookie_pairs(cookie_str)?;
+        let account = Account::from_cookie_pairs(&pairs);
+        account.validate_complete()?;
+
         add_cookie_pairs(&self.jar, &pairs);
         *self
             .cookie_header
             .lock()
             .expect("cookie header mutex poisoned") = Some(format_cookie_pairs(&pairs));
-        *self.account.lock().expect("account mutex poisoned") =
-            Some(Account::from_cookie_pairs(&pairs));
+        *self.account.lock().expect("account mutex poisoned") = Some(account);
         Ok(())
     }
 
@@ -461,6 +465,63 @@ mod tests {
                 ..
             })
         ));
+    }
+
+    #[test]
+    fn builder_rejects_incomplete_structured_account() {
+        let result = BpiClient::builder().account(Account::default()).build();
+
+        assert!(matches!(
+            result,
+            Err(BpiError::InvalidParameter {
+                field: "account",
+                ..
+            })
+        ));
+    }
+
+    #[test]
+    fn set_account_rejects_incomplete_account_without_replacing_existing_state()
+    -> Result<(), BpiError> {
+        let client = BpiClient::builder()
+            .cookie("DedeUserID=42; SESSDATA=session; bili_jct=csrf; buvid3=buvid")
+            .build()?;
+
+        let err = client.set_account(Account::default()).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "account",
+                ..
+            }
+        ));
+        assert_eq!(client.csrf()?, "csrf");
+        assert!(client.has_login_cookies());
+        Ok(())
+    }
+
+    #[test]
+    fn set_account_from_cookie_str_rejects_incomplete_login_cookie_without_replacing_existing_state()
+    -> Result<(), BpiError> {
+        let client = BpiClient::builder()
+            .cookie("DedeUserID=42; SESSDATA=session; bili_jct=csrf; buvid3=buvid")
+            .build()?;
+
+        let err = client
+            .set_account_from_cookie_str("buvid3=guest-buvid")
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "account",
+                ..
+            }
+        ));
+        assert_eq!(client.csrf()?, "csrf");
+        assert!(client.has_login_cookies());
+        Ok(())
     }
 
     #[test]
