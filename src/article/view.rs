@@ -208,7 +208,7 @@ pub enum OpusInsert {
     /// 文本内容
     Text(String),
     /// 富文本内容
-    Rich(OpusRichInsert),
+    Rich(Box<OpusRichInsert>),
 }
 
 /// Opus富文本插入内容
@@ -364,6 +364,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::mem;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -380,5 +381,10 @@ mod tests {
         assert!(!data.author.name.is_empty());
 
         Ok(())
+    }
+
+    #[test]
+    fn opus_insert_keeps_rich_payload_boxed() {
+        assert!(mem::size_of::<OpusInsert>() <= 64);
     }
 }

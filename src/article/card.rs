@@ -14,11 +14,11 @@ pub type CardResponse = BpiResponse<std::collections::HashMap<String, CardItem>>
 #[serde(untagged)]
 pub enum CardItem {
     /// 视频卡片
-    Video(VideoCard),
+    Video(Box<VideoCard>),
     /// 专栏卡片
-    Article(ArticleCard),
+    Article(Box<ArticleCard>),
     /// 直播间卡片
-    Live(LiveCard),
+    Live(Box<LiveCard>),
 
     /// 未知卡片类型
     Unknown(serde_json::Value),
@@ -363,6 +363,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::mem;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -376,5 +377,10 @@ mod tests {
         tracing::info!("{:#?}", data);
 
         Ok(())
+    }
+
+    #[test]
+    fn card_item_keeps_large_payloads_boxed() {
+        assert!(mem::size_of::<CardItem>() <= 64);
     }
 }
