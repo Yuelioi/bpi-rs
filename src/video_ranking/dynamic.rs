@@ -1,6 +1,11 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+use super::params::{
+    VideoRegionDynamicParams, VideoRegionNewListParams, VideoRegionNewListRankParams,
+    VideoRegionTagDynamicParams,
+};
+
 // --- 获取分区最新视频列表 ---
 
 /// 分区最新视频的页面信息
@@ -100,27 +105,15 @@ impl BpiClient {
     /// # 参数
     /// | 名称   | 类型         | 说明                 |
     /// | ------ | ------------| -------------------- |
-    /// | `rid`  | u32         | 分区ID               |
-    /// | `pn`   | `Option<u32>` | 页码，可选           |
-    /// | `ps`   | `Option<u32>` | 每页数量，可选       |
+    /// | `params` | `VideoRegionDynamicParams` | 分区和分页参数 |
     pub async fn video_region_dynamic(
         &self,
-        rid: u32,
-        pn: Option<u32>,
-        ps: Option<u32>,
+        params: VideoRegionDynamicParams,
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        let mut request = self
-            .get("https://api.bilibili.com/x/web-interface/dynamic/region")
-            .query(&[("rid", rid.to_string())]);
-
-        if let Some(pn) = pn {
-            request = request.query(&[("pn", pn.to_string())]);
-        }
-        if let Some(ps) = ps {
-            request = request.query(&[("ps", ps.to_string())]);
-        }
-
-        request.send_bpi("获取分区最新视频列表").await
+        self.get("https://api.bilibili.com/x/web-interface/dynamic/region")
+            .query(&params.query_pairs())
+            .send_bpi("获取分区最新视频列表")
+            .await
     }
 
     /// 获取分区标签近期互动列表
@@ -131,29 +124,15 @@ impl BpiClient {
     /// # 参数
     /// | 名称    | 类型         | 说明                 |
     /// | ------- | ------------| -------------------- |
-    /// | `rid`   | u32         | 分区ID               |
-    /// | `tag_id`| u64         | 标签ID               |
-    /// | `pn`    | `Option<u32>` | 页码，可选           |
-    /// | `ps`    | `Option<u32>` | 每页数量，可选       |
+    /// | `params` | `VideoRegionTagDynamicParams` | 分区、标签和分页参数 |
     pub async fn video_region_tag_dynamic(
         &self,
-        rid: u32,
-        tag_id: u64,
-        pn: Option<u32>,
-        ps: Option<u32>,
+        params: VideoRegionTagDynamicParams,
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        let mut request = self
-            .get("https://api.bilibili.com/x/web-interface/dynamic/tag")
-            .query(&[("rid", rid.to_string()), ("tag_id", tag_id.to_string())]);
-
-        if let Some(pn) = pn {
-            request = request.query(&[("pn", pn.to_string())]);
-        }
-        if let Some(ps) = ps {
-            request = request.query(&[("ps", ps.to_string())]);
-        }
-
-        request.send_bpi("获取分区标签近期互动列表").await
+        self.get("https://api.bilibili.com/x/web-interface/dynamic/tag")
+            .query(&params.query_pairs())
+            .send_bpi("获取分区标签近期互动列表")
+            .await
     }
 
     /// 获取分区近期投稿列表
@@ -164,32 +143,15 @@ impl BpiClient {
     /// # 参数
     /// | 名称   | 类型         | 说明                 |
     /// | ------ | ------------| -------------------- |
-    /// | `rid`  | u32         | 分区ID               |
-    /// | `pn`   | `Option<u32>` | 页码，可选           |
-    /// | `ps`   | `Option<u32>` | 每页数量，可选       |
-    /// | `typ`  | `Option<u32>` | 类型，可选           |
+    /// | `params` | `VideoRegionNewListParams` | 分区、分页和类型参数 |
     pub async fn video_region_newlist(
         &self,
-        rid: u32,
-        pn: Option<u32>,
-        ps: Option<u32>,
-        typ: Option<u32>,
+        params: VideoRegionNewListParams,
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        let mut request = self
-            .get("https://api.bilibili.com/x/web-interface/newlist")
-            .query(&[("rid", rid.to_string())]);
-
-        if let Some(pn) = pn {
-            request = request.query(&[("pn", pn.to_string())]);
-        }
-        if let Some(ps) = ps {
-            request = request.query(&[("ps", ps.to_string())]);
-        }
-        if let Some(t) = typ {
-            request = request.query(&[("type", t.to_string())]);
-        }
-
-        request.send_bpi("获取分区近期投稿列表").await
+        self.get("https://api.bilibili.com/x/web-interface/newlist")
+            .query(&params.query_pairs())
+            .send_bpi("获取分区近期投稿列表")
+            .await
     }
 
     /// 获取分区近期投稿列表（带排序）
@@ -200,47 +162,21 @@ impl BpiClient {
     /// # 参数
     /// | 名称        | 类型           | 说明                 |
     /// | ----------- | --------------| -------------------- |
-    /// | `cate_id`   | u32           | 分类ID               |
-    /// | `order`     | `Option<&str>`  | 排序方式，可选       |
-    /// | `page`      | `Option<u32>`   | 页码，可选           |
-    /// | `pagesize`  | u32           | 每页数量             |
-    /// | `time_from` | &str          | 起始日期(YYYYMMDD)   |
-    /// | `time_to`   | &str          | 结束日期(YYYYMMDD)   |
+    /// | `params` | `VideoRegionNewListRankParams` | 分类、排序、分页和日期参数 |
     pub async fn video_region_newlist_rank(
         &self,
-        cate_id: u32,
-        order: Option<&str>,
-        page: Option<u32>,
-        pagesize: u32,
-        time_from: &str,
-        time_to: &str,
+        params: VideoRegionNewListRankParams,
     ) -> Result<BpiResponse<NewListRankData>, BpiError> {
-        let cate_id = cate_id.to_string();
-        let pagesize = pagesize.to_string();
-        let mut request = self
-            .get("https://api.bilibili.com/x/web-interface/newlist_rank")
-            .query(&[
-                ("search_type", "video"),
-                ("view_type", "hot_rank"),
-                ("cate_id", cate_id.as_str()),
-                ("pagesize", pagesize.as_str()),
-                ("time_from", time_from),
-                ("time_to", time_to),
-            ]);
-
-        if let Some(o) = order {
-            request = request.query(&[("order", o)]);
-        }
-        if let Some(p) = page {
-            request = request.query(&[("page", p.to_string())]);
-        }
-
-        request.send_bpi("获取分区近期投稿列表 (带排序)").await
+        self.get("https://api.bilibili.com/x/web-interface/newlist_rank")
+            .query(&params.query_pairs())
+            .send_bpi("获取分区近期投稿列表 (带排序)")
+            .await
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::super::params::VideoNewListRankOrder;
     use super::*;
     use chrono::{Duration, Local};
     use tracing::info;
@@ -250,9 +186,13 @@ mod tests {
     async fn test_video_region_dynamic() {
         let bpi = BpiClient::new().expect("client should build");
         let rid = 21; // 日常分区
-        let ps = Some(2);
-        let pn = Some(1);
-        let resp = bpi.video_region_dynamic(rid, pn, ps).await;
+        let params = VideoRegionDynamicParams::new(rid)
+            .expect("rid is valid")
+            .with_page(1)
+            .expect("page is valid")
+            .with_page_size(2)
+            .expect("page size is valid");
+        let resp = bpi.video_region_dynamic(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
@@ -271,9 +211,13 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         let rid = 136; // 音游分区
         let tag_id = 10026108; // Phigros
-        let ps = Some(2);
-        let pn = Some(1);
-        let resp = bpi.video_region_tag_dynamic(rid, tag_id, pn, ps).await;
+        let params = VideoRegionTagDynamicParams::new(rid, tag_id)
+            .expect("required ids are valid")
+            .with_page(1)
+            .expect("page is valid")
+            .with_page_size(2)
+            .expect("page size is valid");
+        let resp = bpi.video_region_tag_dynamic(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
@@ -298,16 +242,13 @@ mod tests {
         let time_from = seven_days_ago.format("%Y%m%d").to_string();
         let time_to = today.format("%Y%m%d").to_string();
 
-        let resp = bpi
-            .video_region_newlist_rank(
-                cate_id,
-                Some("click"),
-                Some(1),
-                pagesize,
-                &time_from,
-                &time_to,
-            )
-            .await;
+        let params = VideoRegionNewListRankParams::new(cate_id, pagesize, time_from, time_to)
+            .expect("rank params are valid")
+            .with_order(VideoNewListRankOrder::Click)
+            .with_page(1)
+            .expect("page is valid");
+
+        let resp = bpi.video_region_newlist_rank(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());

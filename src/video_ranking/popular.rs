@@ -1,6 +1,8 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+use super::params::{PopularSeriesOneParams, VideoPopularListParams};
+
 // --- 获取当前热门视频列表 ---
 
 /// 热门视频列表的页面信息
@@ -92,23 +94,15 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型         | 说明                 |
     /// | ---- | ------------| -------------------- |
-    /// | `pn` | `Option<u32>` | 页码，可选           |
-    /// | `ps` | `Option<u32>` | 每页数量，可选       |
+    /// | `params` | `VideoPopularListParams` | 热门视频分页参数 |
     pub async fn video_popular_list(
         &self,
-        pn: Option<u32>,
-        ps: Option<u32>,
+        params: VideoPopularListParams,
     ) -> Result<BpiResponse<PopularListData>, BpiError> {
-        let mut request = self.get("https://api.bilibili.com/x/web-interface/popular");
-
-        if let Some(pn) = pn {
-            request = request.query(&[("pn", pn)]);
-        }
-        if let Some(ps) = ps {
-            request = request.query(&[("ps", ps)]);
-        }
-
-        request.send_bpi("获取当前热门视频列表").await
+        self.get("https://api.bilibili.com/x/web-interface/popular")
+            .query(&params.query_pairs())
+            .send_bpi("获取当前热门视频列表")
+            .await
     }
 
     /// 获取每周必看全部列表
@@ -132,13 +126,13 @@ impl BpiClient {
     /// # 参数
     /// | 名称     | 类型     | 说明         |
     /// | -------- | --------| ------------|
-    /// | `number` | u32     | 期数         |
+    /// | `params` | `PopularSeriesOneParams` | 每周必看选期参数 |
     pub async fn video_popular_series_one(
         &self,
-        number: u32,
+        params: PopularSeriesOneParams,
     ) -> Result<BpiResponse<PopularSeriesOneData>, BpiError> {
         self.get("https://api.bilibili.com/x/web-interface/popular/series/one")
-            .query(&[("number", number)])
+            .query(&params.query_pairs())
             .send_bpi("获取每周必看选期详细信息")
             .await
     }
@@ -153,7 +147,12 @@ mod tests {
     #[tokio::test]
     async fn test_video_popular_list() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.video_popular_list(Some(1), Some(2)).await;
+        let params = VideoPopularListParams::new()
+            .with_page(1)
+            .expect("page is valid")
+            .with_page_size(2)
+            .expect("page size is valid");
+        let resp = bpi.video_popular_list(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
@@ -186,7 +185,8 @@ mod tests {
     #[tokio::test]
     async fn test_video_popular_series_one() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.video_popular_series_one(1).await;
+        let params = PopularSeriesOneParams::new(1).expect("number is valid");
+        let resp = bpi.video_popular_series_one(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
