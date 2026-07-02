@@ -87,6 +87,8 @@ pub mod client;
 pub mod err;
 pub mod ids;
 pub mod log;
+#[doc(hidden)]
+pub mod probe;
 pub mod request;
 pub mod response;
 pub mod session;
