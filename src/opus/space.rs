@@ -5,6 +5,8 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+use super::OpusSpaceFeedParams;
+
 /// 空间图文封面信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct SpaceCover {
@@ -63,24 +65,12 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `mid` | u64 | 用户 UID |
-    /// | `page` | `Option<u32>` | 页码，默认 0 |
-    /// | `offset` | `Option<&str>` | 下一页偏移量 |
-    /// | `typ` | `Option<&str>` | 类型：`all`/`article`/`dynamic`，默认 `all` |
+    /// | `params` | [`OpusSpaceFeedParams`] | 用户、分页和类型参数 |
     pub async fn opus_space_feed(
         &self,
-        mid: u64,
-        page: Option<u32>,
-        offset: Option<&str>,
-        typ: Option<&str>, // all/article/dynamic
+        params: OpusSpaceFeedParams,
     ) -> Result<BpiResponse<SpaceData>, BpiError> {
-        let query = vec![
-            ("host_mid", mid.to_string()),
-            ("page", page.unwrap_or(0).to_string()),
-            ("offset", offset.unwrap_or("").to_string()),
-            ("type", typ.unwrap_or("all").to_string()),
-            ("web_location", "333.1387".to_string()),
-        ];
+        let query = params.query_pairs();
 
         self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space")
             .query(&query)
@@ -92,16 +82,74 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::Mid;
+    use crate::opus::{OpusSpaceFeedKind, OpusSpaceFeedParams};
     use tracing::info;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    async fn test_opus_space_feed() {
+    async fn test_opus_space_feed() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.opus_space_feed(4279370, Some(1), None, None).await;
+        let params = OpusSpaceFeedParams::new(Mid::new(4279370)?)
+            .with_page(1)
+            .with_kind(OpusSpaceFeedKind::All);
+        let resp = bpi.opus_space_feed(params).await;
         assert!(resp.is_ok());
         if let Ok(r) = resp {
             info!("空间图文返回: {:?}", r);
         }
+        Ok(())
+    }
+
+    #[test]
+    fn opus_space_feed_params_serializes_default_query() -> Result<(), BpiError> {
+        let params = OpusSpaceFeedParams::new(Mid::new(4279370)?);
+
+        assert_eq!(
+            params.query_pairs(),
+            [
+                ("host_mid", "4279370".to_string()),
+                ("page", "0".to_string()),
+                ("type", "all".to_string()),
+                ("web_location", "333.1387".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn opus_space_feed_params_serializes_optional_query() -> Result<(), BpiError> {
+        let params = OpusSpaceFeedParams::new(Mid::new(4279370)?)
+            .with_page(2)
+            .with_offset("offset-token")?
+            .with_kind(OpusSpaceFeedKind::Article);
+
+        assert_eq!(
+            params.query_pairs(),
+            [
+                ("host_mid", "4279370".to_string()),
+                ("page", "2".to_string()),
+                ("offset", "offset-token".to_string()),
+                ("type", "article".to_string()),
+                ("web_location", "333.1387".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn opus_space_feed_params_rejects_blank_offset() -> Result<(), BpiError> {
+        let err = OpusSpaceFeedParams::new(Mid::new(4279370)?)
+            .with_offset("   ")
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "offset",
+                ..
+            }
+        ));
+        Ok(())
     }
 }
