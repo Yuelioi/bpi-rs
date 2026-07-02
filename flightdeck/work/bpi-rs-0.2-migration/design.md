@@ -157,6 +157,28 @@ pub struct ApiEnvelope<T> {
 
 The design should avoid pretending every endpoint behaves the same. Endpoint methods should choose the correct response strategy explicitly.
 
+## Type, Fixture, and Documentation Discipline
+
+The migration must raise the quality of types, tests, and examples together. The current code has broad coverage, but many models are permissive, test parameters are ad hoc, and examples are not always maintained as public API contracts.
+
+Endpoint parameters should use explicit types when raw primitives are ambiguous:
+
+- `Aid`, `Bvid`, `Cid`, `Mid`, `SeasonId`, `EpisodeId`, `RoomId`, and similar IDs should be newtypes or strongly named parameter fields.
+- Booleans and magic integers should be replaced with enums or bitflags when the API has named modes.
+- Optional response fields should reflect observed API behavior, but `Option<T>` should not be used as a blanket escape hatch for uncertain modeling.
+- Request builders or parameter structs should validate required combinations before sending requests.
+
+Test data should be centralized and named. Random-looking IDs, keywords, and cookies should be replaced with deterministic fixtures:
+
+- canonical public video, user, dynamic, and live IDs for examples and smoke tests
+- fixture JSON/XML/protobuf bodies committed under a predictable test fixture directory
+- helper constructors for common accounts, sessions, signed params, and endpoint params
+- documented environment variables for live credentials and live-only IDs
+
+When a live API value is inherently unstable, the test should assert stable structure or error classification rather than exact volatile counts/titles.
+
+Documentation examples should be treated as part of the public API. Examples in README and rustdoc should compile when possible. Examples that require network or credentials should be explicitly marked as `no_run` and explain what the caller must provide.
+
 ## Authentication and Signing
 
 Auth and signing are shared capabilities, not endpoint-local utilities.
@@ -214,6 +236,15 @@ Tests should be split into three classes:
 
 No normal `cargo test` should require `account.toml` or network access. Live tests should be named and documented clearly, for example behind `BPI_LIVE_TEST=1` and `BPI_COOKIE`.
 
+Every migrated domain should include:
+
+- unit tests for parameter validation and query/form serialization
+- response fixture tests for successful, missing-data, and API-error envelopes
+- model deserialization tests for representative real Bilibili payloads
+- at most a small number of opt-in smoke tests with named, documented fixture IDs
+
+Tests must not use unexplained random IDs or magic input values. If a specific Bilibili ID is used, its purpose belongs in a named fixture constant or helper.
+
 Baseline verification for each migration phase:
 
 ```text
@@ -242,7 +273,7 @@ docs.rs examples should avoid requiring real credentials unless explicitly marke
 
 ### Phase 0 — Baseline
 
-Record current compile status, feature list, public API shape, and test behavior. This phase should not change behavior except for adding planning artifacts.
+Record current compile status, feature list, public API shape, test behavior, documentation state, and fixture quality. Identify tests that use live network calls, local credentials, random parameters, or weak assertions. This phase should not change behavior except for adding planning artifacts.
 
 ### Phase 1 — Client Foundation
 
@@ -250,7 +281,7 @@ Introduce independent `BpiClient`, `BpiClientBuilder`, `ClientInner`, explicit c
 
 ### Phase 2 — Transport, Response, Error
 
-Centralize request sending, headers, response decoding, API envelope handling, and error conversion. Add offline tests for parsing and error cases.
+Centralize request sending, headers, response decoding, API envelope handling, and error conversion. Add offline tests for parsing and error cases. Establish the fixture layout and shared test helpers before migrating endpoint modules.
 
 ### Phase 3 — Auth and Signing
 
@@ -266,7 +297,7 @@ Migrate the rest of the API modules in batches. Each batch should follow the est
 
 ### Phase 6 — Release Cleanup
 
-Remove obsolete APIs, stale task entries, dead helpers, and outdated docs. Update README, examples, changelog, and crate metadata for `0.2.0`.
+Remove obsolete APIs, stale task entries, dead helpers, weak/random tests, and outdated docs. Update README, examples, changelog, migration guide, and crate metadata for `0.2.0`.
 
 ## Non-Goals
 
@@ -286,6 +317,9 @@ The migration is successful when:
 - Public methods return `BpiResult<T>` for ordinary data access.
 - README and examples match the new API.
 - Public API design follows the Rust API Guidelines where applicable: meaningful newtypes, builders for complex construction, type-directed arguments instead of booleans, and documented public items.
+- Endpoint parameters and common IDs use named types or parameter structs instead of unexplained primitives where ambiguity matters.
+- Tests use named deterministic fixtures and helper constructors instead of random IDs or magic values.
+- README and rustdoc examples are either compiled doc examples or explicitly marked `no_run` when they require network/credentials.
 - Client configuration exposes customization points for HTTP policy, session setup, user agent, headers, base URLs, and test transport without requiring source patches.
 - Library code uses `thiserror`-backed typed errors and does not use `anyhow` in public/library APIs.
 - Async code does not hold locks across `.await`, does not spawn unbounded work, and uses structured tracing spans for important request/session operations.

@@ -14,6 +14,8 @@ Use this as the working quality bar for bpi-rs 0.2 implementation.
 - Prefer module clients such as `client.video().view(...)` over a flat root method surface.
 - Use newtypes for IDs and parameters when raw `u64`, `String`, or `bool` would make call sites ambiguous.
 - Keep public APIs documented with rustdoc examples where examples can compile without live credentials.
+- Use enums or bitflags for named API modes instead of raw magic integers or booleans when the API semantics are known.
+- Use `Option<T>` to model genuinely optional or absent fields, not as a substitute for understanding response shape.
 
 ## Ownership and state
 
@@ -50,6 +52,15 @@ Use this as the working quality bar for bpi-rs 0.2 implementation.
 - Prefer small unit tests for parsing, signing, parameter validation, response envelopes, and error conversion.
 - Use fixture/mocked transport tests for endpoint methods instead of direct network calls.
 - Test names should describe behavior, not just say `test_*`.
+- Do not use unexplained random Bilibili IDs, keywords, cookies, or magic request values. Put reusable values in named fixture constants/helpers with a short purpose.
+- Each migrated domain should test parameter serialization, success envelope parsing, API-error envelope parsing, missing-data behavior, and representative model deserialization.
+- Live tests should assert stable behavior or error classification when Bilibili content is volatile.
+
+## Documentation
+
+- Treat README and rustdoc examples as public API contracts.
+- Prefer compiling doc examples. Mark examples `no_run` only when they require network or credentials.
+- Document required credentials, environment variables, and fixture IDs for live smoke tests.
 
 ## Verification
 

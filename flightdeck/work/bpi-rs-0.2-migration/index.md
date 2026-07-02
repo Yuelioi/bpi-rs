@@ -28,6 +28,7 @@ Done:
 - Installed and reviewed Rust best-practices, async-patterns, and rust-testing skills as reference material for future sessions.
 - Researched primary Rust/Tokio/reqwest/tracing docs and distilled the SDK quality bar into `knowledge/rust/sdk-quality.md`.
 - Added logging/observability and SDK embedding customization requirements to `design.md` and `knowledge/rust/sdk-quality.md`.
+- Added type, fixture, and documentation discipline requirements to address weak models, random test parameters, and stale examples.
 
 Current:
 - Waiting for user review of `design.md`.
