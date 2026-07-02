@@ -235,6 +235,7 @@ mod tests {
     const TEST_OID: i64 = 23199;
     const TEST_ROOT_RPID: i64 = 2554491176;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_comment_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -248,6 +249,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_comment_replies() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -261,6 +263,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_comment_hot() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -279,6 +282,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_comment_count() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");

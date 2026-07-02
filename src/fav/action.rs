@@ -247,6 +247,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_fav_folder_add_and_del() {
         let bpi = BpiClient::new().expect("client should build");
@@ -269,6 +270,7 @@ mod tests {
         assert!(del_resp.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_fav_folder_edit() {
         let bpi = BpiClient::new().expect("client should build");
@@ -284,6 +286,7 @@ mod tests {
         assert!(resp.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_fav_resource_operations() {
         let bpi = BpiClient::new().expect("client should build");
@@ -317,6 +320,7 @@ mod tests {
         assert!(del_resp.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_fav_resource_clean() {
         let bpi = BpiClient::new().expect("client should build");

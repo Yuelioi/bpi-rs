@@ -85,6 +85,7 @@ mod tests {
     use super::*;
     use tokio;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_send_qrcode() {
         use tokio::time::{Duration, sleep};

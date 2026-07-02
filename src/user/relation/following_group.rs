@@ -30,6 +30,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_user_follow_tags_cookie() -> Result<(), BpiError> {
         if std::env::var_os("BPI_LIVE_TEST").is_none() || std::env::var_os("BPI_COOKIE").is_none() {

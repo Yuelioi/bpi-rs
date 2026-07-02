@@ -125,6 +125,7 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_articles_info() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");

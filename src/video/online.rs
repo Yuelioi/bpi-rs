@@ -77,6 +77,7 @@ mod tests {
     const TEST_CID: u64 = 392402545;
     const TEST_BVID: &str = "BV1y64y1q757";
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_online_total_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -93,6 +94,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_online_total_by_bvid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");

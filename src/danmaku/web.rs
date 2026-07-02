@@ -205,6 +205,7 @@ pub mod tests {
     // av 10001 772096113
     const TEST_OID: u64 = 772096113;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_danmaku_web_seg_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -218,6 +219,7 @@ pub mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_danmaku_web_seg_wbi_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -231,6 +233,7 @@ pub mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_danmaku_web_view_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -242,6 +245,7 @@ pub mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_danmaku_mobile_seg_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");

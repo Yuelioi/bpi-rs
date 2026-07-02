@@ -305,6 +305,7 @@ mod tests {
     const TEST_SEASON_ID: u64 = 556;
     const TEST_EP_ID: u64 = 20767;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_cheese_info_by_season_id() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -318,6 +319,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_cheese_info_by_ep_id() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -329,6 +331,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_cheese_ep_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");

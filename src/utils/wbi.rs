@@ -38,6 +38,7 @@ mod tests {
     use crate::sign::wbi::WbiKeys;
     use crate::sign::wbi_client::current_wbi_cache_bucket;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn get_wbi_sign_uses_cached_client_keys() -> Result<(), BpiError> {
         let client = BpiClient::new()?;
@@ -56,6 +57,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_wts_and_rid2() -> Result<(), BpiError> {
         if std::env::var("BPI_LIVE_TEST").ok().as_deref() != Some("1") {

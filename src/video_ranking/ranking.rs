@@ -64,6 +64,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_ranking_list() {
         let bpi = BpiClient::new().expect("client should build");
@@ -88,6 +89,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_ranking_list_with_rid() {
         let bpi = BpiClient::new().expect("client should build");
@@ -105,6 +107,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_ranking_list_with_type() {
         let bpi = BpiClient::new().expect("client should build");

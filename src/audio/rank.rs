@@ -164,6 +164,7 @@ mod tests {
 
     const TEST_LIST_ID: u64 = 76;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_audio_rank_period() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -185,6 +186,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_audio_rank_detail() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -200,6 +202,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_audio_rank_music_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -217,6 +220,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_update_audio_rank_subscribe() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");

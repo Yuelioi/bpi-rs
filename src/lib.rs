@@ -95,6 +95,9 @@ pub mod session;
 pub mod sign;
 pub mod transport;
 
+#[cfg(test)]
+mod testing;
+
 // bv aid互转, 以及生成wbi
 pub mod utils;
 

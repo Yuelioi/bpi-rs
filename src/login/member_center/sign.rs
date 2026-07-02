@@ -35,6 +35,7 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     /// 更新签名测试
     async fn test_update_user_sign() -> Result<(), BpiError> {
@@ -48,6 +49,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_sign_length_validation() {
         let bpi = BpiClient::new().expect("client should build");

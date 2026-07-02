@@ -39,6 +39,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_search_suggest() {
         // 创建一个 BilibiliRequest 实例

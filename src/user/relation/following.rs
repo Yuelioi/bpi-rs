@@ -143,6 +143,7 @@ mod tests {
 
     const TEST_VMID: u64 = 293793435;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_user_followings() -> Result<(), BpiError> {
         if std::env::var_os("BPI_LIVE_TEST").is_none() {

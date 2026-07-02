@@ -219,6 +219,7 @@ mod tests {
 
     const TEST_AID: &str = "772876546";
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_create_and_add_archives() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -239,6 +240,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_add_archives_to_series() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -251,6 +253,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_update_series() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -271,6 +274,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_delete_archives_from_series() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -283,6 +287,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_delete_series() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");

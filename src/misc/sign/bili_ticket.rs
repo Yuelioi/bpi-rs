@@ -67,6 +67,7 @@ mod tests {
     use super::*;
     use crate::sign::bili_ticket::hexsign;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_hmac_sha256() -> Result<(), BpiError> {
         let result = hexsign("XgwSnGZ1p", 1_234_567_890)?;
@@ -76,6 +77,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_generate_bili_ticket() -> Result<(), BpiError> {
         let Some(bpi) = live_client_or_skip()? else {
@@ -112,6 +114,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_bili_ticket_string() -> Result<(), BpiError> {
         let Some(bpi) = live_client_or_skip()? else {
@@ -138,6 +141,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_with_csrf() -> Result<(), BpiError> {
         let Some(bpi) = live_client_or_skip()? else {

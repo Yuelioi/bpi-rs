@@ -256,6 +256,7 @@ mod tests {
 
     const DEFAULT_GROUP_FID: u64 = 3493257409464519;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_tag_operations() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");

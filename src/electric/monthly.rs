@@ -423,6 +423,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_charge_record() {
         let bpi = BpiClient::new().expect("client should build");
@@ -440,6 +441,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_upower_item_detail() {
         let bpi = BpiClient::new().expect("client should build");
@@ -458,6 +460,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_charge_follow_info() {
         let bpi = BpiClient::new().expect("client should build");
@@ -475,6 +478,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_upower_member_rank() {
         let bpi = BpiClient::new().expect("client should build");

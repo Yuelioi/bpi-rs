@@ -115,6 +115,7 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_dynamic_like() {
         let bpi = BpiClient::new().expect("client should build");
@@ -125,8 +126,8 @@ mod tests {
         assert!(resp_new.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    #[ignore]
     async fn test_dynamic_top() {
         let bpi = BpiClient::new().expect("client should build");
         // 替换为你需要置顶或取消置顶的动态ID

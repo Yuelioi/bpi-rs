@@ -199,6 +199,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_note_list_archive() {
         let bpi = BpiClient::new().expect("client should build");
@@ -216,6 +217,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_note_list_user_private() {
         let bpi = BpiClient::new().expect("client should build");
@@ -235,6 +237,7 @@ mod tests {
             });
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_note_list_public_archive() {
         let bpi = BpiClient::new().expect("client should build");
@@ -252,6 +255,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_note_list_public_user() {
         let bpi = BpiClient::new().expect("client should build");

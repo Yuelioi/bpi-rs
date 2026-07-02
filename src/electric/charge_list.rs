@@ -308,6 +308,7 @@ mod tests {
     use chrono::{Duration, Utc};
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_electric_month_up_list() {
         let bpi = BpiClient::new().expect("client should build");
@@ -315,6 +316,7 @@ mod tests {
         assert!(resp.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_electric_video_show() {
         let bpi = BpiClient::new().expect("client should build");
@@ -324,6 +326,7 @@ mod tests {
         assert!(resp.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_recharge_list() {
         let bpi = BpiClient::new().expect("client should build");
@@ -342,6 +345,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_recharge_list_with_dates() {
         let bpi = BpiClient::new().expect("client should build");
@@ -363,6 +367,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_elec_rank_recent() {
         let bpi = BpiClient::new().expect("client should build");

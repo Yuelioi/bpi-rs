@@ -142,6 +142,7 @@ mod tests {
     const TEST_EP_ID: u64 = 10001; // epid
     const TEST_CID: u64 = 772096113;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_bangumi_video_stream_url_simple() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -178,6 +179,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_bangumi_video_stream_url_by_cid() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -189,6 +191,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_bangumi_video_stream_url_no_params() {
         let bpi = BpiClient::new().expect("client should build");

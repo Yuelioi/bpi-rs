@@ -39,6 +39,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_coin() -> Result<(), BpiError> {
         if !live_login_tests_enabled() {

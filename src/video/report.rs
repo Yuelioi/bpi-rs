@@ -51,6 +51,7 @@ mod tests {
     const TEST_AID: u64 = 10001;
     const TEST_CID: u64 = 16546;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_report_watch_progress() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");

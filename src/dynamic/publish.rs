@@ -260,6 +260,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_upload_dynamic_pic() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -279,6 +280,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_create_text_dynamic() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -293,6 +295,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_create_complex_dynamic_text() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -311,6 +314,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_create_complex_dynamic_with_pic() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");

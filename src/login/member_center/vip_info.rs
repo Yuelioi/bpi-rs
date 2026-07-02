@@ -56,6 +56,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_vip_info() {
         if std::env::var_os("BPI_LIVE_TEST").is_none() {
@@ -86,6 +87,7 @@ mod tests {
             }
         }
     }
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_is_vip() {
         if std::env::var_os("BPI_LIVE_TEST").is_none() {

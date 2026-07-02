@@ -194,6 +194,7 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_follow_up_live_list() {
         let bpi = BpiClient::new().expect("client should build");
@@ -204,6 +205,7 @@ mod tests {
         tracing::info!("{:?}", resp);
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_follow_up_live_web_list() {
         let bpi = BpiClient::new().expect("client should build");

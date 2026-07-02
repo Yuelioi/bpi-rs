@@ -143,6 +143,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_note_add_and_del() {
         let bpi = BpiClient::new().expect("client should build");

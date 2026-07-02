@@ -195,6 +195,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     /// 测试登录
     async fn test_bilibili_uinfo() -> Result<(), BpiError> {
@@ -215,6 +216,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_user_info() -> Result<(), BpiError> {
         if !live_login_tests_enabled() {

@@ -562,6 +562,7 @@ mod tests {
         std::env::var_os("BPI_LIVE_TEST").is_some() && std::env::var_os("BPI_COOKIE").is_some()
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_up_stat() -> Result<(), Box<BpiError>> {
         if !live_creativecenter_tests_enabled() {
@@ -574,6 +575,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_archive_compare() -> Result<(), Box<BpiError>> {
         if !live_creativecenter_tests_enabled() {
@@ -586,6 +588,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_up_article_stat() -> Result<(), Box<BpiError>> {
         if !live_creativecenter_tests_enabled() {
@@ -598,6 +601,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_trend() -> Result<(), Box<BpiError>> {
         if !live_creativecenter_tests_enabled() {
@@ -610,6 +614,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_article_trend() -> Result<(), Box<BpiError>> {
         if !live_creativecenter_tests_enabled() {
@@ -622,6 +627,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_viewer_data() -> Result<(), Box<BpiError>> {
         if !live_creativecenter_tests_enabled() {

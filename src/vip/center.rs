@@ -88,6 +88,7 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_vip_center_info_comprehensive() {
         tracing::info!("开始测试大会员中心信息的综合功能");
@@ -208,6 +209,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_time_calculation() {
         tracing::info!("开始测试时间计算功能");

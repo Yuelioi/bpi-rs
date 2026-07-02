@@ -417,8 +417,8 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    #[ignore]
     async fn test_danmaku_post() {
         let bpi = BpiClient::new().expect("client should build");
 
@@ -441,8 +441,8 @@ mod tests {
         info!("dmid{}", resp.unwrap().data.unwrap().dmid);
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    #[ignore]
     async fn test_danmaku_recall() {
         let bpi = BpiClient::new().expect("client should build");
 
@@ -451,8 +451,8 @@ mod tests {
         assert!(resp.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    #[ignore]
     async fn test_danmaku_buy_adv() {
         let bpi = BpiClient::new().expect("client should build");
 
@@ -461,8 +461,8 @@ mod tests {
         assert!(resp.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    #[ignore]
     async fn test_danmaku_get_adv_state() {
         let bpi = BpiClient::new().expect("client should build");
 
@@ -471,8 +471,8 @@ mod tests {
         assert!(resp.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    #[ignore]
     async fn test_danmaku_thumbup() {
         let bpi = BpiClient::new().expect("client should build");
 
@@ -481,8 +481,8 @@ mod tests {
         assert!(resp.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    #[ignore]
     async fn test_danmaku_edit_state() {
         let bpi = BpiClient::new().expect("client should build");
 
@@ -492,8 +492,8 @@ mod tests {
         assert!(resp.is_ok());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    #[ignore]
     async fn test_danmaku_edit_pool() {
         let bpi = BpiClient::new().expect("client should build");
 

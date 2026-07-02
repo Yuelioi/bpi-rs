@@ -248,6 +248,7 @@ mod tests {
 
     const TEST_AID: u64 = 10001;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_related_videos_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -262,6 +263,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_homepage_recommendations() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");

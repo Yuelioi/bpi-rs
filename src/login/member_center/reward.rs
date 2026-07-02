@@ -55,6 +55,7 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_daily_reward() -> Result<(), BpiError> {
         if std::env::var_os("BPI_LIVE_TEST").is_none() {

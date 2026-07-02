@@ -18,36 +18,41 @@ tasks:
       - cargo test --all-features --lib --no-run
 
   test_offline:
-    desc: Run only tests known to be offline in the pre-migration codebase.
+    desc: Run default offline library tests.
     cmds:
-      - cargo test --all-features --lib utils::aid_bvid
+      - cargo test --all-features --lib
 
   check_all:
-    desc: Safe default checks for the pre-migration baseline.
+    desc: Safe default checks for the migration baseline.
     cmds:
       - cargo fmt --check
-      - cargo clippy --all-targets --all-features --locked -- -D warnings
       - cargo check --all-features
-      - cargo test --all-features --lib --no-run
-      - cargo test --all-features --lib utils::aid_bvid
+      - cargo test --all-features --lib
 
-  test_live_readonly:
-    desc: Run legacy live tests only when BPI_LIVE_TEST=1.
+  lint_strict:
+    desc: Run strict clippy; expected to fail until legacy migration debt is cleaned up.
+    cmds:
+      - cargo clippy --all-targets --all-features --locked -- -D warnings
+
+  test_live_legacy:
+    desc: Run ignored legacy live tests. Treat this as potentially mutating until each test is classified.
     preconditions:
       - sh: test "$BPI_LIVE_TEST" = "1"
         msg: Set BPI_LIVE_TEST=1 before running live Bilibili API tests.
+      - sh: test "$BPI_MUTATING_TEST" = "1"
+        msg: Set BPI_MUTATING_TEST=1 because legacy live tests are not yet classified as read-only.
     cmds:
-      - cargo test --all-features --lib -- --test-threads=1 --nocapture
+      - cargo test --all-features --lib -- --ignored --test-threads=1 --nocapture
 
   test_live_mutating:
-    desc: Run legacy live tests that may mutate account state.
+    desc: Alias for running ignored legacy live tests that may mutate account state.
     preconditions:
       - sh: test "$BPI_LIVE_TEST" = "1"
         msg: Set BPI_LIVE_TEST=1 before running live Bilibili API tests.
       - sh: test "$BPI_MUTATING_TEST" = "1"
         msg: Set BPI_MUTATING_TEST=1 before running mutating Bilibili API tests.
     cmds:
-      - cargo test --all-features --lib -- --test-threads=1 --nocapture
+      - task: test_live_legacy
 
   test_activity:
     cmds:

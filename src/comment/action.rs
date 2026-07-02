@@ -313,6 +313,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_comment_like() -> Result<(), BpiError> {
         let rpid = add_test_comment().await?;
@@ -330,6 +331,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_comment_dislike() -> Result<(), BpiError> {
         let rpid = add_test_comment().await?;

@@ -375,6 +375,7 @@ mod tests {
 
     const TEST_SERIES_ID: u64 = 250285;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_seasons_archives_list() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -389,6 +390,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_seasons_series_only() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -400,6 +402,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_seasons_series_list() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -418,6 +421,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_series_info() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -433,6 +437,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_series_archives() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");

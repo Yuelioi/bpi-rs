@@ -133,6 +133,7 @@ mod tests {
 
     const TEST_CVID: u64 = 1;
     const TEST_UID: u64 = 91221505;
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_like_article() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -148,6 +149,7 @@ mod tests {
             })
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_coin_article() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -165,6 +167,7 @@ mod tests {
             })
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_favorite_article() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");

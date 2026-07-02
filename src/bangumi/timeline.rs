@@ -94,6 +94,7 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_bangumi_timeline() {
         let bpi = BpiClient::new().expect("client should build");
@@ -115,6 +116,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_bangumi_timeline_invalid_before() {
         let bpi = BpiClient::new().expect("client should build");
@@ -130,6 +132,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_bangumi_timeline_invalid_after() {
         let bpi = BpiClient::new().expect("client should build");

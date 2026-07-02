@@ -114,6 +114,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_live_get_danmu_info() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -134,6 +135,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_send_live_danmu() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");

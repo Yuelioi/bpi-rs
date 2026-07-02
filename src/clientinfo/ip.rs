@@ -58,6 +58,7 @@ mod tests {
 
     const TEST_IP: &str = "8.8.8.8";
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_clientinfo_ip() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");

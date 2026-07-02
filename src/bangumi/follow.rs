@@ -62,6 +62,7 @@ mod tests {
     use super::*;
 
     const TEST_BANGUMI_ID: u64 = 99644; // 小城日常
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_follow_bangumi() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
@@ -75,6 +76,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_unfollow_bangumi() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");

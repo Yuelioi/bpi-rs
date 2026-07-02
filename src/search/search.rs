@@ -333,6 +333,7 @@ mod tests {
     use crate::search::search_params::{CategoryId, Duration, OrderSort, SearchOrder, UserType};
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_search_article() {
         let bpi = BpiClient::new().expect("client should build");
@@ -360,6 +361,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_search_bangumi() {
         let bpi = BpiClient::new().expect("client should build");
@@ -380,6 +382,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_search_bili_user() {
         let bpi = BpiClient::new().expect("client should build");
@@ -407,6 +410,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_search_live_room() {
         let bpi = BpiClient::new().expect("client should build");
@@ -427,6 +431,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_search_live_user() {
         let bpi = BpiClient::new().expect("client should build");
@@ -454,6 +459,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_search_movie() {
         let bpi = BpiClient::new().expect("client should build");
@@ -474,6 +480,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_search_video() {
         let bpi = BpiClient::new().expect("client should build");

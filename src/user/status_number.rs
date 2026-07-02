@@ -198,6 +198,7 @@ mod tests {
     const TEST_UP_MID: u64 = 456664753;
     const TEST_NAV_MID: u64 = 645769214;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_relation_stat() -> Result<(), BpiError> {
         if std::env::var_os("BPI_LIVE_TEST").is_none() {
@@ -214,6 +215,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_up_stat() -> Result<(), BpiError> {
         if std::env::var_os("BPI_LIVE_TEST").is_none() {
@@ -230,6 +232,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_nav_num() -> Result<(), BpiError> {
         if std::env::var_os("BPI_LIVE_TEST").is_none() {
@@ -246,6 +249,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_album_count() -> Result<(), BpiError> {
         if std::env::var_os("BPI_LIVE_TEST").is_none() {

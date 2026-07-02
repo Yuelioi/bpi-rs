@@ -269,6 +269,7 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_audio_collections_list() {
         let bpi = BpiClient::new().expect("client should build");
@@ -281,6 +282,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_audio_collection_info() {
         let bpi = BpiClient::new().expect("client should build");
@@ -290,6 +292,7 @@ mod tests {
         }
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_audio_hot_menu() {
         let bpi = BpiClient::new().expect("client should build");
@@ -304,6 +307,7 @@ mod tests {
         assert!(!data.data.is_empty());
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_audio_rank_menu() {
         let bpi = BpiClient::new().expect("client should build");

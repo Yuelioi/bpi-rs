@@ -492,6 +492,7 @@ mod tests {
         std::env::var("BPI_LIVE_TEST").ok().as_deref() == Some("1")
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_user_space_info() {
         if !live_user_tests_enabled() {
@@ -525,6 +526,7 @@ mod tests {
         tracing::info!("测试完成");
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_user_space_info_nonexistent() {
         if !live_user_tests_enabled() {
@@ -555,6 +557,7 @@ mod tests {
         tracing::info!("测试完成");
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_user_card_info() {
         if !live_user_tests_enabled() {
@@ -611,6 +614,7 @@ mod tests {
         tracing::info!("测试完成");
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_user_card_info_with_photo() {
         if !live_user_tests_enabled() {
@@ -668,6 +672,7 @@ mod tests {
         tracing::info!("测试完成");
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_user_card_info_without_photo() {
         if !live_user_tests_enabled() {
@@ -708,6 +713,7 @@ mod tests {
         tracing::info!("测试完成");
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_user_card_info_invalid_user() {
         if !live_user_tests_enabled() {
@@ -740,6 +746,7 @@ mod tests {
         tracing::info!("测试完成");
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_user_card_info_banned_user() {
         if !live_user_tests_enabled() {
@@ -780,6 +787,7 @@ mod tests {
         tracing::info!("测试完成");
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_user_cards_and_infos() {
         if !live_user_tests_enabled() {

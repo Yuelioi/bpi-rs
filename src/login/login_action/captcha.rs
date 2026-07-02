@@ -49,6 +49,7 @@ impl BpiClient {
     }
 }
 
+#[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
 #[tokio::test]
 async fn test_generate_captcha() {
     let bpi = BpiClient::new().expect("client should build");

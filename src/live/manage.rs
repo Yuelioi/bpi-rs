@@ -258,6 +258,7 @@ mod tests {
     use super::*;
     use tracing::info;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
 
     async fn test_live_create_room() -> Result<(), BpiError> {
@@ -278,6 +279,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
 
     async fn test_live_update_room_info() -> Result<(), BpiError> {
@@ -295,6 +297,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
 
     async fn test_live_stop() -> Result<(), BpiError> {
@@ -310,6 +313,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
 
     async fn test_live_update_pre_live_info() -> Result<(), BpiError> {
@@ -326,6 +330,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
 
     async fn test_live_update_room_news() -> Result<(), BpiError> {
@@ -342,6 +347,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_live_version() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");

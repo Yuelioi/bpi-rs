@@ -114,6 +114,7 @@ mod tests {
     // 您需要在 `Cargo.toml` 中添加 `dotenvy` 和 `tracing` 依赖，并在 `main.rs` 或测试入口处初始化日志
     // 例如: tracing_subscriber::fmt::init();
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_live_users() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
@@ -126,6 +127,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_dyn_up_users() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");

@@ -70,6 +70,7 @@ mod tests {
     use crate::sign::wbi::WbiKeys;
     use crate::{BpiClient, BpiError};
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn sign_wbi_params_uses_cached_client_keys() -> Result<(), BpiError> {
         let client = BpiClient::new()?;

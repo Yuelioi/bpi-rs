@@ -181,6 +181,7 @@ mod tests {
     const TEST_MID: u64 = 53456;
     const TEST_KEYWORD: &str = "科技";
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_user_contributed_videos_default() -> Result<(), BpiError> {
         if std::env::var_os("BPI_LIVE_TEST").is_none() {
@@ -202,6 +203,7 @@ mod tests {
         Ok(())
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_user_contributed_videos_with_keyword() -> Result<(), BpiError> {
         if std::env::var_os("BPI_LIVE_TEST").is_none() {

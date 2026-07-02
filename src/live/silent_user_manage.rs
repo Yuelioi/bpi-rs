@@ -359,6 +359,7 @@ impl BpiClient {
 mod tests {
     use super::*;
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_silent_user_list() {
         let bpi = BpiClient::new().expect("client should build");
@@ -366,6 +367,7 @@ mod tests {
         tracing::info!("{:?}", resp);
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_add_silent_user() {
         let bpi = BpiClient::new().expect("client should build");
@@ -376,6 +378,7 @@ mod tests {
         tracing::info!("{:?}", resp);
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_del_silent_user_list() {
         let bpi = BpiClient::new().expect("client should build");
@@ -383,6 +386,7 @@ mod tests {
         tracing::info!("{:?}", resp);
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_banned_user_list() {
         let bpi = BpiClient::new().expect("client should build");
@@ -390,6 +394,7 @@ mod tests {
         tracing::info!("{:?}", resp);
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_add_banned_user() {
         let bpi = BpiClient::new().expect("client should build");
@@ -400,6 +405,7 @@ mod tests {
         tracing::info!("{:?}", resp);
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_del_banned_user_list() {
         let bpi = BpiClient::new().expect("client should build");
@@ -409,6 +415,7 @@ mod tests {
             .unwrap();
         tracing::info!("{:?}", resp);
     }
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_keyword_list() {
         let bpi = BpiClient::new().expect("client should build");
@@ -416,6 +423,7 @@ mod tests {
         tracing::info!("{:?}", resp);
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_add_keyword() {
         let bpi = BpiClient::new().expect("client should build");
@@ -426,6 +434,7 @@ mod tests {
         tracing::info!("{:?}", resp);
     }
 
+    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_del_keyword() {
         let bpi = BpiClient::new().expect("client should build");
