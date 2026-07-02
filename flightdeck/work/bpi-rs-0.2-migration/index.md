@@ -8,12 +8,13 @@ This topic owns the staged migration plan and should keep all active design and 
 
 ## Next
 
-- User reviews `design.md`.
-- After approval, write the implementation plan under `plan.md` or staged files in `plans/`.
+- User reviews `plan.md`.
+- After approval, write `plans/00-baseline-inventory.md` and begin Stage 0.
 
 ## Read now
 
 - design.md
+- plan.md
 - knowledge/rust/sdk-quality.md
 
 ## Read if
@@ -29,9 +30,11 @@ Done:
 - Researched primary Rust/Tokio/reqwest/tracing docs and distilled the SDK quality bar into `knowledge/rust/sdk-quality.md`.
 - Added logging/observability and SDK embedding customization requirements to `design.md` and `knowledge/rust/sdk-quality.md`.
 - Added type, fixture, and documentation discipline requirements to address weak models, random test parameters, and stale examples.
+- Read all root `src/*.rs` files and sampled key submodules for errors, signing, login, video, dynamic, user, tests, README, Cargo, and Taskfile.
+- Wrote `plan.md` with code-research findings and a staged migration plan.
 
 Current:
-- Waiting for user review of `design.md`.
+- Waiting for user review of `plan.md`.
 
 Verified:
 - Current crate baseline previously passed `cargo check --all-features`.
