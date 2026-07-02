@@ -454,7 +454,6 @@ impl BpiClient {
     }
 
     /// 批量获取用户卡片（精简信息）
-
     pub async fn user_cards(&self, mids: &[u64]) -> Result<BpiResponse<Vec<UserCard>>, BpiError> {
         let mids_str = mids
             .iter()
@@ -469,7 +468,6 @@ impl BpiClient {
     }
 
     /// 批量获取用户详细信息（带大会员/认证信息）
-
     pub async fn user_infos(&self, mids: &[u64]) -> Result<BpiResponse<Vec<UserInfo>>, BpiError> {
         let mids_str = mids
             .iter()

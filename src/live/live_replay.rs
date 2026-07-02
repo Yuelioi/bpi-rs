@@ -83,7 +83,7 @@ pub struct ReplayListData {
 impl BpiClient {
     /// 获取直播回放列表
     ///
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_replay_list(

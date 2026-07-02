@@ -143,7 +143,7 @@ mod tests {
         let room_id = 21733448;
         let message = "牛";
 
-        let resp = bpi.live_send_danmu(room_id, &message, None, None).await?;
+        let resp = bpi.live_send_danmu(room_id, message, None, None).await?;
         assert_eq!(resp.code, 0);
         let data = resp.into_data()?;
 

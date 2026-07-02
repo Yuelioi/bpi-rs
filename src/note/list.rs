@@ -227,14 +227,9 @@ mod tests {
         assert!(resp.is_ok());
 
         let resp_data = resp.unwrap();
-        resp_data
-            .data
-            .as_ref()
-            .and_then(|data| data.list.as_ref())
-            .and_then(|list| {
-                info!("first note item: {:?}", list.first());
-                Some(())
-            });
+        if let Some(list) = resp_data.data.as_ref().and_then(|data| data.list.as_ref()) {
+            info!("first note item: {:?}", list.first());
+        }
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]

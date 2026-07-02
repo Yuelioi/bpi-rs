@@ -85,7 +85,7 @@ impl BpiClient {
     ///
     /// area_parent_id: 直播分区
     /// area_id: 直播子分区
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     ///
@@ -126,7 +126,7 @@ impl BpiClient {
 
     /// 获取盲盒概率
     ///
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     ///
@@ -159,7 +159,7 @@ mod tests {
         let resp = bpi.live_room_gift_list(23174842, None, None).await?;
 
         let data = resp.data.unwrap();
-        assert!(data.gift_config.base_config.list.len() > 0);
+        assert!(!data.gift_config.base_config.list.is_empty());
         Ok(())
     }
 
@@ -170,7 +170,7 @@ mod tests {
         let resp = bpi.live_blind_gift_info(32251).await?;
 
         let data = resp.data.unwrap();
-        assert!(data.gifts.len() > 0);
+        assert!(!data.gifts.is_empty());
         Ok(())
     }
 }

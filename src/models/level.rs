@@ -14,16 +14,11 @@ pub struct LevelInfo {
 }
 
 /// 下一等级经验类型
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Default)]
 pub enum NextExp {
     Value(i32),
+    #[default]
     Infinite,
-}
-
-impl Default for NextExp {
-    fn default() -> Self {
-        NextExp::Infinite
-    }
 }
 
 /// 自定义反序列化函数处理 next_exp 字段

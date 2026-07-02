@@ -207,10 +207,10 @@ mod tests {
 
         let resp = bpi.login_info_nav_info().await?;
 
-        if resp.code == 0 {
-            if let Some(data) = resp.data {
-                info!("登录成功！UID={} 昵称={} ", data.mid, data.uname);
-            }
+        if resp.code == 0
+            && let Some(data) = resp.data
+        {
+            info!("登录成功！UID={} 昵称={} ", data.mid, data.uname);
         }
 
         Ok(())

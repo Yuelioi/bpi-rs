@@ -180,7 +180,7 @@ impl BpiClient {
     /// page: 页
     /// page_size: 10~30 `[20]`
     /// typ:3,4,5 周/月/总 亲密度
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     ///
@@ -232,7 +232,7 @@ mod tests {
             .await?;
 
         let data = resp.data.unwrap();
-        assert!(data.list.len() > 0);
+        assert!(!data.list.is_empty());
         Ok(())
     }
 }

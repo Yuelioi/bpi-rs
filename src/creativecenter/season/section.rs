@@ -106,11 +106,10 @@ mod tests {
         let data = bpi.season_section_episodes(season_id).await?.into_data()?;
 
         tracing::info!("小节: {} - {}", data.section.id, data.section.title);
-        if let Some(episodes) = data.episodes {
-            for ep in episodes {
-                tracing::info!("视频: {} - {} (aid={})", ep.id, ep.title, ep.aid);
-                break;
-            }
+        if let Some(episodes) = data.episodes
+            && let Some(ep) = episodes.into_iter().next()
+        {
+            tracing::info!("视频: {} - {} (aid={})", ep.id, ep.title, ep.aid);
         }
 
         Ok(())

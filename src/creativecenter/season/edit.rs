@@ -183,7 +183,6 @@ impl BpiClient {
     ///
     /// # 参数
     /// * season_id 合集id
-
     pub async fn season_enable_section(
         &self,
         season_id: u64,

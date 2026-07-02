@@ -124,7 +124,7 @@ pub struct RoomInfoData {
 impl BpiClient {
     /// 获取直播间信息
     ///
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_room_info(

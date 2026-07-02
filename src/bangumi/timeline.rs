@@ -66,13 +66,13 @@ impl BpiClient {
         after: i32,
     ) -> Result<BpiResponse<Vec<BangumiTimelineDay>>, BpiError> {
         // 验证参数
-        if before < 0 || before > 7 {
+        if !(0..=7).contains(&before) {
             return Err(BpiError::InvalidParameter {
                 field: "before",
                 message: "before参数必须在0-7之间",
             });
         }
-        if after < 0 || after > 7 {
+        if !(0..=7).contains(&after) {
             return Err(BpiError::InvalidParameter {
                 field: "after",
                 message: "after参数必须在0-7之间",

@@ -134,7 +134,7 @@ pub struct LiveWebListData {
 impl BpiClient {
     /// 获取用户关注的所有UP的直播情况
     ///
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_follow_up_list(
@@ -170,7 +170,7 @@ impl BpiClient {
 
     /// 获取用户关注的所有UP且正在直播的列表（PC端）
     ///
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_follow_up_web_list(

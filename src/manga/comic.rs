@@ -70,9 +70,9 @@ impl BpiClient {
         coupon_id: i32,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let request = BuyEpisodeRequest {
-            ep_id: ep_id,
+            ep_id,
             buy_method: 2,
-            coupon_id: coupon_id,
+            coupon_id,
             comic_id: None,
             auto_pay_gold_status: Some(2),
             is_presale: Some(0),
@@ -91,7 +91,7 @@ impl BpiClient {
         ep_id: i32,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let request = BuyEpisodeRequest {
-            ep_id: ep_id,
+            ep_id,
             buy_method: 4,
             coupon_id: 0,
             comic_id: Some(comic_id),
@@ -112,7 +112,7 @@ impl BpiClient {
         pay_amount: i32,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let request = BuyEpisodeRequest {
-            ep_id: ep_id,
+            ep_id,
             buy_method: 5,
             coupon_id: 0,
             comic_id: None,

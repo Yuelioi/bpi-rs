@@ -72,7 +72,7 @@ pub type MyMedalsResponse = BpiResponse<MyMedalsData>;
 impl BpiClient {
     /// 获取自己持有的粉丝勋章信息
     ///
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_my_medals(

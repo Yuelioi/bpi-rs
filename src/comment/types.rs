@@ -112,7 +112,7 @@ pub struct Vip {
 }
 
 /// 会员铭牌样式
-
+///
 /// 粉丝标签信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FansDetail {

@@ -267,11 +267,11 @@ mod tests {
             Ok(resp) => resp,
             Err(err) => {
                 // 已经创建直播间
-                if let Some(code) = err.code() {
-                    if code == 1531193016 {
-                        tracing::warn!("allowed special code: {}", code);
-                        return Ok(());
-                    }
+                if let Some(code) = err.code()
+                    && code == 1531193016
+                {
+                    tracing::warn!("allowed special code: {}", code);
+                    return Ok(());
                 }
                 return Err(err);
             }

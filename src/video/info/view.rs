@@ -94,7 +94,7 @@ pub struct Page {
 }
 
 /// 字幕上传者信息
-
+///
 /// 字幕列表
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubtitleListItem {

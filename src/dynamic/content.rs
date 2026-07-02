@@ -122,7 +122,7 @@ mod tests {
         let data = resp.into_data()?;
 
         info!("直播中的关注者数量: {}", data.count);
-        info!("第一位直播中的关注者: {:?}", data.items.get(0));
+        info!("第一位直播中的关注者: {:?}", data.items.first());
 
         Ok(())
     }

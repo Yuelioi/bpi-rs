@@ -102,7 +102,7 @@ pub struct RecommendData {
 impl BpiClient {
     /// 主页获取直播推荐
     ///
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_recommend(&self) -> Result<BpiResponse<RecommendData>, BpiError> {
@@ -130,7 +130,7 @@ mod tests {
 
         let data = resp.data.unwrap();
 
-        assert!(data.recommend_room_list.len() > 0);
+        assert!(!data.recommend_room_list.is_empty());
         Ok(())
     }
 }

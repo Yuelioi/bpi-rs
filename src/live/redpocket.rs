@@ -81,7 +81,7 @@ pub type LotteryInfoResponse = BpiResponse<LotteryInfoData>;
 impl BpiClient {
     /// 获取指定直播间的红包信息
     ///
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     ///

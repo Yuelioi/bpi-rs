@@ -16,7 +16,6 @@ pub struct OnlineData {
 
 impl BpiClient {
     /// 获取分区当日投稿稿件数
-
     pub async fn web_widget_online(&self) -> Result<BpiResponse<OnlineData>, BpiError> {
         self.get("https://api.bilibili.com/x/web-interface/online")
             .send_bpi("获取分区当日投稿数")
@@ -37,11 +36,11 @@ mod tests {
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
-        if let Ok(data) = resp {
-            if let Some(counts) = data.data {
-                for (region_id, count) in counts.region_count.0 {
-                    info!("分区ID: {}, 投稿数: {}", region_id, count);
-                }
+        if let Ok(data) = resp
+            && let Some(counts) = data.data
+        {
+            for (region_id, count) in counts.region_count.0 {
+                info!("分区ID: {}, 投稿数: {}", region_id, count);
             }
         }
     }

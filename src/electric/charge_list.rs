@@ -197,7 +197,6 @@ pub struct ElecRankData {
 
 impl BpiClient {
     /// 获取空间充电公示列表
-
     pub async fn electric_month_up_list(
         &self,
         up_mid: i64,

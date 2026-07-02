@@ -109,7 +109,7 @@ impl BpiClient {
             .query(&[("resource_id", 142)])
             .send_bpi("获取首页头图")
             .await?;
-        let mut header: HeaderData = result.data.take().ok_or_else(|| BpiError::missing_data())?;
+        let mut header: HeaderData = result.data.take().ok_or_else(BpiError::missing_data)?;
 
         header.parse_split_layer()?;
 

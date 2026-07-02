@@ -96,7 +96,6 @@ impl BpiClient {
     ///
     /// # 文档
     /// [获取活动列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md#获取活动列表)
-
     pub async fn activity_list(
         &self,
         plat: Option<&str>,

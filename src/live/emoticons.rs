@@ -136,7 +136,7 @@ mod tests {
         let resp = bpi.live_emoticons(14047, "pc").await?;
 
         let data = resp.data.unwrap();
-        assert!(data.data.len() > 0);
+        assert!(!data.data.is_empty());
         Ok(())
     }
 }

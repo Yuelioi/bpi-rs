@@ -123,7 +123,7 @@ impl BpiClient {
         let form = vec![
             ("room_id", room_id.to_string()),
             ("tuid", tuid.to_string()),
-            ("msg", msg.unwrap_or(String::new())),
+            ("msg", msg.unwrap_or_default()),
             ("mobile_app", "web".to_string()),
             (
                 "type",

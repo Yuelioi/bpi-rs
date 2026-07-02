@@ -82,8 +82,8 @@ impl BpiClient {
         page_size: i32,
     ) -> Result<BpiResponse<CouponsData>, BpiError> {
         let params = GetCouponsRequest {
-            page_num: page_num,
-            page_size: page_size,
+            page_num,
+            page_size,
             not_expired: Some(true),
             tab_type: Some(1),
             r#type: Some(0),

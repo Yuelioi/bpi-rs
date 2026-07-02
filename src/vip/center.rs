@@ -203,7 +203,7 @@ mod tests {
                     tracing::info!("账号未登录，无法获取详细信息，测试通过");
                 } else {
                     tracing::error!("综合测试失败: {:?}", e);
-                    assert!(false, "综合测试失败");
+                    panic!("综合测试失败");
                 }
             }
         }
@@ -275,42 +275,36 @@ mod tests {
 
                 // 分析会员到期时间
                 let vip = &user.vip;
-                if vip.vip_due_date > 0 {
-                    if let Some(due_date) =
+                if vip.vip_due_date > 0
+                    && let Some(due_date) =
                         chrono::DateTime::from_timestamp_millis(vip.vip_due_date as i64)
-                    {
-                        let now = chrono::Utc::now();
-                        let duration = due_date.signed_duration_since(now);
+                {
+                    let now = chrono::Utc::now();
+                    let duration = due_date.signed_duration_since(now);
 
-                        if duration.num_days() > 0 {
-                            tracing::info!("会员还有{}天到期", duration.num_days());
-                        } else if duration.num_hours() > 0 {
-                            tracing::info!("会员还有{}小时到期", duration.num_hours());
-                        } else if duration.num_minutes() > 0 {
-                            tracing::info!("会员还有{}分钟到期", duration.num_minutes());
-                        } else if duration.num_seconds() > 0 {
-                            tracing::info!("会员还有{}秒到期", duration.num_seconds());
-                        } else {
-                            tracing::info!("会员已过期");
-                        }
-
-                        tracing::info!(
-                            "会员到期时间: {}",
-                            due_date.format("%Y-%m-%d %H:%M:%S UTC")
-                        );
+                    if duration.num_days() > 0 {
+                        tracing::info!("会员还有{}天到期", duration.num_days());
+                    } else if duration.num_hours() > 0 {
+                        tracing::info!("会员还有{}小时到期", duration.num_hours());
+                    } else if duration.num_minutes() > 0 {
+                        tracing::info!("会员还有{}分钟到期", duration.num_minutes());
+                    } else if duration.num_seconds() > 0 {
+                        tracing::info!("会员还有{}秒到期", duration.num_seconds());
+                    } else {
+                        tracing::info!("会员已过期");
                     }
+
+                    tracing::info!("会员到期时间: {}", due_date.format("%Y-%m-%d %H:%M:%S UTC"));
                 }
 
                 tracing::info!("时间计算测试通过");
-                assert!(true);
             }
             Err(e) => {
                 if let BpiError::Api { code: -101, .. } = e {
                     tracing::info!("账号未登录，无法进行时间计算测试");
-                    assert!(true);
                 } else {
                     tracing::error!("时间计算测试失败: {:?}", e);
-                    assert!(false);
+                    panic!("时间计算测试失败");
                 }
             }
         }

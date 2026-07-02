@@ -277,7 +277,7 @@ impl BpiClient {
         let pn_val = pn.unwrap_or(1);
         let ps_val = ps.unwrap_or(15);
 
-        if ps_val > 30 || ps_val < 1 {
+        if !(1..=30).contains(&ps_val) {
             return Err(BpiError::parse("ps 参数超出有效范围 [1, 30]"));
         }
 

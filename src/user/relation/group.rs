@@ -265,13 +265,13 @@ mod tests {
 
         // 1. 创建分组
         info!("正在创建分组...");
-        let create_resp = bpi.user_group_create_tag(&test_tag_name).await?;
+        let create_resp = bpi.user_group_create_tag(test_tag_name).await?;
         let tag_id = create_resp.into_data()?.tagid;
         info!("创建分组成功，ID: {}", tag_id);
 
         // 2. 重命名分组
         info!("正在重命名分组...");
-        let update_resp = bpi.user_group_update_tag(tag_id, &new_tag_name).await?;
+        let update_resp = bpi.user_group_update_tag(tag_id, new_tag_name).await?;
         info!("重命名分组成功");
         assert_eq!(update_resp.code, 0);
 

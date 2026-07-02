@@ -43,7 +43,7 @@ pub struct LiveParentArea {
 impl BpiClient {
     /// 获取全部直播间分区列表
     ///
-
+    ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
     pub async fn live_area_list(&self) -> Result<BpiResponse<Vec<LiveParentArea>>, BpiError> {
@@ -67,7 +67,7 @@ mod tests {
         let resp = bpi.live_area_list().await?;
 
         let data = resp.data.unwrap();
-        assert!(data.len() > 0);
+        assert!(!data.is_empty());
         Ok(())
     }
 }

@@ -219,7 +219,7 @@ mod tests {
         let data = resp.into_data()?;
 
         info!("MP4 视频流信息: {:?}", data);
-        assert!(!data.durl.is_none());
+        assert!(data.durl.is_some());
         assert_eq!(data.quality, 64);
 
         Ok(())
@@ -247,7 +247,7 @@ mod tests {
         let data = resp.into_data()?;
 
         info!("4K 视频流信息: {:?}", data);
-        assert!(!data.dash.is_none());
+        assert!(data.dash.is_some());
         assert_eq!(data.quality, 120);
 
         Ok(())

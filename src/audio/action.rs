@@ -114,7 +114,6 @@ impl BpiClient {
     ///
     /// # 文档
     /// [查询音频收藏状态](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md#查询音频收藏状态)
-
     pub async fn audio_collection_status(&self, sid: u64) -> Result<BpiResponse<bool>, BpiError> {
         let result = self
             .get("https://www.bilibili.com/audio/music-service-c/web/collections/songs-coll")
@@ -136,7 +135,6 @@ impl BpiClient {
     ///
     /// # 文档
     /// [查询音频投币数](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md#查询音频投币数)
-
     pub async fn audio_coin_count(&self, sid: u64) -> Result<BpiResponse<i32>, BpiError> {
         let result = self
             .get("https://www.bilibili.com/audio/music-service-c/web/coin/audio")
@@ -164,7 +162,7 @@ impl BpiClient {
         sid: u64,
         multiply: u32,
     ) -> Result<BpiResponse<String>, BpiError> {
-        let multiply = multiply.min(1).max(2);
+        let multiply = normalize_audio_coin_multiply(multiply);
         let csrf = self.csrf()?;
         self.post("https://www.bilibili.com/audio/music-service-c/web/coin/add")
             .form(&[
@@ -177,6 +175,10 @@ impl BpiClient {
     }
 }
 
+fn normalize_audio_coin_multiply(multiply: u32) -> u32 {
+    multiply.clamp(1, 2)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -184,6 +186,14 @@ mod tests {
     // https://www.bilibili.com/audio/au13598
 
     const TEST_SID: u64 = 13603;
+
+    #[test]
+    fn normalize_audio_coin_multiply_clamps_to_supported_range() {
+        assert_eq!(normalize_audio_coin_multiply(0), 1);
+        assert_eq!(normalize_audio_coin_multiply(1), 1);
+        assert_eq!(normalize_audio_coin_multiply(2), 2);
+        assert_eq!(normalize_audio_coin_multiply(3), 2);
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -204,7 +214,7 @@ mod tests {
         let result = bpi.audio_coin_count(TEST_SID).await?;
 
         let data = result.data.unwrap();
-        assert!(data >= 0 && data <= 2);
+        assert!((0..=2).contains(&data));
 
         Ok(())
     }
