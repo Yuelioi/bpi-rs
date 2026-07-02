@@ -12,5 +12,8 @@ pub mod action;
 pub mod info;
 pub mod music_list;
 pub mod musicstream_url;
+pub mod params;
 pub mod rank;
 pub mod status_number;
+
+pub use params::AudioSongParams;

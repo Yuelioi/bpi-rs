@@ -91,6 +91,7 @@ macro_rules! numeric_id {
 }
 
 numeric_id!(Aid, "aid", "Bilibili AV numeric video ID.");
+numeric_id!(AudioId, "sid", "Bilibili audio song ID.");
 numeric_id!(Cid, "cid", "Bilibili video page/content ID.");
 numeric_id!(Mid, "mid", "Bilibili member/user ID.");
 numeric_id!(RoomId, "room_id", "Bilibili live room ID.");
@@ -207,6 +208,24 @@ mod tests {
         let aid = Aid::new(170001)?;
 
         assert_eq!(aid.to_string(), "170001");
+        Ok(())
+    }
+
+    #[test]
+    fn audio_id_rejects_zero() {
+        let err = AudioId::new(0).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "sid", .. }
+        ));
+    }
+
+    #[test]
+    fn audio_id_displays_numeric_value() -> Result<(), BpiError> {
+        let sid = AudioId::new(13603)?;
+
+        assert_eq!(sid.to_string(), "13603");
         Ok(())
     }
 

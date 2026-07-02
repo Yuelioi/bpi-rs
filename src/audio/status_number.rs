@@ -1,6 +1,7 @@
 //! 音频状态数
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/status_number.md)
+use crate::audio::params::AudioSongParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -19,18 +20,18 @@ impl BpiClient {
     /// 唯缺投币数2333333
     ///
     /// # 参数
-    /// | 名称   | 类型  | 说明       |
-    /// | ------ | ----- | ---------- |
-    /// | `sid`  | i64   | 音频 auid |
+    /// | 名称     | 类型              | 说明           |
+    /// | -------- | ----------------- | -------------- |
+    /// | `params` | `AudioSongParams` | 音频 auid 参数 |
     ///
     /// # 文档
     /// [歌曲状态数](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/status_number.md#歌曲状态数)
     pub async fn audio_status_number(
         &self,
-        sid: i64,
+        params: AudioSongParams,
     ) -> Result<BpiResponse<AudioStatusNumberData>, BpiError> {
         self.get("https://www.bilibili.com/audio/music-service-c/web/stat/song")
-            .query(&[("sid", sid.to_string())])
+            .query(&params.query_pairs())
             .send_bpi("查询歌曲状态数")
             .await
     }
@@ -39,12 +40,15 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::AudioId;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_audio_status_number() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.audio_status_number(15664).await?;
+        let result = bpi
+            .audio_status_number(AudioSongParams::new(AudioId::new(15664)?))
+            .await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
