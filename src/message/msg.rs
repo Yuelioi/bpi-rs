@@ -1,4 +1,4 @@
-use crate::message::params::MessageReplyFeedParams;
+use crate::message::params::{MessageReplyFeedParams, MessageUnreadCountParams};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -93,9 +93,12 @@ impl BpiClient {
     ///
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/message)
-    pub async fn message_unread_count(&self) -> Result<BpiResponse<UnreadCountData>, BpiError> {
+    pub async fn message_unread_count(
+        &self,
+        params: MessageUnreadCountParams,
+    ) -> Result<BpiResponse<UnreadCountData>, BpiError> {
         self.get("https://api.vc.bilibili.com/x/im/web/msgfeed/unread")
-            .query(&[("build", "0"), ("mobi_app", "web")])
+            .query(&params.query_pairs())
             .send_bpi("获取未读消息数")
             .await
     }
@@ -130,7 +133,9 @@ mod tests {
     async fn test_get_unread_count() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let new_resp = bpi.message_unread_count().await?;
+        let new_resp = bpi
+            .message_unread_count(MessageUnreadCountParams::new())
+            .await?;
         let new_data = new_resp.into_data()?;
         println!("未读消息数 (新接口): {:?}", new_data);
         Ok(())

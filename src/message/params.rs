@@ -1,5 +1,44 @@
 use crate::{BpiError, BpiResult};
 
+/// Parameters for `/x/im/web/msgfeed/unread`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MessageUnreadCountParams {
+    build: String,
+    mobi_app: String,
+}
+
+impl Default for MessageUnreadCountParams {
+    fn default() -> Self {
+        Self {
+            build: "0".to_string(),
+            mobi_app: "web".to_string(),
+        }
+    }
+}
+
+impl MessageUnreadCountParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_build(mut self, build: impl Into<String>) -> BpiResult<Self> {
+        self.build = normalize_non_blank("build", build.into())?;
+        Ok(self)
+    }
+
+    pub fn with_mobi_app(mut self, mobi_app: impl Into<String>) -> BpiResult<Self> {
+        self.mobi_app = normalize_non_blank("mobi_app", mobi_app.into())?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("build", self.build.clone()),
+            ("mobi_app", self.mobi_app.clone()),
+        ]
+    }
+}
+
 /// Parameters for `/x/msgfeed/reply`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MessageReplyFeedParams {
@@ -173,9 +212,59 @@ fn validate_positive_u64(field: &'static str, value: u64) -> BpiResult<u64> {
     Ok(value)
 }
 
+fn normalize_non_blank(field: &'static str, value: String) -> BpiResult<String> {
+    let value = value.trim();
+    if value.is_empty() {
+        return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
+    }
+
+    Ok(value.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn unread_count_params_serializes_defaults() {
+        let params = MessageUnreadCountParams::new();
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![("build", "0".to_string()), ("mobi_app", "web".to_string())]
+        );
+    }
+
+    #[test]
+    fn unread_count_params_serializes_custom_client() -> BpiResult<()> {
+        let params = MessageUnreadCountParams::new()
+            .with_build("123")?
+            .with_mobi_app("android")?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("build", "123".to_string()),
+                ("mobi_app", "android".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn unread_count_params_rejects_blank_mobi_app() {
+        let err = MessageUnreadCountParams::new()
+            .with_mobi_app("   ")
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "mobi_app",
+                ..
+            }
+        ));
+    }
 
     #[test]
     fn reply_feed_params_serializes_defaults() {
