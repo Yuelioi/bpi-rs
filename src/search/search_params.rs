@@ -157,6 +157,51 @@ impl CategoryId {
     }
 }
 
+/// Parameters for article search.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SearchArticleParams {
+    keyword: String,
+    order: SearchOrder,
+    category_id: CategoryId,
+    page: u32,
+}
+
+impl SearchArticleParams {
+    pub fn new(keyword: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            keyword: normalize_search_keyword(keyword)?,
+            order: SearchOrder::TotalRank,
+            category_id: CategoryId::All,
+            page: 1,
+        })
+    }
+
+    pub fn with_order(mut self, order: SearchOrder) -> Self {
+        self.order = order;
+        self
+    }
+
+    pub fn with_category_id(mut self, category_id: CategoryId) -> Self {
+        self.category_id = category_id;
+        self
+    }
+
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        self.page = validate_search_page(page)?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("search_type", SearchType::Article.as_str().to_string()),
+            ("keyword", self.keyword.clone()),
+            ("order", self.order.as_str().to_string()),
+            ("category_id", self.category_id.as_num().to_string()),
+            ("page", self.page.to_string()),
+        ]
+    }
+}
+
 /// Parameters for bangumi search.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchBangumiParams {
@@ -181,6 +226,162 @@ impl SearchBangumiParams {
         vec![
             ("search_type", SearchType::MediaBangumi.as_str().to_string()),
             ("keyword", self.keyword.clone()),
+            ("page", self.page.to_string()),
+        ]
+    }
+}
+
+/// Parameters for Bilibili user search.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SearchBiliUserParams {
+    keyword: String,
+    order_sort: OrderSort,
+    user_type: UserType,
+    page: u32,
+}
+
+impl SearchBiliUserParams {
+    pub fn new(keyword: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            keyword: normalize_search_keyword(keyword)?,
+            order_sort: OrderSort::Ascending,
+            user_type: UserType::All,
+            page: 1,
+        })
+    }
+
+    pub fn with_order_sort(mut self, order_sort: OrderSort) -> Self {
+        self.order_sort = order_sort;
+        self
+    }
+
+    pub fn with_user_type(mut self, user_type: UserType) -> Self {
+        self.user_type = user_type;
+        self
+    }
+
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        self.page = validate_search_page(page)?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("search_type", SearchType::BiliUser.as_str().to_string()),
+            ("keyword", self.keyword.clone()),
+            ("order_sort", self.order_sort.as_num().to_string()),
+            ("user_type", self.user_type.as_num().to_string()),
+            ("page", self.page.to_string()),
+        ]
+    }
+}
+
+/// Parameters for combined live-room/live-user search.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SearchLiveParams {
+    keyword: String,
+    page: u32,
+}
+
+impl SearchLiveParams {
+    pub fn new(keyword: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            keyword: normalize_search_keyword(keyword)?,
+            page: 1,
+        })
+    }
+
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        self.page = validate_search_page(page)?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("search_type", SearchType::Live.as_str().to_string()),
+            ("keyword", self.keyword.clone()),
+            ("page", self.page.to_string()),
+        ]
+    }
+}
+
+/// Parameters for live-room search.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SearchLiveRoomParams {
+    keyword: String,
+    order: SearchOrder,
+    page: u32,
+}
+
+impl SearchLiveRoomParams {
+    pub fn new(keyword: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            keyword: normalize_search_keyword(keyword)?,
+            order: SearchOrder::Online,
+            page: 1,
+        })
+    }
+
+    pub fn with_order(mut self, order: SearchOrder) -> Self {
+        self.order = order;
+        self
+    }
+
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        self.page = validate_search_page(page)?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("search_type", SearchType::LiveRoom.as_str().to_string()),
+            ("keyword", self.keyword.clone()),
+            ("order", self.order.as_str().to_string()),
+            ("page", self.page.to_string()),
+        ]
+    }
+}
+
+/// Parameters for live-user search.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SearchLiveUserParams {
+    keyword: String,
+    order_sort: OrderSort,
+    user_type: UserType,
+    page: u32,
+}
+
+impl SearchLiveUserParams {
+    pub fn new(keyword: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            keyword: normalize_search_keyword(keyword)?,
+            order_sort: OrderSort::Ascending,
+            user_type: UserType::All,
+            page: 1,
+        })
+    }
+
+    pub fn with_order_sort(mut self, order_sort: OrderSort) -> Self {
+        self.order_sort = order_sort;
+        self
+    }
+
+    pub fn with_user_type(mut self, user_type: UserType) -> Self {
+        self.user_type = user_type;
+        self
+    }
+
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        self.page = validate_search_page(page)?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("search_type", SearchType::LiveUser.as_str().to_string()),
+            ("keyword", self.keyword.clone()),
+            ("order_sort", self.order_sort.as_num().to_string()),
+            ("user_type", self.user_type.as_num().to_string()),
             ("page", self.page.to_string()),
         ]
     }
@@ -296,6 +497,26 @@ mod tests {
     use super::*;
 
     #[test]
+    fn search_article_params_serializes_optional_filters() -> Result<(), BpiError> {
+        let params = SearchArticleParams::new("  Rust  ")?
+            .with_order(SearchOrder::PubDate)
+            .with_category_id(CategoryId::Technology)
+            .with_page(2)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("search_type", "article".to_string()),
+                ("keyword", "Rust".to_string()),
+                ("order", "pubdate".to_string()),
+                ("category_id", "17".to_string()),
+                ("page", "2".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
     fn search_bangumi_params_serializes_default_query() -> Result<(), BpiError> {
         let params = SearchBangumiParams::new("  天气之子  ")?;
 
@@ -336,6 +557,79 @@ mod tests {
                 ..
             }
         ));
+    }
+
+    #[test]
+    fn search_bili_user_params_serializes_optional_filters() -> Result<(), BpiError> {
+        let params = SearchBiliUserParams::new("  老番茄  ")?
+            .with_order_sort(OrderSort::Descending)
+            .with_user_type(UserType::Verified)
+            .with_page(3)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("search_type", "bili_user".to_string()),
+                ("keyword", "老番茄".to_string()),
+                ("order_sort", "0".to_string()),
+                ("user_type", "3".to_string()),
+                ("page", "3".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn search_live_params_serializes_default_query() -> Result<(), BpiError> {
+        let params = SearchLiveParams::new("  游戏  ")?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("search_type", "live".to_string()),
+                ("keyword", "游戏".to_string()),
+                ("page", "1".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn search_live_room_params_serializes_optional_filters() -> Result<(), BpiError> {
+        let params = SearchLiveRoomParams::new("  游戏  ")?
+            .with_order(SearchOrder::LiveTime)
+            .with_page(2)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("search_type", "live_room".to_string()),
+                ("keyword", "游戏".to_string()),
+                ("order", "live_time".to_string()),
+                ("page", "2".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn search_live_user_params_serializes_optional_filters() -> Result<(), BpiError> {
+        let params = SearchLiveUserParams::new("  散人  ")?
+            .with_order_sort(OrderSort::Descending)
+            .with_user_type(UserType::Up)
+            .with_page(2)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("search_type", "live_user".to_string()),
+                ("keyword", "散人".to_string()),
+                ("order_sort", "0".to_string()),
+                ("user_type", "1".to_string()),
+                ("page", "2".to_string()),
+            ]
+        );
+        Ok(())
     }
 
     #[test]

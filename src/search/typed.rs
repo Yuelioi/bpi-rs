@@ -6,8 +6,8 @@ use super::result::{
     Article, Bangumi, BiliUser, LiveData, LiveRoom, LiveUser, Movie, SearchData, Video,
 };
 use super::search_params::{
-    CategoryId, OrderSort, SearchBangumiParams, SearchMovieParams, SearchOrder, SearchType,
-    SearchVideoParams, UserType,
+    SearchArticleParams, SearchBangumiParams, SearchBiliUserParams, SearchLiveParams,
+    SearchLiveRoomParams, SearchLiveUserParams, SearchMovieParams, SearchVideoParams,
 };
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
@@ -21,32 +21,12 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `keyword` | &str | 搜索关键词 |
-    /// | `order` | `Option<SearchOrder>` | 排序方式 |
-    /// | `category_id` | `Option<CategoryId>` | 专栏分区 |
-    /// | `page` | `Option<i32>` | 页码（默认1） |
+    /// | `params` | `SearchArticleParams` | 专栏搜索参数 |
     pub async fn search_article(
         &self,
-        keyword: &str,
-        order: Option<SearchOrder>,
-        category_id: Option<CategoryId>,
-        page: Option<i32>,
+        params: SearchArticleParams,
     ) -> Result<BpiResponse<SearchData<Vec<Article>>>, BpiError> {
-        let category_id_str = category_id.unwrap_or(CategoryId::All).as_num().to_string();
-        let page_str = page.unwrap_or(1).to_string();
-
-        let params = vec![
-            ("search_type", SearchType::Article.as_str().to_string()),
-            ("keyword", keyword.to_string()),
-            (
-                "order",
-                order.unwrap_or(SearchOrder::TotalRank).as_str().to_string(),
-            ),
-            ("category_id", category_id_str),
-            ("page", page_str),
-        ];
-
-        let signed_params = self.get_wbi_sign2(params).await?;
+        let signed_params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         self.get("https://api.bilibili.com/x/web-interface/wbi/search/type")
             .with_bilibili_headers()
@@ -86,37 +66,12 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `keyword` | &str | 搜索关键词 |
-    /// | `order_sort` | `Option<OrderSort>` | 排序方向：降序/升序 |
-    /// | `user_type` | `Option<UserType>` | 用户类型筛选 |
-    /// | `page` | `Option<i32>` | 页码（默认1） |
+    /// | `params` | `SearchBiliUserParams` | 用户搜索参数 |
     pub async fn search_bili_user(
         &self,
-        keyword: &str,
-        order_sort: Option<OrderSort>,
-        user_type: Option<UserType>,
-        page: Option<i32>,
+        params: SearchBiliUserParams,
     ) -> Result<BpiResponse<SearchData<Vec<BiliUser>>>, BpiError> {
-        let page_str = page.unwrap_or(1).to_string();
-
-        let params = vec![
-            ("search_type", SearchType::BiliUser.as_str().to_string()),
-            ("keyword", keyword.to_string()),
-            (
-                "order_sort",
-                order_sort
-                    .unwrap_or(OrderSort::Ascending)
-                    .as_num()
-                    .to_string(),
-            ),
-            (
-                "user_type",
-                user_type.unwrap_or(UserType::All).as_num().to_string(),
-            ),
-            ("page", page_str),
-        ];
-
-        let signed_params = self.get_wbi_sign2(params).await?;
+        let signed_params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         self.get("https://api.bilibili.com/x/web-interface/wbi/search/type")
             .query(&signed_params)
@@ -133,22 +88,12 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `keyword` | &str | 搜索关键词 |
-    /// | `page` | `Option<i32>` | 页码（默认1） |
+    /// | `params` | `SearchLiveParams` | 直播综合搜索参数 |
     pub async fn search_live(
         &self,
-        keyword: &str,
-        page: Option<i32>,
+        params: SearchLiveParams,
     ) -> Result<BpiResponse<SearchData<LiveData>>, BpiError> {
-        let page_str = page.unwrap_or(1).to_string();
-
-        let params = vec![
-            ("search_type", SearchType::Live.as_str().to_string()),
-            ("keyword", keyword.to_string()),
-            ("page", page_str),
-        ];
-
-        let signed_params = self.get_wbi_sign2(params).await?;
+        let signed_params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         self.get("https://api.bilibili.com/x/web-interface/wbi/search/type")
             .query(&signed_params)
@@ -165,28 +110,12 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `keyword` | &str | 搜索关键词 |
-    /// | `order` | `Option<SearchOrder>` | 排序方式（默认 online） |
-    /// | `page` | `Option<i32>` | 页码（默认1） |
+    /// | `params` | `SearchLiveRoomParams` | 直播间搜索参数 |
     pub async fn search_live_room(
         &self,
-        keyword: &str,
-        order: Option<SearchOrder>,
-        page: Option<i32>,
+        params: SearchLiveRoomParams,
     ) -> Result<BpiResponse<SearchData<Vec<LiveRoom>>>, BpiError> {
-        let page_str = page.unwrap_or(1).to_string();
-
-        let params = vec![
-            ("search_type", SearchType::LiveRoom.as_str().to_string()),
-            ("keyword", keyword.to_string()),
-            (
-                "order",
-                order.unwrap_or(SearchOrder::Online).as_str().to_string(),
-            ),
-            ("page", page_str),
-        ];
-
-        let signed_params = self.get_wbi_sign2(params).await?;
+        let signed_params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         self.get("https://api.bilibili.com/x/web-interface/wbi/search/type")
             .query(&signed_params)
@@ -203,37 +132,12 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `keyword` | &str | 搜索关键词 |
-    /// | `order_sort` | `Option<OrderSort>` | 排序方向 |
-    /// | `user_type` | `Option<UserType>` | 主播类型筛选 |
-    /// | `page` | `Option<i32>` | 页码（默认1） |
+    /// | `params` | `SearchLiveUserParams` | 主播搜索参数 |
     pub async fn search_live_user(
         &self,
-        keyword: &str,
-        order_sort: Option<OrderSort>,
-        user_type: Option<UserType>,
-        page: Option<i32>,
+        params: SearchLiveUserParams,
     ) -> Result<BpiResponse<SearchData<Vec<LiveUser>>>, BpiError> {
-        let page_str = page.unwrap_or(1).to_string();
-
-        let params = vec![
-            ("search_type", SearchType::LiveUser.as_str().to_string()),
-            ("keyword", keyword.to_string()),
-            (
-                "order_sort",
-                order_sort
-                    .unwrap_or(OrderSort::Ascending)
-                    .as_num()
-                    .to_string(),
-            ),
-            (
-                "user_type",
-                user_type.unwrap_or(UserType::All).as_num().to_string(),
-            ),
-            ("page", page_str),
-        ];
-
-        let signed_params = self.get_wbi_sign2(params).await?;
+        let signed_params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         self.get("https://api.bilibili.com/x/web-interface/wbi/search/type")
             .query(&signed_params)
@@ -289,8 +193,9 @@ impl BpiClient {
 mod tests {
     use super::*;
     use crate::search::{
-        CategoryId, Duration, OrderSort, SearchBangumiParams, SearchMovieParams, SearchOrder,
-        SearchVideoParams, UserType,
+        CategoryId, Duration, OrderSort, SearchArticleParams, SearchBangumiParams,
+        SearchBiliUserParams, SearchLiveRoomParams, SearchLiveUserParams, SearchMovieParams,
+        SearchOrder, SearchVideoParams, UserType,
     };
     use tracing::info;
 
@@ -298,14 +203,11 @@ mod tests {
     #[tokio::test]
     async fn test_search_article() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .search_article(
-                "Rust",
-                Some(SearchOrder::PubDate),
-                Some(CategoryId::Technology),
-                None,
-            )
-            .await;
+        let params = SearchArticleParams::new("Rust")
+            .expect("keyword should be valid")
+            .with_order(SearchOrder::PubDate)
+            .with_category_id(CategoryId::Technology);
+        let resp = bpi.search_article(params).await;
         assert!(resp.is_ok());
         if let Ok(r) = resp {
             info!("搜索文章返回: {:?}", r);
@@ -348,14 +250,11 @@ mod tests {
     #[tokio::test]
     async fn test_search_bili_user() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .search_bili_user(
-                "老番茄",
-                Some(OrderSort::Descending),
-                Some(UserType::All),
-                None,
-            )
-            .await;
+        let params = SearchBiliUserParams::new("老番茄")
+            .expect("keyword should be valid")
+            .with_order_sort(OrderSort::Descending)
+            .with_user_type(UserType::All);
+        let resp = bpi.search_bili_user(params).await;
         assert!(resp.is_ok());
         if let Ok(r) = resp {
             info!("搜索用户返回: {:?}", r);
@@ -376,7 +275,8 @@ mod tests {
     #[tokio::test]
     async fn test_search_live_room() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.search_live_room("游戏", None, None).await;
+        let params = SearchLiveRoomParams::new("游戏").expect("keyword should be valid");
+        let resp = bpi.search_live_room(params).await;
         assert!(resp.is_ok());
         if let Ok(r) = resp {
             info!("搜索直播间返回: {:?}", r);
@@ -397,14 +297,11 @@ mod tests {
     #[tokio::test]
     async fn test_search_live_user() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .search_live_user(
-                "散人",
-                Some(OrderSort::Descending),
-                Some(UserType::All),
-                None,
-            )
-            .await;
+        let params = SearchLiveUserParams::new("散人")
+            .expect("keyword should be valid")
+            .with_order_sort(OrderSort::Descending)
+            .with_user_type(UserType::All);
+        let resp = bpi.search_live_user(params).await;
         assert!(resp.is_ok());
         if let Ok(r) = resp {
             info!("搜索主播返回: {:?}", r);
