@@ -30,11 +30,12 @@ async fn run() -> Result<(), BpiError> {
         )
     })?;
     let account_path = args.next().unwrap_or_else(|| "account.toml".to_string());
+    let output_path = args.next();
 
     if args.next().is_some() {
         return Err(BpiError::invalid_parameter(
             "args",
-            "usage: bpi-probe <contract.json> [account.toml]",
+            "usage: bpi-probe <contract.json> [account.toml] [output.json]",
         ));
     }
 
@@ -46,7 +47,16 @@ async fn run() -> Result<(), BpiError> {
     let contract = ApiContract::from_slice(&contract_bytes)?;
     let accounts = RawProbeConfig::load(&account_path)?;
     let result = execute_contract(&contract, &accounts).await?;
+    let output = serde_json::to_string_pretty(&result)?;
 
-    println!("{}", serde_json::to_string_pretty(&result)?);
+    if let Some(output_path) = output_path {
+        fs::write(&output_path, format!("{output}\n")).map_err(|err| {
+            BpiError::parse(format!(
+                "failed to write probe output file {output_path}: {err}"
+            ))
+        })?;
+    } else {
+        println!("{output}");
+    }
     Ok(())
 }

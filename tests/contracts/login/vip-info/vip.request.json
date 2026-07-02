@@ -1,5 +1,5 @@
 {
-  "name": "login.vip_info.active",
+  "name": "login.vip_info.vip",
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/vip/web/user/info",

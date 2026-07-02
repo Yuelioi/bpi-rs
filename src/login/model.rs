@@ -140,3 +140,53 @@ where
     Ok(Option::<String>::deserialize(deserializer)?
         .and_then(|value| (!value.trim().is_empty()).then_some(value)))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{ApiEnvelope, BpiError};
+
+    fn local_vip_info_probe_body(name: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/login/vip-info/vip-info/{name}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn login_vip_info_matches_local_probe_outputs_when_available() -> Result<(), BpiError> {
+        let Some(normal_body) = local_vip_info_probe_body("normal") else {
+            return Ok(());
+        };
+        let Some(active_body) = local_vip_info_probe_body("vip") else {
+            return Ok(());
+        };
+
+        let normal: LoginVipInfo =
+            serde_json::from_value::<ApiEnvelope<LoginVipInfo>>(normal_body)?.into_payload()?;
+        let active: LoginVipInfo =
+            serde_json::from_value::<ApiEnvelope<LoginVipInfo>>(active_body)?.into_payload()?;
+
+        assert!(!normal.is_active());
+        assert!(active.is_active());
+        Ok(())
+    }
+
+    #[test]
+    fn login_vip_info_anonymous_probe_returns_login_required_when_available() -> Result<(), BpiError>
+    {
+        let Some(body) = local_vip_info_probe_body("anonymous") else {
+            return Ok(());
+        };
+
+        let err = serde_json::from_value::<ApiEnvelope<LoginVipInfo>>(body)?
+            .ensure_success()
+            .unwrap_err();
+
+        assert!(err.requires_login());
+        Ok(())
+    }
+}

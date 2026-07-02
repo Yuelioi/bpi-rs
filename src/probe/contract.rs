@@ -40,6 +40,7 @@ impl ContractUrl {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "UPPERCASE")]
 pub enum HttpMethod {
     Get,
     Post,
@@ -106,6 +107,53 @@ impl ProbeResult {
         redact_headers(&mut output.request.headers);
         redact_headers(&mut output.response.headers);
         output
+    }
+
+    pub fn validate_expectations(&self, contract: &ApiContract) -> BpiResult<()> {
+        if let Some(expected_code) = contract.expect.get("api_code") {
+            let actual_code = self
+                .response
+                .body
+                .get("code")
+                .ok_or_else(|| BpiError::unsupported_response("probe response missing code"))?;
+            if actual_code != expected_code {
+                return Err(BpiError::unsupported_response(format!(
+                    "probe api_code mismatch: expected {expected_code}, got {actual_code}"
+                )));
+            }
+        }
+
+        if let Some(expected_vip_active) = contract.expect.get("vip_active") {
+            let expected_vip_active = expected_vip_active.as_bool().ok_or_else(|| {
+                BpiError::invalid_parameter("vip_active", "vip_active expectation must be boolean")
+            })?;
+            let data = self
+                .response
+                .body
+                .get("data")
+                .ok_or_else(|| BpiError::unsupported_response("probe response missing data"))?;
+            let vip_status = data
+                .get("vip_status")
+                .and_then(serde_json::Value::as_u64)
+                .ok_or_else(|| {
+                    BpiError::unsupported_response("probe response missing data.vip_status")
+                })?;
+            let vip_due_date = data
+                .get("vip_due_date")
+                .and_then(serde_json::Value::as_u64)
+                .ok_or_else(|| {
+                    BpiError::unsupported_response("probe response missing data.vip_due_date")
+                })?;
+            let actual_vip_active = vip_status == 1 && vip_due_date > 0;
+
+            if actual_vip_active != expected_vip_active {
+                return Err(BpiError::unsupported_response(format!(
+                    "probe vip_active mismatch: expected {expected_vip_active}, got {actual_vip_active}"
+                )));
+            }
+        }
+
+        Ok(())
     }
 }
 
@@ -193,10 +241,10 @@ mod tests {
     #[test]
     fn contract_deserializes_get_cookie_request() -> Result<(), BpiError> {
         let contract = ApiContract::from_slice(include_bytes!(
-            "../../tests/contracts/login/vip-info/active.request.json"
+            "../../tests/contracts/login/vip-info/vip.request.json"
         ))?;
 
-        assert_eq!(contract.name, "login.vip_info.active");
+        assert_eq!(contract.name, "login.vip_info.vip");
         assert_eq!(contract.request.method, HttpMethod::Get);
         assert_eq!(
             contract.request.url.as_str(),
@@ -220,6 +268,104 @@ mod tests {
         assert_eq!(contract.name, "login.vip_info.normal");
         assert_eq!(contract.request.auth.profile.as_deref(), Some("normal"));
         assert_eq!(contract.expect["vip_active"], false);
+        Ok(())
+    }
+
+    #[test]
+    fn contract_deserializes_anonymous_variant() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(include_bytes!(
+            "../../tests/contracts/login/vip-info/anonymous.request.json"
+        ))?;
+
+        assert_eq!(contract.name, "login.vip_info.anonymous");
+        assert_eq!(contract.request.auth.profile, None);
+        assert!(!contract.request.auth.requires_cookie());
+        assert_eq!(contract.expect["api_code"], -101);
+        Ok(())
+    }
+
+    #[test]
+    fn captured_request_serializes_method_as_uppercase() -> Result<(), BpiError> {
+        let captured = CapturedRequest {
+            method: HttpMethod::Get,
+            url: "https://api.bilibili.com/x/vip/web/user/info".to_string(),
+            headers: Default::default(),
+            query: Default::default(),
+            body: None,
+        };
+
+        let value = serde_json::to_value(captured)?;
+
+        assert_eq!(value["method"], "GET");
+        Ok(())
+    }
+
+    #[test]
+    fn probe_result_validates_expected_api_code() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(include_bytes!(
+            "../../tests/contracts/login/vip-info/anonymous.request.json"
+        ))?;
+        let result = ProbeResult {
+            contract: contract.name.clone(),
+            request: CapturedRequest {
+                method: HttpMethod::Get,
+                url: contract.request.url.as_str().to_string(),
+                headers: Default::default(),
+                query: Default::default(),
+                body: None,
+            },
+            response: ProbeResponse {
+                status: 200,
+                headers: Default::default(),
+                body: serde_json::json!({
+                    "code": -101,
+                    "message": "账号未登录"
+                }),
+            },
+        };
+
+        result.validate_expectations(&contract)?;
+        Ok(())
+    }
+
+    #[test]
+    fn probe_result_rejects_mismatched_vip_active_expectation() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(include_bytes!(
+            "../../tests/contracts/login/vip-info/vip.request.json"
+        ))?;
+        let result = ProbeResult {
+            contract: contract.name.clone(),
+            request: CapturedRequest {
+                method: HttpMethod::Get,
+                url: contract.request.url.as_str().to_string(),
+                headers: Default::default(),
+                query: Default::default(),
+                body: None,
+            },
+            response: ProbeResponse {
+                status: 200,
+                headers: Default::default(),
+                body: serde_json::json!({
+                    "code": 0,
+                    "data": {
+                        "mid": 1,
+                        "vip_type": 0,
+                        "vip_status": 0,
+                        "vip_due_date": 0,
+                        "vip_pay_type": 0,
+                        "theme_type": 0
+                    },
+                    "message": "0"
+                }),
+            },
+        };
+
+        let err = result.validate_expectations(&contract).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::UnsupportedResponse { .. } | BpiError::InvalidParameter { .. }
+        ));
         Ok(())
     }
 
@@ -248,7 +394,7 @@ mod tests {
     #[test]
     fn probe_result_redacts_sensitive_headers() -> Result<(), BpiError> {
         let result = ProbeResult {
-            contract: "login.vip_info.active".to_string(),
+            contract: "login.vip_info.vip".to_string(),
             request: CapturedRequest {
                 method: HttpMethod::Get,
                 url: "https://api.bilibili.com/x/vip/web/user/info".to_string(),

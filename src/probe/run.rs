@@ -20,7 +20,7 @@ pub async fn execute_contract(
     let headers = collect_headers(response.headers());
     let body = response_body(response).await?;
 
-    Ok(ProbeResult {
+    let result = ProbeResult {
         contract: contract.name.clone(),
         request: captured_request,
         response: ProbeResponse {
@@ -29,7 +29,11 @@ pub async fn execute_contract(
             body,
         },
     }
-    .sanitized())
+    .sanitized();
+
+    result.validate_expectations(contract)?;
+
+    Ok(result)
 }
 
 fn client_for_contract(contract: &ApiContract, accounts: &RawProbeConfig) -> BpiResult<BpiClient> {
@@ -167,7 +171,7 @@ mod tests {
     -> Result<(), BpiError> {
         let contract = ApiContract::from_slice(
             br#"{
-                "name": "login.vip_info.active",
+                "name": "login.vip_info.vip",
                 "request": {
                     "method": "GET",
                     "url": "https://api.bilibili.com/x/vip/web/user/info",

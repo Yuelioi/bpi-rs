@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use config::{Config, File};
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 
 use crate::{Account, BpiError, BpiResult};
 
@@ -31,35 +31,35 @@ pub struct ProbeAccountProfile {
 
 #[derive(Debug, Clone, Default, Deserialize)]
 pub(crate) struct FlatProbeAccountConfig {
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     bili_jct: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     dede_user_id: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     dede_user_id_ckmd5: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     sessdata: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     buvid3: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     bili_jct_vip: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     dede_user_id_vip: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     dede_user_id_ckmd5_vip: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     sessdata_vip: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     buvid3_vip: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     bili_jct_normal: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     dede_user_id_normal: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     dede_user_id_ckmd5_normal: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     sessdata_normal: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
     buvid3_normal: Option<String>,
 }
 
@@ -181,6 +181,27 @@ fn configured_value(value: &Option<String>) -> Option<String> {
         .map(str::to_owned)
 }
 
+fn deserialize_optional_stringish<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum Stringish {
+        String(String),
+        Unsigned(u64),
+        Signed(i64),
+    }
+
+    Ok(
+        Option::<Stringish>::deserialize(deserializer)?.map(|value| match value {
+            Stringish::String(value) => value,
+            Stringish::Unsigned(value) => value.to_string(),
+            Stringish::Signed(value) => value.to_string(),
+        }),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -275,7 +296,7 @@ mod tests {
                 r#"
                 [probe.vip]
                 bili_jct = "vip-csrf"
-                dede_user_id = "42"
+                dede_user_id = 42
                 dede_user_id_ckmd5 = "vip-ck"
                 sessdata = "vip-session"
                 buvid3 = "vip-buvid"
@@ -314,13 +335,13 @@ mod tests {
             .add_source(File::from_str(
                 r#"
                 bili_jct_vip = "vip-csrf"
-                dede_user_id_vip = "42"
+                dede_user_id_vip = 42
                 dede_user_id_ckmd5_vip = "vip-ck"
                 sessdata_vip = "vip-session"
                 buvid3_vip = "vip-buvid"
 
                 bili_jct_normal = "normal-csrf"
-                dede_user_id_normal = "43"
+                dede_user_id_normal = 43
                 sessdata_normal = "normal-session"
                 buvid3_normal = "normal-buvid"
                 "#,
@@ -346,7 +367,7 @@ mod tests {
             .add_source(File::from_str(
                 r#"
                 bili_jct = "legacy-csrf"
-                dede_user_id = "42"
+                dede_user_id = 42
                 dede_user_id_ckmd5 = "legacy-ck"
                 sessdata = "legacy-session"
                 buvid3 = "legacy-buvid"

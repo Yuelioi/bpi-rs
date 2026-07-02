@@ -34,3 +34,6 @@ src-tauri/libs
 src/doc
 
 account.toml
+
+# Local live probe outputs can contain account-specific response data.
+flightdeck/work/**/probe-runs/
