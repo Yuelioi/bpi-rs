@@ -4,6 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::creativecenter::{UpArchiveVideosParams, UpArchivesListParams};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 /// 稿件统计信息
@@ -108,23 +109,18 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `pn` | i64 | 页码 |
-    /// | `ps` | `Option<i64>` | 每页数量，可选 |
+    /// | `params` | [`UpArchivesListParams`] | 稿件列表分页参数 |
     ///
     /// # 文档
     /// [获取稿件列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/videos.md#获取稿件列表)
     pub async fn up_archives_list(
         &self,
-        pn: i64,
-        ps: Option<i64>,
+        params: UpArchivesListParams,
     ) -> Result<BpiResponse<SpArchivesData>, BpiError> {
-        let mut req = self
-            .get("https://member.bilibili.com/x2/creative/web/archives/sp")
-            .query(&[("pn", pn)]);
-        if let Some(ps) = ps {
-            req = req.query(&[("ps", ps)]);
-        }
-        req.send_bpi("获取稿件列表").await
+        self.get("https://member.bilibili.com/x2/creative/web/archives/sp")
+            .query(&params.query_pairs())
+            .send_bpi("获取稿件列表")
+            .await
     }
 
     /// 获取视频基础信息
@@ -134,16 +130,16 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `aid` | i64 | 视频 av 号 |
+    /// | `params` | [`UpArchiveVideosParams`] | 视频 aid 参数 |
     ///
     /// # 文档
     /// [获取视频基础信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/videos.md#获取视频基础信息)
     pub async fn up_archive_videos(
         &self,
-        aid: i64,
+        params: UpArchiveVideosParams,
     ) -> Result<BpiResponse<ArchiveVideosData>, BpiError> {
         self.get("https://member.bilibili.com/x/web/archive/videos")
-            .query(&[("aid", aid)])
+            .query(&params.query_pairs())
             .send_bpi("获取视频基础信息")
             .await
     }
@@ -152,15 +148,17 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::Aid;
     use tracing::info;
 
-    const TEST_AID: i64 = 113602455409683;
+    const TEST_AID: u64 = 113602455409683;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_archives_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi.up_archives_list(1, Some(10)).await?.into_data()?;
+        let params = UpArchivesListParams::new(1)?.with_page_size(10)?;
+        let data = bpi.up_archives_list(params).await?.into_data()?;
         info!("稿件列表: {:?}", data);
         Ok(())
     }
@@ -169,7 +167,8 @@ mod tests {
     #[tokio::test]
     async fn test_archive_videos() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi.up_archive_videos(TEST_AID).await?.into_data()?;
+        let params = UpArchiveVideosParams::new(Aid::new(TEST_AID)?);
+        let data = bpi.up_archive_videos(params).await?.into_data()?;
         info!("视频基础信息: {:?}", data);
         Ok(())
     }
