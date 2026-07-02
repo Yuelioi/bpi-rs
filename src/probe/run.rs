@@ -37,8 +37,13 @@ fn client_for_contract(contract: &ApiContract, accounts: &RawProbeConfig) -> Bpi
 
     if let Some(profile) = contract.request.auth.profile.as_deref() {
         let account = accounts
-            .account(profile)
-            .ok_or_else(|| BpiError::invalid_parameter("profile", "account profile not found"))?;
+            .account(profile)?
+            .ok_or_else(|| {
+                BpiError::invalid_parameter(
+                    "profile",
+                    "account profile not found; configure [probe.vip]/[probe.normal] or *_vip/*_normal fields",
+                )
+            })?;
         builder = builder.account(account);
     } else if contract.request.auth.requires_cookie() {
         return Err(BpiError::invalid_parameter(
@@ -125,8 +130,6 @@ async fn response_body(response: reqwest::Response) -> BpiResult<serde_json::Val
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
     use super::*;
     use crate::BpiError;
     use crate::probe::account::{ProbeAccountConfig, ProbeAccountProfile, RawProbeConfig};
@@ -177,17 +180,16 @@ mod tests {
         )?;
         let config = RawProbeConfig {
             probe: ProbeAccountConfig {
-                accounts: HashMap::from([(
-                    "vip".to_string(),
-                    ProbeAccountProfile {
-                        bili_jct: "csrf".to_string(),
-                        dede_user_id: "42".to_string(),
-                        dede_user_id_ckmd5: "ck".to_string(),
-                        sessdata: "session".to_string(),
-                        buvid3: "buvid".to_string(),
-                    },
-                )]),
+                vip: Some(ProbeAccountProfile {
+                    bili_jct: "csrf".to_string(),
+                    dede_user_id: "42".to_string(),
+                    dede_user_id_ckmd5: "ck".to_string(),
+                    sessdata: "session".to_string(),
+                    buvid3: "buvid".to_string(),
+                }),
+                normal: None,
             },
+            ..RawProbeConfig::default()
         };
 
         let client = client_for_contract(&contract, &config)?;
