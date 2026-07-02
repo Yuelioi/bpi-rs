@@ -1,0 +1,15 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "mid": 1000001,
+    "uname": "sanitized-normal",
+    "userid": "sanitized-user",
+    "sign": "",
+    "birthday": "2000-01-01",
+    "sex": "保密",
+    "nick_free": false,
+    "rank": "10000"
+  }
+}

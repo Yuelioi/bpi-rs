@@ -85,7 +85,8 @@ impl BpiClient {
 mod tests {
     use super::*;
     use crate::ApiEnvelope;
-    use crate::probe::contract::{ApiContract, HttpMethod};
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
     use crate::probe::flow::ProbeFlow;
     use tokio;
 
@@ -107,23 +108,45 @@ mod tests {
 
     #[test]
     fn qr_generate_contract_matches_endpoint_request() -> Result<(), BpiError> {
-        let contract = ApiContract::from_slice(include_bytes!(
-            "../../../tests/contracts/login/qr/generate/anonymous.request.json"
+        let contract = EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/login/qr/generate/contract.json"
         ))?;
 
-        assert_eq!(contract.name, "login.qr_generate.anonymous");
+        assert_eq!(contract.name, "login.qr_generate");
         assert_eq!(contract.request.method, HttpMethod::Get);
         assert_eq!(contract.request.url.as_str(), QR_GENERATE_ENDPOINT);
         assert!(contract.request.query.is_empty());
-        assert_eq!(contract.expect["api_code"], 0);
         assert!(!contract.request.auth.requires_cookie());
+        assert_eq!(contract.cases[0].response.api_code, 0);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("GenerateQrCodeData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn qr_poll_contract_matches_endpoint_request() -> Result<(), BpiError> {
+        let contract = EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/login/qr/poll/contract.json"
+        ))?;
+
+        assert_eq!(contract.name, "login.qr_poll");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), QR_POLL_ENDPOINT);
+        assert_eq!(
+            contract.request.query.get("qrcode_key").map(String::as_str),
+            Some("${qrcode_key}")
+        );
+        assert!(!contract.request.auth.requires_cookie());
+        assert_eq!(contract.cases[0].response.api_code, 0);
         Ok(())
     }
 
     #[test]
     fn qr_flow_contract_covers_generate_and_poll_requests() -> Result<(), BpiError> {
         let flow = ProbeFlow::from_slice(include_bytes!(
-            "../../../tests/contracts/login/qr/flow.anonymous.request.json"
+            "../../../tests/contracts/login/qr/flow/contract.json"
         ))?;
 
         assert_eq!(flow.name, "login.qr.flow");
@@ -137,6 +160,22 @@ mod tests {
             flow.steps[1].contract["request"]["query"]["qrcode_key"],
             "${qrcode_key}"
         );
+        Ok(())
+    }
+
+    #[test]
+    fn qr_response_fixtures_parse_declared_models() -> Result<(), BpiError> {
+        let generate = ApiEnvelope::<GenerateQrCodeData>::from_slice(include_bytes!(
+            "../../../tests/contracts/login/qr/generate/responses/anonymous.success.json"
+        ))?
+        .into_payload()?;
+        let poll = ApiEnvelope::<CheckQrCodeStatusData>::from_slice(include_bytes!(
+            "../../../tests/contracts/login/qr/poll/responses/waiting.success.json"
+        ))?
+        .into_payload()?;
+
+        assert!(generate.url.starts_with("https://"));
+        assert_eq!(poll.code, 86101);
         Ok(())
     }
 

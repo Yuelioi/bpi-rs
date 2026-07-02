@@ -1,0 +1,9 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "url": "https://passport.bilibili.com/qrcode/h5/login?oauthKey=sanitized",
+    "qrcode_key": "sanitized-qrcode-key"
+  }
+}

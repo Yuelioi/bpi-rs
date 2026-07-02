@@ -1,0 +1,36 @@
+{
+  "name": "login.qr_generate",
+  "request": {
+    "method": "GET",
+    "url": "https://passport.bilibili.com/x/passport-login/web/qrcode/generate",
+    "query": {},
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "private account fields sanitized before commit"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/anonymous.success.json",
+        "fixture_kind": "sanitized_probe",
+        "rust_model": "GenerateQrCodeData"
+      }
+    }
+  ]
+}

@@ -243,11 +243,39 @@ mod tests {
     use super::*;
     use crate::BpiError;
 
+    fn vip_info_contract(
+        profile: &str,
+        requires_cookie: bool,
+        expect: serde_json::Value,
+    ) -> BpiResult<ApiContract> {
+        let required_headers = if requires_cookie {
+            serde_json::json!(["user-agent", "referer", "origin", "cookie"])
+        } else {
+            serde_json::json!(["user-agent", "referer", "origin"])
+        };
+        let auth = if requires_cookie {
+            serde_json::json!({ "profile": profile, "requires": ["cookie"] })
+        } else {
+            serde_json::json!({ "requires": [] })
+        };
+
+        ApiContract::from_value(serde_json::json!({
+            "name": format!("login.vip_info.{profile}"),
+            "request": {
+                "method": "GET",
+                "url": "https://api.bilibili.com/x/vip/web/user/info",
+                "query": {},
+                "required_headers": required_headers,
+                "headers": {},
+                "auth": auth
+            },
+            "expect": expect
+        }))
+    }
+
     #[test]
     fn contract_deserializes_get_cookie_request() -> Result<(), BpiError> {
-        let contract = ApiContract::from_slice(include_bytes!(
-            "../../tests/contracts/login/vip-info/vip.request.json"
-        ))?;
+        let contract = vip_info_contract("vip", true, serde_json::json!({ "api_code": 0 }))?;
 
         assert_eq!(contract.name, "login.vip_info.vip");
         assert_eq!(contract.request.method, HttpMethod::Get);
@@ -266,9 +294,11 @@ mod tests {
 
     #[test]
     fn contract_deserializes_normal_account_variant() -> Result<(), BpiError> {
-        let contract = ApiContract::from_slice(include_bytes!(
-            "../../tests/contracts/login/vip-info/normal.request.json"
-        ))?;
+        let contract = vip_info_contract(
+            "normal",
+            true,
+            serde_json::json!({ "api_code": 0, "vip_active": false }),
+        )?;
 
         assert_eq!(contract.name, "login.vip_info.normal");
         assert_eq!(contract.request.auth.profile.as_deref(), Some("normal"));
@@ -278,9 +308,8 @@ mod tests {
 
     #[test]
     fn contract_deserializes_anonymous_variant() -> Result<(), BpiError> {
-        let contract = ApiContract::from_slice(include_bytes!(
-            "../../tests/contracts/login/vip-info/anonymous.request.json"
-        ))?;
+        let contract =
+            vip_info_contract("anonymous", false, serde_json::json!({ "api_code": -101 }))?;
 
         assert_eq!(contract.name, "login.vip_info.anonymous");
         assert_eq!(contract.request.auth.profile, None);
@@ -307,9 +336,8 @@ mod tests {
 
     #[test]
     fn probe_result_validates_expected_api_code() -> Result<(), BpiError> {
-        let contract = ApiContract::from_slice(include_bytes!(
-            "../../tests/contracts/login/vip-info/anonymous.request.json"
-        ))?;
+        let contract =
+            vip_info_contract("anonymous", false, serde_json::json!({ "api_code": -101 }))?;
         let result = ProbeResult {
             contract: contract.name.clone(),
             request: CapturedRequest {
@@ -335,9 +363,11 @@ mod tests {
 
     #[test]
     fn probe_result_rejects_mismatched_vip_active_expectation() -> Result<(), BpiError> {
-        let contract = ApiContract::from_slice(include_bytes!(
-            "../../tests/contracts/login/vip-info/vip.request.json"
-        ))?;
+        let contract = vip_info_contract(
+            "vip",
+            true,
+            serde_json::json!({ "api_code": 0, "vip_active": true }),
+        )?;
         let result = ProbeResult {
             contract: contract.name.clone(),
             request: CapturedRequest {

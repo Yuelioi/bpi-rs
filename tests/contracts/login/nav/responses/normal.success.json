@@ -1,0 +1,15 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "isLogin": true,
+    "mid": 1000001,
+    "uname": "sanitized-normal",
+    "face": "https://example.invalid/avatar.png",
+    "wbi_img": {
+      "img_url": "https://i0.hdslb.com/bfs/wbi/sanitized-img.png",
+      "sub_url": "https://i0.hdslb.com/bfs/wbi/sanitized-sub.png"
+    }
+  }
+}

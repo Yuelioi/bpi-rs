@@ -146,6 +146,7 @@ mod tests {
     use super::*;
     use serde::de::DeserializeOwned;
 
+    use crate::probe::endpoint_contract::EndpointContract;
     use crate::{ApiEnvelope, BpiError};
 
     const READ_INFO_ENDPOINTS: &[&str] = &["account-info", "coin", "nav", "stat", "today-coin-exp"];
@@ -182,6 +183,82 @@ mod tests {
         serde_json::from_value::<ApiEnvelope<T>>(body)?
             .into_payload()
             .map(Some)
+    }
+
+    fn fixture_bytes(
+        endpoint: &str,
+        case: &crate::probe::endpoint_contract::EndpointCase,
+    ) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+        let fixture = case
+            .response
+            .fixture
+            .as_deref()
+            .ok_or_else(|| BpiError::unsupported_response("contract case missing fixture"))?;
+        let path = format!("tests/contracts/login/{endpoint}/{fixture}");
+
+        Ok(std::fs::read(path)?)
+    }
+
+    fn assert_fixture_matches_model(
+        model: &str,
+        bytes: &[u8],
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        match model {
+            "LoginAccountInfo" => {
+                let payload = ApiEnvelope::<LoginAccountInfo>::from_slice(bytes)?.into_payload()?;
+                assert!(payload.mid.get() > 0);
+            }
+            "LoginCoinBalance" => {
+                let payload = ApiEnvelope::<LoginCoinBalance>::from_slice(bytes)?.into_payload()?;
+                assert!(payload.money >= 0.0);
+            }
+            "LoginNav" => {
+                let payload = ApiEnvelope::<LoginNav>::from_slice(bytes)?.into_payload()?;
+                assert!(payload.is_login);
+            }
+            "LoginStats" => {
+                let payload = ApiEnvelope::<LoginStats>::from_slice(bytes)?.into_payload()?;
+                assert!(payload.following > 0);
+            }
+            "LoginTodayCoinExp" => {
+                let payload =
+                    ApiEnvelope::<LoginTodayCoinExp>::from_slice(bytes)?.into_payload()?;
+                assert!(payload.value <= 50);
+            }
+            "LoginVipInfo" => {
+                let payload = ApiEnvelope::<LoginVipInfo>::from_slice(bytes)?.into_payload()?;
+                assert!(payload.mid.get() > 0);
+            }
+            _ => {
+                return Err(Box::new(BpiError::unsupported_response(format!(
+                    "unknown login response model {model}"
+                ))));
+            }
+        }
+
+        Ok(())
+    }
+
+    fn assert_login_contract_fixtures_parse(
+        endpoint: &str,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let contract = EndpointContract::from_slice(&std::fs::read(format!(
+            "tests/contracts/login/{endpoint}/contract.json"
+        ))?)?;
+
+        for case in &contract.cases {
+            let bytes = fixture_bytes(endpoint, case)?;
+            if let Some(model) = &case.response.rust_model {
+                assert_fixture_matches_model(model, &bytes)?;
+            } else if case.response.error.as_deref() == Some("requires_login") {
+                let err = ApiEnvelope::<serde_json::Value>::from_slice(&bytes)?
+                    .ensure_success()
+                    .unwrap_err();
+                assert!(err.requires_login());
+            }
+        }
+
+        Ok(())
     }
 
     #[test]
@@ -257,6 +334,16 @@ mod tests {
                 .unwrap_err();
 
             assert!(err.requires_login());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn login_contract_response_fixtures_parse_declared_models()
+    -> Result<(), Box<dyn std::error::Error>> {
+        assert_login_contract_fixtures_parse("vip-info")?;
+        for endpoint in READ_INFO_ENDPOINTS {
+            assert_login_contract_fixtures_parse(endpoint)?;
         }
         Ok(())
     }

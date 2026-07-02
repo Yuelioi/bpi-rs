@@ -20,7 +20,7 @@
 - Do not store raw Probe outputs in `flightdeck/work`.
 - Do not commit raw Probe outputs, cookies, `SESSDATA`, `bili_jct`, `buvid`, account-specific response headers, or account-identifying data when avoidable.
 - Confirmed request contracts may be committed under `tests/contracts/...`.
-- Sanitized fixtures may be committed under `tests/fixtures/...` only after review.
+- Sanitized endpoint fixtures may be committed under `tests/contracts/<domain>/<endpoint>/responses/...` only after review.
 - Default commit unit is one module batch, not one endpoint.
 - Do not create hundreds of endpoint-sized commits.
 - Do not make a single commit so large that review or rollback becomes impractical.
@@ -109,8 +109,8 @@ target/bpi-probe-notes/<domain>/<batch>.md
 Commit only after review:
 
 ```text
-tests/contracts/<domain>/<endpoint>/<profile>.request.json
-tests/fixtures/<domain>/<endpoint>/<case>.json
+tests/contracts/<domain>/<endpoint>/contract.json
+tests/contracts/<domain>/<endpoint>/responses/<case>.json
 ```
 
 `flightdeck/work` is for plans, protocols, and decisions. It is not a raw Probe output directory.
@@ -206,8 +206,9 @@ cargo run --quiet --bin bpi-probe -- <draft-or-contract.json> account.toml targe
 
 ### Task 5: Promote Contracts And Fixtures
 
-- [ ] Copy reviewed request contracts into `tests/contracts/<domain>/<endpoint>/<profile>.request.json`.
-- [ ] Add sanitized fixtures only when needed for offline model tests.
+- [ ] Promote one reviewed endpoint contract into `tests/contracts/<domain>/<endpoint>/contract.json`.
+- [ ] Put reviewed/sanitized response fixtures under `tests/contracts/<domain>/<endpoint>/responses/*.json`.
+- [ ] Keep profile differences in `contract.json` `cases`, not in duplicated per-profile request files.
 - [ ] Keep fixtures minimal and remove account-specific data.
 - [ ] Do not commit raw Probe output.
 
@@ -255,7 +256,7 @@ git status --short --ignored=matching target\bpi-probe-notes
 - [ ] Commit one module batch:
 
 ```powershell
-git add src tests/contracts tests/fixtures
+git add src tests/contracts
 git commit -m "feat(<domain>): validate <batch> api contracts"
 ```
 

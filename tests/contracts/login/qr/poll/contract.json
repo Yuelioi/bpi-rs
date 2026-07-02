@@ -1,0 +1,38 @@
+{
+  "name": "login.qr_poll",
+  "request": {
+    "method": "GET",
+    "url": "https://passport.bilibili.com/x/passport-login/web/qrcode/poll",
+    "query": {
+      "qrcode_key": "${qrcode_key}"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "private account fields sanitized before commit"
+  },
+  "cases": [
+    {
+      "name": "waiting",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/waiting.success.json",
+        "fixture_kind": "sanitized_probe",
+        "rust_model": "CheckQrCodeStatusData"
+      }
+    }
+  ]
+}

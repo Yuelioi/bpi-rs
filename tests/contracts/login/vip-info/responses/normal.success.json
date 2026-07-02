@@ -1,0 +1,13 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "mid": 1000001,
+    "vip_type": 0,
+    "vip_status": 0,
+    "vip_due_date": 0,
+    "vip_pay_type": 0,
+    "theme_type": 0
+  }
+}

@@ -1,5 +1,5 @@
 use crate::err::error::BpiError;
-use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use serde::{Deserialize, Deserializer, Serialize, de::DeserializeOwned};
 
 /// Crate-wide result type for bpi-rs operations.
 pub type BpiResult<T> = Result<T, BpiError>;
@@ -17,7 +17,7 @@ pub struct ApiEnvelope<T> {
     pub data: Option<T>,
 
     /// API message. Bilibili often returns `"0"` for success.
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_default_string")]
     pub message: String,
 
     /// Optional status flag returned by some endpoints.
@@ -78,12 +78,19 @@ pub struct BpiResponse<T> {
     pub data: Option<T>,
 
     /// 错误信息，默认为0
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_default_string")]
     pub message: String,
 
     /// 状态, 部分接口需要
     #[serde(default)]
     pub status: bool,
+}
+
+fn deserialize_default_string<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Option::<String>::deserialize(deserializer)?.unwrap_or_default())
 }
 
 impl<T> BpiResponse<T> {
@@ -160,9 +167,25 @@ mod tests {
     }
 
     #[test]
+    fn api_envelope_treats_null_message_as_empty() -> Result<(), BpiError> {
+        let payload = ApiEnvelope::<LoginCoinFixture>::from_slice(
+            br#"{ "code": 0, "message": null, "data": { "money": 0.0 } }"#,
+        )?
+        .into_payload()?;
+
+        assert_eq!(payload.money, 0.0);
+        Ok(())
+    }
+
+    #[test]
     fn api_envelope_returns_decode_error_for_invalid_json() {
         let err = ApiEnvelope::<FixturePayload>::from_slice(b"{not json").unwrap_err();
 
         assert!(matches!(err, BpiError::Decode { .. }));
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct LoginCoinFixture {
+        money: f64,
     }
 }

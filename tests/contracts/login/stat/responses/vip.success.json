@@ -1,0 +1,10 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "following": 10,
+    "follower": 20,
+    "dynamic_count": 30
+  }
+}
