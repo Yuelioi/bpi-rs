@@ -22,6 +22,13 @@ const DEFAULT_REFERER: &str = "https://www.bilibili.com/";
 const DEFAULT_ORIGIN: &str = "https://www.bilibili.com";
 const BILIBILI_URL: &str = "https://www.bilibili.com";
 const API_BILIBILI_URL: &str = "https://api.bilibili.com";
+const AUTH_COOKIE_NAMES: &[&str] = &[
+    "DedeUserID",
+    "DedeUserID__ckMd5",
+    "SESSDATA",
+    "bili_jct",
+    "buvid3",
+];
 
 /// Configures a [`BpiClient`] before construction.
 #[derive(Debug)]
@@ -221,6 +228,7 @@ impl BpiClient {
             .cookie_header
             .lock()
             .expect("cookie header mutex poisoned") = None;
+        expire_auth_cookies(&self.jar);
         tracing::info!("Bilibili account cleared");
     }
 
@@ -243,13 +251,17 @@ impl BpiClient {
             .cookie_header
             .lock()
             .expect("cookie header mutex poisoned")
-            .is_some()
+            .as_deref()
+            .is_some_and(contains_login_cookie)
         {
             return true;
         }
 
         let url = Url::parse(API_BILIBILI_URL).expect("static Bilibili API URL is valid");
-        self.jar.cookies(&url).is_some()
+        self.jar
+            .cookies(&url)
+            .and_then(|cookies| cookies.to_str().ok().map(contains_login_cookie))
+            .unwrap_or(false)
     }
 
     /// Returns the current account information.
@@ -359,6 +371,26 @@ fn add_cookie_pairs(jar: &reqwest::cookie::Jar, pairs: &[(String, String)]) {
     }
 }
 
+fn expire_auth_cookies(jar: &reqwest::cookie::Jar) {
+    let url = Url::parse(BILIBILI_URL).expect("static Bilibili URL is valid");
+    for key in AUTH_COOKIE_NAMES {
+        let cookie = format!(
+            "{key}=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Domain=.bilibili.com; Path=/"
+        );
+        jar.add_cookie_str(&cookie, &url);
+    }
+}
+
+fn contains_login_cookie(cookie_header: &str) -> bool {
+    parse_cookie_pairs(cookie_header)
+        .map(|pairs| {
+            pairs
+                .iter()
+                .any(|(key, value)| key.eq_ignore_ascii_case("SESSDATA") && !value.is_empty())
+        })
+        .unwrap_or(false)
+}
+
 fn validate_header(field: &'static str, value: &str) -> Result<HeaderValue, BpiError> {
     HeaderValue::from_str(value)
         .map_err(|_| BpiError::invalid_parameter(field, "invalid header value"))
@@ -392,6 +424,29 @@ mod tests {
             first.cookie_header_for_test(),
             second.cookie_header_for_test()
         );
+        Ok(())
+    }
+
+    #[test]
+    fn clear_account_removes_login_cookie_state() -> Result<(), BpiError> {
+        let client = BpiClient::builder()
+            .cookie("DedeUserID=42; SESSDATA=session; bili_jct=csrf; buvid3=buvid")
+            .build()?;
+        assert!(client.has_login_cookies());
+
+        client.clear_account();
+
+        assert!(!client.has_login_cookies());
+        assert!(client.cookie_header_for_test().is_none());
+        assert!(client.get_account().is_none());
+        Ok(())
+    }
+
+    #[test]
+    fn has_login_cookies_requires_sessdata_cookie() -> Result<(), BpiError> {
+        let client = BpiClient::builder().cookie("buvid3=buvid").build()?;
+
+        assert!(!client.has_login_cookies());
         Ok(())
     }
 
