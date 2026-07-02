@@ -96,6 +96,8 @@ numeric_id!(Cid, "cid", "Bilibili video page/content ID.");
 numeric_id!(Mid, "mid", "Bilibili member/user ID.");
 numeric_id!(RoomId, "room_id", "Bilibili live room ID.");
 numeric_id!(MediaId, "media_id", "Bilibili media ID.");
+numeric_id!(SeasonId, "season_id", "Bilibili season ID.");
+numeric_id!(EpisodeId, "ep_id", "Bilibili episode ID.");
 
 macro_rules! string_id {
     ($name:ident, $field:literal, $doc:literal, $validate:ident) => {
@@ -226,6 +228,27 @@ mod tests {
         let sid = AudioId::new(13603)?;
 
         assert_eq!(sid.to_string(), "13603");
+        Ok(())
+    }
+
+    #[test]
+    fn season_id_rejects_zero() {
+        let err = SeasonId::new(0).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "season_id",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn episode_id_displays_numeric_value() -> Result<(), BpiError> {
+        let episode_id = EpisodeId::new(21265)?;
+
+        assert_eq!(episode_id.to_string(), "21265");
         Ok(())
     }
 

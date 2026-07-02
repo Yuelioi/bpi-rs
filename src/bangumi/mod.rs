@@ -10,5 +10,11 @@
 
 pub mod follow;
 pub mod info;
+pub mod params;
 pub mod timeline;
 pub mod videostream_url;
+
+pub use params::{
+    BangumiDetailId, BangumiDetailParams, BangumiInfoParams, BangumiSectionsParams,
+    BangumiTimelineParams,
+};

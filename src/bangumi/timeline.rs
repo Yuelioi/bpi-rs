@@ -1,7 +1,7 @@
 //! 番剧或影视时间线
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/timeline.md)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, bangumi::BangumiTimelineParams};
 use serde::{Deserialize, Serialize};
 
 /// 番剧类型
@@ -54,37 +54,15 @@ impl BpiClient {
     /// 获取番剧或影视时间线
     ///
     /// # 参数
-    /// * `types` - 类别（1：番剧，3：电影，4：国创）
-    /// * `before` - 开始于前几日（0-7）
-    /// * `after` - 结束于后几日（0-7）
+    /// * `params` - 时间线类型和日期范围参数
     /// # 文档
     /// [获取番剧或影视时间线](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/timeline.md#获取番剧或影视时间线)
     pub async fn bangumi_timeline(
         &self,
-        types: BangumiTimelineType,
-        before: i32,
-        after: i32,
+        params: BangumiTimelineParams,
     ) -> Result<BpiResponse<Vec<BangumiTimelineDay>>, BpiError> {
-        // 验证参数
-        if !(0..=7).contains(&before) {
-            return Err(BpiError::InvalidParameter {
-                field: "before",
-                message: "before参数必须在0-7之间",
-            });
-        }
-        if !(0..=7).contains(&after) {
-            return Err(BpiError::InvalidParameter {
-                field: "after",
-                message: "after参数必须在0-7之间",
-            });
-        }
-
         self.get("https://api.bilibili.com/pgc/web/timeline")
-            .query(&[
-                ("types", types.as_i32().to_string()),
-                ("before", before.to_string()),
-                ("after", after.to_string()),
-            ])
+            .query(&params.query_pairs())
             .send_bpi("获取番剧或影视时间线")
             .await
     }
@@ -98,7 +76,12 @@ mod tests {
     #[tokio::test]
     async fn test_bangumi_timeline() {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.bangumi_timeline(BangumiTimelineType::Anime, 3, 7).await;
+        let result = bpi
+            .bangumi_timeline(
+                BangumiTimelineParams::new(BangumiTimelineType::Anime, 3, 7)
+                    .expect("valid timeline params"),
+            )
+            .await;
         assert!(result.is_ok());
         let response = result.unwrap();
         assert_eq!(response.code, 0);
@@ -116,33 +99,25 @@ mod tests {
         }
     }
 
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_bangumi_timeline_invalid_before() {
-        let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.bangumi_timeline(BangumiTimelineType::Anime, 8, 7).await;
-        assert!(result.is_err());
-        let error = result.unwrap_err();
+    #[test]
+    fn test_bangumi_timeline_invalid_before() {
+        let error = BangumiTimelineParams::new(BangumiTimelineType::Anime, 8, 7).unwrap_err();
         match error {
             BpiError::InvalidParameter { field, message } => {
                 assert_eq!(field, "before");
-                assert_eq!(message, "before参数必须在0-7之间");
+                assert_eq!(message, "value must be between 0 and 7");
             }
             _ => panic!("Expected InvalidParameter error"),
         }
     }
 
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_bangumi_timeline_invalid_after() {
-        let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.bangumi_timeline(BangumiTimelineType::Anime, 3, 8).await;
-        assert!(result.is_err());
-        let error = result.unwrap_err();
+    #[test]
+    fn test_bangumi_timeline_invalid_after() {
+        let error = BangumiTimelineParams::new(BangumiTimelineType::Anime, 3, 8).unwrap_err();
         match error {
             BpiError::InvalidParameter { field, message } => {
                 assert_eq!(field, "after");
-                assert_eq!(message, "after参数必须在0-7之间");
+                assert_eq!(message, "value must be between 0 and 7");
             }
             _ => panic!("Expected InvalidParameter error"),
         }
