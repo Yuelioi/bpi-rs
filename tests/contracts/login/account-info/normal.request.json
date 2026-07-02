@@ -1,0 +1,24 @@
+{
+  "name": "login.account_info.normal",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/member/web/account",
+    "query": {},
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin",
+      "cookie"
+    ],
+    "headers": {},
+    "auth": {
+      "profile": "normal",
+      "requires": [
+        "cookie"
+      ]
+    }
+  },
+  "expect": {
+    "api_code": 0
+  }
+}

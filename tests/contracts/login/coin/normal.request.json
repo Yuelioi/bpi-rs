@@ -1,0 +1,24 @@
+{
+  "name": "login.coin.normal",
+  "request": {
+    "method": "GET",
+    "url": "https://account.bilibili.com/site/getCoin",
+    "query": {},
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin",
+      "cookie"
+    ],
+    "headers": {},
+    "auth": {
+      "profile": "normal",
+      "requires": [
+        "cookie"
+      ]
+    }
+  },
+  "expect": {
+    "api_code": 0
+  }
+}

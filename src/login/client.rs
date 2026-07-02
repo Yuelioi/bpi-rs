@@ -127,6 +127,89 @@ impl<'a> LoginClient<'a> {
 #[cfg(test)]
 mod tests {
     use crate::BpiClient;
+    use crate::probe::contract::{ApiContract, HttpMethod};
+
+    const READ_INFO_CONTRACTS: &[(&str, &str, &str, i32, bool)] = &[
+        (
+            "account-info",
+            "login.account_info",
+            "https://api.bilibili.com/x/member/web/account",
+            -101,
+            false,
+        ),
+        (
+            "account-info",
+            "login.account_info",
+            "https://api.bilibili.com/x/member/web/account",
+            0,
+            true,
+        ),
+        (
+            "coin",
+            "login.coin",
+            "https://account.bilibili.com/site/getCoin",
+            -101,
+            false,
+        ),
+        (
+            "coin",
+            "login.coin",
+            "https://account.bilibili.com/site/getCoin",
+            0,
+            true,
+        ),
+        (
+            "nav",
+            "login.nav",
+            "https://api.bilibili.com/x/web-interface/nav",
+            -101,
+            false,
+        ),
+        (
+            "nav",
+            "login.nav",
+            "https://api.bilibili.com/x/web-interface/nav",
+            0,
+            true,
+        ),
+        (
+            "stat",
+            "login.stat",
+            "https://api.bilibili.com/x/web-interface/nav/stat",
+            -101,
+            false,
+        ),
+        (
+            "stat",
+            "login.stat",
+            "https://api.bilibili.com/x/web-interface/nav/stat",
+            0,
+            true,
+        ),
+        (
+            "today-coin-exp",
+            "login.today_coin_exp",
+            "https://api.bilibili.com/x/web-interface/coin/today/exp",
+            -101,
+            false,
+        ),
+        (
+            "today-coin-exp",
+            "login.today_coin_exp",
+            "https://api.bilibili.com/x/web-interface/coin/today/exp",
+            0,
+            true,
+        ),
+    ];
+
+    fn read_info_contract(
+        endpoint: &str,
+        profile: &str,
+    ) -> Result<ApiContract, Box<dyn std::error::Error>> {
+        let path = format!("tests/contracts/login/{endpoint}/{profile}.request.json");
+        let bytes = std::fs::read(path)?;
+        Ok(ApiContract::from_slice(&bytes)?)
+    }
 
     #[test]
     fn login_client_borrows_root_client() -> Result<(), crate::BpiError> {
@@ -209,6 +292,51 @@ mod tests {
             login.vip_info_endpoint(),
             "https://api.bilibili.com/x/vip/web/user/info"
         );
+        Ok(())
+    }
+
+    #[test]
+    fn login_read_info_contracts_match_endpoint_requests() -> Result<(), Box<dyn std::error::Error>>
+    {
+        for (endpoint, name, url, anonymous_code, requires_cookie) in READ_INFO_CONTRACTS {
+            let profile = if *requires_cookie {
+                "normal"
+            } else {
+                "anonymous"
+            };
+            let contract = read_info_contract(endpoint, profile)?;
+
+            assert_eq!(contract.name, format!("{name}.{profile}"));
+            assert_eq!(contract.request.method, HttpMethod::Get);
+            assert_eq!(contract.request.url.as_str(), *url);
+            assert!(contract.request.query.is_empty());
+            assert_eq!(contract.expect["api_code"], *anonymous_code);
+            assert_eq!(contract.request.auth.requires_cookie(), *requires_cookie);
+            assert_eq!(
+                contract.request.auth.profile.as_deref(),
+                requires_cookie.then_some(profile)
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn login_read_info_contracts_cover_vip_profile() -> Result<(), Box<dyn std::error::Error>> {
+        for (endpoint, name, url, _, requires_cookie) in READ_INFO_CONTRACTS {
+            if !requires_cookie {
+                continue;
+            }
+
+            let contract = read_info_contract(endpoint, "vip")?;
+
+            assert_eq!(contract.name, format!("{name}.vip"));
+            assert_eq!(contract.request.method, HttpMethod::Get);
+            assert_eq!(contract.request.url.as_str(), *url);
+            assert!(contract.request.query.is_empty());
+            assert_eq!(contract.expect["api_code"], 0);
+            assert!(contract.request.auth.requires_cookie());
+            assert_eq!(contract.request.auth.profile.as_deref(), Some("vip"));
+        }
         Ok(())
     }
 }

@@ -1,0 +1,24 @@
+{
+  "name": "login.today_coin_exp.vip",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/coin/today/exp",
+    "query": {},
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin",
+      "cookie"
+    ],
+    "headers": {},
+    "auth": {
+      "profile": "vip",
+      "requires": [
+        "cookie"
+      ]
+    }
+  },
+  "expect": {
+    "api_code": 0
+  }
+}

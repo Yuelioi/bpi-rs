@@ -1,0 +1,20 @@
+{
+  "name": "login.nav.anonymous",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/nav",
+    "query": {},
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "expect": {
+    "api_code": -101
+  }
+}

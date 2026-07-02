@@ -144,7 +144,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde::de::DeserializeOwned;
+
     use crate::{ApiEnvelope, BpiError};
+
+    const READ_INFO_ENDPOINTS: &[&str] = &["account-info", "coin", "nav", "stat", "today-coin-exp"];
 
     fn local_vip_info_probe_body(name: &str) -> Option<serde_json::Value> {
         let path = format!("target/bpi-probe-runs/login/vip-info/vip-info/{name}.response.json");
@@ -154,6 +158,30 @@ mod tests {
             .get("response")
             .and_then(|response| response.get("body"))
             .cloned()
+    }
+
+    fn local_read_info_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/login/read-info/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    fn read_info_payload<T>(endpoint: &str, profile: &str) -> Result<Option<T>, BpiError>
+    where
+        T: DeserializeOwned,
+    {
+        let Some(body) = local_read_info_probe_body(endpoint, profile) else {
+            return Ok(None);
+        };
+
+        serde_json::from_value::<ApiEnvelope<T>>(body)?
+            .into_payload()
+            .map(Some)
     }
 
     #[test]
@@ -187,6 +215,49 @@ mod tests {
             .unwrap_err();
 
         assert!(err.requires_login());
+        Ok(())
+    }
+
+    #[test]
+    fn login_read_info_models_match_local_probe_outputs_when_available() -> Result<(), BpiError> {
+        for profile in ["normal", "vip"] {
+            if let Some(nav) = read_info_payload::<LoginNav>("nav", profile)? {
+                assert!(nav.is_login);
+                assert!(nav.mid.is_some());
+            }
+
+            let _ = read_info_payload::<LoginStats>("stat", profile)?;
+
+            if let Some(coin) = read_info_payload::<LoginCoinBalance>("coin", profile)? {
+                assert!(coin.money >= 0.0);
+            }
+
+            if let Some(exp) = read_info_payload::<LoginTodayCoinExp>("today-coin-exp", profile)? {
+                assert!(exp.value <= 50);
+            }
+
+            if let Some(account) = read_info_payload::<LoginAccountInfo>("account-info", profile)? {
+                assert!(account.mid.get() > 0);
+                assert!(!account.uname.trim().is_empty());
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn login_read_info_anonymous_probes_return_login_required_when_available()
+    -> Result<(), BpiError> {
+        for endpoint in READ_INFO_ENDPOINTS {
+            let Some(body) = local_read_info_probe_body(endpoint, "anonymous") else {
+                continue;
+            };
+
+            let err = serde_json::from_value::<ApiEnvelope<serde_json::Value>>(body)?
+                .ensure_success()
+                .unwrap_err();
+
+            assert!(err.requires_login());
+        }
         Ok(())
     }
 }

@@ -1,0 +1,20 @@
+{
+  "name": "login.coin.anonymous",
+  "request": {
+    "method": "GET",
+    "url": "https://account.bilibili.com/site/getCoin",
+    "query": {},
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "expect": {
+    "api_code": -101
+  }
+}
