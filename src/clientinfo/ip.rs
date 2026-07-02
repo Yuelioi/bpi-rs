@@ -55,6 +55,8 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::{ApiContract, HttpMethod};
+    use crate::{ApiEnvelope, BpiResult};
 
     const TEST_IP: &str = "8.8.8.8";
 
@@ -79,6 +81,64 @@ mod tests {
             tracing::error!("请求失败: code={}, message={}", resp.code, resp.message);
         }
 
+        Ok(())
+    }
+
+    fn contract(profile: &str) -> BpiResult<ApiContract> {
+        let bytes = match profile {
+            "anonymous" => {
+                include_bytes!("../../tests/contracts/clientinfo/ip/anonymous.request.json")
+                    .as_slice()
+            }
+            "normal" => {
+                include_bytes!("../../tests/contracts/clientinfo/ip/normal.request.json").as_slice()
+            }
+            "vip" => {
+                include_bytes!("../../tests/contracts/clientinfo/ip/vip.request.json").as_slice()
+            }
+            _ => unreachable!("unknown clientinfo ip contract profile"),
+        };
+
+        ApiContract::from_slice(bytes)
+    }
+
+    #[test]
+    fn clientinfo_ip_contracts_match_endpoint_request() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let contract = contract(profile)?;
+
+            assert_eq!(contract.request.method, HttpMethod::Get);
+            assert_eq!(
+                contract.request.url.as_str(),
+                "https://api.live.bilibili.com/ip_service/v1/ip_service/get_ip_addr"
+            );
+            assert_eq!(contract.request.query.get("ip"), Some(&TEST_IP.to_string()));
+            assert_eq!(contract.expect["api_code"], 0);
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/clientinfo/ip/ip/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn clientinfo_ip_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+
+            let payload = serde_json::from_value::<ApiEnvelope<IpInfo>>(body)?.into_payload()?;
+
+            assert_eq!(payload.addr.as_deref(), Some(TEST_IP));
+        }
         Ok(())
     }
 }
