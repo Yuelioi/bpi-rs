@@ -10,4 +10,9 @@ pub mod card;
 pub mod category;
 pub mod info;
 mod models;
+pub mod params;
 pub mod view;
+
+pub use params::{
+    ArticleArticlesInfoParams, ArticleCardsParams, ArticleInfoParams, ArticleViewParams,
+};

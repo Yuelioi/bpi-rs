@@ -3,6 +3,7 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/view.md)
 
 use super::models::{ArticleAuthor, ArticleCategory, ArticleMedia, ArticleStats};
+use crate::article::params::ArticleViewParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -342,14 +343,12 @@ impl BpiClient {
     /// 获取专栏正文内容
     ///
     /// # 参数
-    /// * `id` - 专栏文章ID (必要)
-    /// * `gaia_source` - 来源，默认为"main_web" (可选)
-    pub async fn article_view(&self, id: i64) -> Result<ArticleViewResponse, BpiError> {
-        let params = vec![
-            ("id", id.to_string()),
-            ("gaia_source", "main_web".to_string()),
-        ];
-        let params = self.get_wbi_sign2(params).await?;
+    /// * `params` - 专栏正文参数
+    pub async fn article_view(
+        &self,
+        params: ArticleViewParams,
+    ) -> Result<ArticleViewResponse, BpiError> {
+        let params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         let result: ArticleViewResponse = self
             .get("https://api.bilibili.com/x/article/view")
@@ -371,9 +370,9 @@ mod tests {
     async fn test_article_view() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let cvid = 2;
+        let params = ArticleViewParams::new(2)?;
 
-        let result = bpi.article_view(cvid).await?;
+        let result = bpi.article_view(params).await?;
 
         let data = result.data.unwrap();
         assert!(!data.title.is_empty());

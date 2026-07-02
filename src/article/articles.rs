@@ -3,6 +3,7 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/articles.md)
 
 use crate::article::models::{ArticleAuthor, ArticleCategory, ArticleStats};
+use crate::article::params::ArticleArticlesInfoParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -106,16 +107,16 @@ impl BpiClient {
     /// # 参数
     /// | 名称   | 类型  | 说明              |
     /// | ------ | ----- | ----------------- |
-    /// | `id`   | i64   | 文集 rlid (必要)  |
+    /// | `params` | `ArticleArticlesInfoParams` | 文集基本信息参数 |
     ///
     /// # 文档
     /// [获取文集基本信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/articles.md#获取文集基本信息)
     pub async fn article_articles_info(
         &self,
-        id: i64,
+        params: ArticleArticlesInfoParams,
     ) -> Result<BpiResponse<ArticlesData>, BpiError> {
         self.get("https://api.bilibili.com/x/article/list/web/articles")
-            .query(&[("id", id.to_string())])
+            .query(&params.query_pairs())
             .send_bpi("获取文集基本信息")
             .await
     }
@@ -130,9 +131,9 @@ mod tests {
     async fn test_get_articles_info() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let rlid = 207146;
+        let params = ArticleArticlesInfoParams::new(207146)?;
 
-        let result = bpi.article_articles_info(rlid).await?;
+        let result = bpi.article_articles_info(params).await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 

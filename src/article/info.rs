@@ -3,6 +3,7 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/info.md)
 
 use crate::article::models::ArticleStats;
+use crate::article::params::ArticleInfoParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -77,13 +78,16 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明              |
     /// | ---- | ---- | ----------------- |
-    /// | `id` | i64  | 专栏 cvid (必要)  |
+    /// | `params` | `ArticleInfoParams` | 专栏基本信息参数 |
     ///
     /// # 文档
     /// [获取专栏文章基本信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/info.md#获取专栏文章基本信息)
-    pub async fn article_info(&self, id: i64) -> Result<BpiResponse<ArticleInfoData>, BpiError> {
+    pub async fn article_info(
+        &self,
+        params: ArticleInfoParams,
+    ) -> Result<BpiResponse<ArticleInfoData>, BpiError> {
         self.get("https://api.bilibili.com/x/article/viewinfo")
-            .query(&[("id", id.to_string())])
+            .query(&params.query_pairs())
             .send_bpi("获取专栏文章基本信息")
             .await
     }
@@ -100,9 +104,9 @@ mod tests {
     async fn test_article_info() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let cvid = TEST_CVID;
+        let params = ArticleInfoParams::new(TEST_CVID)?;
 
-        let result = bpi.article_info(cvid).await?;
+        let result = bpi.article_info(params).await?;
 
         let data = result.data.unwrap();
         assert!(!data.title.is_empty());
@@ -117,7 +121,8 @@ mod tests {
     async fn test_article_stats() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi.article_info(TEST_CVID).await?;
+        let params = ArticleInfoParams::new(TEST_CVID)?;
+        let result = bpi.article_info(params).await?;
 
         let data = result.data.unwrap();
         let stats = &data.stats;

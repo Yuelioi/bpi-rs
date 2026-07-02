@@ -3,6 +3,7 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/card.md)
 
 use super::models::{ArticleAuthor, ArticleCategory, ArticleMedia, ArticleStats};
+use crate::article::params::ArticleCardsParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -337,17 +338,15 @@ impl BpiClient {
     /// # 参数
     /// | 名称   | 类型    | 说明                                                                 |
     /// | ------ | ------- | -------------------------------------------------------------------- |
-    /// | `ids`  | String  | 被查询的 id 列表，以逗号分隔；可填视频完整 AV/BV 号、专栏 CV 号、直播间长/短 lv 号 |
+    /// | `params` | `ArticleCardsParams` | 专栏卡片查询参数 |
     ///
     /// # 文档
     /// [获取专栏显示卡片信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/card.md#获取专栏显示卡片信息)
-    pub async fn article_cards(&self, ids: &str) -> Result<CardResponse, BpiError> {
-        let params = vec![
-            ("ids", ids.to_string()),
-            ("web_location", "333.1305".to_string()),
-        ];
-
-        let params = self.get_wbi_sign2(params).await?;
+    pub async fn article_cards(
+        &self,
+        params: ArticleCardsParams,
+    ) -> Result<CardResponse, BpiError> {
+        let params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         let result: CardResponse = self
             .get("https://api.bilibili.com/x/article/cards")
@@ -370,9 +369,9 @@ mod tests {
     async fn test_get_article_cards() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let ids = "av2,cv1,cv2";
+        let params = ArticleCardsParams::new("av2,cv1,cv2")?;
 
-        let result = bpi.article_cards(ids).await?;
+        let result = bpi.article_cards(params).await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
