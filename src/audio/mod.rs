@@ -16,4 +16,7 @@ pub mod params;
 pub mod rank;
 pub mod status_number;
 
-pub use params::AudioSongParams;
+pub use params::{
+    AudioCollectionInfoParams, AudioPageParams, AudioRankListParams, AudioRankListType,
+    AudioRankPeriodParams, AudioSongParams,
+};
