@@ -2,7 +2,8 @@ use crate::request::BilibiliRequest;
 use crate::{BpiClient, BpiResult};
 
 use super::model::VideoView;
-use super::params::VideoViewParams;
+use super::params::{VideoPlayUrlParams, VideoViewParams};
+use super::videostream_url::PlayUrlResponseData;
 
 const VIEW_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/view";
 
@@ -30,6 +31,11 @@ impl<'a> VideoClient<'a> {
             .send_bpi::<VideoView>("video.view")
             .await?
             .into_data()
+    }
+
+    /// Fetches signed web playback URLs by AV ID or BV ID plus page/content ID.
+    pub async fn play_url(&self, params: VideoPlayUrlParams) -> BpiResult<PlayUrlResponseData> {
+        self.client.video_playurl(params).await?.into_data()
     }
 }
 

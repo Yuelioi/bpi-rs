@@ -24,4 +24,4 @@ pub mod videostream_url;
 
 pub use client::VideoClient;
 pub use model::{VideoOwner, VideoPage, VideoStat, VideoView};
-pub use params::{VideoId, VideoViewParams};
+pub use params::{VideoId, VideoPlayUrlParams, VideoViewParams};

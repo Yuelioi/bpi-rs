@@ -4,6 +4,8 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+use super::params::VideoPlayUrlParams;
+
 // --- 视频流URL相关数据结构体 ---
 
 /// DASH 流信息
@@ -112,72 +114,11 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/videostream_url.html#获取视频流地址)
     ///
-    /// # 参数
-    /// | 名称         | 类型           | 说明                 |
-    /// | ------------ | --------------| -------------------- |
-    /// | `aid`        | `Option<u64>`   | 稿件 avid，可选      |
-    /// | `bvid`       | `Option<&str>`  | 稿件 bvid，可选      |
-    /// | `cid`        | u64           | 视频 cid             |
-    /// | `qn`         | `Option<u64>`   | 清晰度选择，可选     |
-    /// | `fnval`      | `Option<u64>`   | 流格式标识，可选，默认1(MP4) |
-    /// | `fnver`      | `Option<u64>`   | 流版本标识，可选，默认0 |
-    /// | `fourk`      | `Option<u8>`    | 是否允许4K，可选，默认0 |
-    /// | `platform`   | `Option<&str>`  | 平台标识，可选，默认"pc" |
-    /// | `high_quality`| `Option<u8>`   | 是否高画质，可选     |
-    /// | `try_look`   | `Option<u8>`    | 是否可不登录拉取高画质，可选 |
-    ///
-    /// `aid` 和 `bvid` 必须提供一个。
     pub async fn video_playurl(
         &self,
-        aid: Option<u64>,
-        bvid: Option<&str>,
-        cid: u64,
-        qn: Option<u64>,
-        fnval: Option<u64>,
-        fnver: Option<u64>,
-        fourk: Option<u8>,
-        platform: Option<&str>,
-        high_quality: Option<u8>,
-        try_look: Option<u8>,
+        params: VideoPlayUrlParams,
     ) -> Result<BpiResponse<PlayUrlResponseData>, BpiError> {
-        if aid.is_none() && bvid.is_none() {
-            return Err(BpiError::parse("必须提供 aid 或 bvid"));
-        }
-
-        let mut params = vec![("cid", cid.to_string())];
-
-        if let Some(a) = aid {
-            params.push(("avid", a.to_string()));
-        }
-        if let Some(b) = bvid {
-            params.push(("bvid", b.to_string()));
-        }
-        if let Some(q) = qn {
-            params.push(("qn", q.to_string()));
-        }
-        if let Some(f) = fnval {
-            params.push(("fnval", f.to_string()));
-        }
-        if let Some(f) = fnver {
-            params.push(("fnver", f.to_string()));
-        }
-        if let Some(f) = fourk {
-            params.push(("fourk", f.to_string()));
-        }
-        if let Some(p) = platform {
-            params.push(("platform", p.to_string()));
-        } else {
-            params.push(("platform", "pc".to_string()));
-        }
-        if let Some(h) = high_quality {
-            params.push(("high_quality", h.to_string()));
-        }
-        if let Some(t) = try_look {
-            params.push(("try_look", t.to_string()));
-        }
-
-        // 签名
-        let params = self.get_wbi_sign2(params).await?;
+        let params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         self.get("https://api.bilibili.com/x/player/wbi/playurl")
             .with_bilibili_headers()
@@ -192,6 +133,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::{Aid, Cid};
     use tracing::info;
 
     const TEST_AID: u64 = 113898824998659;
@@ -201,21 +143,10 @@ mod tests {
     #[tokio::test]
     async fn test_video_playurl_mp4_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        // 请求 MP4 格式，720P
-        let resp = bpi
-            .video_playurl(
-                Some(TEST_AID),
-                None,
-                TEST_CID,
-                Some(64),
-                Some(1),
-                None,
-                None,
-                None,
-                None,
-                None,
-            )
-            .await?;
+        let params = VideoPlayUrlParams::from_aid(Aid::new(TEST_AID)?, Cid::new(TEST_CID)?)
+            .quality(64)
+            .format_flags(1);
+        let resp = bpi.video_playurl(params).await?;
         let data = resp.into_data()?;
 
         info!("MP4 视频流信息: {:?}", data);
@@ -229,21 +160,12 @@ mod tests {
     #[tokio::test]
     async fn test_video_playurl_4k() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        // 请求 4K
-        let resp = bpi
-            .video_playurl(
-                Some(TEST_AID),
-                None,
-                TEST_CID,
-                Some(120),
-                Some(16 | 128),
-                Some(0),
-                Some(1),
-                None,
-                None,
-                None,
-            )
-            .await?;
+        let params = VideoPlayUrlParams::from_aid(Aid::new(TEST_AID)?, Cid::new(TEST_CID)?)
+            .quality(120)
+            .format_flags(16 | 128)
+            .format_version(0)
+            .fourk(true);
+        let resp = bpi.video_playurl(params).await?;
         let data = resp.into_data()?;
 
         info!("4K 视频流信息: {:?}", data);
