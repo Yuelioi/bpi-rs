@@ -86,6 +86,7 @@ mod tests {
     use super::*;
     use crate::ApiEnvelope;
     use crate::probe::contract::{ApiContract, HttpMethod};
+    use crate::probe::flow::ProbeFlow;
     use tokio;
 
     fn local_qr_probe_body(endpoint: &str) -> Option<serde_json::Value> {
@@ -96,6 +97,12 @@ mod tests {
             .get("response")
             .and_then(|response| response.get("body"))
             .cloned()
+    }
+
+    fn local_qr_flow_probe() -> Option<serde_json::Value> {
+        let bytes =
+            std::fs::read("target/bpi-probe-runs/login/qr/flow/anonymous.response.json").ok()?;
+        serde_json::from_slice(&bytes).ok()
     }
 
     #[test]
@@ -110,6 +117,26 @@ mod tests {
         assert!(contract.request.query.is_empty());
         assert_eq!(contract.expect["api_code"], 0);
         assert!(!contract.request.auth.requires_cookie());
+        Ok(())
+    }
+
+    #[test]
+    fn qr_flow_contract_covers_generate_and_poll_requests() -> Result<(), BpiError> {
+        let flow = ProbeFlow::from_slice(include_bytes!(
+            "../../../tests/contracts/login/qr/flow.anonymous.request.json"
+        ))?;
+
+        assert_eq!(flow.name, "login.qr.flow");
+        assert_eq!(flow.steps[0].name, "generate");
+        assert_eq!(flow.steps[1].name, "poll");
+        assert_eq!(
+            flow.steps[0].extract["qrcode_key"],
+            "/response/body/data/qrcode_key"
+        );
+        assert_eq!(
+            flow.steps[1].contract["request"]["query"]["qrcode_key"],
+            "${qrcode_key}"
+        );
         Ok(())
     }
 
@@ -138,6 +165,24 @@ mod tests {
 
         assert_eq!(data.code, 86101);
         assert!(!data.message.trim().is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn qr_flow_output_matches_local_probe_when_available() -> Result<(), BpiError> {
+        let Some(flow) = local_qr_flow_probe() else {
+            return Ok(());
+        };
+
+        let steps = flow["steps"]
+            .as_array()
+            .ok_or_else(|| BpiError::unsupported_response("flow output missing steps"))?;
+        let generate = &steps[0]["result"]["response"]["body"];
+        let poll = &steps[1]["result"]["response"]["body"];
+
+        assert_eq!(generate["code"], 0);
+        assert_eq!(poll["code"], 0);
+        assert_eq!(poll["data"]["code"], 86101);
         Ok(())
     }
 

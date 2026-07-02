@@ -1,0 +1,56 @@
+{
+  "name": "login.qr.flow",
+  "steps": [
+    {
+      "name": "generate",
+      "contract": {
+        "name": "login.qr_generate.anonymous",
+        "request": {
+          "method": "GET",
+          "url": "https://passport.bilibili.com/x/passport-login/web/qrcode/generate",
+          "query": {},
+          "required_headers": [
+            "user-agent",
+            "referer",
+            "origin"
+          ],
+          "headers": {},
+          "auth": {
+            "requires": []
+          }
+        },
+        "expect": {
+          "api_code": 0
+        }
+      },
+      "extract": {
+        "qrcode_key": "/response/body/data/qrcode_key"
+      }
+    },
+    {
+      "name": "poll",
+      "contract": {
+        "name": "login.qr_poll.anonymous",
+        "request": {
+          "method": "GET",
+          "url": "https://passport.bilibili.com/x/passport-login/web/qrcode/poll",
+          "query": {
+            "qrcode_key": "${qrcode_key}"
+          },
+          "required_headers": [
+            "user-agent",
+            "referer",
+            "origin"
+          ],
+          "headers": {},
+          "auth": {
+            "requires": []
+          }
+        },
+        "expect": {
+          "api_code": 0
+        }
+      }
+    }
+  ]
+}
