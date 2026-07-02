@@ -3,6 +3,7 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md)
 //!
 
+use crate::audio::params::AudioSongParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -19,7 +20,7 @@ impl BpiClient {
     /// # 参数
     /// | 名称   | 类型 | 说明       |
     /// | ------ | ---- | ---------- |
-    /// | `sid`  | u64  | 音频 auid  |
+    /// | `rid`  | u64  | 音频 auid  |
     /// | `add_media_ids` | `Vec<&str>`|添加的合集ids|
     /// | `del_media_ids` | `Vec<&str>`|从中删除的合集ids|
     ///
@@ -75,6 +76,7 @@ impl BpiClient {
     /// | 名称   | 类型 | 说明       |
     /// | ------ | ---- | ---------- |
     /// | `sid`  | u64  | 音频 auid  |
+    /// | `cids` | u64  | 歌单 id    |
     ///
     /// # 返回
     /// | 值       | 说明     |
@@ -114,10 +116,13 @@ impl BpiClient {
     ///
     /// # 文档
     /// [查询音频收藏状态](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md#查询音频收藏状态)
-    pub async fn audio_collection_status(&self, sid: u64) -> Result<BpiResponse<bool>, BpiError> {
+    pub async fn audio_collection_status(
+        &self,
+        params: AudioSongParams,
+    ) -> Result<BpiResponse<bool>, BpiError> {
         let result = self
             .get("https://www.bilibili.com/audio/music-service-c/web/collections/songs-coll")
-            .query(&[("sid", sid.to_string())])
+            .query(&params.query_pairs())
             .send_bpi("查询音频收藏状态")
             .await?;
         Ok(result)
@@ -126,19 +131,22 @@ impl BpiClient {
     /// 查询音频投币数
     ///
     /// # 参数
-    /// | 名称   | 类型 | 说明       |
-    /// | ------ | ---- | ---------- |
-    /// | `sid`  | u64  | 音频 auid  |
+    /// | 名称     | 类型              | 说明           |
+    /// | -------- | ----------------- | -------------- |
+    /// | `params` | `AudioSongParams` | 音频 auid 参数 |
     ///
     /// # 返回
     /// 投币数量，`0` 为未投币，上限为 `2`
     ///
     /// # 文档
     /// [查询音频投币数](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md#查询音频投币数)
-    pub async fn audio_coin_count(&self, sid: u64) -> Result<BpiResponse<i32>, BpiError> {
+    pub async fn audio_coin_count(
+        &self,
+        params: AudioSongParams,
+    ) -> Result<BpiResponse<i32>, BpiError> {
         let result = self
             .get("https://www.bilibili.com/audio/music-service-c/web/coin/audio")
-            .query(&[("sid", sid.to_string())])
+            .query(&params.query_pairs())
             .send_bpi("查询音频投币数")
             .await?;
         Ok(result)
@@ -182,6 +190,8 @@ fn normalize_audio_coin_multiply(multiply: u32) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::audio::params::AudioSongParams;
+    use crate::ids::AudioId;
 
     // https://www.bilibili.com/audio/au13598
 
@@ -199,7 +209,9 @@ mod tests {
     #[tokio::test]
     async fn test_audio_collection_status() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.audio_collection_status(TEST_SID).await?;
+        let result = bpi
+            .audio_collection_status(AudioSongParams::new(AudioId::new(TEST_SID)?))
+            .await?;
 
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
@@ -211,7 +223,9 @@ mod tests {
     #[tokio::test]
     async fn test_audio_coin_count() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.audio_coin_count(TEST_SID).await?;
+        let result = bpi
+            .audio_coin_count(AudioSongParams::new(AudioId::new(TEST_SID)?))
+            .await?;
 
         let data = result.data.unwrap();
         assert!((0..=2).contains(&data));
