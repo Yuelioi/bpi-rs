@@ -8,4 +8,7 @@ pub mod statistics_data;
 pub mod upload;
 pub mod videos;
 
-pub use params::{UpArchiveVideosParams, UpArchivesListParams};
+pub use params::{
+    UpArchiveCompareParams, UpArchiveVideosParams, UpArchivesListParams, UpArticleTrendMetric,
+    UpArticleTrendParams, UpVideoTrendMetric, UpVideoTrendParams,
+};

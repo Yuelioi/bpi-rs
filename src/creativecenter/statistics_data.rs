@@ -4,6 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::creativecenter::{UpArchiveCompareParams, UpArticleTrendParams, UpVideoTrendParams};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 /// UP主视频状态数据
@@ -450,26 +451,18 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `t` | `Option<i64>` | 时间戳，可选 |
-    /// | `size` | `Option<i64>` | 最近 N 条视频，可选，默认 5 |
+    /// | `params` | [`UpArchiveCompareParams`] | 视频对比查询参数 |
     ///
     /// # 文档
     /// [获取 UP 主视频数据比较](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取-up-主视频数据比较)
     pub async fn up_archive_compare(
         &self,
-        t: Option<i64>,
-        size: Option<i64>,
+        params: UpArchiveCompareParams,
     ) -> Result<BpiResponse<ArchiveCompareData>, BpiError> {
-        let mut req = self.get("https://member.bilibili.com/x/web/data/archive_diagnose/compare");
-
-        if let Some(t) = t {
-            req = req.query(&[("t", t)]);
-        }
-        if let Some(size) = size {
-            req = req.query(&[("size", size)]);
-        }
-
-        req.send_bpi("获取UP主视频数据比较").await
+        self.get("https://member.bilibili.com/x/web/data/archive_diagnose/compare")
+            .query(&params.query_pairs())
+            .send_bpi("获取UP主视频数据比较")
+            .await
     }
 
     /// 获取UP主专栏状态数据
@@ -491,16 +484,16 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `type_code` | i64 | 数据类型：1播放 2弹幕 3评论 4分享 5投币 6收藏 7充电 8点赞 |
+    /// | `params` | [`UpVideoTrendParams`] | 视频趋势查询参数 |
     ///
     /// # 文档
     /// [获取UP主视频数据增量趋势](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主视频数据增量趋势)
     pub async fn up_video_trend(
         &self,
-        type_code: i64,
+        params: UpVideoTrendParams,
     ) -> Result<BpiResponse<Vec<VideoTrendItem>>, BpiError> {
         self.get("https://member.bilibili.com/x/web/data/pandect")
-            .query(&[("type", type_code)])
+            .query(&params.query_pairs())
             .send_bpi("获取UP主视频数据增量趋势")
             .await
     }
@@ -512,16 +505,16 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `type_code` | i64 | 数据类型：1阅读 2评论 3分享 4投币 5收藏 6点赞 |
+    /// | `params` | [`UpArticleTrendParams`] | 专栏趋势查询参数 |
     ///
     /// # 文档
     /// [获取UP主专栏数据增量趋势](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主专栏数据增量趋势)
     pub async fn up_article_trend(
         &self,
-        type_code: i64,
+        params: UpArticleTrendParams,
     ) -> Result<BpiResponse<Vec<ArticleTrendItem>>, BpiError> {
         self.get("https://member.bilibili.com/x/web/data/article/thirty")
-            .query(&[("type", type_code)])
+            .query(&params.query_pairs())
             .send_bpi("获取UP主专栏数据增量趋势")
             .await
     }
@@ -556,6 +549,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::creativecenter::{UpArticleTrendMetric, UpVideoTrendMetric};
     use tracing::info;
 
     fn live_creativecenter_tests_enabled() -> bool {
@@ -583,7 +577,8 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi.up_archive_compare(None, Some(3)).await?.into_data()?;
+        let params = UpArchiveCompareParams::new().with_size(3)?;
+        let data = bpi.up_archive_compare(params).await?.into_data()?;
         info!("UP主视频数据比较: {:?}", data);
         Ok(())
     }
@@ -609,7 +604,8 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi.up_video_trend(1).await?.into_data()?; // 1 = 播放
+        let params = UpVideoTrendParams::new(UpVideoTrendMetric::Play);
+        let data = bpi.up_video_trend(params).await?.into_data()?;
         info!("UP主视频数据增量趋势: {:?}", data);
         Ok(())
     }
@@ -622,7 +618,8 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi.up_article_trend(1).await?.into_data()?; // 1 = 阅读
+        let params = UpArticleTrendParams::new(UpArticleTrendMetric::Read);
+        let data = bpi.up_article_trend(params).await?.into_data()?;
         info!("UP主专栏数据增量趋势: {:?}", data);
         Ok(())
     }
