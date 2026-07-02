@@ -1,0 +1,13 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "mid": 1000001,
+    "device_name": "sanitized-device",
+    "login_type": "password",
+    "login_time": "2026-07-03 00:00:00",
+    "location": "sanitized-location",
+    "ip": "203.0.113.10"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "count": 1,
+    "list": [
+      {
+        "ip": "203.0.113.10",
+        "time": 1783036800,
+        "time_at": "2026-07-03 00:00:00",
+        "status": true,
+        "type": 1,
+        "geo": "sanitized-location"
+      }
+    ]
+  }
+}

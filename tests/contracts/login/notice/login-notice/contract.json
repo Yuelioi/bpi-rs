@@ -1,0 +1,70 @@
+{
+  "name": "login.notice",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/safecenter/login_notice",
+    "query": {
+      "mid": "1000001"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "request mid and private login record fields sanitized before commit"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": -101,
+        "fixture": "responses/anonymous.error.json",
+        "fixture_kind": "sanitized_probe",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "sanitized_probe",
+        "rust_model": "LoginNoticeData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "sanitized_probe",
+        "rust_model": "LoginNoticeData"
+      }
+    }
+  ]
+}
