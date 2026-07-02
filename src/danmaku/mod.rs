@@ -9,4 +9,5 @@ pub mod thumbup;
 pub mod web;
 
 pub use action::DanmakuSendParams;
+pub use snapshot::DanmakuSnapshotParams;
 pub use web::DanmakuSegmentParams;
