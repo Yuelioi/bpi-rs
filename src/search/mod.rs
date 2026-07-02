@@ -6,4 +6,4 @@ mod result;
 mod search_params;
 pub mod suggest;
 
-mod search;
+mod typed;
