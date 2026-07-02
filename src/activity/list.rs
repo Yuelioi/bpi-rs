@@ -2,8 +2,14 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
 use serde::{Deserialize, Serialize};
+
+const DEFAULT_PLATFORM_FILTER: &str = "1,3";
+const DEFAULT_MOLD: u32 = 0;
+const DEFAULT_HTTP_MODE: u32 = 3;
+const DEFAULT_PAGE: u32 = 1;
+const DEFAULT_PAGE_SIZE: u32 = 15;
 
 /// 活动列表数据
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,38 +53,73 @@ pub struct ActivityItem {
     pub desc: String,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ActivityListParams {
-    /// 活动平台类型，可选范围 [1, 3]，以半角逗号分隔
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub plat: Option<String>,
-
-    /// 固定值 0
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub mold: Option<i32>,
-
-    /// 固定值 3
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub http: Option<i32>,
-
-    /// 目标页码
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub pn: Option<i32>,
-
-    /// 每页条数
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ps: Option<i32>,
+    plat: String,
+    mold: u32,
+    http: u32,
+    pn: u32,
+    ps: u32,
 }
 
 impl Default for ActivityListParams {
     fn default() -> Self {
         Self {
-            plat: Some("1,3".to_string()),
-            mold: Some(0),
-            http: Some(3),
-            pn: Some(1),
-            ps: Some(15),
+            plat: DEFAULT_PLATFORM_FILTER.to_string(),
+            mold: DEFAULT_MOLD,
+            http: DEFAULT_HTTP_MODE,
+            pn: DEFAULT_PAGE,
+            ps: DEFAULT_PAGE_SIZE,
         }
+    }
+}
+
+impl ActivityListParams {
+    /// Creates activity-list parameters with Bilibili's web defaults.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Sets the platform filter, for example `1,3`.
+    pub fn platform_filter(mut self, plat: impl Into<String>) -> BpiResult<Self> {
+        let plat = plat.into();
+        validate_non_blank("plat", &plat)?;
+        self.plat = plat;
+        Ok(self)
+    }
+
+    /// Sets the API mold marker. Defaults to `0`.
+    pub fn mold(mut self, mold: u32) -> Self {
+        self.mold = mold;
+        self
+    }
+
+    /// Sets the API HTTP mode marker. Defaults to `3`.
+    pub fn http_mode(mut self, http: u32) -> Self {
+        self.http = http;
+        self
+    }
+
+    /// Sets the page number.
+    pub fn page(mut self, page: u32) -> BpiResult<Self> {
+        self.pn = validate_positive("pn", page)?;
+        Ok(self)
+    }
+
+    /// Sets the page size.
+    pub fn page_size(mut self, page_size: u32) -> BpiResult<Self> {
+        self.ps = validate_positive("ps", page_size)?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("plat", self.plat.clone()),
+            ("mold", self.mold.to_string()),
+            ("http", self.http.to_string()),
+            ("pn", self.pn.to_string()),
+            ("ps", self.ps.to_string()),
+        ]
     }
 }
 
@@ -88,35 +129,17 @@ impl BpiClient {
     /// # 参数
     /// | 名称    | 类型   | 说明                                               |
     /// | ------- | ------ | -------------------------------------------------- |
-    /// | `plat`  | u32    | 活动平台类型，可选范围 ``[1,3]``，以半角逗号分隔，默认 `1,3` |
-    /// | `mold`  | u32    | 固定值 `0` (可选)                                  |
-    /// | `http`  | u32    | 固定值 `3` (可选)                                  |
-    /// | `pn`    | u32    | 目标页码 (可选，默认为 `1`)                        |
-    /// | `ps`    | u32    | 每页条数 (可选，默认为 `15`)                       |
+    /// | `params` | `ActivityListParams` | 活动列表参数 |
     ///
     /// # 文档
     /// [获取活动列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md#获取活动列表)
     pub async fn activity_list(
         &self,
-        plat: Option<&str>,
-        mold: Option<i32>,
-        http: Option<i32>,
-        pn: Option<i32>,
-        ps: Option<i32>,
+        params: ActivityListParams,
     ) -> Result<BpiResponse<ActivityListData>, BpiError> {
-        let params = ActivityListParams {
-            plat: plat
-                .map(|s| s.to_string())
-                .or_else(|| Some("1,3".to_string())),
-            mold: mold.or(Some(0)),
-            http: http.or(Some(3)),
-            pn: pn.or(Some(1)),
-            ps: ps.or(Some(15)),
-        };
-
         let result = self
             .get("https://api.bilibili.com/x/activity/page/list")
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("获取活动列表")
             .await?;
 
@@ -128,9 +151,24 @@ impl BpiClient {
     /// # 文档
     /// [获取活动列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md#获取活动列表)
     pub async fn activity_list_default(&self) -> Result<BpiResponse<ActivityListData>, BpiError> {
-        self.activity_list(Some("1,3"), None, None, Some(1), Some(15))
-            .await
+        self.activity_list(ActivityListParams::default()).await
     }
+}
+
+fn validate_non_blank(field: &'static str, value: &str) -> BpiResult<()> {
+    if value.trim().is_empty() {
+        return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
+    }
+
+    Ok(())
+}
+
+fn validate_positive(field: &'static str, value: u32) -> BpiResult<u32> {
+    if value == 0 {
+        return Err(BpiError::invalid_parameter(field, "value must be non-zero"));
+    }
+
+    Ok(value)
 }
 
 #[cfg(test)]
@@ -143,9 +181,8 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         // 测试获取活动列表
-        let result = bpi
-            .activity_list(Some("1,3"), None, None, Some(1), Some(4))
-            .await?;
+        let params = ActivityListParams::new().page_size(4)?;
+        let result = bpi.activity_list(params).await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
@@ -179,9 +216,8 @@ mod tests {
     async fn test_activity_item_fields() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi
-            .activity_list(Some("1,3"), None, None, Some(1), Some(1))
-            .await?;
+        let params = ActivityListParams::new().page_size(1)?;
+        let result = bpi.activity_list(params).await?;
         let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
@@ -193,5 +229,63 @@ mod tests {
         }
 
         Ok(())
+    }
+
+    #[test]
+    fn activity_list_params_serializes_defaults() {
+        let params = ActivityListParams::new();
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("plat", "1,3".to_string()),
+                ("mold", "0".to_string()),
+                ("http", "3".to_string()),
+                ("pn", "1".to_string()),
+                ("ps", "15".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn activity_list_params_serializes_custom_values() -> Result<(), BpiError> {
+        let params = ActivityListParams::new()
+            .platform_filter("1")?
+            .mold(2)
+            .http_mode(4)
+            .page(3)?
+            .page_size(30)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("plat", "1".to_string()),
+                ("mold", "2".to_string()),
+                ("http", "4".to_string()),
+                ("pn", "3".to_string()),
+                ("ps", "30".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn activity_list_params_rejects_blank_platform_filter() {
+        let err = ActivityListParams::new().platform_filter("  ").unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "plat", .. }
+        ));
+    }
+
+    #[test]
+    fn activity_list_params_rejects_zero_page() {
+        let err = ActivityListParams::new().page(0).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "pn", .. }
+        ));
     }
 }
