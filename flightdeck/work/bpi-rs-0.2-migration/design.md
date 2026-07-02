@@ -15,6 +15,19 @@ The existing crate already compiles with current dependencies and has broad API 
 - Separate offline unit tests from live API smoke tests.
 - Migrate in stages so every checkpoint can compile, be reviewed, and be reverted.
 
+## Research Inputs
+
+This design should be implemented against these references:
+
+- Rust API Guidelines checklist: https://rust-lang.github.io/api-guidelines/checklist.html
+- Tokio unit testing guide: https://tokio.rs/tokio/topics/testing
+- Tokio tracing guide: https://tokio.rs/tokio/topics/tracing
+- reqwest `ClientBuilder` and cookie provider docs: https://docs.rs/reqwest/latest/reqwest/struct.ClientBuilder.html
+- reqwest `Jar` docs: https://docs.rs/reqwest/latest/reqwest/cookie/struct.Jar.html
+- tracing `#[instrument]` docs: https://docs.rs/tracing/latest/tracing/attr.instrument.html
+
+Installed local skills were also reviewed as reference material for Rust best practices, async patterns, and Rust testing.
+
 ## Public API Direction
 
 The new public API should be module-oriented:
@@ -238,4 +251,8 @@ The migration is successful when:
 - Shared auth/signing behavior is centralized.
 - Public methods return `BpiResult<T>` for ordinary data access.
 - README and examples match the new API.
-- `cargo fmt --check`, `cargo check --all-features`, and `cargo test --all-features --lib` pass before release.
+- Public API design follows the Rust API Guidelines where applicable: meaningful newtypes, builders for complex construction, type-directed arguments instead of booleans, and documented public items.
+- Library code uses `thiserror`-backed typed errors and does not use `anyhow` in public/library APIs.
+- Async code does not hold locks across `.await`, does not spawn unbounded work, and uses structured tracing spans for important request/session operations.
+- Default tests are offline and deterministic; live Bilibili tests are opt-in.
+- `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, and `cargo test --all-features --lib` pass before release.

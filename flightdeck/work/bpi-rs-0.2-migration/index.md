@@ -14,6 +14,7 @@ This topic owns the staged migration plan and should keep all active design and 
 ## Read now
 
 - design.md
+- knowledge/rust/sdk-quality.md
 
 ## Read if
 
@@ -24,6 +25,8 @@ This topic owns the staged migration plan and should keep all active design and 
 Done:
 - Created active Flightdeck topic package.
 - Wrote the 0.2 migration design spec.
+- Installed and reviewed Rust best-practices, async-patterns, and rust-testing skills as reference material for future sessions.
+- Researched primary Rust/Tokio/reqwest/tracing docs and distilled the SDK quality bar into `knowledge/rust/sdk-quality.md`.
 
 Current:
 - Waiting for user review of `design.md`.
