@@ -10,4 +10,4 @@ mod info;
 mod models;
 pub mod section;
 
-pub use params::SeasonByAidParams;
+pub use params::{SeasonByAidParams, SeasonInfoParams, SeasonSectionEpisodesParams};

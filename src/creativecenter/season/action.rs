@@ -129,6 +129,9 @@ mod tests {
     use base64::{Engine as _, engine::general_purpose};
     use std::fs;
 
+    use crate::creativecenter::season::SeasonInfoParams;
+    use crate::ids::SeasonId;
+
     const TEST_AID: u64 = 772876546;
     const TEST_CID: u64 = 829554597;
 
@@ -166,7 +169,8 @@ mod tests {
 
         tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
 
-        let season = bpi.season_info(season_id).await?;
+        let params = SeasonInfoParams::new(SeasonId::new(season_id)?);
+        let season = bpi.season_info(params).await?;
 
         let section_id = season.into_data()?.sections.sections.first().unwrap().id;
 

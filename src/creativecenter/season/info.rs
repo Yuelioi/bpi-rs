@@ -5,6 +5,7 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+use super::SeasonInfoParams;
 use super::models::{Season, Section};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -27,10 +28,10 @@ pub struct Sections {
 impl BpiClient {
     pub async fn season_info(
         &self,
-        season_id: u64,
+        params: SeasonInfoParams,
     ) -> Result<BpiResponse<SeasonInfoData>, BpiError> {
         self.get("https://member.bilibili.com/x2/creative/web/season")
-            .query(&[("id", &season_id.to_string())])
+            .query(&params.query_pairs())
             .send_bpi("获取合集信息")
             .await
     }
@@ -39,6 +40,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::SeasonId;
 
     const TEST_SSID: u64 = 4294056;
 
@@ -46,7 +48,8 @@ mod tests {
     #[tokio::test]
     async fn test_season_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi.season_info(TEST_SSID).await?.into_data()?;
+        let params = SeasonInfoParams::new(SeasonId::new(TEST_SSID)?);
+        let data = bpi.season_info(params).await?.into_data()?;
 
         tracing::info!("共 {:?} 个合集", data);
 
