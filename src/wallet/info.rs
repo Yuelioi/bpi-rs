@@ -1,7 +1,6 @@
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-
+use crate::wallet::params::WalletInfoParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use serde::{Deserialize, Serialize};
 
 /// 用户钱包数据
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -34,18 +33,12 @@ impl BpiClient {
     ///
     /// # 文档
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/wallet/info.html#获取用户钱包信息)
-    pub async fn wallet_info(&self) -> Result<BpiResponse<UserWallet>, BpiError> {
+    pub async fn wallet_info(
+        &self,
+        params: WalletInfoParams,
+    ) -> Result<BpiResponse<UserWallet>, BpiError> {
         let csrf = self.csrf()?;
-
-        let timestamp = chrono::Utc::now().timestamp_millis();
-
-        let body = json!({
-            "csrf": csrf,
-            "platformType": 3,
-            "timestamp": timestamp,
-            "traceId": timestamp,
-            "version": "1.0",
-        });
+        let body = params.body(&csrf);
 
         self.post("https://pay.bilibili.com/paywallet/wallet/getUserWallet")
             .json(&body)
@@ -63,7 +56,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_user_wallet() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.wallet_info().await;
+        let resp = bpi.wallet_info(WalletInfoParams::new()).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
         if let Ok(data) = resp {

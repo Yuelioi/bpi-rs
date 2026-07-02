@@ -1,4 +1,5 @@
 use crate::models::{Account, Vip};
+use crate::vip::params::VipCenterInfoParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::Deserialize;
 
@@ -76,9 +77,12 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/vip/center.html#获取大会员中心信息)
     ///
-    pub async fn vip_center_info(&self) -> Result<BpiResponse<VipCenterData>, BpiError> {
+    pub async fn vip_center_info(
+        &self,
+        params: VipCenterInfoParams,
+    ) -> Result<BpiResponse<VipCenterData>, BpiError> {
         self.get("https://api.bilibili.com/x/vip/web/vip_center/combine")
-            .query(&[("build", 0)])
+            .query(&params.query_pairs())
             .send_bpi("获取大会员中心信息")
             .await
     }
@@ -94,7 +98,7 @@ mod tests {
         tracing::info!("开始测试大会员中心信息的综合功能");
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.vip_center_info().await;
+        let resp = bpi.vip_center_info(VipCenterInfoParams::new()).await;
 
         match resp {
             Ok(response) => {
@@ -215,7 +219,7 @@ mod tests {
         tracing::info!("开始测试时间计算功能");
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.vip_center_info().await;
+        let resp = bpi.vip_center_info(VipCenterInfoParams::new()).await;
 
         match resp {
             Ok(response) => {
