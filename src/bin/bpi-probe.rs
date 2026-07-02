@@ -4,6 +4,7 @@ use std::fs;
 use bpi_rs::BpiError;
 use bpi_rs::probe::account::RawProbeConfig;
 use bpi_rs::probe::contract::ApiContract;
+use bpi_rs::probe::flow::{ProbeFlow, execute_flow};
 use bpi_rs::probe::run::execute_contract;
 
 #[tokio::main]
@@ -44,10 +45,17 @@ async fn run() -> Result<(), BpiError> {
             "failed to read contract file {contract_path}: {err}"
         ))
     })?;
-    let contract = ApiContract::from_slice(&contract_bytes)?;
     let accounts = RawProbeConfig::load(&account_path)?;
-    let result = execute_contract(&contract, &accounts).await?;
-    let output = serde_json::to_string_pretty(&result)?;
+    let input: serde_json::Value = serde_json::from_slice(&contract_bytes)?;
+    let output = if input.get("steps").is_some() {
+        let flow = ProbeFlow::from_slice(&contract_bytes)?;
+        let result = execute_flow(&flow, &accounts).await?;
+        serde_json::to_string_pretty(&result)?
+    } else {
+        let contract = ApiContract::from_value(input)?;
+        let result = execute_contract(&contract, &accounts).await?;
+        serde_json::to_string_pretty(&result)?
+    };
 
     if let Some(output_path) = output_path {
         fs::write(&output_path, format!("{output}\n")).map_err(|err| {

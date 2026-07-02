@@ -17,6 +17,11 @@ impl ApiContract {
         let raw: RawApiContract = serde_json::from_slice(bytes)?;
         raw.try_into()
     }
+
+    pub fn from_value(value: serde_json::Value) -> BpiResult<Self> {
+        let raw: RawApiContract = serde_json::from_value(value)?;
+        raw.try_into()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]

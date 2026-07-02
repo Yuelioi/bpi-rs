@@ -133,6 +133,18 @@ Rules:
 - If a generator cannot parse a module, do not get stuck endlessly improving the generator. Use manual drafts for that batch and record the reason.
 - Generator improvements should be their own batch only when they help multiple modules.
 
+## Probe Flow Policy
+
+Some endpoints require values derived from an earlier API response, such as one-time tokens, generated IDs, or QR login keys. Use Probe flows for those cases instead of committing a stale literal value.
+
+Rules:
+
+- Flow drafts live under `target/bpi-contract-drafts/...` unless the flow contract has been reviewed and contains no account-specific or one-time values.
+- Flow execution output lives under `target/bpi-probe-runs/...`.
+- Use JSON Pointer extraction from prior Probe results and `${name}` substitution in later step contracts.
+- Do not promote a dynamic step as a standalone request contract if its request depends on a one-time value.
+- A dynamic flow contract may be committed only when reviewed placeholders, extraction paths, and expected API behavior are stable and do not expose secrets.
+
 ## What To Compare
 
 Avoid useless self-validation. Comparing a draft to the request sent by that same draft is not enough.
