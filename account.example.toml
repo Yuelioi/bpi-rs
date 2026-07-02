@@ -1,8 +1,14 @@
-# 本地测试用, 可以打开B站登录, F12 > Application => Cookies 找到下面的值
-# 最主要的是 sessdata, 偶尔需要使用 bili_jct
+# 本地测试用, 可以打开 B 站登录, F12 > Application => Cookies 找到下面的值
+# 字段后缀表示账号语义, 不要使用 2/3 这类临时编号。
 
-bili_jct = "ab7d21xxx"
-dede_user_id = "xxxxxx"
-dede_user_id_ckmd5 = "2ae3c614dxxx"
-sessdata = "03b1exxxx"
-buvid3 = "C0229Bxxx"
+bili_jct_vip = "vip_bili_jct"
+dede_user_id_vip = "vip_dede_user_id"
+dede_user_id_ckmd5_vip = "vip_dede_user_id_ckmd5"
+sessdata_vip = "vip_sessdata"
+buvid3_vip = "vip_buvid3"
+
+bili_jct_normal = "normal_bili_jct"
+dede_user_id_normal = "normal_dede_user_id"
+dede_user_id_ckmd5_normal = "normal_dede_user_id_ckmd5"
+sessdata_normal = "normal_sessdata"
+buvid3_normal = "normal_buvid3"
