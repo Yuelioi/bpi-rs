@@ -1,7 +1,7 @@
 //! B站分区轮播图相关接口
 //!
 //! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/banner.html)
-use crate::video::video_zone_v2::VideoPartitionV2;
+use crate::web_widget::params::WebWidgetRegionBannerParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -30,15 +30,13 @@ impl BpiClient {
     /// # 参数
     /// | 名称        | 类型                | 说明         |
     /// | ----------- | -------------------| ------------|
-    /// | `region_id` | VideoPartitionV2    | 分区 ID      |
+    /// | `params`    | [`WebWidgetRegionBannerParams`] | 分区参数 |
     pub async fn web_widget_region_banner(
         &self,
-        region_id: VideoPartitionV2,
+        params: WebWidgetRegionBannerParams,
     ) -> Result<BpiResponse<RegionBannerData>, BpiError> {
-        let query = vec![("region_id", region_id.tid().to_string())];
-
         self.get("https://api.bilibili.com/x/web-show/region/banner")
-            .query(&query)
+            .query(&params.query_pairs())
             .send_bpi("获取各分区的轮播图")
             .await
     }
@@ -57,7 +55,9 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         // 例如 region_id = 1 (动画)
         let resp = bpi
-            .web_widget_region_banner(VideoPartitionV2::Douga(Douga::Douga))
+            .web_widget_region_banner(WebWidgetRegionBannerParams::new(VideoPartitionV2::Douga(
+                Douga::Douga,
+            )))
             .await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());

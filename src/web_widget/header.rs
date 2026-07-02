@@ -3,6 +3,7 @@
 //! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/header.html)
 use serde::{Deserialize, Serialize};
 
+use crate::web_widget::params::WebWidgetHeaderPageParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 /// B站首页头图数据
@@ -103,10 +104,13 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/header.html#获取首页头图)
     ///
-    pub async fn web_widget_header_page(&self) -> Result<BpiResponse<HeaderData>, BpiError> {
+    pub async fn web_widget_header_page(
+        &self,
+        params: WebWidgetHeaderPageParams,
+    ) -> Result<BpiResponse<HeaderData>, BpiError> {
         let mut result = self
             .get("https://api.bilibili.com/x/web-show/page/header")
-            .query(&[("resource_id", 142)])
+            .query(&params.query_pairs())
             .send_bpi("获取首页头图")
             .await?;
         let mut header: HeaderData = result.data.take().ok_or_else(BpiError::missing_data)?;
@@ -129,7 +133,9 @@ mod tests {
     #[tokio::test]
     async fn test_get_header_page() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.web_widget_header_page().await;
+        let resp = bpi
+            .web_widget_header_page(WebWidgetHeaderPageParams::new())
+            .await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
     }
