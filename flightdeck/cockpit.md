@@ -1,11 +1,13 @@
 # Cockpit — bpi-rs
 
-Focus: Prepare the bpi-rs 0.2 migration as a high-quality Rust SDK redesign.
+Focus: `work/bpi-rs-0.2-migration/` — staged 0.2 redesign for a high-quality Rust SDK.
 
 ## In flight
 
+- `work/bpi-rs-0.2-migration/` — user reviews `design.md`; next step is implementation planning after approval.
+
 ## Next
 
-- Create `work/bpi-rs-0.2-migration/` and write the staged migration design/plan there.
+- Review `flightdeck/work/bpi-rs-0.2-migration/design.md`.
 
 ## Open questions
