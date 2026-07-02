@@ -1,6 +1,11 @@
 use crate::models::{Official, Pendant, Vip};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
+
+use super::{
+    DynamicDetailParams, DynamicForwardItemParams, DynamicForwardsParams,
+    DynamicLotteryNoticeParams, DynamicPicsParams, DynamicReactionsParams,
+};
 // --- 动态详情 API 结构体 ---
 
 /// 动态详情响应数据
@@ -162,25 +167,17 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `id` | &str | 动态 ID |
-    /// | `features` | `Option<&str>` | 功能特性，如 `itemOpusStyle,opusBigCover,onlyfansVote...` |
+    /// | `params` | [`DynamicDetailParams`] | 动态 ID 和详情特性参数 |
     pub async fn dynamic_detail(
         &self,
-        id: &str,
-        features: Option<&str>,
+        params: DynamicDetailParams,
     ) -> Result<BpiResponse<DynamicDetailData>, BpiError> {
-        let mut req = self
-            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail")
-            .query(&[("id", id)]);
+        let query = params.query_pairs();
 
-        if let Some(f) = features {
-            req = req.query(&[("features", f)]);
-        } else {
-            // 默认值处理
-            req = req.query(&[("features", "htmlNewStyle,itemOpusStyle,decorationCard")]);
-        }
-
-        req.send_bpi("获取动态详情").await
+        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail")
+            .query(&query)
+            .send_bpi("获取动态详情")
+            .await
     }
 
     /// 获取动态点赞与转发列表
@@ -192,22 +189,17 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `id` | &str | 动态 ID |
-    /// | `offset` | `Option<&str>` | 偏移量，用于翻页 |
+    /// | `params` | [`DynamicReactionsParams`] | 动态 ID 和翻页参数 |
     pub async fn dynamic_reactions(
         &self,
-        id: &str,
-        offset: Option<&str>,
+        params: DynamicReactionsParams,
     ) -> Result<BpiResponse<DynamicReactionData>, BpiError> {
-        let mut req = self
-            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/reaction")
-            .query(&[("id", id)]);
+        let query = params.query_pairs();
 
-        if let Some(o) = offset {
-            req = req.query(&[("offset", o)]);
-        }
-
-        req.send_bpi("获取动态点赞与转发列表").await
+        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/reaction")
+            .query(&query)
+            .send_bpi("获取动态点赞与转发列表")
+            .await
     }
 
     /// 获取动态抽奖详情
@@ -219,18 +211,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `business_id` | &str | 动态 ID |
+    /// | `params` | [`DynamicLotteryNoticeParams`] | 动态抽奖业务参数 |
     pub async fn dynamic_lottery_notice(
         &self,
-        business_id: &str,
+        params: DynamicLotteryNoticeParams,
     ) -> Result<BpiResponse<DynamicLotteryData>, BpiError> {
         let csrf = self.csrf()?;
+        let query = params.query_pairs(&csrf);
         self.get("https://api.vc.bilibili.com/lottery_svr/v1/lottery_svr/lottery_notice")
-            .query(&[
-                ("business_id", business_id),
-                ("business_type", "1"),
-                ("csrf", &csrf),
-            ])
+            .query(&query)
             .send_bpi("获取动态抽奖详情")
             .await
     }
@@ -244,22 +233,17 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `id` | &str | 动态 ID |
-    /// | `offset` | `Option<&str>` | 偏移量，用于翻页 |
+    /// | `params` | [`DynamicForwardsParams`] | 动态 ID 和翻页参数 |
     pub async fn dynamic_forwards(
         &self,
-        id: &str,
-        offset: Option<&str>,
+        params: DynamicForwardsParams,
     ) -> Result<BpiResponse<DynamicForwardData>, BpiError> {
-        let mut req = self
-            .get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/forward")
-            .query(&[("id", id)]);
+        let query = params.query_pairs();
 
-        if let Some(o) = offset {
-            req = req.query(&[("offset", o)]);
-        }
-
-        req.send_bpi("获取动态转发列表").await
+        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/forward")
+            .query(&query)
+            .send_bpi("获取动态转发列表")
+            .await
     }
 
     /// 获取动态中图片列表
@@ -271,10 +255,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `id` | &str | 动态 ID |
-    pub async fn dynamic_pics(&self, id: &str) -> Result<BpiResponse<Vec<DynamicPic>>, BpiError> {
+    /// | `params` | [`DynamicPicsParams`] | 动态 ID 参数 |
+    pub async fn dynamic_pics(
+        &self,
+        params: DynamicPicsParams,
+    ) -> Result<BpiResponse<Vec<DynamicPic>>, BpiError> {
+        let query = params.query_pairs();
+
         self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/pic")
-            .query(&[("id", id)])
+            .query(&query)
             .send_bpi("获取动态图片列表")
             .await
     }
@@ -288,13 +277,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `id` | &str | 动态 ID |
+    /// | `params` | [`DynamicForwardItemParams`] | 动态 ID 参数 |
     pub async fn dynamic_forward_item(
         &self,
-        id: &str,
+        params: DynamicForwardItemParams,
     ) -> Result<BpiResponse<DynamicForwardInfoData>, BpiError> {
+        let query = params.query_pairs();
+
         self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/forward/item")
-            .query(&[("id", id)])
+            .query(&query)
             .send_bpi("获取转发动态信息")
             .await
     }
@@ -303,21 +294,34 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::dynamic::{
+        DynamicDetailParams, DynamicForwardItemParams, DynamicForwardsParams,
+        DynamicLotteryNoticeParams, DynamicPicsParams, DynamicReactionsParams,
+    };
+    use crate::ids::DynamicId;
     use tracing::info;
+
+    fn parse_dynamic_id(value: &str) -> Result<DynamicId, BpiError> {
+        value.parse()
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_dynamic_detail() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "1099138163191840776";
-        let resp = bpi.dynamic_detail(dynamic_id, None).await?;
+        let resp = bpi
+            .dynamic_detail(DynamicDetailParams::new(parse_dynamic_id(dynamic_id)?))
+            .await?;
         let data = resp.into_data()?;
 
         info!("动态详情: {:?}", data.item);
         assert_eq!(data.item.id_str, dynamic_id);
 
         let dynamic_id = "1152614216889270274"; // 此动态为陈叔叔的一条转发动态
-        let resp = bpi.dynamic_detail("1152614216889270274", None).await?;
+        let resp = bpi
+            .dynamic_detail(DynamicDetailParams::new(parse_dynamic_id(dynamic_id)?))
+            .await?;
         let data = resp.into_data()?;
         info!("动态详情: {:?}", data.item);
         assert_eq!(data.item.id_str, dynamic_id);
@@ -331,7 +335,9 @@ mod tests {
     async fn test_get_dynamic_reactions() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "1099138163191840776";
-        let resp = bpi.dynamic_reactions(dynamic_id, None).await?;
+        let resp = bpi
+            .dynamic_reactions(DynamicReactionsParams::new(parse_dynamic_id(dynamic_id)?))
+            .await?;
         let data = resp.into_data()?;
 
         info!("点赞/转发总数: {}", data.total);
@@ -345,7 +351,11 @@ mod tests {
     async fn test_get_lottery_notice() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "969916293954142214";
-        let resp = bpi.dynamic_lottery_notice(dynamic_id).await?;
+        let resp = bpi
+            .dynamic_lottery_notice(DynamicLotteryNoticeParams::new(parse_dynamic_id(
+                dynamic_id,
+            )?))
+            .await?;
         let data = resp.into_data()?;
 
         info!("抽奖状态: {}", data.status);
@@ -359,7 +369,9 @@ mod tests {
     async fn test_get_dynamic_forwards() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "1099138163191840776";
-        let resp = bpi.dynamic_forwards(dynamic_id, None).await?;
+        let resp = bpi
+            .dynamic_forwards(DynamicForwardsParams::new(parse_dynamic_id(dynamic_id)?))
+            .await?;
         let data = resp.into_data()?;
 
         info!("转发总数: {}", data.total);
@@ -373,7 +385,9 @@ mod tests {
     async fn test_get_dynamic_pics() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "1099138163191840776";
-        let resp = bpi.dynamic_pics(dynamic_id).await?;
+        let resp = bpi
+            .dynamic_pics(DynamicPicsParams::new(parse_dynamic_id(dynamic_id)?))
+            .await?;
         let data = resp.into_data()?;
 
         info!("图片数量: {}", data.len());
@@ -387,12 +401,114 @@ mod tests {
     async fn test_get_forward_item() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let dynamic_id = "1110902525317349376";
-        let resp = bpi.dynamic_forward_item(dynamic_id).await?;
+        let resp = bpi
+            .dynamic_forward_item(DynamicForwardItemParams::new(parse_dynamic_id(dynamic_id)?))
+            .await?;
         let data = resp.into_data()?;
 
         info!("转发动态详情: {:?}", data.item);
         assert_eq!(data.item.id_str, dynamic_id);
 
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_detail_params_serializes_default_features() -> Result<(), BpiError> {
+        let params = DynamicDetailParams::new(parse_dynamic_id("1099138163191840776")?);
+
+        assert_eq!(
+            params.query_pairs(),
+            [
+                ("id", "1099138163191840776".to_string()),
+                (
+                    "features",
+                    "htmlNewStyle,itemOpusStyle,decorationCard".to_string()
+                ),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_detail_params_serializes_custom_features() -> Result<(), BpiError> {
+        let params = DynamicDetailParams::new(parse_dynamic_id("1099138163191840776")?)
+            .with_features("itemOpusStyle,opusBigCover")?;
+
+        assert_eq!(
+            params.query_pairs(),
+            [
+                ("id", "1099138163191840776".to_string()),
+                ("features", "itemOpusStyle,opusBigCover".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_reactions_params_serializes_offset() -> Result<(), BpiError> {
+        let params = DynamicReactionsParams::new(parse_dynamic_id("1099138163191840776")?)
+            .with_offset("offset-token")?;
+
+        assert_eq!(
+            params.query_pairs(),
+            [
+                ("id", "1099138163191840776".to_string()),
+                ("offset", "offset-token".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_lottery_notice_params_serializes_csrf_query() -> Result<(), BpiError> {
+        let params = DynamicLotteryNoticeParams::new(parse_dynamic_id("969916293954142214")?);
+
+        assert_eq!(
+            params.query_pairs("csrf-token"),
+            [
+                ("business_id", "969916293954142214".to_string()),
+                ("business_type", "1".to_string()),
+                ("csrf", "csrf-token".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_pics_params_serializes_query() -> Result<(), BpiError> {
+        let params = DynamicPicsParams::new(parse_dynamic_id("1099138163191840776")?);
+
+        assert_eq!(
+            params.query_pairs(),
+            [("id", "1099138163191840776".to_string())]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_forward_item_params_serializes_query() -> Result<(), BpiError> {
+        let params = DynamicForwardItemParams::new(parse_dynamic_id("1110902525317349376")?);
+
+        assert_eq!(
+            params.query_pairs(),
+            [("id", "1110902525317349376".to_string())]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_forwards_params_rejects_blank_offset() -> Result<(), BpiError> {
+        let err = DynamicForwardsParams::new(parse_dynamic_id("1099138163191840776")?)
+            .with_offset("   ")
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "offset",
+                ..
+            }
+        ));
         Ok(())
     }
 }

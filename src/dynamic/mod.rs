@@ -9,8 +9,14 @@ pub mod detail;
 pub mod dynamic_enum;
 pub mod get_dynamic_detail;
 pub mod nav;
+pub mod params;
 pub mod publish;
 pub mod space;
 pub mod topic;
 
 mod module;
+
+pub use params::{
+    DynamicDetailParams, DynamicForwardItemParams, DynamicForwardsParams,
+    DynamicLotteryNoticeParams, DynamicPicsParams, DynamicReactionsParams,
+};
