@@ -9,5 +9,6 @@ pub mod suggest;
 mod typed;
 
 pub use search_params::{
-    CategoryId, Duration, OrderSort, SearchOrder, SearchVideoParams, UserType,
+    CategoryId, Duration, OrderSort, SearchBangumiParams, SearchMovieParams, SearchOrder,
+    SearchVideoParams, UserType,
 };

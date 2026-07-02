@@ -157,6 +157,64 @@ impl CategoryId {
     }
 }
 
+/// Parameters for bangumi search.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SearchBangumiParams {
+    keyword: String,
+    page: u32,
+}
+
+impl SearchBangumiParams {
+    pub fn new(keyword: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            keyword: normalize_search_keyword(keyword)?,
+            page: 1,
+        })
+    }
+
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        self.page = validate_search_page(page)?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("search_type", SearchType::MediaBangumi.as_str().to_string()),
+            ("keyword", self.keyword.clone()),
+            ("page", self.page.to_string()),
+        ]
+    }
+}
+
+/// Parameters for movie/film search.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SearchMovieParams {
+    keyword: String,
+    page: u32,
+}
+
+impl SearchMovieParams {
+    pub fn new(keyword: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            keyword: normalize_search_keyword(keyword)?,
+            page: 1,
+        })
+    }
+
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        self.page = validate_search_page(page)?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("search_type", SearchType::MediaFt.as_str().to_string()),
+            ("keyword", self.keyword.clone()),
+            ("page", self.page.to_string()),
+        ]
+    }
+}
+
 /// Parameters for video search.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchVideoParams {
@@ -169,16 +227,8 @@ pub struct SearchVideoParams {
 
 impl SearchVideoParams {
     pub fn new(keyword: impl Into<String>) -> BpiResult<Self> {
-        let keyword = keyword.into().trim().to_string();
-        if keyword.is_empty() {
-            return Err(BpiError::invalid_parameter(
-                "keyword",
-                "search keyword cannot be blank",
-            ));
-        }
-
         Ok(Self {
-            keyword,
+            keyword: normalize_search_keyword(keyword)?,
             order: SearchOrder::TotalRank,
             duration: Duration::All,
             tids: 0,
@@ -202,14 +252,7 @@ impl SearchVideoParams {
     }
 
     pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
-        if page == 0 {
-            return Err(BpiError::invalid_parameter(
-                "page",
-                "page number must be at least 1",
-            ));
-        }
-
-        self.page = page;
+        self.page = validate_search_page(page)?;
         Ok(self)
     }
 
@@ -225,9 +268,103 @@ impl SearchVideoParams {
     }
 }
 
+fn normalize_search_keyword(keyword: impl Into<String>) -> BpiResult<String> {
+    let keyword = keyword.into().trim().to_string();
+    if keyword.is_empty() {
+        return Err(BpiError::invalid_parameter(
+            "keyword",
+            "search keyword cannot be blank",
+        ));
+    }
+
+    Ok(keyword)
+}
+
+fn validate_search_page(page: u32) -> BpiResult<u32> {
+    if page == 0 {
+        return Err(BpiError::invalid_parameter(
+            "page",
+            "page number must be at least 1",
+        ));
+    }
+
+    Ok(page)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn search_bangumi_params_serializes_default_query() -> Result<(), BpiError> {
+        let params = SearchBangumiParams::new("  天气之子  ")?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("search_type", "media_bangumi".to_string()),
+                ("keyword", "天气之子".to_string()),
+                ("page", "1".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn search_bangumi_params_serializes_page() -> Result<(), BpiError> {
+        let params = SearchBangumiParams::new("天气之子")?.with_page(2)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("search_type", "media_bangumi".to_string()),
+                ("keyword", "天气之子".to_string()),
+                ("page", "2".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn search_bangumi_params_rejects_blank_keyword() {
+        let err = SearchBangumiParams::new("  ").unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "keyword",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn search_movie_params_serializes_default_query() -> Result<(), BpiError> {
+        let params = SearchMovieParams::new("  哈利波特  ")?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("search_type", "media_ft".to_string()),
+                ("keyword", "哈利波特".to_string()),
+                ("page", "1".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn search_movie_params_rejects_zero_page() -> Result<(), BpiError> {
+        let err = SearchMovieParams::new("哈利波特")?
+            .with_page(0)
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "page", .. }
+        ));
+        Ok(())
+    }
 
     #[test]
     fn search_video_params_serializes_default_query() -> Result<(), BpiError> {

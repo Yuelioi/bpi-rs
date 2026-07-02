@@ -6,7 +6,8 @@ use super::result::{
     Article, Bangumi, BiliUser, LiveData, LiveRoom, LiveUser, Movie, SearchData, Video,
 };
 use super::search_params::{
-    CategoryId, OrderSort, SearchOrder, SearchType, SearchVideoParams, UserType,
+    CategoryId, OrderSort, SearchBangumiParams, SearchMovieParams, SearchOrder, SearchType,
+    SearchVideoParams, UserType,
 };
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
@@ -63,22 +64,12 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `keyword` | &str | 搜索关键词 |
-    /// | `page` | `Option<i32>` | 页码（默认1） |
+    /// | `params` | `SearchBangumiParams` | 番剧搜索参数 |
     pub async fn search_bangumi(
         &self,
-        keyword: &str,
-        page: Option<i32>,
+        params: SearchBangumiParams,
     ) -> Result<BpiResponse<SearchData<Vec<Bangumi>>>, BpiError> {
-        let page_str = page.unwrap_or(1).to_string();
-
-        let params = vec![
-            ("search_type", SearchType::MediaBangumi.as_str().to_string()),
-            ("keyword", keyword.to_string()),
-            ("page", page_str),
-        ];
-
-        let signed_params = self.get_wbi_sign2(params).await?;
+        let signed_params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         self.get("https://api.bilibili.com/x/web-interface/wbi/search/type")
             .query(&signed_params)
@@ -259,22 +250,12 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `keyword` | &str | 搜索关键词 |
-    /// | `page` | `Option<i32>` | 页码（默认1） |
+    /// | `params` | `SearchMovieParams` | 影视搜索参数 |
     pub async fn search_movie(
         &self,
-        keyword: &str,
-        page: Option<i32>,
+        params: SearchMovieParams,
     ) -> Result<BpiResponse<SearchData<Vec<Movie>>>, BpiError> {
-        let page_str = page.unwrap_or(1).to_string();
-
-        let params = vec![
-            ("search_type", SearchType::MediaFt.as_str().to_string()),
-            ("keyword", keyword.to_string()),
-            ("page", page_str),
-        ];
-
-        let signed_params = self.get_wbi_sign2(params).await?;
+        let signed_params = self.get_wbi_sign2(params.query_pairs()).await?;
 
         self.get("https://api.bilibili.com/x/web-interface/wbi/search/type")
             .query(&signed_params)
@@ -308,7 +289,8 @@ impl BpiClient {
 mod tests {
     use super::*;
     use crate::search::{
-        CategoryId, Duration, OrderSort, SearchOrder, SearchVideoParams, UserType,
+        CategoryId, Duration, OrderSort, SearchBangumiParams, SearchMovieParams, SearchOrder,
+        SearchVideoParams, UserType,
     };
     use tracing::info;
 
@@ -344,7 +326,8 @@ mod tests {
     #[tokio::test]
     async fn test_search_bangumi() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.search_bangumi("天气之子", None).await;
+        let params = SearchBangumiParams::new("天气之子").expect("keyword should be valid");
+        let resp = bpi.search_bangumi(params).await;
         assert!(resp.is_ok());
         if let Ok(r) = resp {
             info!("搜索番剧返回: {:?}", r);
@@ -442,7 +425,8 @@ mod tests {
     #[tokio::test]
     async fn test_search_movie() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.search_movie("哈利波特", None).await;
+        let params = SearchMovieParams::new("哈利波特").expect("keyword should be valid");
+        let resp = bpi.search_movie(params).await;
         assert!(resp.is_ok());
         if let Ok(r) = resp {
             info!("搜索影视返回: {:?}", r);
