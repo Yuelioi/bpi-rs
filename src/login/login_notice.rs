@@ -1,6 +1,7 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+
+use crate::login::params::{LoginLogParams, LoginNoticeParams};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 // --- API 结构体 ---
 
@@ -39,21 +40,13 @@ impl BpiClient {
     /// 查询指定登录记录。
     ///
     /// # 参数
-    /// * `mid` - 用户mid，必须是自己的mid。
-    /// * `buvid` - 可选的设备虚拟ID（web端为buvid3）。
+    /// * `params` - 用户 mid 和可选 buvid。
     pub async fn login_notice(
         &self,
-        mid: u64,
-        buvid: Option<&str>,
+        params: LoginNoticeParams,
     ) -> Result<BpiResponse<LoginNoticeData>, BpiError> {
-        let mut params = HashMap::new();
-        params.insert("mid", mid.to_string());
-        if let Some(buvid_val) = buvid {
-            params.insert("buvid", buvid_val.to_string());
-        }
-
         self.get("https://api.bilibili.com/x/safecenter/login_notice")
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("查询登录记录")
             .await
     }
@@ -61,10 +54,13 @@ impl BpiClient {
     /// 查询最近一周的登录情况。
     ///
     /// # 参数
-    /// 无。该接口自动使用当前登录用户的Session。
-    pub async fn login_log(&self) -> Result<BpiResponse<LoginLogData>, BpiError> {
+    /// * `params` - JSONP 和 web_location 查询参数。
+    pub async fn login_log(
+        &self,
+        params: LoginLogParams,
+    ) -> Result<BpiResponse<LoginLogData>, BpiError> {
         self.get("https://api.bilibili.com/x/member/web/login/log")
-            .query(&[("jsonp", "jsonp"), ("web_location", "333.33")])
+            .query(&params.query_pairs())
             .send_bpi("查询最近一周登录情况")
             .await
     }
@@ -73,6 +69,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::Mid;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -80,7 +77,9 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         let mid = 4279370;
 
-        let resp = bpi.login_notice(mid, None).await?;
+        let resp = bpi
+            .login_notice(LoginNoticeParams::new(Mid::new(mid)?))
+            .await?;
         let data = resp.into_data()?;
 
         println!("指定登录记录:");
@@ -100,7 +99,7 @@ mod tests {
     async fn test_get_login_log() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let resp = bpi.login_log().await?;
+        let resp = bpi.login_log(LoginLogParams::new()).await?;
         let data = resp.into_data()?;
 
         println!("最近一周登录记录 (共 {} 条):", data.count);
