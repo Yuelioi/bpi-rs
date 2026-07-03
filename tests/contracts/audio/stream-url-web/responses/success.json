@@ -1,0 +1,18 @@
+{
+  "code": 0,
+  "data": {
+    "cdns": [
+      "https://example.invalid/audio/stream-url-web.m4a"
+    ],
+    "cover": "",
+    "info": "",
+    "qualities": null,
+    "sid": 13603,
+    "size": 6537507,
+    "timeout": 10800,
+    "title": "",
+    "type": 1
+  },
+  "message": "OK",
+  "msg": "success"
+}

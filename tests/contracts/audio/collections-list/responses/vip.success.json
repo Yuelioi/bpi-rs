@@ -1,0 +1,36 @@
+{
+  "code": 0,
+  "data": {
+    "curPage": 1,
+    "data": [
+      {
+        "cover": "https://example.invalid/audio/private-collection-cover.jpg",
+        "ctime": 1523870864,
+        "desc": "",
+        "id": 1,
+        "menuId": 1,
+        "published": 1,
+        "sids": [
+          13603
+        ],
+        "song": 1,
+        "statistic": {
+          "collect": 0,
+          "comment": 0,
+          "play": 0,
+          "share": 0,
+          "sid": 19750557
+        },
+        "title": "sanitized-private-collection",
+        "type": 1,
+        "uid": 1,
+        "uname": "sanitized-user"
+      }
+    ],
+    "pageCount": 1,
+    "pageSize": 1,
+    "totalSize": 1
+  },
+  "message": "OK",
+  "msg": "success"
+}

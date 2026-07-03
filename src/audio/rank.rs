@@ -77,7 +77,7 @@ impl BpiClient {
         &self,
         params: AudioRankPeriodParams,
     ) -> Result<BpiResponse<AudioRankPeriodData>, BpiError> {
-        let csrf = self.csrf()?;
+        let csrf = self.csrf().unwrap_or_default();
 
         self.get("https://api.bilibili.com/x/copyright-music-publicity/toplist/all_period")
             .query(&params.query_pairs(&csrf))
@@ -98,7 +98,7 @@ impl BpiClient {
         &self,
         params: AudioRankListParams,
     ) -> Result<BpiResponse<AudioRankDetailData>, BpiError> {
-        let csrf = self.csrf()?;
+        let csrf = self.csrf().unwrap_or_default();
 
         self.get("https://api.bilibili.com/x/copyright-music-publicity/toplist/detail")
             .query(&params.query_pairs(&csrf))
@@ -119,7 +119,7 @@ impl BpiClient {
         &self,
         params: AudioRankListParams,
     ) -> Result<BpiResponse<AudioRankMusicListData>, BpiError> {
-        let csrf = self.csrf()?;
+        let csrf = self.csrf().unwrap_or_default();
 
         self.get("https://api.bilibili.com/x/copyright-music-publicity/toplist/music_list")
             .query(&params.query_pairs(&csrf))
@@ -159,8 +159,29 @@ impl BpiClient {
 mod tests {
     use super::*;
     use crate::audio::params::AudioRankListType;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
 
     const TEST_LIST_ID: u64 = 76;
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "rank-period" => {
+                include_bytes!("../../tests/contracts/audio/rank-period/contract.json").as_slice()
+            }
+            "rank-detail" => {
+                include_bytes!("../../tests/contracts/audio/rank-detail/contract.json").as_slice()
+            }
+            "rank-music-list" => {
+                include_bytes!("../../tests/contracts/audio/rank-music-list/contract.json")
+                    .as_slice()
+            }
+            _ => unreachable!("unknown audio rank contract"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -230,6 +251,158 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         bpi.audio_rank_subscribe(1, Some(76)).await?;
 
+        Ok(())
+    }
+
+    #[test]
+    fn audio_rank_period_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("rank-period")?;
+        let params = AudioRankPeriodParams::new(AudioRankListType::Original);
+
+        assert_eq!(contract.name, "audio.rank_period");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/copyright-music-publicity/toplist/all_period"
+        );
+        assert_eq!(
+            contract.request.query.get("list_type").map(String::as_str),
+            Some("2")
+        );
+        assert_eq!(
+            contract.request.query.get("csrf").map(String::as_str),
+            Some("${csrf}")
+        );
+        assert_eq!(
+            params.query_pairs(""),
+            vec![("list_type", "2".to_string()), ("csrf", String::new())]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("AudioRankPeriodData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_rank_period_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<AudioRankPeriodData>::from_slice(include_bytes!(
+            "../../tests/contracts/audio/rank-period/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert!(!payload.list.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn audio_rank_detail_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("rank-detail")?;
+        let params = AudioRankListParams::new(TEST_LIST_ID)?;
+
+        assert_eq!(contract.name, "audio.rank_detail");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/copyright-music-publicity/toplist/detail"
+        );
+        assert_eq!(
+            contract.request.query.get("list_id").map(String::as_str),
+            Some("76")
+        );
+        assert_eq!(
+            params.query_pairs(""),
+            vec![("list_id", "76".to_string()), ("csrf", String::new())]
+        );
+        assert_eq!(
+            contract.cases[2].response.fixture.as_deref(),
+            Some("responses/vip.success.json")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_rank_detail_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        let public_payload = ApiEnvelope::<AudioRankDetailData>::from_slice(include_bytes!(
+            "../../tests/contracts/audio/rank-detail/responses/public.success.json"
+        ))?
+        .into_payload()?;
+        let vip_payload = ApiEnvelope::<AudioRankDetailData>::from_slice(include_bytes!(
+            "../../tests/contracts/audio/rank-detail/responses/vip.success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(public_payload.listen_fid, vip_payload.listen_fid);
+        assert!(!public_payload.is_subscribe);
+        assert!(vip_payload.is_subscribe);
+        Ok(())
+    }
+
+    #[test]
+    fn audio_rank_music_list_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("rank-music-list")?;
+
+        assert_eq!(contract.name, "audio.rank_music_list");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/copyright-music-publicity/toplist/music_list"
+        );
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("AudioRankMusicListData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_rank_music_list_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<AudioRankMusicListData>::from_slice(include_bytes!(
+            "../../tests/contracts/audio/rank-music-list/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert!(!payload.list.is_empty());
+        assert_eq!(payload.list[0].rank, 1);
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/audio/extra-read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn audio_rank_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("rank-period", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<AudioRankPeriodData>>(body)?
+                    .into_payload()?;
+
+                assert!(!payload.list.is_empty());
+            }
+
+            if let Some(body) = local_probe_body("rank-detail", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<AudioRankDetailData>>(body)?
+                    .into_payload()?;
+
+                assert!(payload.listen_fid > 0);
+            }
+
+            if let Some(body) = local_probe_body("rank-music-list", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<AudioRankMusicListData>>(body)?
+                    .into_payload()?;
+
+                assert!(!payload.list.is_empty());
+            }
+        }
         Ok(())
     }
 }

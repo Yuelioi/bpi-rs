@@ -1,0 +1,36 @@
+{
+  "code": 0,
+  "data": {
+    "curPage": 1,
+    "data": [
+      {
+        "attr": 0,
+        "collectionId": 0,
+        "cover": "http://i0.hdslb.com/bfs/music/a32c1ed4f6ec3f74f8240f4486a750dda3a509e5.jpg",
+        "ctime": 1501209433,
+        "curtime": 1783083645,
+        "intro": "每天11:00更新，为你推送最新音乐",
+        "isDefault": 0,
+        "menuId": 10624,
+        "off": 0,
+        "snum": 0,
+        "statistic": {
+          "collect": 0,
+          "comment": 0,
+          "play": 2376265,
+          "share": 0,
+          "sid": 10624
+        },
+        "title": "新曲推荐",
+        "type": 2,
+        "uid": 32708543,
+        "uname": "大家的音乐机"
+      }
+    ],
+    "pageCount": 4,
+    "pageSize": 3,
+    "totalSize": 11
+  },
+  "message": "OK",
+  "msg": "success"
+}

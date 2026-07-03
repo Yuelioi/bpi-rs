@@ -1,0 +1,74 @@
+{
+  "name": "audio.rank_music_list",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/copyright-music-publicity/toplist/music_list",
+    "query": {
+      "list_id": "76",
+      "csrf": "${csrf}"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "raw Probe output kept under target; promoted fixtures are sanitized or trimmed when responses contain signed URLs, account state, or large public lists"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "AudioRankMusicListData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie",
+          "csrf"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "AudioRankMusicListData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie",
+          "csrf"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "AudioRankMusicListData"
+      }
+    }
+  ]
+}
+

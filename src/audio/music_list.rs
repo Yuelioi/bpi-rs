@@ -263,6 +263,31 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "collections-list" => {
+                include_bytes!("../../tests/contracts/audio/collections-list/contract.json")
+                    .as_slice()
+            }
+            "collection-info" => {
+                include_bytes!("../../tests/contracts/audio/collection-info/contract.json")
+                    .as_slice()
+            }
+            "hot-menu" => {
+                include_bytes!("../../tests/contracts/audio/hot-menu/contract.json").as_slice()
+            }
+            "rank-menu" => {
+                include_bytes!("../../tests/contracts/audio/rank-menu/contract.json").as_slice()
+            }
+            _ => unreachable!("unknown audio music list contract"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -336,5 +361,218 @@ mod tests {
                 assert!(audio.duration > 0);
             }
         }
+    }
+
+    #[test]
+    fn audio_collections_list_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("collections-list")?;
+        let params = AudioPageParams::new(1, 2)?;
+
+        assert_eq!(contract.name, "audio.collections_list");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://www.bilibili.com/audio/music-service-c/web/collections/list"
+        );
+        assert_eq!(
+            contract.request.query.get("pn").map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            contract.request.query.get("ps").map(String::as_str),
+            Some("2")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![("pn", "1".to_string()), ("ps", "2".to_string())]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("requires_login")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_collections_list_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        let anonymous = ApiEnvelope::<AudioCollectionsListData>::from_slice(include_bytes!(
+            "../../tests/contracts/audio/collections-list/responses/anonymous.error.json"
+        ))?;
+        assert_eq!(anonymous.code, 4_511_003);
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/audio/collections-list/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/audio/collections-list/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload =
+                ApiEnvelope::<AudioCollectionsListData>::from_slice(bytes)?.into_payload()?;
+
+            assert!(payload.total_size >= 0);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn audio_collection_info_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("collection-info")?;
+        let params = AudioCollectionInfoParams::new(15_967_839)?;
+
+        assert_eq!(contract.name, "audio.collection_info");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://www.bilibili.com/audio/music-service-c/web/collections/info"
+        );
+        assert_eq!(
+            contract.request.query.get("sid").map(String::as_str),
+            Some("15967839")
+        );
+        assert_eq!(params.query_pairs(), vec![("sid", "15967839".to_string())]);
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("Option<AudioCollection>")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_collection_info_response_fixtures_record_optional_success_payload() -> BpiResult<()> {
+        let anonymous = ApiEnvelope::<AudioCollection>::from_slice(include_bytes!(
+            "../../tests/contracts/audio/collection-info/responses/anonymous.error.json"
+        ))?;
+        assert_eq!(anonymous.code, 4_511_003);
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/audio/collection-info/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/audio/collection-info/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload =
+                ApiEnvelope::<AudioCollection>::from_slice(bytes)?.into_optional_payload()?;
+
+            assert!(payload.is_none());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn audio_hot_menu_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("hot-menu")?;
+
+        assert_eq!(contract.name, "audio.hot_menu");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://www.bilibili.com/audio/music-service-c/web/menu/hit"
+        );
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("AudioHotMenuData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_hot_menu_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<AudioHotMenuData>::from_slice(include_bytes!(
+            "../../tests/contracts/audio/hot-menu/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert!(!payload.data.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn audio_rank_menu_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("rank-menu")?;
+
+        assert_eq!(contract.name, "audio.rank_menu");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://www.bilibili.com/audio/music-service-c/web/menu/rank"
+        );
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("AudioRankMenuData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_rank_menu_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<AudioRankMenuData>::from_slice(include_bytes!(
+            "../../tests/contracts/audio/rank-menu/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert!(!payload.data.is_empty());
+        assert!(!payload.data[0].audios.is_empty());
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/audio/extra-read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn audio_music_list_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("collections-list", profile) {
+                let envelope =
+                    serde_json::from_value::<ApiEnvelope<AudioCollectionsListData>>(body)?;
+                if profile == "anonymous" {
+                    assert_eq!(envelope.code, 4_511_003);
+                } else {
+                    let payload = envelope.into_payload()?;
+                    assert!(payload.total_size >= 0);
+                }
+            }
+
+            if let Some(body) = local_probe_body("collection-info", profile) {
+                let envelope = serde_json::from_value::<ApiEnvelope<AudioCollection>>(body)?;
+                if profile == "anonymous" {
+                    assert_eq!(envelope.code, 4_511_003);
+                } else {
+                    let _payload = envelope.into_optional_payload()?;
+                }
+            }
+
+            if let Some(body) = local_probe_body("hot-menu", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<AudioHotMenuData>>(body)?
+                    .into_payload()?;
+
+                assert!(!payload.data.is_empty());
+            }
+
+            if let Some(body) = local_probe_body("rank-menu", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<AudioRankMenuData>>(body)?
+                    .into_payload()?;
+
+                assert!(!payload.data.is_empty());
+            }
+        }
+        Ok(())
     }
 }

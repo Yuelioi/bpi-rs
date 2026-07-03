@@ -1,0 +1,17 @@
+{
+  "code": 0,
+  "data": {
+    "all_fid": 23672948,
+    "bg_color": "#2d271e",
+    "cover_url": "https://example.invalid/audio/rank-cover.png",
+    "fav_mid": 1164440244,
+    "first_music_cover_url": "https://i0.hdslb.com/bfs/station_src/music_metadata/07e0d9826c574e37df25387cab6df062.jpg",
+    "is_subscribe": false,
+    "listen_count": 5,
+    "listen_fid": 23317138,
+    "listen_music_switch": false,
+    "shoot_video_switch": false
+  },
+  "message": "0",
+  "ttl": 1
+}

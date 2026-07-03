@@ -1,0 +1,36 @@
+{
+  "code": 0,
+  "data": {
+    "cdns": [
+      "https://example.invalid/audio/stream-url.m4a"
+    ],
+    "cover": "https://example.invalid/audio/cover.jpg",
+    "info": "",
+    "qualities": [
+      {
+        "bps": "192kbit/s",
+        "desc": "标准",
+        "require": 0,
+        "requiredesc": "",
+        "size": 4853263,
+        "tag": "",
+        "type": 1
+      },
+      {
+        "bps": "128kbit/s",
+        "desc": "流畅",
+        "require": 0,
+        "requiredesc": "",
+        "size": 3248309,
+        "tag": "",
+        "type": 0
+      }
+    ],
+    "sid": 15664,
+    "size": 4853263,
+    "timeout": 10800,
+    "title": "威风堂堂",
+    "type": 1
+  },
+  "msg": "success"
+}

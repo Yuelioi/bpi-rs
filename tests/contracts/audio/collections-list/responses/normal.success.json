@@ -1,0 +1,12 @@
+{
+  "code": 0,
+  "data": {
+    "curPage": 0,
+    "data": [],
+    "pageCount": 0,
+    "pageSize": 0,
+    "totalSize": 0
+  },
+  "message": "OK",
+  "msg": "success"
+}

@@ -1,0 +1,48 @@
+{
+  "code": 0,
+  "data": {
+    "list": [
+      {
+        "achievements": [
+          "重回榜单",
+          "最高排名1"
+        ],
+        "album": "約束 -Promise code-",
+        "arc_list": null,
+        "can_listen": true,
+        "creation_aid": 542698306,
+        "creation_bvid": "BV1Mi4y1L7CV",
+        "creation_cover": "https://example.invalid/audio/creation-cover.jpg",
+        "creation_duration": 228,
+        "creation_first_cid": 254594087,
+        "creation_nickname": "天猫首发",
+        "creation_play": 8548551,
+        "creation_reason": "官方现场",
+        "creation_title": "周深《极乐净土》，请问还有这个男人挑战不了的歌吗？",
+        "creation_up": 484109809,
+        "heat": 5328979,
+        "is_vt": 0,
+        "last_rank": 19,
+        "material_duration": 0,
+        "material_id": 0,
+        "material_show": 1,
+        "material_use_num": 0,
+        "music_id": "MA409252256362326366",
+        "music_title": "極楽浄土",
+        "mv_aid": 28361833,
+        "mv_bvid": "BV1us41137Fd",
+        "mv_cover": "https://example.invalid/audio/mv-cover.jpg",
+        "rank": 1,
+        "recommendation": "",
+        "singer": "GARNiDELiA",
+        "song_type": 2,
+        "vt": 0,
+        "vt_display": ""
+      }
+    ],
+    "list_id": 76,
+    "version": 15
+  },
+  "message": "0",
+  "ttl": 1
+}
