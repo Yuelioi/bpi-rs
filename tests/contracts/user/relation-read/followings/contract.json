@@ -1,0 +1,76 @@
+{
+  "name": "user.followings",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/relation/followings",
+    "query": {
+      "vmid": "2",
+      "order_type": "attention",
+      "ps": "20",
+      "pn": "1"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixture minimizes public relation-list data; full raw probe output is ignored under target/bpi-probe-runs/user/relation-read/followings"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": -101,
+        "fixture": "responses/anonymous.error.json",
+        "fixture_kind": "sanitized_probe_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "UserFollowings"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "UserFollowings"
+      }
+    }
+  ]
+}

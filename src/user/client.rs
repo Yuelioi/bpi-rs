@@ -320,6 +320,15 @@ mod tests {
             "cards" => {
                 include_bytes!("../../tests/contracts/user/public-read/cards/contract.json")
             }
+            "follow-tags" => {
+                include_bytes!("../../tests/contracts/user/relation-read/follow-tags/contract.json")
+            }
+            "followers" => {
+                include_bytes!("../../tests/contracts/user/relation-read/followers/contract.json")
+            }
+            "followings" => {
+                include_bytes!("../../tests/contracts/user/relation-read/followings/contract.json")
+            }
             "infos" => {
                 include_bytes!("../../tests/contracts/user/public-read/infos/contract.json")
             }
@@ -350,7 +359,7 @@ mod tests {
             _ => {
                 return Err(BpiError::invalid_parameter(
                     "endpoint",
-                    "unknown user public-read contract",
+                    "unknown user contract",
                 ));
             }
         };
@@ -358,9 +367,8 @@ mod tests {
         EndpointContract::from_slice(bytes)
     }
 
-    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
-        let path =
-            format!("target/bpi-probe-runs/user/public-read/{endpoint}/{profile}.response.json");
+    fn local_probe_body(batch: &str, endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/user/{batch}/{endpoint}/{profile}.response.json");
         let bytes = std::fs::read(path).ok()?;
         let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
         value
@@ -369,12 +377,12 @@ mod tests {
             .cloned()
     }
 
-    fn parse_local_probe_outputs<T>(endpoint: &str, profiles: &[&str]) -> BpiResult<()>
+    fn parse_local_probe_outputs<T>(batch: &str, endpoint: &str, profiles: &[&str]) -> BpiResult<()>
     where
         T: DeserializeOwned,
     {
         for profile in profiles {
-            let Some(body) = local_probe_body(endpoint, profile) else {
+            let Some(body) = local_probe_body(batch, endpoint, profile) else {
                 continue;
             };
 
@@ -687,6 +695,74 @@ mod tests {
     }
 
     #[test]
+    fn user_relation_read_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let expectations = [
+            (
+                "followings",
+                "user.followings",
+                FOLLOWINGS_ENDPOINT,
+                &[
+                    ("order_type", "attention"),
+                    ("pn", "1"),
+                    ("ps", "20"),
+                    ("vmid", "2"),
+                ][..],
+                "UserFollowings",
+            ),
+            (
+                "followers",
+                "user.followers",
+                FOLLOWERS_ENDPOINT,
+                &[("pn", "1"), ("ps", "20"), ("vmid", "2")][..],
+                "UserFollowers",
+            ),
+            (
+                "follow-tags",
+                "user.follow_tags",
+                FOLLOW_TAGS_ENDPOINT,
+                &[][..],
+                "Vec<UserFollowTag>",
+            ),
+        ];
+
+        for (endpoint, name, url, query_pairs, rust_model) in expectations {
+            let contract = contract(endpoint)?;
+
+            assert_eq!(contract.name, name);
+            assert_eq!(contract.request.method, HttpMethod::Get);
+            assert_eq!(contract.request.url.as_str(), url);
+            assert!(!contract.request.auth.requires_wbi());
+            assert_eq!(contract.cases.len(), 3);
+            assert!(
+                contract
+                    .cases
+                    .iter()
+                    .any(|case| case.response.rust_model.as_deref() == Some(rust_model)),
+                "{endpoint} should declare {rust_model} for at least one success case"
+            );
+
+            for &(key, value) in query_pairs {
+                if !key.is_empty() {
+                    assert_eq!(
+                        contract.request.query.get(key).map(String::as_str),
+                        Some(value)
+                    );
+                }
+            }
+
+            let anonymous = contract
+                .cases
+                .iter()
+                .find(|case| case.name == "anonymous")
+                .ok_or_else(|| BpiError::unsupported_response("missing anonymous case"))?;
+            assert_eq!(anonymous.response.http_status, Some(200));
+            assert!(anonymous.response.api_code.is_some());
+        }
+
+        Ok(())
+    }
+
+    #[test]
     fn user_public_read_response_fixtures_parse_declared_models() -> BpiResult<()> {
         let album_count = ApiEnvelope::<UserAlbumCount>::from_slice(include_bytes!(
             "../../tests/contracts/user/public-read/album-count/responses/success.json"
@@ -759,6 +835,27 @@ mod tests {
     }
 
     #[test]
+    fn user_relation_read_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let followings = ApiEnvelope::<UserFollowings>::from_slice(include_bytes!(
+            "../../tests/contracts/user/relation-read/followings/responses/success.json"
+        ))?
+        .into_payload()?;
+        let followers = ApiEnvelope::<UserFollowers>::from_slice(include_bytes!(
+            "../../tests/contracts/user/relation-read/followers/responses/success.json"
+        ))?
+        .into_payload()?;
+        let follow_tags = ApiEnvelope::<Vec<UserFollowTag>>::from_slice(include_bytes!(
+            "../../tests/contracts/user/relation-read/follow-tags/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(followings.list.len(), 1);
+        assert_eq!(followers.list.len(), 1);
+        assert_eq!(follow_tags.len(), 2);
+        Ok(())
+    }
+
+    #[test]
     fn user_public_read_error_fixtures_preserve_observed_api_errors() -> BpiResult<()> {
         for bytes in [
             include_bytes!(
@@ -802,40 +899,138 @@ mod tests {
     }
 
     #[test]
+    fn user_relation_read_error_fixtures_preserve_observed_api_errors() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/user/relation-read/followings/responses/anonymous.error.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/user/relation-read/follow-tags/responses/anonymous.error.json"
+            )
+            .as_slice(),
+        ] {
+            let err = ApiEnvelope::<serde_json::Value>::from_slice(bytes)?
+                .ensure_success()
+                .unwrap_err();
+
+            assert!(err.requires_login());
+        }
+
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/user/relation-read/followers/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert_eq!(err.code(), Some(-352));
+
+        Ok(())
+    }
+
+    #[test]
     fn user_public_read_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
         parse_local_probe_outputs::<UserAlbumCount>(
+            "public-read",
             "album-count",
             &["anonymous", "normal", "vip"],
         )?;
         parse_local_probe_outputs::<UserBangumiFollowList>(
+            "public-read",
             "bangumi-follow-list",
             &["anonymous", "normal", "vip"],
         )?;
-        parse_local_probe_outputs::<UserCardProfile>("card", &["anonymous", "normal", "vip"])?;
-        parse_local_probe_outputs::<Vec<UserBatchCard>>("cards", &["normal", "vip"])?;
-        parse_local_probe_outputs::<Vec<UserBatchInfo>>("infos", &["normal", "vip"])?;
-        parse_local_probe_outputs::<UserMedalWall>("medal-wall", &["normal", "vip"])?;
-        parse_local_probe_outputs::<UserNameToUid>("name-to-uid", &["normal", "vip"])?;
-        parse_local_probe_outputs::<UserNavStat>("nav-stat", &["anonymous", "normal", "vip"])?;
+        parse_local_probe_outputs::<UserCardProfile>(
+            "public-read",
+            "card",
+            &["anonymous", "normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<Vec<UserBatchCard>>(
+            "public-read",
+            "cards",
+            &["normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<Vec<UserBatchInfo>>(
+            "public-read",
+            "infos",
+            &["normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<UserMedalWall>(
+            "public-read",
+            "medal-wall",
+            &["normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<UserNameToUid>(
+            "public-read",
+            "name-to-uid",
+            &["normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<UserNavStat>(
+            "public-read",
+            "nav-stat",
+            &["anonymous", "normal", "vip"],
+        )?;
         parse_local_probe_outputs::<UserRelationStat>(
+            "public-read",
             "relation-stat",
             &["anonymous", "normal", "vip"],
         )?;
-        parse_local_probe_outputs::<UserSpaceProfile>("space-info", &["normal", "vip"])?;
+        parse_local_probe_outputs::<UserSpaceProfile>(
+            "public-read",
+            "space-info",
+            &["normal", "vip"],
+        )?;
         parse_local_probe_outputs::<UserSpaceNotice>(
+            "public-read",
             "space-notice",
             &["anonymous", "normal", "vip"],
         )?;
-        parse_local_probe_outputs::<UserUpStat>("up-stat", &["normal", "vip"])?;
+        parse_local_probe_outputs::<UserUpStat>("public-read", "up-stat", &["normal", "vip"])?;
         parse_local_probe_outputs::<UserUploadedVideos>(
+            "public-read",
             "uploaded-videos",
             &["anonymous", "normal", "vip"],
         )?;
 
-        if let Some(body) = local_probe_body("up-stat", "anonymous") {
+        if let Some(body) = local_probe_body("public-read", "up-stat", "anonymous") {
             let payload =
                 serde_json::from_value::<ApiEnvelope<serde_json::Value>>(body)?.into_payload()?;
             assert_eq!(payload, serde_json::json!({}));
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn user_relation_read_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        parse_local_probe_outputs::<UserFollowings>(
+            "relation-read",
+            "followings",
+            &["normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<UserFollowers>(
+            "relation-read",
+            "followers",
+            &["normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<Vec<UserFollowTag>>(
+            "relation-read",
+            "follow-tags",
+            &["normal", "vip"],
+        )?;
+
+        for (endpoint, profile, code) in [
+            ("followings", "anonymous", -101),
+            ("followers", "anonymous", -352),
+            ("follow-tags", "anonymous", -101),
+        ] {
+            let Some(body) = local_probe_body("relation-read", endpoint, profile) else {
+                continue;
+            };
+            let err = serde_json::from_value::<ApiEnvelope<serde_json::Value>>(body)?
+                .ensure_success()
+                .unwrap_err();
+
+            assert_eq!(err.code(), Some(code));
         }
 
         Ok(())

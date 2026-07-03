@@ -1,0 +1,30 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "list": [
+      {
+        "mid": 2,
+        "attribute": 0,
+        "mtime": 1700000000,
+        "tag": null,
+        "special": 0,
+        "uname": "sanitized_user",
+        "face": "https://i0.hdslb.com/bfs/face/sanitized.jpg",
+        "sign": "sanitized signature",
+        "face_nft": 0,
+        "official_verify": {
+          "type": -1,
+          "desc": ""
+        },
+        "vip": {
+          "vipType": 0,
+          "vipStatus": 0
+        }
+      }
+    ],
+    "re_version": 1,
+    "total": 1
+  }
+}

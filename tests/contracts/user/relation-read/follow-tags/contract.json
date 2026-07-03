@@ -1,0 +1,71 @@
+{
+  "name": "user.follow_tags",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/relation/tags",
+    "query": {},
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixture keeps only built-in group examples; full raw probe output is ignored under target/bpi-probe-runs/user/relation-read/follow-tags"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": -101,
+        "fixture": "responses/anonymous.error.json",
+        "fixture_kind": "sanitized_probe_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "Vec<UserFollowTag>"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "Vec<UserFollowTag>"
+      }
+    }
+  ]
+}
