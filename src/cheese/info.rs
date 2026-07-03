@@ -114,6 +114,7 @@ pub struct CourseFaqItem {
 pub struct CoursePayment {
     pub desc: String,
     pub discount_desc: String,
+    #[serde(default)]
     pub discount_prefix: String,
     pub pay_shade: String,
     pub price: f64,
@@ -164,7 +165,8 @@ pub struct CourseUserStatus {
     pub favored: i32, // 0 未收藏，1 已收藏
     pub favored_count: u64,
     pub payed: i32, // 0 未购买，1 已购买
-    pub progress: CourseProgress,
+    #[serde(default)]
+    pub progress: Option<CourseProgress>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -278,9 +280,30 @@ impl BpiClient {
 mod tests {
     use super::*;
     use crate::cheese::CheeseInfoParams;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
 
     const TEST_SEASON_ID: u64 = 556;
     const TEST_EP_ID: u64 = 20767;
+
+    fn contract(name: &str) -> BpiResult<EndpointContract> {
+        let bytes = match name {
+            "season-detail-season" => include_bytes!(
+                "../../tests/contracts/cheese/info/season-detail-season/contract.json"
+            )
+            .as_slice(),
+            "season-detail-episode" => include_bytes!(
+                "../../tests/contracts/cheese/info/season-detail-episode/contract.json"
+            )
+            .as_slice(),
+            "ep-list" => {
+                include_bytes!("../../tests/contracts/cheese/info/ep-list/contract.json").as_slice()
+            }
+            _ => unreachable!("unknown cheese info contract"),
+        };
+        EndpointContract::from_slice(bytes)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -351,6 +374,200 @@ mod tests {
             err,
             BpiError::InvalidParameter { field: "pn", .. }
         ));
+        Ok(())
+    }
+
+    #[test]
+    fn cheese_info_by_season_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("season-detail-season")?;
+        let params = CheeseInfoParams::from_season_id(SeasonId::new(TEST_SEASON_ID)?);
+
+        assert_eq!(contract.name, "cheese.info.season_detail_by_season_id");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/pugv/view/web/season"
+        );
+        assert_eq!(
+            contract.request.query.get("season_id").map(String::as_str),
+            Some("556")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![("season_id", TEST_SEASON_ID.to_string())]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("CourseInfo")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn cheese_info_by_episode_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("season-detail-episode")?;
+        let params = CheeseInfoParams::from_episode_id(EpisodeId::new(TEST_EP_ID)?);
+
+        assert_eq!(contract.name, "cheese.info.season_detail_by_ep_id");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/pugv/view/web/season"
+        );
+        assert_eq!(
+            contract.request.query.get("ep_id").map(String::as_str),
+            Some("20767")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![("ep_id", TEST_EP_ID.to_string())]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.fixture_kind.as_deref(),
+            Some("trimmed_probe_body")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn cheese_ep_list_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("ep-list")?;
+        let params = CheeseEpListParams::new(SeasonId::new(TEST_SEASON_ID)?)
+            .with_page_size(50)?
+            .with_page(1)?;
+
+        assert_eq!(contract.name, "cheese.info.ep_list");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/pugv/view/web/ep/list"
+        );
+        assert_eq!(
+            contract.request.query.get("season_id").map(String::as_str),
+            Some("556")
+        );
+        assert_eq!(
+            contract.request.query.get("ps").map(String::as_str),
+            Some("50")
+        );
+        assert_eq!(
+            contract.request.query.get("pn").map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("season_id", TEST_SEASON_ID.to_string()),
+                ("ps", "50".to_string()),
+                ("pn", "1".to_string()),
+            ]
+        );
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("CourseEpList")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn cheese_info_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/cheese/info/season-detail-season/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/cheese/info/season-detail-season/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/cheese/info/season-detail-season/responses/vip.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/cheese/info/season-detail-episode/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/cheese/info/season-detail-episode/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/cheese/info/season-detail-episode/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<CourseInfo>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.season_id, TEST_SEASON_ID);
+            assert_eq!(payload.episodes.len(), 2);
+            assert_eq!(payload.user_status.payed, 0);
+            assert_eq!(payload.title, "【暑期5折】法语0-B2高级班");
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn cheese_ep_list_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/cheese/info/ep-list/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/cheese/info/ep-list/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!("../../tests/contracts/cheese/info/ep-list/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<CourseEpList>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.page.total, 603);
+            assert_eq!(payload.items.len(), 2);
+            assert_eq!(payload.items[0].id, 20766);
+            assert_eq!(payload.items[0].aid, 640_041_584);
+            assert_eq!(payload.items[0].cid, 1_641_007_864);
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/cheese/read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn cheese_info_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            for endpoint in ["info-season", "info-episode"] {
+                let Some(body) = local_probe_body(endpoint, profile) else {
+                    continue;
+                };
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<CourseInfo>>(body)?.into_payload()?;
+
+                assert_eq!(payload.season_id, TEST_SEASON_ID);
+                assert_eq!(payload.episodes.len(), 603);
+                assert_eq!(payload.user_status.payed, 0);
+            }
+
+            let Some(body) = local_probe_body("ep-list", profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<CourseEpList>>(body)?.into_payload()?;
+
+            assert_eq!(payload.page.total, 603);
+            assert_eq!(payload.items.len(), 50);
+        }
         Ok(())
     }
 }

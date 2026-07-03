@@ -151,10 +151,19 @@ mod tests {
     use crate::cheese::CheeseVideoStreamParams;
     use crate::ids::{Aid, Cid, EpisodeId};
     use crate::models::{Fnval, VideoQuality};
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
 
     const TEST_AVID: u64 = 997984154;
     const TEST_EP_ID: u64 = 163956;
     const TEST_CID: u64 = 1183682680;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/cheese/playurl/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -209,6 +218,129 @@ mod tests {
                 ("fnval", (Fnval::DASH | Fnval::FOURK).bits().to_string()),
             ]
         );
+        Ok(())
+    }
+
+    #[test]
+    fn cheese_playurl_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params = CheeseVideoStreamParams::new(
+            Aid::new(TEST_AVID)?,
+            EpisodeId::new(TEST_EP_ID)?,
+            Cid::new(TEST_CID)?,
+        )
+        .with_quality(VideoQuality::P480)
+        .with_fnval(Fnval::DASH);
+
+        assert_eq!(contract.name, "cheese.playurl");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/pugv/player/web/playurl"
+        );
+        assert_eq!(
+            contract.request.query.get("avid").map(String::as_str),
+            Some("997984154")
+        );
+        assert_eq!(
+            contract.request.query.get("ep_id").map(String::as_str),
+            Some("163956")
+        );
+        assert_eq!(
+            contract.request.query.get("cid").map(String::as_str),
+            Some("1183682680")
+        );
+        assert_eq!(
+            contract.request.query.get("fnver").map(String::as_str),
+            Some("0")
+        );
+        assert_eq!(
+            contract.request.query.get("qn").map(String::as_str),
+            Some("32")
+        );
+        assert_eq!(
+            contract.request.query.get("fnval").map(String::as_str),
+            Some("16")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("avid", TEST_AVID.to_string()),
+                ("ep_id", TEST_EP_ID.to_string()),
+                ("cid", TEST_CID.to_string()),
+                ("fnver", "0".to_string()),
+                ("qn", "32".to_string()),
+                ("fnval", "16".to_string()),
+            ]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("CourseVideoStreamData")
+        );
+        assert_eq!(
+            contract.cases[0].response.fixture_kind.as_deref(),
+            Some("sanitized_probe_body")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn cheese_playurl_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!("../../tests/contracts/cheese/playurl/responses/anonymous.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/cheese/playurl/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/cheese/playurl/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload =
+                ApiEnvelope::<CourseVideoStreamData>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.base.quality, VideoQuality::P480.as_u32());
+            assert!(!payload.base.has_paid);
+            assert!(payload.base.supports_dash());
+            assert_eq!(
+                payload
+                    .base
+                    .best_video()
+                    .map(|track| track.base_url.as_str()),
+                Some("https://example.invalid/bilibili/playurl/redacted.m4s")
+            );
+            assert!(
+                payload
+                    .fragment_videos
+                    .as_ref()
+                    .is_some_and(|fragments| !fragments.is_empty())
+            );
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/cheese/read/playurl/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn cheese_playurl_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload = serde_json::from_value::<ApiEnvelope<CourseVideoStreamData>>(body)?
+                .into_payload()?;
+
+            assert_eq!(payload.base.quality, VideoQuality::P480.as_u32());
+            assert!(!payload.base.has_paid);
+            assert!(payload.base.supports_dash());
+        }
         Ok(())
     }
 }

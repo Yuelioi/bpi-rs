@@ -1,0 +1,914 @@
+{
+  "code": 0,
+  "data": {
+    "accept_description": [
+      "高清 1080P+",
+      "高清 1080P",
+      "高清 720P",
+      "清晰 480P",
+      "流畅 360P"
+    ],
+    "accept_format": "hdflv2,flv,flv720,flv480,mp4",
+    "accept_quality": [
+      112,
+      80,
+      64,
+      32,
+      16
+    ],
+    "code": 0,
+    "dash": {
+      "audio": [
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 38679,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 0,
+          "codecs": "mp4a.40.5",
+          "frame_rate": "",
+          "height": 0,
+          "id": 30216,
+          "md5": "8db3bdd44e143522c151bfe6c93781bc",
+          "mime_type": "audio/mp4",
+          "noRexcode": 0,
+          "sar": "",
+          "segment_base": {
+            "index_range": "944-1491",
+            "initialization": "0-943"
+          },
+          "size": 1021548,
+          "start_with_sap": 0,
+          "width": 0
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 91193,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 0,
+          "codecs": "mp4a.40.2",
+          "frame_rate": "",
+          "height": 0,
+          "id": 30232,
+          "md5": "b4f1e46e30decae973f0a0817706cb9b",
+          "mime_type": "audio/mp4",
+          "noRexcode": 0,
+          "sar": "",
+          "segment_base": {
+            "index_range": "934-1481",
+            "initialization": "0-933"
+          },
+          "size": 2407500,
+          "start_with_sap": 0,
+          "width": 0
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 158668,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 0,
+          "codecs": "mp4a.40.2",
+          "frame_rate": "",
+          "height": 0,
+          "id": 30280,
+          "md5": "baa8b0d9eed3869fe70fe29b5393260c",
+          "mime_type": "audio/mp4",
+          "noRexcode": 0,
+          "sar": "",
+          "segment_base": {
+            "index_range": "934-1481",
+            "initialization": "0-933"
+          },
+          "size": 4188843,
+          "start_with_sap": 0,
+          "width": 0
+        }
+      ],
+      "duration": 212,
+      "min_buffer_time": 1.5,
+      "solution": {},
+      "video": [
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 769628,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 12,
+          "codecs": "hev1.1.6.L150.90",
+          "frame_rate": "25",
+          "height": 1080,
+          "id": 112,
+          "md5": "d79e075d6d5c61da65539b8898b89d3a",
+          "mime_type": "video/mp4",
+          "noRexcode": 0,
+          "sar": "1:1",
+          "segment_base": {
+            "index_range": "1160-1695",
+            "initialization": "0-1159"
+          },
+          "size": 20310490,
+          "start_with_sap": 1,
+          "width": 1920
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 1421312,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 7,
+          "codecs": "avc1.640032",
+          "frame_rate": "25",
+          "height": 1080,
+          "id": 112,
+          "md5": "ca5f646f578acd9ef92bc92ea2da8a63",
+          "mime_type": "video/mp4",
+          "noRexcode": 0,
+          "sar": "1:1",
+          "segment_base": {
+            "index_range": "997-1532",
+            "initialization": "0-996"
+          },
+          "size": 37508450,
+          "start_with_sap": 1,
+          "width": 1920
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 423193,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 12,
+          "codecs": "hev1.1.6.L150.90",
+          "frame_rate": "25",
+          "height": 1080,
+          "id": 80,
+          "md5": "2e491d8c9cf2ef009254e1732ce71c69",
+          "mime_type": "video/mp4",
+          "noRexcode": 0,
+          "sar": "1:1",
+          "segment_base": {
+            "index_range": "1160-1695",
+            "initialization": "0-1159"
+          },
+          "size": 11168085,
+          "start_with_sap": 1,
+          "width": 1920
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 523475,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 7,
+          "codecs": "avc1.640032",
+          "frame_rate": "25",
+          "height": 1080,
+          "id": 80,
+          "md5": "081fdb3c4ee2e4df56109633f40cb5ea",
+          "mime_type": "video/mp4",
+          "noRexcode": 0,
+          "sar": "1:1",
+          "segment_base": {
+            "index_range": "997-1532",
+            "initialization": "0-996"
+          },
+          "size": 13814530,
+          "start_with_sap": 1,
+          "width": 1920
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 235708,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 12,
+          "codecs": "hev1.1.6.L120.90",
+          "frame_rate": "25",
+          "height": 720,
+          "id": 64,
+          "md5": "948585e7997de0066435bb47777284e9",
+          "mime_type": "video/mp4",
+          "noRexcode": 0,
+          "sar": "1:1",
+          "segment_base": {
+            "index_range": "1160-1695",
+            "initialization": "0-1159"
+          },
+          "size": 6220351,
+          "start_with_sap": 1,
+          "width": 1280
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 333038,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 7,
+          "codecs": "avc1.640028",
+          "frame_rate": "25",
+          "height": 720,
+          "id": 64,
+          "md5": "6b71aadb7e355d63fb8a650757193f36",
+          "mime_type": "video/mp4",
+          "noRexcode": 0,
+          "sar": "1:1",
+          "segment_base": {
+            "index_range": "995-1530",
+            "initialization": "0-994"
+          },
+          "size": 8788891,
+          "start_with_sap": 1,
+          "width": 1280
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 149706,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 12,
+          "codecs": "hev1.1.6.L120.90",
+          "frame_rate": "25",
+          "height": 480,
+          "id": 32,
+          "md5": "8036172599efe9e5b52ab17fc82a0c5e",
+          "mime_type": "video/mp4",
+          "noRexcode": 0,
+          "sar": "640:639",
+          "segment_base": {
+            "index_range": "1164-1699",
+            "initialization": "0-1163"
+          },
+          "size": 3950751,
+          "start_with_sap": 1,
+          "width": 852
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 184410,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 7,
+          "codecs": "avc1.64001F",
+          "frame_rate": "25",
+          "height": 480,
+          "id": 32,
+          "md5": "6ddb553206bf5dd29df80a6662e052f4",
+          "mime_type": "video/mp4",
+          "noRexcode": 0,
+          "sar": "640:639",
+          "segment_base": {
+            "index_range": "1000-1535",
+            "initialization": "0-999"
+          },
+          "size": 4866580,
+          "start_with_sap": 1,
+          "width": 852
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 106667,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 12,
+          "codecs": "hev1.1.6.L120.90",
+          "frame_rate": "25",
+          "height": 360,
+          "id": 16,
+          "md5": "8b80e589a6aa80164dbc1b2d7da9a1f2",
+          "mime_type": "video/mp4",
+          "noRexcode": 0,
+          "sar": "1:1",
+          "segment_base": {
+            "index_range": "1158-1693",
+            "initialization": "0-1157"
+          },
+          "size": 2814951,
+          "start_with_sap": 1,
+          "width": 640
+        },
+        {
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "bandwidth": 114505,
+          "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+          "codecid": 7,
+          "codecs": "avc1.64001E",
+          "frame_rate": "25",
+          "height": 360,
+          "id": 16,
+          "md5": "343bad668929de3f8f48552b9e230868",
+          "mime_type": "video/mp4",
+          "noRexcode": 0,
+          "sar": "1:1",
+          "segment_base": {
+            "index_range": "1004-1539",
+            "initialization": "0-1003"
+          },
+          "size": 3021809,
+          "start_with_sap": 1,
+          "width": 640
+        }
+      ]
+    },
+    "durls": [],
+    "fnval": 16,
+    "fnver": 0,
+    "format": "flv480",
+    "fragment_videos": [
+      {
+        "fragment_info": {
+          "aid": 1406480666,
+          "cid": 1657262325,
+          "fragment_position": "POST",
+          "fragment_type": "PUGV_FRAGMENT",
+          "index": 0
+        },
+        "playable_status": true,
+        "video_info": {
+          "accept_formats": [
+            {
+              "attribute": 0,
+              "description": "高清 1080P+",
+              "display_desc": "1080P",
+              "format": "hdflv2",
+              "need_login": false,
+              "need_vip": false,
+              "new_description": "1080P 高码率",
+              "quality": 112,
+              "superscript": "高码率"
+            },
+            {
+              "attribute": 0,
+              "description": "高清 1080P",
+              "display_desc": "1080P",
+              "format": "flv",
+              "need_login": false,
+              "need_vip": false,
+              "new_description": "1080P 高清",
+              "quality": 80,
+              "superscript": ""
+            },
+            {
+              "attribute": 0,
+              "description": "高清 720P",
+              "display_desc": "720P",
+              "format": "flv720",
+              "need_login": false,
+              "need_vip": false,
+              "new_description": "720P 准高清",
+              "quality": 64,
+              "superscript": ""
+            },
+            {
+              "attribute": 0,
+              "description": "清晰 480P",
+              "display_desc": "480P",
+              "format": "flv480",
+              "need_login": false,
+              "need_vip": false,
+              "new_description": "480P 标清",
+              "quality": 32,
+              "superscript": ""
+            },
+            {
+              "attribute": 0,
+              "description": "流畅 360P",
+              "display_desc": "360P",
+              "format": "mp4",
+              "need_login": false,
+              "need_vip": false,
+              "new_description": "360P 流畅",
+              "quality": 16,
+              "superscript": ""
+            }
+          ],
+          "backup_url": [
+            "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+          ],
+          "cid": 1657262325,
+          "dash": {
+            "audio": [
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 66439,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 0,
+                "codecs": "mp4a.40.2",
+                "frame_rate": "",
+                "height": 0,
+                "id": 30216,
+                "md5": "a8d59ce765c6aa9e4cc55a62a9076d00",
+                "mime_type": "audio/mp4",
+                "sar": "",
+                "segment_base": {
+                  "index_range": "825-892",
+                  "initialization": "0-824"
+                },
+                "size": 89653,
+                "start_with_sap": 0,
+                "width": 0
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 69121,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 0,
+                "codecs": "mp4a.40.2",
+                "frame_rate": "",
+                "height": 0,
+                "id": 30232,
+                "md5": "6e5dfc6a5b2059b49b24392656b70768",
+                "mime_type": "audio/mp4",
+                "sar": "",
+                "segment_base": {
+                  "index_range": "818-885",
+                  "initialization": "0-817"
+                },
+                "size": 93230,
+                "start_with_sap": 0,
+                "width": 0
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 133287,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 0,
+                "codecs": "mp4a.40.2",
+                "frame_rate": "",
+                "height": 0,
+                "id": 30280,
+                "md5": "02a707daa9e4698998c24942f68eb3c0",
+                "mime_type": "audio/mp4",
+                "sar": "",
+                "segment_base": {
+                  "index_range": "818-885",
+                  "initialization": "0-817"
+                },
+                "size": 178952,
+                "start_with_sap": 0,
+                "width": 0
+              }
+            ],
+            "dolby": {
+              "audio": [],
+              "type": "NONE"
+            },
+            "duration": 11,
+            "min_buffer_time": 1.5,
+            "video": [
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 3273832,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 7,
+                "codecs": "avc1.640032",
+                "frame_rate": "25.000",
+                "height": 1080,
+                "id": 112,
+                "md5": "7e7682c06d247086287f0946b22af885",
+                "mime_type": "video/mp4",
+                "sar": "N/A",
+                "segment_base": {
+                  "index_range": "929-996",
+                  "initialization": "0-928"
+                },
+                "size": 4371564,
+                "start_with_sap": 1,
+                "width": 1920
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 1013989,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 12,
+                "codecs": "hev1.1.6.L150.90",
+                "frame_rate": "25.000",
+                "height": 1080,
+                "id": 112,
+                "md5": "af74300d66604aeab7e2cd15c508a7ed",
+                "mime_type": "video/mp4",
+                "sar": "N/A",
+                "segment_base": {
+                  "index_range": "1092-1159",
+                  "initialization": "0-1091"
+                },
+                "size": 1354836,
+                "start_with_sap": 1,
+                "width": 1920
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 1218245,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 7,
+                "codecs": "avc1.640032",
+                "frame_rate": "25.000",
+                "height": 1080,
+                "id": 80,
+                "md5": "69b7d13ef2b45ee67c7d6bcb14c1502a",
+                "mime_type": "video/mp4",
+                "sar": "N/A",
+                "segment_base": {
+                  "index_range": "929-996",
+                  "initialization": "0-928"
+                },
+                "size": 1627355,
+                "start_with_sap": 1,
+                "width": 1920
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 449936,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 12,
+                "codecs": "hev1.1.6.L150.90",
+                "frame_rate": "25.000",
+                "height": 1080,
+                "id": 80,
+                "md5": "ec74e696212b326caca5a69134c416d8",
+                "mime_type": "video/mp4",
+                "sar": "N/A",
+                "segment_base": {
+                  "index_range": "1092-1159",
+                  "initialization": "0-1091"
+                },
+                "size": 601825,
+                "start_with_sap": 1,
+                "width": 1920
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 565042,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 7,
+                "codecs": "avc1.640028",
+                "frame_rate": "25.000",
+                "height": 720,
+                "id": 64,
+                "md5": "48c3038f4049bd6c01b97fb42c11ab3d",
+                "mime_type": "video/mp4",
+                "sar": "N/A",
+                "segment_base": {
+                  "index_range": "929-996",
+                  "initialization": "0-928"
+                },
+                "size": 755329,
+                "start_with_sap": 1,
+                "width": 1280
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 243765,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 12,
+                "codecs": "hev1.1.6.L120.90",
+                "frame_rate": "25.000",
+                "height": 720,
+                "id": 64,
+                "md5": "3db2d0cb048bf817598d3681dd3aaa42",
+                "mime_type": "video/mp4",
+                "sar": "N/A",
+                "segment_base": {
+                  "index_range": "1091-1158",
+                  "initialization": "0-1090"
+                },
+                "size": 326586,
+                "start_with_sap": 1,
+                "width": 1280
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 323361,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 7,
+                "codecs": "avc1.64001F",
+                "frame_rate": "25.000",
+                "height": 480,
+                "id": 32,
+                "md5": "13b8e2dcae87535f213b6a0f072bc123",
+                "mime_type": "video/mp4",
+                "sar": "N/A",
+                "segment_base": {
+                  "index_range": "928-995",
+                  "initialization": "0-927"
+                },
+                "size": 432684,
+                "start_with_sap": 1,
+                "width": 852
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 154647,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 12,
+                "codecs": "hev1.1.6.L120.90",
+                "frame_rate": "25.000",
+                "height": 480,
+                "id": 32,
+                "md5": "8bb34c31236325aa6fedc647e9d236d6",
+                "mime_type": "video/mp4",
+                "sar": "N/A",
+                "segment_base": {
+                  "index_range": "1092-1159",
+                  "initialization": "0-1091"
+                },
+                "size": 207614,
+                "start_with_sap": 1,
+                "width": 852
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 115453,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 12,
+                "codecs": "hev1.1.6.L120.90",
+                "frame_rate": "25.000",
+                "height": 360,
+                "id": 16,
+                "md5": "f43e2a53e42aa83f20b8c4f383038d5d",
+                "mime_type": "video/mp4",
+                "sar": "N/A",
+                "segment_base": {
+                  "index_range": "1092-1159",
+                  "initialization": "0-1091"
+                },
+                "size": 155290,
+                "start_with_sap": 1,
+                "width": 640
+              },
+              {
+                "backup_url": [
+                  "https://example.invalid/bilibili/playurl/redacted-backup.m4s"
+                ],
+                "bandwidth": 221318,
+                "base_url": "https://example.invalid/bilibili/playurl/redacted.m4s",
+                "codecid": 7,
+                "codecs": "avc1.64001E",
+                "frame_rate": "25.000",
+                "height": 360,
+                "id": 16,
+                "md5": "0db078bb2231e71a90fb1bbb5dd9effe",
+                "mime_type": "video/mp4",
+                "sar": "N/A",
+                "segment_base": {
+                  "index_range": "935-1002",
+                  "initialization": "0-934"
+                },
+                "size": 296463,
+                "start_with_sap": 1,
+                "width": 640
+              }
+            ]
+          },
+          "expire_time": 1783045263,
+          "file_info": {
+            "16": {
+              "infos": [
+                {
+                  "ahead": "",
+                  "filesize": 296463,
+                  "order": 1,
+                  "timelength": 10680,
+                  "vhead": ""
+                }
+              ]
+            },
+            "32": {
+              "infos": [
+                {
+                  "ahead": "",
+                  "filesize": 432684,
+                  "order": 1,
+                  "timelength": 10680,
+                  "vhead": ""
+                }
+              ]
+            },
+            "64": {
+              "infos": [
+                {
+                  "ahead": "",
+                  "filesize": 755329,
+                  "order": 1,
+                  "timelength": 10680,
+                  "vhead": ""
+                }
+              ]
+            },
+            "80": {
+              "infos": [
+                {
+                  "ahead": "",
+                  "filesize": 1627355,
+                  "order": 1,
+                  "timelength": 10680,
+                  "vhead": ""
+                }
+              ]
+            },
+            "112": {
+              "infos": [
+                {
+                  "ahead": "",
+                  "filesize": 4371564,
+                  "order": 1,
+                  "timelength": 10680,
+                  "vhead": ""
+                }
+              ]
+            }
+          },
+          "fnval": 16,
+          "fnver": 0,
+          "no_rexcode": 0,
+          "quality": 32,
+          "support_description": [
+            "高清 1080P+",
+            "高清 1080P",
+            "高清 720P",
+            "清晰 480P",
+            "流畅 360P"
+          ],
+          "support_formats": [
+            "hdflv2",
+            "flv",
+            "flv720",
+            "flv480",
+            "mp4"
+          ],
+          "support_quality": [
+            112,
+            80,
+            64,
+            32,
+            16
+          ],
+          "timelength": 10680,
+          "type": "DASH",
+          "url": "",
+          "video_codecid": 7,
+          "video_project": true,
+          "volume": {
+            "measured_i": -12.9,
+            "measured_lra": 6.4,
+            "measured_threshold": -23.1,
+            "measured_tp": 1.8,
+            "multi_scene_args": {
+              "high_dynamic_target_i": "-24",
+              "normal_target_i": "-14",
+              "undersized_target_i": "-28"
+            },
+            "target_i": -14,
+            "target_offset": 0.001,
+            "target_tp": -1
+          }
+        }
+      }
+    ],
+    "from": "local",
+    "has_paid": false,
+    "is_preview": 0,
+    "message": "Success",
+    "no_rexcode": 0,
+    "play_view_business_info": {
+      "user_status": {
+        "watch_progress": {
+          "current_watch_progress": 5000,
+          "last_ep_id": 163956,
+          "last_ep_index": "【先导片】前考官教你如何攻克雅思",
+          "last_time": 5000
+        }
+      }
+    },
+    "quality": 32,
+    "result": "suee",
+    "seek_param": "start",
+    "seek_type": "offset",
+    "status": 0,
+    "support_formats": [
+      {
+        "codecs": [
+          "avc1.640032",
+          "hev1.1.6.L150.90"
+        ],
+        "description": "高清 1080P+",
+        "display_desc": "1080P",
+        "format": "hdflv2",
+        "need_login": true,
+        "new_description": "1080P 高码率",
+        "quality": 112,
+        "superscript": "高码率"
+      },
+      {
+        "codecs": [
+          "avc1.640032",
+          "hev1.1.6.L150.90"
+        ],
+        "description": "高清 1080P",
+        "display_desc": "1080P",
+        "format": "flv",
+        "need_login": true,
+        "new_description": "1080P 高清",
+        "quality": 80,
+        "superscript": ""
+      },
+      {
+        "codecs": [
+          "avc1.640028",
+          "hev1.1.6.L120.90"
+        ],
+        "description": "高清 720P",
+        "display_desc": "720P",
+        "format": "flv720",
+        "need_login": true,
+        "new_description": "720P 准高清",
+        "quality": 64,
+        "superscript": ""
+      },
+      {
+        "codecs": [
+          "avc1.64001F",
+          "hev1.1.6.L120.90"
+        ],
+        "description": "清晰 480P",
+        "display_desc": "480P",
+        "format": "flv480",
+        "need_login": false,
+        "new_description": "480P 标清",
+        "quality": 32,
+        "superscript": ""
+      },
+      {
+        "codecs": [
+          "avc1.64001E",
+          "hev1.1.6.L120.90"
+        ],
+        "description": "流畅 360P",
+        "display_desc": "360P",
+        "format": "mp4",
+        "need_login": false,
+        "new_description": "360P 流畅",
+        "quality": 16,
+        "superscript": ""
+      }
+    ],
+    "timelength": 211284,
+    "type": "DASH",
+    "video_codecid": 7,
+    "video_project": true,
+    "volume": {
+      "measured_i": -13.5,
+      "measured_lra": 4.9,
+      "measured_threshold": -23.9,
+      "measured_tp": 1.6,
+      "multi_scene_args": {
+        "high_dynamic_target_i": "-24",
+        "normal_target_i": "-14",
+        "undersized_target_i": "-28"
+      },
+      "target_i": -14,
+      "target_offset": 0.2,
+      "target_tp": -1
+    }
+  },
+  "message": "success"
+}

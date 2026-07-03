@@ -1,0 +1,62 @@
+{
+  "code": 0,
+  "data": {
+    "items": [
+      {
+        "aid": 640041584,
+        "catalogue_index": 0,
+        "cid": 1641007864,
+        "cover": "https://archive.biliimg.com/bfs/archive/4644d9730106686d56e3c0a4fe2a438664ec26fc.jpg",
+        "duration": 146,
+        "ep_status": 0,
+        "episode_can_view": true,
+        "from": "pugv",
+        "id": 20766,
+        "index": 1,
+        "label": "全集试看",
+        "page": 1,
+        "play": 3467544,
+        "play_way": 1,
+        "playable": true,
+        "release_date": 1648436323,
+        "show_vt": false,
+        "status": 1,
+        "subtitle": "视频课 · 2分26秒",
+        "title": "【先导片】一起学法语吧！带你从零基础直达B2高级",
+        "watched": false,
+        "watchedHistory": 0
+      },
+      {
+        "aid": 767600873,
+        "catalogue_index": 0,
+        "cid": 937877885,
+        "cover": "https://archive.biliimg.com/bfs/archive/4644d9730106686d56e3c0a4fe2a438664ec26fc.jpg",
+        "duration": 1205,
+        "ep_status": 0,
+        "episode_can_view": true,
+        "from": "pugv",
+        "id": 20767,
+        "index": 2,
+        "label": "全集试看",
+        "page": 1,
+        "play": 681692,
+        "play_way": 1,
+        "playable": true,
+        "release_date": 1648436323,
+        "show_vt": false,
+        "status": 1,
+        "subtitle": "视频课 · 20分5秒",
+        "title": "【试学课】语音第1讲：字母表A-N",
+        "watched": false,
+        "watchedHistory": 0
+      }
+    ],
+    "page": {
+      "next": true,
+      "num": 1,
+      "size": 50,
+      "total": 603
+    }
+  },
+  "message": "success"
+}

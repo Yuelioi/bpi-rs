@@ -1,0 +1,70 @@
+{
+  "name": "cheese.info.season_detail_by_ep_id",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/pugv/view/web/season",
+    "query": {
+      "ep_id": "20767"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "public cheese response body trimmed from real Probe bodies; account headers kept only in local Probe output"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/anonymous.success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "CourseInfo"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "CourseInfo"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "CourseInfo"
+      }
+    }
+  ]
+}

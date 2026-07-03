@@ -1,0 +1,751 @@
+{
+  "code": 0,
+  "data": {
+    "abtest_info": {
+      "style_abtest": 3
+    },
+    "active_market": [
+      1
+    ],
+    "activity_list": [],
+    "be_subscription": false,
+    "brief": {
+      "content": "",
+      "img": [
+        {
+          "aspect_ratio": 0.4109375,
+          "url": "http://i0.hdslb.com/bfs/album/e3c37bf2dbfc0b22d171c5ac1f2c7ce2497519697.jpg"
+        },
+        {
+          "aspect_ratio": 1.93125,
+          "url": "http://i0.hdslb.com/bfs/album/8109d4757bf0a8c367bc8a9fb533d8c3497519697.jpg"
+        },
+        {
+          "aspect_ratio": 1.721875,
+          "url": "http://i0.hdslb.com/bfs/album/fb0429d31000ef1ec3208d29be92a249497519697.jpg"
+        },
+        {
+          "aspect_ratio": 2.70625,
+          "url": "http://i0.hdslb.com/bfs/album/ed0245ca6c529026d5a24d97f113b588497519697.jpg"
+        },
+        {
+          "aspect_ratio": 1.01015625,
+          "url": "http://i0.hdslb.com/bfs/album/d1f63e83638f9f44451b8501c2d86df7497519697.jpg"
+        },
+        {
+          "aspect_ratio": 2.32578125,
+          "url": "http://i0.hdslb.com/bfs/album/438e9173e5b2e932d990bc7399da2ffa497519697.jpg"
+        },
+        {
+          "aspect_ratio": 2.35,
+          "url": "http://i0.hdslb.com/bfs/album/30ab2eb5ed54cd6add0df84680212f51497519697.jpg"
+        },
+        {
+          "aspect_ratio": 2.56328125,
+          "url": "http://i0.hdslb.com/bfs/album/78b2a198660335df01b3b2fc268473ad497519697.jpg"
+        },
+        {
+          "aspect_ratio": 3.14921875,
+          "url": "http://i0.hdslb.com/bfs/album/6e0e643779dff20d24962c672992b129497519697.jpg"
+        },
+        {
+          "aspect_ratio": 2.9984375,
+          "url": "http://i0.hdslb.com/bfs/album/699b4ff687af0699cbb779c15a8507bf497519697.jpg"
+        },
+        {
+          "aspect_ratio": 3.0546875,
+          "url": "http://i0.hdslb.com/bfs/album/fb60e0b6d701a03f0a9856d94aa37fa6497519697.jpg"
+        }
+      ],
+      "title": "课程概述",
+      "type": 2
+    },
+    "catalogue_top": {
+      "btn_text": "点击保存",
+      "guide_text": "订购后可加入课程群，享受学习服务，互动交流！",
+      "img_url": "http://i0.hdslb.com/bfs/feed-admin/5c12c3a6cc206b0fbb3536e2a546097bdf66c35c.png",
+      "sub_guide_text": "保存后打开微信识别图片，",
+      "type": 0
+    },
+    "coach": {
+      "detail_url": "http://m.bilibili.com/cheese/addWxgroup?ss=556&navhide=1",
+      "directory_url": "https://m.bilibili.com/cheese/season/addWX?ss=556&navhide=1&source_type=3",
+      "h5_url": "https://m.bilibili.com/cheese/season/addWX?ss=556&navhide=1&source_type=2"
+    },
+    "consulting": {
+      "consulting_flag": false,
+      "consulting_url": ""
+    },
+    "cooperation": {
+      "link": "https://www.bilibili.com/cheese/cooperate?from=web_detail"
+    },
+    "cooperators": [
+      {
+        "avatar": "https://i0.hdslb.com/bfs/face/b52b9484f1216375955088a73d8f61bcf4962847.jpg",
+        "is_follow": 0,
+        "mid": 498079623,
+        "nick_name": "水木外语",
+        "publisher": false,
+        "role": "机构",
+        "user_link": "https://space.bilibili.com/498079623/pugv?defaultTab=cheese"
+      },
+      {
+        "avatar": "https://i0.hdslb.com/bfs/face/a993fe4122fc1e21145f3c1791812cc3e865d83b.jpg",
+        "is_follow": 0,
+        "mid": 497519697,
+        "nick_name": "法语Tina老师",
+        "publisher": true,
+        "role": "发布者",
+        "user_link": "https://space.bilibili.com/497519697/pugv?defaultTab=cheese"
+      }
+    ],
+    "coupon": {
+      "amount": 0.4,
+      "coupon_type": 1,
+      "discount_amount": "领券立减1199.4",
+      "discount_message": "【立减1199.4】【限时特惠】哔哩哔哩课堂4折券",
+      "expire_minute": "2026-08-31 23:59",
+      "expire_time": "2026-08-31 23:59:59",
+      "is_frequenter": false,
+      "receive_expire_time": 1788191999,
+      "scene_background_img": "",
+      "scene_benefit_img": "",
+      "scene_countdown": false,
+      "scene_mark": "",
+      "short_title": "4折优惠券",
+      "show_amount": "4",
+      "start_time": "2026-07-01 00:00:00",
+      "status": 2,
+      "title": "【限时特惠】哔哩哔哩课堂4折券",
+      "token": "B20260630181828243359418",
+      "use_expire_time": 1788191999,
+      "use_scope": "仅限当前课程使用"
+    },
+    "course_content": "本课程附赠随堂练习，点击下载",
+    "courses": [
+      {
+        "file_id": 10849,
+        "file_name": "法语A1讲义"
+      },
+      {
+        "file_id": 10850,
+        "file_name": "A1水平测试卷及答案"
+      }
+    ],
+    "cover": "https://archive.biliimg.com/bfs/archive/115f8e890a1a9192347799e117a57af5efc5a710.jpg",
+    "ep_catalogue": [
+      {
+        "end_ep_index": 50,
+        "index": 1,
+        "start_ep_index": 1,
+        "title": "1-50"
+      },
+      {
+        "end_ep_index": 100,
+        "index": 2,
+        "start_ep_index": 51,
+        "title": "51-100"
+      },
+      {
+        "end_ep_index": 150,
+        "index": 3,
+        "start_ep_index": 101,
+        "title": "101-150"
+      },
+      {
+        "end_ep_index": 200,
+        "index": 4,
+        "start_ep_index": 151,
+        "title": "151-200"
+      },
+      {
+        "end_ep_index": 250,
+        "index": 5,
+        "start_ep_index": 201,
+        "title": "201-250"
+      },
+      {
+        "end_ep_index": 300,
+        "index": 6,
+        "start_ep_index": 251,
+        "title": "251-300"
+      },
+      {
+        "end_ep_index": 350,
+        "index": 7,
+        "start_ep_index": 301,
+        "title": "301-350"
+      },
+      {
+        "end_ep_index": 400,
+        "index": 8,
+        "start_ep_index": 351,
+        "title": "351-400"
+      },
+      {
+        "end_ep_index": 450,
+        "index": 9,
+        "start_ep_index": 401,
+        "title": "401-450"
+      },
+      {
+        "end_ep_index": 500,
+        "index": 10,
+        "start_ep_index": 451,
+        "title": "451-500"
+      },
+      {
+        "end_ep_index": 550,
+        "index": 11,
+        "start_ep_index": 501,
+        "title": "501-550"
+      },
+      {
+        "end_ep_index": 600,
+        "index": 12,
+        "start_ep_index": 551,
+        "title": "551-600"
+      },
+      {
+        "end_ep_index": 603,
+        "index": 13,
+        "start_ep_index": 601,
+        "title": "601-603"
+      }
+    ],
+    "ep_count": 602,
+    "episode_page": {
+      "next": false,
+      "num": 1,
+      "size": 603,
+      "total": 603
+    },
+    "episode_sort": 1,
+    "episode_tag": {
+      "part_preview_tag": "部分试看",
+      "pay_tag": "付费",
+      "preview_tag": "全集试看"
+    },
+    "episodes": [
+      {
+        "aid": 640041584,
+        "catalogue_index": 1,
+        "cid": 1641007864,
+        "cover": "https://archive.biliimg.com/bfs/archive/4644d9730106686d56e3c0a4fe2a438664ec26fc.jpg",
+        "duration": 146,
+        "ep_status": 0,
+        "episode_can_view": true,
+        "from": "pugv",
+        "id": 20766,
+        "index": 1,
+        "label": "全集试看",
+        "page": 1,
+        "play": 3467544,
+        "play_way": 1,
+        "playable": true,
+        "release_date": 1648436323,
+        "show_vt": false,
+        "status": 1,
+        "subtitle": "视频课 · 2分26秒",
+        "title": "【先导片】一起学法语吧！带你从零基础直达B2高级",
+        "watched": false,
+        "watchedHistory": 0
+      },
+      {
+        "aid": 767600873,
+        "catalogue_index": 1,
+        "cid": 937877885,
+        "cover": "https://archive.biliimg.com/bfs/archive/4644d9730106686d56e3c0a4fe2a438664ec26fc.jpg",
+        "duration": 1205,
+        "ep_status": 0,
+        "episode_can_view": true,
+        "from": "pugv",
+        "id": 20767,
+        "index": 2,
+        "label": "全集试看",
+        "page": 1,
+        "play": 681692,
+        "play_way": 1,
+        "playable": true,
+        "release_date": 1648436323,
+        "show_vt": false,
+        "status": 1,
+        "subtitle": "视频课 · 20分5秒",
+        "title": "【试学课】语音第1讲：字母表A-N",
+        "watched": false,
+        "watchedHistory": 0
+      }
+    ],
+    "expiry_day": 0,
+    "expiry_info_content": "长期有效",
+    "faq": {
+      "content": "Q：课程在什么时间更新？\nA：课程更新频次以页面前端展示为准。购买成功后，课程更新将通过账号动态提示，方便及时观看。\n\nQ：课程购买后有收看时间限制吗？\nA：购买后除不可抗力因素外，本课程长期有效，请您放心购买。\n\nQ：原价购买课程后，如遇到优惠折扣，是否可以退还差价或重新购买？\nA：虚拟商品付款后无法返还，请您随时留意各类课程折扣信息，按需购买。\n\nQ：购买课程后是否可以加入老师的粉丝群或者用户群？\nA：如老师设置用户群，我们将邀您加入，但我们无法承诺所有老师均提供用户群服务，感谢理解。",
+      "link": "http://m.bilibili.com",
+      "title": "常见问题"
+    },
+    "faq1": {
+      "items": [
+        {
+          "answer": "课程更新频次以页面前端展示为准。购买成功后，课程更新将通过账号动态提示，方便及时观看。",
+          "question": "课程在什么时间更新？"
+        },
+        {
+          "answer": "购买后除不可抗力因素外，本课程长期有效，请您放心购买。",
+          "question": "课程购买后有收看时间限制吗？"
+        },
+        {
+          "answer": "虚拟商品付款后无法返还，请您随时留意各类课程折扣信息，按需购买。",
+          "question": "原价购买课程后，如遇到优惠折扣，是否可以退还差价或重新购买？"
+        },
+        {
+          "answer": "如老师设置用户群，我们将邀您加入，但我们无法承诺所有老师均提供用户群服务，感谢理解。",
+          "question": "购买课程后是否可以加入老师的粉丝群或者用户群？"
+        }
+      ],
+      "title": "常见问题"
+    },
+    "is_enable_cash": true,
+    "is_series": false,
+    "live_ep_count": 0,
+    "notice": {},
+    "opened_ep_count": 602,
+    "pack_info": {
+      "pack_item_list": [
+        {
+          "abtest_info": {
+            "upgrade_show_ab": 2
+          },
+          "brief": {
+            "content": "",
+            "img": [],
+            "type": 0
+          },
+          "btn_notice": "立即购买",
+          "btn_original_price_notice": "价格23397",
+          "btn_show_amount_unit": "元",
+          "coupon_batch_token": "",
+          "is_enable_cash": false,
+          "name": "（法语）限时优惠升级外研社*水木外语全站卡",
+          "original_price": "23397",
+          "original_price_prefix": "价值",
+          "original_price_unit": "元",
+          "product_available": true,
+          "product_cover": "http://i0.hdslb.com/bfs/pugv/eb76d66653b9b7ca59c778ba740c57cbbb96c779.png",
+          "product_id": 1218,
+          "product_notice": "",
+          "product_paid": false,
+          "product_status": 10,
+          "product_type": 3,
+          "relative_item_count_notice": "共3门课程",
+          "relative_item_list": [
+            {
+              "cover": "https://archive.biliimg.com/bfs/archive/0ba348ab8592f0499a89742ae6de2fa3a20f3c6b.jpg",
+              "ep_count_notice": "共100课时",
+              "expiry_notice": "长期有效",
+              "original_price": "19999",
+              "original_price_notice": "价值19999元",
+              "original_price_prefix": "价值",
+              "original_price_unit": "元",
+              "season_id": 23340,
+              "season_paid": false,
+              "sort": 1,
+              "title": "【限时优惠】水木全站*外研社畅学卡（20门语言）"
+            },
+            {
+              "cover": "https://archive.biliimg.com/bfs/archive/16e2a0efdde4588f3bbc92d64b7473c87738f21c.jpg",
+              "ep_count_notice": "共400课时",
+              "expiry_notice": "长期有效",
+              "original_price": "1399",
+              "original_price_notice": "价值1399元",
+              "original_price_prefix": "价值",
+              "original_price_unit": "元",
+              "season_id": 2181,
+              "season_paid": false,
+              "sort": 2,
+              "title": "【暑期5折】法语零基础直达B1中高级"
+            },
+            {
+              "cover": "https://archive.biliimg.com/bfs/archive/115f8e890a1a9192347799e117a57af5efc5a710.jpg",
+              "ep_count_notice": "共602课时",
+              "expiry_notice": "长期有效",
+              "original_price": "1999",
+              "original_price_notice": "价值1999元",
+              "original_price_prefix": "价值",
+              "original_price_unit": "元",
+              "season_id": 556,
+              "season_paid": false,
+              "sort": 3,
+              "title": "【暑期5折】法语0-B2高级班"
+            }
+          ],
+          "season_ep_count_notice": "含3门课，共1102课时",
+          "show_amount": "23397",
+          "show_amount_notice": "",
+          "visible_detail": true
+        },
+        {
+          "abtest_info": {
+            "upgrade_show_ab": 2
+          },
+          "brief": {
+            "content": "",
+            "img": [
+              {
+                "aspect_ratio": 1.852,
+                "url": "http://i0.hdslb.com/bfs/pugv/8196d1c13b5942c146f79fb0958c7c96dcac1621.png"
+              },
+              {
+                "aspect_ratio": 3.673333333333334,
+                "url": "http://i0.hdslb.com/bfs/pugv/44179ffa174a75d8d9a6fc09ee685c6af18d87dd.png"
+              },
+              {
+                "aspect_ratio": 0.30666666666666664,
+                "url": "http://i0.hdslb.com/bfs/pugv/d465257a782e48d025e81735162ffe5a22c40d61.png"
+              },
+              {
+                "aspect_ratio": 3.12,
+                "url": "http://i0.hdslb.com/bfs/pugv/bad85e83948a3141642d735a4f968231b971b3fa.png"
+              },
+              {
+                "aspect_ratio": 4.282666666666667,
+                "url": "http://i0.hdslb.com/bfs/pugv/b37c2305b61bfbce1ed28bc3ef9cf391392e2891.png"
+              },
+              {
+                "aspect_ratio": 4.092,
+                "url": "http://i0.hdslb.com/bfs/pugv/12d79ff8dbf834b2dae03db69e56bb387016c720.png"
+              },
+              {
+                "aspect_ratio": 2.522666666666667,
+                "url": "http://i0.hdslb.com/bfs/pugv/138cb072040d2f139f31d238d202a7691b33627e.png"
+              },
+              {
+                "aspect_ratio": 3.3706666666666667,
+                "url": "http://i0.hdslb.com/bfs/pugv/90ba5e67f63d18f8273b553ee814685bb67ea2f5.png"
+              },
+              {
+                "aspect_ratio": 2.972,
+                "url": "http://i0.hdslb.com/bfs/pugv/6e6284ee5a4013bfb75f03c2faa4528b2f154716.png"
+              }
+            ],
+            "type": 0
+          },
+          "btn_notice": "领券购买",
+          "btn_original_price_notice": "原价9397",
+          "btn_show_amount_unit": "元",
+          "coupon_batch_token": "B20260702115536799693167",
+          "coupon_status": 2,
+          "current_season_price": 839.79,
+          "discount_price": 399900,
+          "is_enable_cash": false,
+          "name": "限时优惠升级法语 vip畅学卡",
+          "original_price": "9397",
+          "original_price_prefix": "价值",
+          "original_price_unit": "元",
+          "product_available": true,
+          "product_cover": "http://i0.hdslb.com/bfs/pugv/2ac5b4794ee41268f3882ac9503250f92f5db69f.png",
+          "product_id": 1036,
+          "product_notice": "领券节省5398元",
+          "product_paid": false,
+          "product_status": 10,
+          "product_type": 3,
+          "relative_item_count_notice": "共3门课程",
+          "relative_item_list": [
+            {
+              "cover": "https://archive.biliimg.com/bfs/archive/ece99f9c2512e9ad111666e3182e93ef04f00009.jpg",
+              "ep_count_notice": "共1000课时",
+              "expiry_notice": "长期有效",
+              "original_price": "5999",
+              "original_price_notice": "价值5999元",
+              "original_price_prefix": "价值",
+              "original_price_unit": "元",
+              "season_id": 8007,
+              "season_paid": false,
+              "sort": 1,
+              "title": "【618特价】法语VIP畅学终身卡（含直播）"
+            },
+            {
+              "cover": "https://archive.biliimg.com/bfs/archive/16e2a0efdde4588f3bbc92d64b7473c87738f21c.jpg",
+              "ep_count_notice": "共400课时",
+              "expiry_notice": "长期有效",
+              "original_price": "1399",
+              "original_price_notice": "价值1399元",
+              "original_price_prefix": "价值",
+              "original_price_unit": "元",
+              "season_id": 2181,
+              "season_paid": false,
+              "sort": 2,
+              "title": "【暑期5折】法语零基础直达B1中高级"
+            },
+            {
+              "cover": "https://archive.biliimg.com/bfs/archive/115f8e890a1a9192347799e117a57af5efc5a710.jpg",
+              "ep_count_notice": "共602课时",
+              "expiry_notice": "长期有效",
+              "original_price": "1999",
+              "original_price_notice": "价值1999元",
+              "original_price_prefix": "价值",
+              "original_price_unit": "元",
+              "season_id": 556,
+              "season_paid": false,
+              "sort": 3,
+              "title": "【暑期5折】法语0-B2高级班"
+            }
+          ],
+          "sale_notice": "券后价",
+          "season_ep_count_notice": "含3门课，共2002课时",
+          "show_amount": "3999",
+          "show_amount_notice": "3999元券后价",
+          "visible_detail": true
+        }
+      ],
+      "pack_notice": "套餐最高立减5,398元",
+      "pack_notice2": "联报限时折上折",
+      "show_packs_right": true,
+      "title": "套餐优惠"
+    },
+    "paid_jump": {
+      "jump_url_for_app": "bilibili://cheese/pay-guide?season_id=556",
+      "url": ""
+    },
+    "paid_view": false,
+    "payment": {
+      "bp_enough": 0,
+      "desc": "券后 799.6 元起/602课时",
+      "discount_desc": "799.6 元",
+      "discount_prefix": "券后",
+      "my_bp": 0,
+      "pay_shade": "券后支付 799.6 元即可观看所有视频",
+      "price": 1999,
+      "price_format": "1999",
+      "price_unit": "元",
+      "refresh_text": "立即购买",
+      "select_text": "立即购买"
+    },
+    "previewed_purchase_note": {
+      "long_watch_text": "试看5分钟，购买后即可观看完整内容",
+      "pay_text": "券后支付",
+      "price_format": " 799.6 元",
+      "watch_text": "即可观看所有视频",
+      "watching_text": "试看中，购买即可观看完整内容"
+    },
+    "purchase_format_note": {
+      "content_list": [
+        {
+          "bold": false,
+          "content": "本内容为付费内容，购买成功后方可观看。",
+          "number": "1."
+        },
+        {
+          "bold": true,
+          "content": "本内容为虚拟服务，已购买内容不支持退款，敬请谅解。",
+          "number": "2."
+        },
+        {
+          "bold": false,
+          "content": "实际购买价格以页面展示的价格及订单结算页显示价格为准。",
+          "number": "3."
+        }
+      ],
+      "link": "https://www.bilibili.com/blackboard/agreement-class-pc.html",
+      "title": "购买须知"
+    },
+    "purchase_note": {
+      "content": "1. 本内容为付费内容，购买成功后方可观看。<br/>2. 本内容为虚拟服务，已购买内容不支持退款，敬请谅解。<br/>3. 实际购买价格以页面展示的价格及订单结算页显示价格为准。",
+      "link": "https://www.bilibili.com/blackboard/agreement-class-pc.html",
+      "title": "购买须知"
+    },
+    "purchase_protocol": {
+      "link": "https://www.bilibili.com/blackboard/agreement-class-pc.html",
+      "title": "付费内容购买协议"
+    },
+    "recommend_seasons": [
+      {
+        "cover": "http://i0.hdslb.com/bfs/archive/3b839d76b00beefbd0839f892be81c204f6b75b4.jpg",
+        "ep_count": "共123课时",
+        "id": 210,
+        "season_url": "https://m.bilibili.com/cheese/play/ss210?csource=Detail_relevantclass",
+        "subtitle": "零基础小白也能轻松开口说法语",
+        "title": "0-A1零基础法语课",
+        "view": 808319
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/3b4bacb408442eb5046f73aa69613005a722dd45.jpg",
+        "ep_count": "共5课时",
+        "id": 154387284,
+        "season_url": "https://m.bilibili.com/cheese/play/ss154387284?csource=Detail_relevantclass",
+        "subtitle": "跟复旦大学硕士，法语DALF C2最高级的老师系统学法语！",
+        "title": "法语零基础入门体验营",
+        "view": 1110
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/ba92438b14073778f189cafbaf0c08f5c2464f90.jpg",
+        "ep_count": "共122课时",
+        "id": 11025,
+        "season_url": "https://m.bilibili.com/cheese/play/ss11025?csource=Detail_relevantclass",
+        "subtitle": "一门课搞定你的法语词汇",
+        "title": "遇见法语词汇渐进课程（A1.1）",
+        "view": 7455
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/188e19900e489f092f719f207bdaa234bed6db2e.jpg",
+        "ep_count": "共59课时",
+        "id": 112779918,
+        "season_url": "https://m.bilibili.com/cheese/play/ss112779918?csource=Detail_relevantclass",
+        "subtitle": "掌握A2级别常见词汇语法和话题知识，备考Delf A2",
+        "title": "进阶法语A2",
+        "view": 5657
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/083b4b06f9ad1650f58c2475d7edb57fa7902b71.jpg",
+        "ep_count": "共12课时",
+        "id": 644355875,
+        "season_url": "https://m.bilibili.com/cheese/play/ss644355875?csource=Detail_relevantclass",
+        "subtitle": "自主说法语 B1 (系统课程 Partie 1)",
+        "title": "自主说法语 B1 (系统课程 Partie 1)",
+        "view": 578
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/4d3a79d842e5e72508de26a6245c141910f8dd35.jpg",
+        "ep_count": "共23课时",
+        "id": 60515,
+        "season_url": "https://m.bilibili.com/cheese/play/ss60515?csource=Detail_relevantclass",
+        "subtitle": "一卡畅学130门法语好课！",
+        "title": "【加v领100G资料】法语VIP畅学终身卡体验课",
+        "view": 54036
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/ca127fa2510978b1d0bcf71a1e1a5bc3739012e1.jpg",
+        "ep_count": "共22课时",
+        "id": 259833879,
+        "season_url": "https://m.bilibili.com/cheese/play/ss259833879?csource=Detail_relevantclass",
+        "subtitle": "共36节，每节90-120分钟，更新中。",
+        "title": "Violette《你好法语》A1全套36节更新中",
+        "view": 276
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/e18dbd449391799188ef4a2c0bf943b9d49ea8fa.jpg",
+        "ep_count": "共636课时",
+        "id": 60033,
+        "season_url": "https://m.bilibili.com/cheese/play/ss60033?csource=Detail_relevantclass",
+        "subtitle": "法语0-B2全程精讲系统课（含直播、中外教）",
+        "title": "法语0-B2全程精讲系统课（含直播、中外教）",
+        "view": 119021
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/16e2a0efdde4588f3bbc92d64b7473c87738f21c.jpg",
+        "ep_count": "共400课时",
+        "id": 2181,
+        "season_url": "https://m.bilibili.com/cheese/play/ss2181?csource=Detail_relevantclass",
+        "subtitle": "跟着211高校教授一起学法语！",
+        "title": "【暑期5折】法语零基础直达B1中高级",
+        "view": 368285
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/a90ee0ac1e390b41171b5d117e739f08f98c75b1.jpg",
+        "ep_count": "共10课时",
+        "id": 22424,
+        "season_url": "https://m.bilibili.com/cheese/play/ss22424?csource=Detail_relevantclass",
+        "subtitle": "告别机械的死记硬背，别再没有情感地苦学单词！",
+        "title": "【法语词汇】词根词缀全攻略，探秘词汇基因密码",
+        "view": 5065
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/284a18bd16d3482468b6ee3b745536883a9c9a26.jpg",
+        "ep_count": "共27课时",
+        "id": 129678884,
+        "season_url": "https://m.bilibili.com/cheese/play/ss129678884?csource=Detail_relevantclass",
+        "subtitle": "掌握A1重要语法点  告别难点易混淆点",
+        "title": "法语 A1 语法大盘点",
+        "view": 1046
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/522a7a51df139ed6ff36f70d3ad447c5e4ec6d61.jpg",
+        "ep_count": "共6课时",
+        "id": 297829473,
+        "season_url": "https://m.bilibili.com/cheese/play/ss297829473?csource=Detail_relevantclass",
+        "subtitle": "法语全套发音规则",
+        "title": "Violette的法语发音全套课程",
+        "view": 112
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/180ad76d7c6cb511992e552fbabd939c94905902.jpg",
+        "ep_count": "共99课时",
+        "id": 17596,
+        "season_url": "https://m.bilibili.com/cheese/play/ss17596?csource=Detail_relevantclass",
+        "subtitle": "全面剖析法语DELF考试 听说读写全兼顾 提升能力传授方法",
+        "title": "【蜗牛法语】法语DELF备考A1-B2官方题精讲",
+        "view": 18060
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/10b7475246ca8cb39281a74f68b6a20bacd605f6.jpg",
+        "ep_count": "共618课时",
+        "id": 1095,
+        "season_url": "https://m.bilibili.com/cheese/play/ss1095?csource=Detail_relevantclass",
+        "subtitle": "零基础搞定西语B2，这一课就够了！",
+        "title": "【暑期5折】西班牙语0-B2高级班",
+        "view": 1454730
+      },
+      {
+        "cover": "https://archive.biliimg.com/bfs/archive/3dcb680c91e9375abb430afe3cbbdb93df1d6e46.jpg",
+        "ep_count": "共546课时",
+        "id": 912,
+        "season_url": "https://m.bilibili.com/cheese/play/ss912?csource=Detail_relevantclass",
+        "subtitle": "系统学德语，零基础直达B2高级！",
+        "title": "【暑期5折】德语0-B2高级班",
+        "view": 4882159
+      }
+    ],
+    "release_bottom_info": "没有更多啦~",
+    "release_info": "已完结 | 共602课时",
+    "release_info2": "共602课时",
+    "release_status": "已完结",
+    "season_id": 556,
+    "season_tag": 0,
+    "share_url": "https://m.bilibili.com/cheese/play/ss556",
+    "short_link": "bilibili://cheese/season/556",
+    "show_watermark": true,
+    "stat": {
+      "play": 5542435,
+      "play_desc": "554.2万播放",
+      "show_vt": false
+    },
+    "status": 10,
+    "stop_sell": false,
+    "subscription_update_count_cycle_text": "",
+    "subtitle": "系统学法语，零基础直达B2高级！\n",
+    "title": "【暑期5折】法语0-B2高级班",
+    "up_info": {
+      "avatar": "https://i0.hdslb.com/bfs/face/a993fe4122fc1e21145f3c1791812cc3e865d83b.jpg",
+      "brief": "法语DALF-C2最高级 | 复旦大学硕士\n9年教学经验 | 前新东方、上外培训教师\n温柔、优雅、超用心~带你走进法语世界！",
+      "follower": 34097,
+      "is_follow": 0,
+      "is_living": false,
+      "link": "https://space.bilibili.com/497519697/pugv?defaultTab=cheese",
+      "mid": 497519697,
+      "pendant": {
+        "image": "",
+        "name": "",
+        "pid": 0
+      },
+      "season_count": 3,
+      "uname": "法语Tina老师"
+    },
+    "update_status": 2,
+    "user_status": {
+      "bp": 0,
+      "expire_at": 0,
+      "favored": 0,
+      "favored_count": 1,
+      "is_expired": false,
+      "is_first_paid": false,
+      "payed": 0,
+      "progress": {
+        "last_ep_id": 20767,
+        "last_ep_index": "【试学课】语音第1讲：字母表A-N",
+        "last_time": 0
+      },
+      "user_expiry_content": "长期有效"
+    },
+    "watermark_interval": 300
+  },
+  "message": "success"
+}
