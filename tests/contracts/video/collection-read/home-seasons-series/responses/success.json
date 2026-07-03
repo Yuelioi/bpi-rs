@@ -1,0 +1,235 @@
+{
+  "code": 0,
+  "data": {
+    "items_lists": {
+      "page": {
+        "page_num": 1,
+        "page_size": 10,
+        "total": 1
+      },
+      "seasons_list": [
+        {
+          "archives": [
+            {
+              "aid": 464606672,
+              "bvid": "BV1sL411777f",
+              "ctime": 1638624989,
+              "duration": 213,
+              "enable_vt": false,
+              "interactive_video": false,
+              "is_lesson_video": 0,
+              "pic": "http://i1.hdslb.com/bfs/archive/f4716a8156437c0f241d6430eb5e6ced6257da2e.jpg",
+              "playback_position": 0,
+              "pubdate": 1638624988,
+              "stat": {
+                "danmaku": 0,
+                "view": 4644,
+                "vt": 0
+              },
+              "state": 0,
+              "title": "【每日动画技巧】波形变形动画 | WAVE WARP",
+              "ugc_pay": 0,
+              "vt_display": ""
+            },
+            {
+              "aid": 763078148,
+              "bvid": "BV1464y1a7C3",
+              "ctime": 1631866844,
+              "duration": 19,
+              "enable_vt": false,
+              "interactive_video": false,
+              "is_lesson_video": 0,
+              "pic": "http://i0.hdslb.com/bfs/archive/e2667424586650a899db50d19d995f24480c0457.jpg",
+              "playback_position": 0,
+              "pubdate": 1631866844,
+              "stat": {
+                "danmaku": 1,
+                "view": 5205,
+                "vt": 0
+              },
+              "state": 0,
+              "title": "【每日动效技巧】魔法阵的制作方法",
+              "ugc_pay": 0,
+              "vt_display": ""
+            },
+            {
+              "aid": 590113616,
+              "bvid": "BV1Fq4y1U7wa",
+              "ctime": 1629973309,
+              "duration": 25,
+              "enable_vt": false,
+              "interactive_video": false,
+              "is_lesson_video": 0,
+              "pic": "http://i0.hdslb.com/bfs/archive/da99326c60ece072e9a047d34751b6ac44a1e286.jpg",
+              "playback_position": 0,
+              "pubdate": 1629973309,
+              "stat": {
+                "danmaku": 0,
+                "view": 11537,
+                "vt": 0
+              },
+              "state": 0,
+              "title": "【每日动效技巧】- 龙龙龙龙卷风",
+              "ugc_pay": 0,
+              "vt_display": ""
+            },
+            {
+              "aid": 804686978,
+              "bvid": "BV1py4y1L7Mu",
+              "ctime": 1628580147,
+              "duration": 9,
+              "enable_vt": false,
+              "interactive_video": false,
+              "is_lesson_video": 0,
+              "pic": "http://i1.hdslb.com/bfs/archive/c2f1ac4de6bf980bc4b2bf625101926220309890.jpg",
+              "playback_position": 0,
+              "pubdate": 1628580147,
+              "stat": {
+                "danmaku": 0,
+                "view": 10351,
+                "vt": 0
+              },
+              "state": 0,
+              "title": "【每日动效技巧】内置效果，四步做出水涟漪",
+              "ugc_pay": 0,
+              "vt_display": ""
+            },
+            {
+              "aid": 674746890,
+              "bvid": "BV1MU4y1n7Na",
+              "ctime": 1628570861,
+              "duration": 9,
+              "enable_vt": false,
+              "interactive_video": false,
+              "is_lesson_video": 0,
+              "pic": "http://i1.hdslb.com/bfs/archive/c9be5c67261d68dc1207744139a2eafc7bbf4559.jpg",
+              "playback_position": 0,
+              "pubdate": 1628570861,
+              "stat": {
+                "danmaku": 0,
+                "view": 6637,
+                "vt": 0
+              },
+              "state": 0,
+              "title": "【每日动效技巧】内置效果，四步做出闪电效果",
+              "ugc_pay": 0,
+              "vt_display": ""
+            },
+            {
+              "aid": 376815802,
+              "bvid": "BV1Qo4y1D7v2",
+              "ctime": 1626791711,
+              "duration": 197,
+              "enable_vt": false,
+              "interactive_video": false,
+              "is_lesson_video": 0,
+              "pic": "http://i0.hdslb.com/bfs/archive/2f98e2ceadbc309dbebf351bd1bcba71f5a7dfed.jpg",
+              "playback_position": 0,
+              "pubdate": 1626791711,
+              "stat": {
+                "danmaku": 1,
+                "view": 7301,
+                "vt": 0
+              },
+              "state": 0,
+              "title": "【每日动效技巧】映像制作的三大法宝",
+              "ugc_pay": 0,
+              "vt_display": ""
+            }
+          ],
+          "meta": {
+            "category": 0,
+            "cover": "https://archive.biliimg.com/bfs/archive/2fa6b41a47fb8796f4e85dfca1ad0e07a5f3ab8f.jpg",
+            "description": "",
+            "mid": 4279370,
+            "name": "合集·每日动效技巧",
+            "ptime": 1638624988,
+            "season_id": 64780,
+            "title": "每日动效技巧",
+            "total": 13
+          },
+          "recent_aids": [
+            464606672,
+            763078148,
+            590113616,
+            804686978,
+            674746890,
+            376815802
+          ]
+        }
+      ],
+      "series_list": [
+        {
+          "archives": [
+            {
+              "aid": 545646468,
+              "bvid": "BV1oq4y177gW",
+              "ctime": 1621575641,
+              "duration": 401,
+              "enable_vt": false,
+              "interactive_video": false,
+              "is_lesson_video": 0,
+              "pic": "http://i0.hdslb.com/bfs/archive/8d8991aad84e68e73fa6fd566e15b19ccca9f010.jpg",
+              "playback_position": 0,
+              "pubdate": 1621575641,
+              "stat": {
+                "danmaku": 0,
+                "view": 3350,
+                "vt": 0
+              },
+              "state": 0,
+              "title": "【After Effects】内置效果 - 极坐标",
+              "ugc_pay": 0,
+              "vt_display": ""
+            },
+            {
+              "aid": 973131166,
+              "bvid": "BV1f44y167NT",
+              "ctime": 1621434003,
+              "duration": 359,
+              "enable_vt": false,
+              "interactive_video": false,
+              "is_lesson_video": 0,
+              "pic": "http://i0.hdslb.com/bfs/archive/14a95c84610df57a92d75196e6a23514e10df66e.jpg",
+              "playback_position": 0,
+              "pubdate": 1621434003,
+              "stat": {
+                "danmaku": 3,
+                "view": 3727,
+                "vt": 0
+              },
+              "state": 0,
+              "title": "【After Effects】内置效果 - 写入",
+              "ugc_pay": 0,
+              "vt_display": ""
+            }
+          ],
+          "meta": {
+            "category": 1,
+            "cover": "http://i0.hdslb.com/bfs/archive/8d8991aad84e68e73fa6fd566e15b19ccca9f010.jpg",
+            "creator": "",
+            "ctime": 1630468940,
+            "description": "",
+            "keywords": [
+              ""
+            ],
+            "last_update_ts": 1630468940,
+            "mid": 4279370,
+            "mtime": 1630468940,
+            "name": "AE内置效果",
+            "raw_keywords": "",
+            "series_id": 250285,
+            "state": 2,
+            "total": 2
+          },
+          "recent_aids": [
+            545646468,
+            973131166
+          ]
+        }
+      ]
+    }
+  },
+  "message": "OK",
+  "ttl": 1
+}

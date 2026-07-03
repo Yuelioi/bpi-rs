@@ -1,0 +1,115 @@
+{
+  "code": 0,
+  "data": {
+    "aids": [
+      113602455409683,
+      305213924,
+      635913695,
+      676931260
+    ],
+    "archives": [
+      {
+        "aid": 113602455409683,
+        "bvid": "BV185iYYuEzj",
+        "ctime": 1733436012,
+        "duration": 852,
+        "enable_vt": false,
+        "interactive_video": false,
+        "is_lesson_video": 0,
+        "pic": "http://i1.hdslb.com/bfs/archive/21c174786fbb3250c202d57777349556481645dd.jpg",
+        "playback_position": 0,
+        "pubdate": 1733436012,
+        "stat": {
+          "danmaku": 2,
+          "view": 3425,
+          "vt": 0
+        },
+        "state": 0,
+        "title": "【授人以渔】Adobe Cep 拓展开发教程",
+        "ugc_pay": 0,
+        "vt_display": ""
+      },
+      {
+        "aid": 305213924,
+        "bvid": "BV1BP411g7E6",
+        "ctime": 1668616752,
+        "duration": 760,
+        "enable_vt": false,
+        "interactive_video": false,
+        "is_lesson_video": 0,
+        "pic": "http://i0.hdslb.com/bfs/archive/6968ed24e4ab19ab8b32319b9e837c7f4c6809e8.jpg",
+        "playback_position": 0,
+        "pubdate": 1668616752,
+        "stat": {
+          "danmaku": 1,
+          "view": 4537,
+          "vt": 0
+        },
+        "state": 0,
+        "title": "【授人以渔】AE插件开发",
+        "ugc_pay": 0,
+        "vt_display": ""
+      },
+      {
+        "aid": 635913695,
+        "bvid": "BV1Vb4y1n7MY",
+        "ctime": 1642939181,
+        "duration": 331,
+        "enable_vt": false,
+        "interactive_video": false,
+        "is_lesson_video": 0,
+        "pic": "http://i1.hdslb.com/bfs/archive/e670120d752d23c0ad41a18804f919c98f735585.jpg",
+        "playback_position": 0,
+        "pubdate": 1642939181,
+        "stat": {
+          "danmaku": 1,
+          "view": 7131,
+          "vt": 0
+        },
+        "state": 0,
+        "title": "【授人以渔】5分钟了解Blender插件开发流程",
+        "ugc_pay": 0,
+        "vt_display": ""
+      },
+      {
+        "aid": 676931260,
+        "bvid": "BV17U4y1T7mU",
+        "ctime": 1637858465,
+        "duration": 2178,
+        "enable_vt": false,
+        "interactive_video": false,
+        "is_lesson_video": 0,
+        "pic": "http://i1.hdslb.com/bfs/archive/fde68c6ce94fa9048449a06661a1e729f31d21c0.jpg",
+        "playback_position": 0,
+        "pubdate": 1637858465,
+        "stat": {
+          "danmaku": 10,
+          "view": 12455,
+          "vt": 0
+        },
+        "state": 0,
+        "title": "【授人以渔】AE脚本编写全流程 | 文档 + 教程 + 源码",
+        "ugc_pay": 0,
+        "vt_display": ""
+      }
+    ],
+    "meta": {
+      "category": 0,
+      "cover": "https://archive.biliimg.com/bfs/archive/1306b727084ff9caff0f89b9152028fe66152df9.jpg",
+      "description": "",
+      "mid": 4279370,
+      "name": "合集·授人以渔",
+      "ptime": 1733436012,
+      "season_id": 4294056,
+      "title": "授人以渔",
+      "total": 4
+    },
+    "page": {
+      "page_num": 1,
+      "page_size": 20,
+      "total": 4
+    }
+  },
+  "message": "OK",
+  "ttl": 1
+}

@@ -1,0 +1,58 @@
+{
+  "code": 0,
+  "data": {
+    "aids": [
+      973131166,
+      545646468
+    ],
+    "archives": [
+      {
+        "aid": 973131166,
+        "bvid": "BV1f44y167NT",
+        "ctime": 1621434003,
+        "desc": "第1次忘了点录制，第2次录错屏幕了，第3次发现爆音了好多！不想录第4次了！\n------\n1.本系列是尽量用生动活泼的例子讲清AE内置插件的效果以及各个参数\n2.如果有本效果的其他案例，可以评论区留言\n3.教程风格有什么意见，也可以留言\n------",
+        "duration": 359,
+        "enable_vt": 0,
+        "interactive_video": false,
+        "pic": "http://i0.hdslb.com/bfs/archive/14a95c84610df57a92d75196e6a23514e10df66e.jpg",
+        "playback_position": 0,
+        "pubdate": 1621434003,
+        "stat": {
+          "view": 3727
+        },
+        "state": 0,
+        "title": "【After Effects】内置效果 - 写入",
+        "ugc_pay": 0,
+        "upMid": 4279370,
+        "vt_display": ""
+      },
+      {
+        "aid": 545646468,
+        "bvid": "BV1oq4y177gW",
+        "ctime": 1621575641,
+        "desc": "睡醒的时候，忽然想到了螺旋线，临时加进去导致下面时间错位了一点点~不过不影响观看\n------\n1.本系列是尽量用生动活泼的例子讲清AE内置插件的效果以及各个参数\n2.如果有本效果的其他案例，可以评论区留言\n3.教程风格有什么意见，也可以留言\n------",
+        "duration": 401,
+        "enable_vt": 0,
+        "interactive_video": false,
+        "pic": "http://i0.hdslb.com/bfs/archive/8d8991aad84e68e73fa6fd566e15b19ccca9f010.jpg",
+        "playback_position": 0,
+        "pubdate": 1621575641,
+        "stat": {
+          "view": 3350
+        },
+        "state": 0,
+        "title": "【After Effects】内置效果 - 极坐标",
+        "ugc_pay": 0,
+        "upMid": 4279370,
+        "vt_display": ""
+      }
+    ],
+    "page": {
+      "num": 1,
+      "size": 10,
+      "total": 2
+    }
+  },
+  "message": "0",
+  "ttl": 1
+}

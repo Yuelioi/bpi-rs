@@ -3,5 +3,16 @@
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 pub mod action;
 mod info;
+mod params;
 
 pub use action::CollectionUpdateSeriesParams;
+pub use info::{
+    Archive, ArchiveStat, GetSeasonsArchivesData, GetSeasonsSeriesData, GetSeriesArchivesData,
+    GetSeriesData, ItemsList, PageInfo, SeasonsArchivesMeta, SeasonsItem, SeasonsMeta, SeriesItem,
+    SeriesMeta,
+};
+pub use params::{
+    CollectionArchiveSort, VideoCollectionHomeSeasonsSeriesParams,
+    VideoCollectionSeasonsArchivesParams, VideoCollectionSeasonsSeriesParams,
+    VideoCollectionSeriesArchivesParams, VideoCollectionSeriesInfoParams,
+};

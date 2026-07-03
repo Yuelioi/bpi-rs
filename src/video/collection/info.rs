@@ -4,6 +4,21 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+use super::params::{
+    VideoCollectionHomeSeasonsSeriesParams, VideoCollectionSeasonsArchivesParams,
+    VideoCollectionSeasonsSeriesParams, VideoCollectionSeriesArchivesParams,
+    VideoCollectionSeriesInfoParams,
+};
+
+const HOME_SEASONS_SERIES_ENDPOINT: &str =
+    "https://api.bilibili.com/x/polymer/web-space/home/seasons_series";
+const SEASONS_ARCHIVES_LIST_ENDPOINT: &str =
+    "https://api.bilibili.com/x/polymer/web-space/seasons_archives_list";
+const SEASONS_SERIES_LIST_ENDPOINT: &str =
+    "https://api.bilibili.com/x/polymer/web-space/seasons_series_list";
+const SERIES_ARCHIVES_ENDPOINT: &str = "https://api.bilibili.com/x/series/archives";
+const SERIES_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/series/series";
+
 /// 稿件信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ArchiveStat {
@@ -197,41 +212,14 @@ impl BpiClient {
     /// 此接口用于获取特定UP主某个视频合集的详细信息，包括合集内的所有视频列表和元数据。
     ///
     /// # 参数
-    /// * `mid` - 用户 mid，必填。
-    /// * `season_id` - 视频合集 ID，必填。
-    /// * `sort_reverse` - 排序方式，可选。`true`: 升序排序，`false`: 默认排序。
-    /// * `page_num` - 页码索引，可选，默认为 1。
-    /// * `page_size` - 单页内容数量，可选，默认为 30。
+    /// * `params` - 用户、合集 ID、排序和分页参数。
     pub async fn video_seasons_list(
         &self,
-        mid: u64,
-        season_id: u64,
-        sort_reverse: Option<bool>,
-        page_num: Option<u64>,
-        page_size: Option<u64>,
+        params: VideoCollectionSeasonsArchivesParams,
     ) -> Result<BpiResponse<GetSeasonsArchivesData>, BpiError> {
-        let mut params = vec![
-            ("mid", mid.to_string()),
-            ("season_id", season_id.to_string()),
-            // 默认分页参数
-            ("page_num", "1".to_string()),
-            ("page_size", "20".to_string()),
-        ];
+        let params = self.get_wbi_sign2(params.query_pairs()).await?;
 
-        if let Some(sort) = sort_reverse {
-            params.push(("sort_reverse", sort.to_string()));
-        }
-        if let Some(num) = page_num {
-            params.push(("page_num", num.to_string()));
-        }
-        if let Some(size) = page_size {
-            params.push(("page_size", size.to_string()));
-        }
-
-        // 签名
-        let params = self.get_wbi_sign2(params).await?;
-
-        self.get("https://api.bilibili.com/x/polymer/web-space/seasons_archives_list")
+        self.get(SEASONS_ARCHIVES_LIST_ENDPOINT)
             .with_bilibili_headers()
             .query(&params)
             .send_bpi("获取视频合集信息")
@@ -243,25 +231,14 @@ impl BpiClient {
     /// 此接口用于获取特定UP主创建的系列视频列表。
     ///
     /// # 参数
-    /// * `mid` - 用户 mid，必填。
-    /// * `page_num` - 页码索引，必填。
-    /// * `page_size` - 单页内容数量，必填。
+    /// * `params` - 用户和分页参数。
     pub async fn video_series_list(
         &self,
-        mid: u64,
-        page_num: u64,
-        page_size: u64,
+        params: VideoCollectionHomeSeasonsSeriesParams,
     ) -> Result<BpiResponse<GetSeasonsSeriesData>, BpiError> {
-        let params = vec![
-            ("mid", mid.to_string()),
-            ("page_num", page_num.to_string()),
-            ("page_size", page_size.to_string()),
-        ];
+        let params = self.get_wbi_sign2(params.query_pairs()).await?;
 
-        // 签名
-        let params = self.get_wbi_sign2(params).await?;
-
-        self.get("https://api.bilibili.com/x/polymer/web-space/home/seasons_series")
+        self.get(HOME_SEASONS_SERIES_ENDPOINT)
             .query(&params)
             .send_bpi("只获取系列视频列表")
             .await
@@ -272,28 +249,14 @@ impl BpiClient {
     /// 此接口用于获取特定UP主创建的系列和合集视频列表，返回结果包含两种类型。
     ///
     /// # 参数
-    /// * `mid` - 用户 mid，必填。
-    /// * `page_num` - 页码索引，可选，默认为 1。
-    /// * `page_size` - 每页数量，可选，默认为 20。
+    /// * `params` - 用户和可选分页参数。
     pub async fn video_seasons_series_list(
         &self,
-        mid: u64,
-        page_num: Option<u64>,
-        page_size: Option<u64>,
+        params: VideoCollectionSeasonsSeriesParams,
     ) -> Result<BpiResponse<GetSeasonsSeriesData>, BpiError> {
-        let mut params = vec![("mid", mid.to_string())];
+        let params = self.get_wbi_sign2(params.query_pairs()).await?;
 
-        if let Some(num) = page_num {
-            params.push(("page_num", num.to_string()));
-        }
-        if let Some(size) = page_size {
-            params.push(("page_size", size.to_string()));
-        }
-
-        // 签名
-        let params = self.get_wbi_sign2(params).await?;
-
-        self.get("https://api.bilibili.com/x/polymer/web-space/seasons_series_list")
+        self.get(SEASONS_SERIES_LIST_ENDPOINT)
             .query(&params)
             .send_bpi("获取系列和合集视频列表")
             .await
@@ -304,16 +267,15 @@ impl BpiClient {
     /// 此接口用于获取指定系列的基本信息，如名称、描述、总视频数量等。
     ///
     /// # 参数
-    /// * `series_id` - 系列ID，必填。
+    /// * `params` - 系列 ID 参数。
     pub async fn video_series_info(
         &self,
-        series_id: u64,
+        params: VideoCollectionSeriesInfoParams,
     ) -> Result<BpiResponse<GetSeriesData>, BpiError> {
-        let req = self
-            .get("https://api.bilibili.com/x/series/series")
-            .query(&[("series_id", &series_id.to_string())]);
-
-        req.send_bpi("查询指定系列信息").await
+        self.get(SERIES_INFO_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi("查询指定系列信息")
+            .await
     }
 
     /// 获取指定系列视频列表
@@ -321,52 +283,28 @@ impl BpiClient {
     /// 此接口用于获取指定系列内的所有视频列表，支持分页和排序。
     ///
     /// # 参数
-    /// * `mid` - 用户 mid，必填。
-    /// * `series_id` - 系列ID，必填。
-    /// * `only_normal` - 作用尚不明确，可选，默认为 true。
-    /// * `sort` - 排序方式，可选。`desc`: 默认排序，`asc`: 升序排序。
-    /// * `page_num` - 页码索引，可选，默认为 1。
-    /// * `page_size` - 每页数量，可选，默认为 20。
+    /// * `params` - 用户、系列 ID、过滤、排序和分页参数。
     pub async fn video_series_archives(
         &self,
-        mid: u64,
-        series_id: u64,
-        only_normal: Option<bool>,
-        sort: Option<&str>,
-        page_num: Option<u64>,
-        page_size: Option<u64>,
+        params: VideoCollectionSeriesArchivesParams,
     ) -> Result<BpiResponse<GetSeriesArchivesData>, BpiError> {
-        let mut req = self
-            .get("https://api.bilibili.com/x/series/archives")
-            .query(&[
-                ("mid", &mid.to_string()),
-                ("series_id", &series_id.to_string()),
-            ]);
-
-        if let Some(normal) = only_normal {
-            req = req.query(&[("only_normal", &normal.to_string())]);
-        }
-
-        if let Some(s) = sort {
-            req = req.query(&[("sort", s)]);
-        }
-
-        if let Some(num) = page_num {
-            req = req.query(&[("pn", &num.to_string())]);
-        }
-
-        if let Some(size) = page_size {
-            req = req.query(&[("ps", &size.to_string())]);
-        }
-
-        req.send_bpi("获取指定系列视频列表").await
+        self.get(SERIES_ARCHIVES_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi("获取指定系列视频列表")
+            .await
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::{Mid, SeasonId};
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
+
+    use super::super::params::CollectionArchiveSort;
 
     // 测试用的 mid
     const TEST_MID: u64 = 4279370;
@@ -375,13 +313,44 @@ mod tests {
 
     const TEST_SERIES_ID: u64 = 250285;
 
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "seasons-archives-list" => include_bytes!(
+                "../../../tests/contracts/video/collection-read/seasons-archives-list/contract.json"
+            )
+            .as_slice(),
+            "home-seasons-series" => include_bytes!(
+                "../../../tests/contracts/video/collection-read/home-seasons-series/contract.json"
+            )
+            .as_slice(),
+            "seasons-series-list" => include_bytes!(
+                "../../../tests/contracts/video/collection-read/seasons-series-list/contract.json"
+            )
+            .as_slice(),
+            "series-info" => include_bytes!(
+                "../../../tests/contracts/video/collection-read/series-info/contract.json"
+            )
+            .as_slice(),
+            "series-archives" => include_bytes!(
+                "../../../tests/contracts/video/collection-read/series-archives/contract.json"
+            )
+            .as_slice(),
+            _ => unreachable!("unknown video collection-read contract endpoint"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
+
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_seasons_archives_list() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_seasons_list(TEST_MID, TEST_SEASON_ID, Some(false), None, None)
-            .await?;
+        let params = VideoCollectionSeasonsArchivesParams::new(
+            Mid::new(TEST_MID)?,
+            SeasonId::new(TEST_SEASON_ID)?,
+        )
+        .with_sort_reverse(false);
+        let resp = bpi.video_seasons_list(params).await?;
         let data = resp.into_data()?;
 
         info!("测试结果: {:?}", data);
@@ -394,7 +363,8 @@ mod tests {
     #[tokio::test]
     async fn test_video_seasons_series_only() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.video_series_list(TEST_MID, 1, 10).await?;
+        let params = VideoCollectionHomeSeasonsSeriesParams::new(Mid::new(TEST_MID)?);
+        let resp = bpi.video_series_list(params).await?;
         let data = resp.into_data()?;
 
         info!("测试结果: {:?}", data);
@@ -406,9 +376,10 @@ mod tests {
     #[tokio::test]
     async fn test_video_seasons_series_list() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_seasons_series_list(TEST_MID, Some(1), Some(5))
-            .await?;
+        let params = VideoCollectionSeasonsSeriesParams::new(Mid::new(TEST_MID)?)
+            .with_page_num(1)?
+            .with_page_size(5)?;
+        let resp = bpi.video_seasons_series_list(params).await?;
         let data = resp.into_data()?;
 
         info!("测试结果: {:?}", data);
@@ -425,7 +396,8 @@ mod tests {
     #[tokio::test]
     async fn test_video_series_info() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.video_series_info(TEST_SERIES_ID).await?;
+        let params = VideoCollectionSeriesInfoParams::new(TEST_SERIES_ID)?;
+        let resp = bpi.video_series_info(params).await?;
         let data = resp.into_data()?;
 
         info!("测试结果: {:?}", data);
@@ -441,20 +413,184 @@ mod tests {
     #[tokio::test]
     async fn test_video_series_archives() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_series_archives(
-                TEST_MID,
-                TEST_SERIES_ID,
-                None,
-                Some("asc"),
-                Some(1),
-                Some(10),
-            )
-            .await?;
+        let params = VideoCollectionSeriesArchivesParams::new(Mid::new(TEST_MID)?, TEST_SERIES_ID)?
+            .with_sort(CollectionArchiveSort::Asc)
+            .with_page_num(1)?
+            .with_page_size(10)?;
+        let resp = bpi.video_series_archives(params).await?;
         let data = resp.into_data()?;
 
         info!("测试结果: {:?}", data);
         assert!(!data.archives.is_empty(), "返回的系列视频列表不应为空");
+        Ok(())
+    }
+
+    #[test]
+    fn video_collection_read_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let expectations = [
+            (
+                "seasons-archives-list",
+                "video.collection.seasons_archives_list",
+                SEASONS_ARCHIVES_LIST_ENDPOINT,
+                VideoCollectionSeasonsArchivesParams::new(
+                    Mid::new(TEST_MID)?,
+                    SeasonId::new(TEST_SEASON_ID)?,
+                )
+                .with_sort_reverse(false)
+                .query_pairs(),
+                "GetSeasonsArchivesData",
+                true,
+            ),
+            (
+                "home-seasons-series",
+                "video.collection.home_seasons_series",
+                HOME_SEASONS_SERIES_ENDPOINT,
+                VideoCollectionHomeSeasonsSeriesParams::new(Mid::new(TEST_MID)?).query_pairs(),
+                "GetSeasonsSeriesData",
+                true,
+            ),
+            (
+                "seasons-series-list",
+                "video.collection.seasons_series_list",
+                SEASONS_SERIES_LIST_ENDPOINT,
+                VideoCollectionSeasonsSeriesParams::new(Mid::new(TEST_MID)?)
+                    .with_page_num(1)?
+                    .with_page_size(5)?
+                    .query_pairs(),
+                "GetSeasonsSeriesData",
+                true,
+            ),
+            (
+                "series-info",
+                "video.collection.series_info",
+                SERIES_INFO_ENDPOINT,
+                VideoCollectionSeriesInfoParams::new(TEST_SERIES_ID)?.query_pairs(),
+                "GetSeriesData",
+                false,
+            ),
+            (
+                "series-archives",
+                "video.collection.series_archives",
+                SERIES_ARCHIVES_ENDPOINT,
+                VideoCollectionSeriesArchivesParams::new(Mid::new(TEST_MID)?, TEST_SERIES_ID)?
+                    .with_sort(CollectionArchiveSort::Asc)
+                    .with_page_num(1)?
+                    .with_page_size(10)?
+                    .query_pairs(),
+                "GetSeriesArchivesData",
+                false,
+            ),
+        ];
+
+        for (endpoint, name, url, query_pairs, rust_model, requires_wbi) in expectations {
+            let contract = contract(endpoint)?;
+
+            assert_eq!(contract.name, name);
+            assert_eq!(contract.request.method, HttpMethod::Get);
+            assert_eq!(contract.request.url.as_str(), url);
+            assert_eq!(contract.request.auth.requires_wbi(), requires_wbi);
+            assert_eq!(contract.cases.len(), 3);
+            assert!(
+                contract
+                    .cases
+                    .iter()
+                    .all(|case| case.response.api_code == Some(0))
+            );
+            assert!(
+                contract
+                    .cases
+                    .iter()
+                    .all(|case| case.response.rust_model.as_deref() == Some(rust_model))
+            );
+
+            for (key, value) in query_pairs {
+                assert_eq!(
+                    contract.request.query.get(key).map(String::as_str),
+                    Some(value.as_str())
+                );
+            }
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn video_collection_read_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let seasons = ApiEnvelope::<GetSeasonsArchivesData>::from_slice(include_bytes!(
+            "../../../tests/contracts/video/collection-read/seasons-archives-list/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(seasons.meta.season_id, TEST_SEASON_ID);
+
+        let home_series = ApiEnvelope::<GetSeasonsSeriesData>::from_slice(include_bytes!(
+            "../../../tests/contracts/video/collection-read/home-seasons-series/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(home_series.items_lists.page.page_num, 1);
+
+        let seasons_series = ApiEnvelope::<GetSeasonsSeriesData>::from_slice(include_bytes!(
+            "../../../tests/contracts/video/collection-read/seasons-series-list/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(seasons_series.items_lists.page.page_size, 5);
+
+        let series = ApiEnvelope::<GetSeriesData>::from_slice(include_bytes!(
+            "../../../tests/contracts/video/collection-read/series-info/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(series.meta.series_id, TEST_SERIES_ID);
+
+        let series_archives = ApiEnvelope::<GetSeriesArchivesData>::from_slice(include_bytes!(
+            "../../../tests/contracts/video/collection-read/series-archives/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(series_archives.page.page_size, 10);
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!(
+            "target/bpi-probe-runs/video/collection-read/{endpoint}/{profile}.response.json"
+        );
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn video_collection_read_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("seasons-archives-list", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<GetSeasonsArchivesData>>(body)?
+                    .into_payload()?;
+                assert_eq!(payload.meta.season_id, TEST_SEASON_ID);
+            }
+
+            for endpoint in ["home-seasons-series", "seasons-series-list"] {
+                if let Some(body) = local_probe_body(endpoint, profile) {
+                    let payload =
+                        serde_json::from_value::<ApiEnvelope<GetSeasonsSeriesData>>(body)?
+                            .into_payload()?;
+                    assert!(payload.items_lists.page.total >= 1);
+                }
+            }
+
+            if let Some(body) = local_probe_body("series-info", profile) {
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<GetSeriesData>>(body)?.into_payload()?;
+                assert_eq!(payload.meta.series_id, TEST_SERIES_ID);
+            }
+
+            if let Some(body) = local_probe_body("series-archives", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<GetSeriesArchivesData>>(body)?
+                    .into_payload()?;
+                assert_eq!(payload.page.page_size, 10);
+            }
+        }
+
         Ok(())
     }
 }

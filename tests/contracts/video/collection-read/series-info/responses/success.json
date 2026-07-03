@@ -1,0 +1,28 @@
+{
+  "code": 0,
+  "data": {
+    "meta": {
+      "category": 1,
+      "creator": "",
+      "ctime": 1630468940,
+      "description": "",
+      "keywords": [
+        ""
+      ],
+      "last_update_ts": 1630468940,
+      "mid": 4279370,
+      "mtime": 1630468940,
+      "name": "AE内置效果",
+      "raw_keywords": "",
+      "series_id": 250285,
+      "state": 2,
+      "total": 2
+    },
+    "recent_aids": [
+      545646468,
+      973131166
+    ]
+  },
+  "message": "0",
+  "ttl": 1
+}
