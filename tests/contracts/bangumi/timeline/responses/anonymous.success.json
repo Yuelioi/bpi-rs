@@ -1,0 +1,130 @@
+{
+  "code": 0,
+  "message": "success",
+  "result": [
+    {
+      "date": "6-30",
+      "date_ts": 1782748800,
+      "day_of_week": 2,
+      "episodes": [],
+      "is_today": 0
+    },
+    {
+      "date": "7-1",
+      "date_ts": 1782835200,
+      "day_of_week": 3,
+      "episodes": [],
+      "is_today": 0
+    },
+    {
+      "date": "7-2",
+      "date_ts": 1782921600,
+      "day_of_week": 4,
+      "episodes": [],
+      "is_today": 0
+    },
+    {
+      "date": "7-3",
+      "date_ts": 1783008000,
+      "day_of_week": 5,
+      "episodes": [],
+      "is_today": 1
+    },
+    {
+      "date": "7-4",
+      "date_ts": 1783094400,
+      "day_of_week": 6,
+      "episodes": [],
+      "is_today": 0
+    },
+    {
+      "date": "7-5",
+      "date_ts": 1783180800,
+      "day_of_week": 7,
+      "episodes": [
+        {
+          "cover": "https://i0.hdslb.com/bfs/bangumi/image/88406f07db1dad1f2663b93f6035eeb222bde0b5.jpg",
+          "delay": 0,
+          "delay_id": 0,
+          "delay_index": "",
+          "delay_reason": "",
+          "enable_vt": false,
+          "ep_cover": "https://i0.hdslb.com/bfs/bangumi/image/87b018c72a1d9a7a0093db6c960ca1abf3be6284.jpg",
+          "episode_id": 3781142,
+          "follows": "-",
+          "icon_font": {
+            "name": "playdata-square-line@500",
+            "text": "-"
+          },
+          "plays": "-",
+          "pub_index": "第42话",
+          "pub_time": "10:00",
+          "pub_ts": 1783216800,
+          "published": 0,
+          "season_id": 109700,
+          "square_cover": "https://i0.hdslb.com/bfs/bangumi/image/b650f40fb0eeb3dc6e51f41798ac78ae2b05c3c1.png",
+          "title": "假面骑士ZZZ"
+        },
+        {
+          "cover": "https://i0.hdslb.com/bfs/bangumi/image/88406f07db1dad1f2663b93f6035eeb222bde0b5.jpg",
+          "delay": 0,
+          "delay_id": 0,
+          "delay_index": "",
+          "delay_reason": "",
+          "enable_vt": false,
+          "ep_cover": "https://i0.hdslb.com/bfs/bangumi/image/87b018c72a1d9a7a0093db6c960ca1abf3be6284.jpg",
+          "episode_id": 3781149,
+          "follows": "-",
+          "icon_font": {
+            "name": "playdata-square-line@500",
+            "text": "-"
+          },
+          "plays": "-",
+          "pub_index": "第42话",
+          "pub_time": "10:00",
+          "pub_ts": 1783216800,
+          "published": 0,
+          "season_id": 109701,
+          "square_cover": "https://i0.hdslb.com/bfs/bangumi/image/ef538516b528d1b31de4c9278ac44222db7602fc.png",
+          "title": "假面骑士ZZZ（中配）"
+        }
+      ],
+      "is_today": 0
+    },
+    {
+      "date": "7-6",
+      "date_ts": 1783267200,
+      "day_of_week": 1,
+      "episodes": [],
+      "is_today": 0
+    },
+    {
+      "date": "7-7",
+      "date_ts": 1783353600,
+      "day_of_week": 2,
+      "episodes": [],
+      "is_today": 0
+    },
+    {
+      "date": "7-8",
+      "date_ts": 1783440000,
+      "day_of_week": 3,
+      "episodes": [],
+      "is_today": 0
+    },
+    {
+      "date": "7-9",
+      "date_ts": 1783526400,
+      "day_of_week": 4,
+      "episodes": [],
+      "is_today": 0
+    },
+    {
+      "date": "7-10",
+      "date_ts": 1783612800,
+      "day_of_week": 5,
+      "episodes": [],
+      "is_today": 0
+    }
+  ]
+}

@@ -71,6 +71,15 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/bangumi/timeline/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -128,5 +137,91 @@ mod tests {
         assert_eq!(BangumiTimelineType::Anime.as_i32(), 1);
         assert_eq!(BangumiTimelineType::Movie.as_i32(), 3);
         assert_eq!(BangumiTimelineType::ChineseAnimation.as_i32(), 4);
+    }
+
+    #[test]
+    fn bangumi_timeline_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params = BangumiTimelineParams::new(BangumiTimelineType::Anime, 3, 7)?;
+
+        assert_eq!(contract.name, "bangumi.timeline");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/pgc/web/timeline"
+        );
+        assert_eq!(
+            contract.request.query.get("types").map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            contract.request.query.get("before").map(String::as_str),
+            Some("3")
+        );
+        assert_eq!(
+            contract.request.query.get("after").map(String::as_str),
+            Some("7")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("types", "1".to_string()),
+                ("before", "3".to_string()),
+                ("after", "7".to_string()),
+            ]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("Vec<BangumiTimelineDay>")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_timeline_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/bangumi/timeline/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!("../../tests/contracts/bangumi/timeline/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/bangumi/timeline/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload =
+                ApiEnvelope::<Vec<BangumiTimelineDay>>::from_slice(bytes)?.into_payload()?;
+
+            assert!(!payload.is_empty());
+            assert!(payload.iter().any(|day| !day.episodes.is_empty()));
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/bangumi/timeline/timeline/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn bangumi_timeline_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload = serde_json::from_value::<ApiEnvelope<Vec<BangumiTimelineDay>>>(body)?
+                .into_payload()?;
+
+            assert!(!payload.is_empty());
+            assert!(payload.iter().all(|day| !day.date.is_empty()));
+        }
+        Ok(())
     }
 }
