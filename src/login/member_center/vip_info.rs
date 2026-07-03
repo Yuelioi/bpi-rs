@@ -42,17 +42,34 @@ mod tests {
         assert_eq!(contract.name, "login.vip_info");
         assert_eq!(contract.request.method, HttpMethod::Get);
         assert_eq!(contract.request.url.as_str(), VIP_INFO_ENDPOINT);
+        assert!(contract.request.query.is_empty());
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(contract.cases[0].response.api_code, Some(-101));
+        assert_eq!(contract.cases[1].response.api_code, Some(0));
+        assert_eq!(contract.cases[2].response.api_code, Some(0));
         Ok(())
     }
 
     #[test]
-    fn member_center_vip_info_fixture_parses_legacy_alias() -> Result<(), BpiError> {
-        let info = ApiEnvelope::<VipInfo>::from_slice(include_bytes!(
+    fn member_center_vip_info_fixtures_parse_legacy_alias() -> Result<(), BpiError> {
+        let normal = ApiEnvelope::<VipInfo>::from_slice(include_bytes!(
             "../../../tests/contracts/login/vip-info/responses/normal.success.json"
         ))?
         .into_payload()?;
+        let vip = ApiEnvelope::<VipInfo>::from_slice(include_bytes!(
+            "../../../tests/contracts/login/vip-info/responses/vip.success.json"
+        ))?
+        .into_payload()?;
 
-        assert!(!info.is_active());
+        assert!(!normal.is_active());
+        assert!(vip.is_active());
+
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../../tests/contracts/login/vip-info/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
         Ok(())
     }
 }

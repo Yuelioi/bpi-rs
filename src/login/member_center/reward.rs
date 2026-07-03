@@ -35,7 +35,21 @@ mod tests {
         assert_eq!(contract.name, "login.daily_reward");
         assert_eq!(contract.request.method, HttpMethod::Get);
         assert_eq!(contract.request.url.as_str(), DAILY_REWARD_ENDPOINT);
+        assert!(contract.request.query.is_empty());
         assert_eq!(contract.cases.len(), 3);
+        assert_eq!(contract.cases[0].response.http_status, Some(412));
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("risk_control")
+        );
+        assert!(contract.cases[0].response.fixture.is_none());
+        assert_eq!(contract.cases[1].response.api_code, Some(0));
+        assert_eq!(contract.cases[2].response.http_status, Some(412));
+        assert_eq!(
+            contract.cases[2].response.error.as_deref(),
+            Some("risk_control")
+        );
+        assert!(contract.cases[2].response.fixture.is_none());
         Ok(())
     }
 
