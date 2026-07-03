@@ -93,18 +93,18 @@ impl<'de> Deserialize<'de> for Vip {
                             if vip_type.is_some() {
                                 return Err(de::Error::duplicate_field("vip_type"));
                             }
-                            vip_type = Some(map.next_value()?);
+                            vip_type = Some(next_u8_value(&mut map, "vip_type")?);
                         }
                         "vip_status" | "vipStatus" | "status" => {
                             if vip_status.is_none() {
-                                vip_status = Some(map.next_value()?);
+                                vip_status = Some(next_u8_value(&mut map, "vip_status")?);
                             } else {
                                 let _: serde_json::Value = map.next_value()?;
                             }
                         }
                         "vipDueDate" | "due_date" | "vip_due_date" => {
                             if vip_due_date.is_none() {
-                                vip_due_date = Some(map.next_value()?);
+                                vip_due_date = Some(next_u64_value(&mut map, "vip_due_date")?);
                             } else {
                                 let _: serde_json::Value = map.next_value()?;
                             }
@@ -125,13 +125,13 @@ impl<'de> Deserialize<'de> for Vip {
                             if vip_pay_type.is_some() {
                                 return Err(de::Error::duplicate_field("vip_pay_type"));
                             }
-                            vip_pay_type = Some(map.next_value()?);
+                            vip_pay_type = next_optional_u8_value(&mut map, "vip_pay_type")?;
                         }
                         "role" => {
                             if role.is_some() {
                                 return Err(de::Error::duplicate_field("role"));
                             }
-                            role = Some(map.next_value()?);
+                            role = next_optional_u8_value(&mut map, "role")?;
                         }
                         "is_tv_vip" => {
                             if is_tv_vip.is_some() {
@@ -143,25 +143,25 @@ impl<'de> Deserialize<'de> for Vip {
                             if tv_vip_status.is_some() {
                                 return Err(de::Error::duplicate_field("tv_vip_status"));
                             }
-                            tv_vip_status = Some(map.next_value()?);
+                            tv_vip_status = next_optional_u8_value(&mut map, "tv_vip_status")?;
                         }
                         "tv_vip_pay_type" => {
                             if tv_vip_pay_type.is_some() {
                                 return Err(de::Error::duplicate_field("tv_vip_pay_type"));
                             }
-                            tv_vip_pay_type = Some(map.next_value()?);
+                            tv_vip_pay_type = next_optional_u8_value(&mut map, "tv_vip_pay_type")?;
                         }
                         "tv_due_date" => {
                             if tv_due_date.is_some() {
                                 return Err(de::Error::duplicate_field("tv_due_date"));
                             }
-                            tv_due_date = Some(map.next_value()?);
+                            tv_due_date = next_optional_u64_value(&mut map, "tv_due_date")?;
                         }
                         "mid" => {
                             if mid.is_some() {
                                 return Err(de::Error::duplicate_field("mid"));
                             }
-                            mid = Some(map.next_value()?);
+                            mid = next_optional_u64_value(&mut map, "mid")?;
                         }
                         "name" => {
                             if name.is_some() {
@@ -205,5 +205,102 @@ impl<'de> Deserialize<'de> for Vip {
         }
 
         deserializer.deserialize_map(VipVisitor)
+    }
+}
+
+fn next_u8_value<'de, M>(map: &mut M, field: &'static str) -> Result<u8, M::Error>
+where
+    M: MapAccess<'de>,
+{
+    parse_u8_value(map.next_value()?, field)
+}
+
+fn next_u64_value<'de, M>(map: &mut M, field: &'static str) -> Result<u64, M::Error>
+where
+    M: MapAccess<'de>,
+{
+    parse_u64_value(map.next_value()?, field)
+}
+
+fn next_optional_u8_value<'de, M>(map: &mut M, field: &'static str) -> Result<Option<u8>, M::Error>
+where
+    M: MapAccess<'de>,
+{
+    match map.next_value()? {
+        serde_json::Value::Null => Ok(None),
+        value => parse_u8_value(value, field).map(Some),
+    }
+}
+
+fn next_optional_u64_value<'de, M>(
+    map: &mut M,
+    field: &'static str,
+) -> Result<Option<u64>, M::Error>
+where
+    M: MapAccess<'de>,
+{
+    match map.next_value()? {
+        serde_json::Value::Null => Ok(None),
+        value => parse_u64_value(value, field).map(Some),
+    }
+}
+
+fn parse_u8_value<E>(value: serde_json::Value, field: &'static str) -> Result<u8, E>
+where
+    E: de::Error,
+{
+    let raw = parse_u64_value::<E>(value, field)?;
+    u8::try_from(raw).map_err(|_| E::custom(format!("{field} must fit in u8")))
+}
+
+fn parse_u64_value<E>(value: serde_json::Value, field: &'static str) -> Result<u64, E>
+where
+    E: de::Error,
+{
+    match value {
+        serde_json::Value::Number(number) => number
+            .as_u64()
+            .ok_or_else(|| E::custom(format!("{field} must be a non-negative integer"))),
+        serde_json::Value::String(text) => text
+            .parse::<u64>()
+            .map_err(|_| E::custom(format!("{field} must be a numeric string"))),
+        _ => Err(E::custom(format!("{field} must be a string or number"))),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn vip_deserializes_numeric_fields_from_strings() {
+        let vip: Vip = serde_json::from_str(
+            r##"{
+                "type": "2",
+                "status": "1",
+                "due_date": "1813334400000",
+                "label": {
+                    "text": "年度大会员",
+                    "label_theme": "annual_vip",
+                    "text_color": "#FFFFFF",
+                    "bg_style": 1,
+                    "bg_color": "#FB7299"
+                },
+                "nickname_color": "#FB7299",
+                "role": "3",
+                "tv_due_date": "0",
+                "tv_vip_pay_type": "0",
+                "tv_vip_status": "0",
+                "vip_pay_type": "0",
+                "mid": "4279370"
+            }"##,
+        )
+        .expect("vip should parse string numeric fields");
+
+        assert_eq!(vip.vip_type, 2);
+        assert_eq!(vip.vip_status, 1);
+        assert_eq!(vip.vip_due_date, 1813334400000);
+        assert_eq!(vip.role, Some(3));
+        assert_eq!(vip.mid, Some(4279370));
     }
 }

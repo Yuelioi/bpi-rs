@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, de};
 
 use crate::dynamic::params::DynamicCardDetailParams;
 use crate::models::{LevelInfo, Official, Pendant, Vip};
@@ -91,16 +91,19 @@ pub struct RecentUpData {
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct MyInfo {
     /// 个人动态数
+    #[serde(deserialize_with = "deserialize_i32_from_string_or_number")]
     pub dyns: i32,
     /// 头像地址
     pub face: String,
     /// 粉丝数
     pub follower: String,
     /// 我的关注数
+    #[serde(deserialize_with = "deserialize_i32_from_string_or_number")]
     pub following: i32,
     /// 等级信息
     pub level_info: LevelInfo,
     /// 用户 mid
+    #[serde(deserialize_with = "deserialize_i64_from_string_or_number")]
     pub mid: i64,
     /// 用户昵称
     pub name: String,
@@ -123,9 +126,41 @@ pub struct UpUser {
     /// 作用不明
     pub is_reserve_recall: bool,
     /// 用户 mid
+    #[serde(deserialize_with = "deserialize_i64_from_string_or_number")]
     pub mid: i64,
     /// 用户昵称
     pub uname: String,
+}
+
+fn deserialize_i32_from_string_or_number<'de, D>(deserializer: D) -> Result<i32, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = serde_json::Value::deserialize(deserializer)?;
+    let value = parse_i64_from_string_or_number(value)?;
+    i32::try_from(value).map_err(|_| de::Error::custom("value must fit in i32"))
+}
+
+fn deserialize_i64_from_string_or_number<'de, D>(deserializer: D) -> Result<i64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    parse_i64_from_string_or_number(serde_json::Value::deserialize(deserializer)?)
+}
+
+fn parse_i64_from_string_or_number<E>(value: serde_json::Value) -> Result<i64, E>
+where
+    E: de::Error,
+{
+    match value {
+        serde_json::Value::Number(number) => number
+            .as_i64()
+            .ok_or_else(|| E::custom("value must be an integer")),
+        serde_json::Value::String(text) => text
+            .parse::<i64>()
+            .map_err(|_| E::custom("value must be a numeric string")),
+        _ => Err(E::custom("value must be a string or number")),
+    }
 }
 
 impl BpiClient {
@@ -164,6 +199,15 @@ impl BpiClient {
 mod tests {
     use super::*;
     use crate::ids::DynamicId;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn recent_up_contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/dynamic/content/recent-up/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -187,5 +231,95 @@ mod tests {
         if let Ok(res) = resp {
             tracing::info!("{:#?}", res.data.unwrap().up_list.len());
         }
+    }
+
+    #[test]
+    fn dynamic_recent_up_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = recent_up_contract()?;
+
+        assert_eq!(contract.name, "dynamic.recent_up");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/polymer/web-dynamic/v1/portal"
+        );
+        assert!(contract.request.query.is_empty());
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("requires_login")
+        );
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("RecentUpData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_recent_up_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/dynamic/content/recent-up/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/dynamic/content/recent-up/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<RecentUpData>::from_slice(bytes)?.into_payload()?;
+            let my_info = payload
+                .my_info
+                .expect("sanitized fixture should include my_info");
+            assert_eq!(my_info.dyns, 0);
+            assert_eq!(my_info.following, 0);
+            assert_eq!(my_info.mid, 1);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_recent_up_anonymous_fixture_records_login_error() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/dynamic/content/recent-up/responses/anonymous.requires_login.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+
+        assert_eq!(err.code(), Some(-101));
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!(
+            "target/bpi-probe-runs/dynamic/content-readonly/recent-up/{profile}.response.json"
+        );
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn dynamic_recent_up_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<RecentUpData>>(body)?.into_payload()?;
+            assert!(payload.my_info.is_some());
+        }
+
+        if let Some(body) = local_probe_body("anonymous") {
+            let err = serde_json::from_value::<ApiEnvelope<serde_json::Value>>(body)?
+                .ensure_success()
+                .unwrap_err();
+            assert_eq!(err.code(), Some(-101));
+        }
+        Ok(())
     }
 }

@@ -1,0 +1,19 @@
+{
+  "code": 0,
+  "data": {
+    "button_statement": "",
+    "items": [
+      {
+        "user_profile": {
+          "info": {
+            "uid": 1,
+            "uname": "<redacted-up-user>",
+            "face": "<redacted-face-url>"
+          }
+        }
+      }
+    ]
+  },
+  "message": "OK",
+  "ttl": 1
+}

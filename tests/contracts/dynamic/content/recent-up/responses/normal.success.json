@@ -1,0 +1,60 @@
+{
+  "code": 0,
+  "data": {
+    "live_users": {
+      "count": 0,
+      "group": "default",
+      "items": []
+    },
+    "my_info": {
+      "dyns": "0",
+      "face": "<redacted-face-url>",
+      "follower": "<redacted-follower-count>",
+      "following": "0",
+      "level_info": {
+        "current_exp": 0,
+        "current_level": 0,
+        "current_min": 0,
+        "next_exp": 0
+      },
+      "mid": "1",
+      "name": "<redacted-account>",
+      "official": {
+        "role": 0,
+        "title": "",
+        "desc": "",
+        "type": -1
+      },
+      "space_bg": "<redacted-space-bg-url>",
+      "vip": {
+        "type": "0",
+        "status": 0,
+        "due_date": "0",
+        "label": {
+          "text": "",
+          "label_theme": "",
+          "text_color": "",
+          "bg_style": 0,
+          "bg_color": ""
+        },
+        "nickname_color": "",
+        "role": "0",
+        "tv_due_date": "0",
+        "tv_vip_pay_type": 0,
+        "tv_vip_status": 0,
+        "vip_pay_type": 0
+      }
+    },
+    "up_list": [
+      {
+        "face": "<redacted-face-url>",
+        "has_update": false,
+        "is_reserve_recall": false,
+        "mid": 1,
+        "uname": "<redacted-up-user>"
+      }
+    ]
+  },
+  "message": "0",
+  "ttl": 1
+}
