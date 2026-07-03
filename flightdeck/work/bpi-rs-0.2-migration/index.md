@@ -56,14 +56,15 @@ Done:
 - Covered `clientinfo/ip`, `login/vip-info`, `login/read-info`, and `login/qr` in the accepted contract shape.
 
 Current:
-- Shared-core foundation work is active after endpoint contract batches. The latest small batch adds payload-returning request helpers so new module-client methods can return `BpiResult<T>` instead of legacy envelopes.
-- Use the local status board to select and execute the next shared-core batch.
+- Shared-core/domain bridge work is active after endpoint contract batches. The latest small batch adds `client.clientinfo().ip(...) -> BpiResult<IpInfo>` as the first payload-helper-backed module client method while keeping the legacy flat method intact.
+- Use the local status board to select and execute the next shared-core/domain bridge batch.
 
 Verified:
 - After commit `6383119`, `cargo fmt --check`, `cargo check --all-features`, and `cargo test --all-features --lib` passed.
 - `cargo test --all-features --lib`: 358 passed, 0 failed, 302 ignored.
 - For `shared-core/contract-error-label-validation`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, `cargo test --all-features --lib --quiet`, and `git diff --check` passed.
 - For `shared-core/payload-request-helpers`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, `cargo test --all-features --lib --quiet`, and `git diff --check` passed.
+- For `clientinfo/module-client-bridge`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, `cargo test --all-features --lib --quiet`, and `git diff --check` passed.
 
 ## Local-only Constraints
 

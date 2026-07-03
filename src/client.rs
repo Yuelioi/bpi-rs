@@ -7,6 +7,8 @@ use reqwest::{Client, RequestBuilder, Url};
 
 use crate::BpiError;
 use crate::auth::Account;
+#[cfg(feature = "clientinfo")]
+use crate::clientinfo::ClientInfoClient;
 #[cfg(feature = "login")]
 use crate::login::LoginClient;
 use crate::session::cookie::{format_cookie_pairs, parse_cookie_header as parse_cookie_pairs};
@@ -360,6 +362,12 @@ impl BpiClient {
 }
 
 impl BpiClient {
+    /// Creates a client info domain client.
+    #[cfg(feature = "clientinfo")]
+    pub fn clientinfo(&self) -> ClientInfoClient<'_> {
+        ClientInfoClient::new(self)
+    }
+
     /// Creates a login domain client.
     #[cfg(feature = "login")]
     pub fn login(&self) -> LoginClient<'_> {
