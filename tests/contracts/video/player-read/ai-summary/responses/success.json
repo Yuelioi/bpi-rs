@@ -1,0 +1,18 @@
+{
+  "code": 0,
+  "data": {
+    "code": -1,
+    "dislike_num": 0,
+    "like_num": 0,
+    "model_result": {
+      "outline": [],
+      "result_type": 0,
+      "subtitle": [],
+      "summary": "<summary unavailable in probe target>"
+    },
+    "status": 0,
+    "stid": "0"
+  },
+  "message": "OK",
+  "ttl": 1
+}

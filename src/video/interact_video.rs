@@ -1,8 +1,11 @@
 //! 互动视频相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
+use super::params::InteractiveVideoInfoParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
+
+const INTERACTIVE_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/stein/edgeinfo_v2";
 
 // --- 响应数据结构体 ---
 
@@ -168,40 +171,17 @@ impl BpiClient {
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/interact_video.html#获取互动视频信息)
     ///
     /// # 参数
-    /// | 名称           | 类型           | 说明                 |
-    /// | -------------- | --------------| -------------------- |
-    /// | `aid`          | `Option<u64>`   | 稿件 avid，可选      |
-    /// | `bvid`         | `Option<&str>`  | 稿件 bvid，可选      |
-    /// | `graph_version`| u64           | 剧情图 ID            |
-    /// | `edge_id`      | `Option<u64>`   | 模块编号，0或留空为起始模块，可选 |
-    ///
-    /// `aid` 和 `bvid` 必须提供一个。
+    /// | 名称     | 类型                         | 说明                           |
+    /// | -------- | ---------------------------- | ------------------------------ |
+    /// | `params` | `InteractiveVideoInfoParams` | 稿件 id、剧情图和可选模块编号   |
     pub async fn video_interactive_video_info(
         &self,
-        aid: Option<u64>,
-        bvid: Option<&str>,
-        graph_version: u64,
-        edge_id: Option<u64>,
+        params: InteractiveVideoInfoParams,
     ) -> Result<BpiResponse<InteractiveVideoInfoResponseData>, BpiError> {
-        if aid.is_none() && bvid.is_none() {
-            return Err(BpiError::parse("必须提供 aid 或 bvid"));
-        }
-
-        let mut req = self
-            .get("https://api.bilibili.com/x/stein/edgeinfo_v2")
-            .query(&[("graph_version", &graph_version.to_string())]);
-
-        if let Some(a) = aid {
-            req = req.query(&[("aid", &a.to_string())]);
-        }
-        if let Some(b) = bvid {
-            req = req.query(&[("bvid", b)]);
-        }
-        if let Some(e) = edge_id {
-            req = req.query(&[("edge_id", &e.to_string())]);
-        }
-
-        req.send_bpi("获取互动视频模块详细信息").await
+        self.get(INTERACTIVE_INFO_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi("获取互动视频模块详细信息")
+            .await
     }
 }
 
@@ -210,6 +190,10 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::Aid;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 114347430905959;
@@ -219,15 +203,90 @@ mod tests {
     #[tokio::test]
     async fn test_video_interactive_video_info_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_interactive_video_info(Some(TEST_AID), None, TEST_GRAPH_VERSION, None)
-            .await?;
+        let params = InteractiveVideoInfoParams::from_aid(Aid::new(TEST_AID)?, TEST_GRAPH_VERSION)?;
+        let resp = bpi.video_interactive_video_info(params).await?;
         let data = resp.into_data()?;
 
         info!("互动视频信息: {:?}", data);
         assert!(!data.title.is_empty());
         assert!(!data.story_list.is_empty());
 
+        Ok(())
+    }
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/video/player-read/interactive-info/contract.json"
+        ))
+    }
+
+    #[test]
+    fn video_interactive_info_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params = InteractiveVideoInfoParams::from_aid(Aid::new(114347430905959)?, 1273647)?;
+
+        assert_eq!(contract.name, "video.interactive_video_info");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), INTERACTIVE_INFO_ENDPOINT);
+        assert_eq!(
+            contract
+                .request
+                .query
+                .get("graph_version")
+                .map(String::as_str),
+            Some("1273647")
+        );
+        assert_eq!(
+            contract.request.query.get("aid").map(String::as_str),
+            Some("114347430905959")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("graph_version", "1273647".to_string()),
+                ("aid", "114347430905959".to_string())
+            ]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        Ok(())
+    }
+
+    #[test]
+    fn video_interactive_info_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<InteractiveVideoInfoResponseData>::from_slice(include_bytes!(
+            "../../tests/contracts/video/player-read/interactive-info/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.title, "序幕");
+        assert!(!payload.story_list.is_empty());
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!(
+            "target/bpi-probe-runs/video/player-read/interactive-info/{profile}.response.json"
+        );
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn video_interactive_info_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<InteractiveVideoInfoResponseData>>(body)?
+                    .into_payload()?;
+
+            assert!(!payload.title.is_empty());
+        }
         Ok(())
     }
 }

@@ -1,0 +1,81 @@
+{
+  "code": 0,
+  "data": [
+    {
+      "ai_rcmd": null,
+      "aid": 114861568761090,
+      "bvid": "BV169utzpECu",
+      "cid": 31076583203,
+      "copyright": 1,
+      "cover43": "",
+      "ctime": 1752648450,
+      "desc": "我不好奇\nB站不诡异视频",
+      "dimension": {
+        "height": 1080,
+        "rotate": 0,
+        "width": 1920
+      },
+      "duration": 175,
+      "dynamic": "",
+      "enable_vt": 0,
+      "first_frame": "http://i2.hdslb.com/bfs/storyff/n250716sa1o42nmsdnrxdw311p7qz1ro_firsti.jpg",
+      "is_ogv": false,
+      "ogv_info": null,
+      "owner": {
+        "face": "https://example.invalid/video/related-owner-face.jpg",
+        "mid": 3494369929726573,
+        "name": "蚊䗈"
+      },
+      "pic": "https://example.invalid/video/related-cover.jpg",
+      "pid_name_v2": "鬼畜",
+      "pid_v2": 1007,
+      "pub_location": "辽宁",
+      "pubdate": 1752648482,
+      "rcmd_reason": "",
+      "rights": {
+        "arc_pay": 0,
+        "autoplay": 1,
+        "bp": 0,
+        "download": 0,
+        "elec": 0,
+        "hd5": 0,
+        "is_cooperation": 0,
+        "movie": 0,
+        "no_background": 0,
+        "no_reprint": 1,
+        "pay": 0,
+        "pay_free_watch": 0,
+        "ugc_pay": 0,
+        "ugc_pay_preview": 0
+      },
+      "season_type": 0,
+      "short_link_v2": "https://b23.tv/BV169utzpECu",
+      "stat": {
+        "aid": 114861568761090,
+        "coin": 75,
+        "danmaku": 691,
+        "dislike": 0,
+        "fav_g": 0,
+        "favorite": 2002,
+        "his_rank": 0,
+        "like": 2439,
+        "like_g": 0,
+        "now_rank": 0,
+        "reply": 534,
+        "share": 305,
+        "view": 158794,
+        "vt": 0,
+        "vv": 158794
+      },
+      "state": 0,
+      "tid": 21,
+      "tidv2": 2063,
+      "title": "不能拖动的进度条——B站不诡异视频",
+      "tname": "日常",
+      "tnamev2": "鬼畜综合",
+      "up_from_v2": 35,
+      "videos": 1
+    }
+  ],
+  "message": "OK"
+}

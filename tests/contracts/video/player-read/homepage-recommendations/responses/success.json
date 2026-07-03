@@ -1,0 +1,52 @@
+{
+  "code": 0,
+  "data": {
+    "business_card": null,
+    "floor_info": null,
+    "item": [
+      {
+        "av_feature": null,
+        "business_info": null,
+        "bvid": "BV1PhTq6AECu",
+        "cid": 39567494435,
+        "dislike_switch": 0,
+        "dislike_switch_pc": 0,
+        "duration": 307,
+        "enable_vt": 0,
+        "goto": "av",
+        "id": 116845088676590,
+        "is_followed": 0,
+        "is_stock": 0,
+        "ogv_info": null,
+        "owner": {
+          "face": "https://example.invalid/video/homepage-owner-face.jpg",
+          "mid": 28760993,
+          "name": "又非又韭"
+        },
+        "pic": "https://example.invalid/video/homepage-cover.jpg",
+        "pic_4_3": "",
+        "pos": 0,
+        "pubdate": 1782915140,
+        "rcmd_reason": null,
+        "room_info": null,
+        "show_info": 0,
+        "stat": {
+          "danmaku": 132,
+          "like": 51389,
+          "view": 1142277,
+          "vt": 0
+        },
+        "title": "人民的王行长又干事了",
+        "track_id": "sanitized-track-id",
+        "uri": "https://www.bilibili.com/video/BV1xx411c7mD",
+        "vt_display": ""
+      }
+    ],
+    "mid": 0,
+    "preload_expose_pct": 0,
+    "preload_floor_expose_pct": 0,
+    "user_feature": null
+  },
+  "message": "OK",
+  "ttl": 1
+}

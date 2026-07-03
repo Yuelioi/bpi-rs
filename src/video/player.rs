@@ -1,8 +1,11 @@
 //! B站 web 播放器相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
+use super::params::VideoPlayerInfoParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
+
+const PLAYER_INFO_V2_ENDPOINT: &str = "https://api.bilibili.com/x/player/wbi/v2";
 
 // --- 响应数据结构体 ---
 
@@ -201,43 +204,16 @@ impl BpiClient {
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/player.html#获取web播放器信息)
     ///
     /// # 参数
-    /// | 名称        | 类型           | 说明                 |
-    /// | ----------- | --------------| -------------------- |
-    /// | `aid`       | `Option<u64>`   | 稿件 avid，可选      |
-    /// | `bvid`      | `Option<&str>`  | 稿件 bvid，可选      |
-    /// | `cid`       | u64           | 稿件 cid             |
-    /// | `season_id` | `Option<u64>`   | 番剧 season_id，可选 |
-    /// | `ep_id`     | `Option<u64>`   | 剧集 ep_id，可选     |
-    ///
-    /// `aid` 和 `bvid` 必须提供一个。
+    /// | 名称     | 类型                    | 说明                               |
+    /// | -------- | ----------------------- | ---------------------------------- |
+    /// | `params` | `VideoPlayerInfoParams` | 稿件 id、cid 和可选 OGV 上下文     |
     pub async fn video_player_info_v2(
         &self,
-        aid: Option<u64>,
-        bvid: Option<&str>,
-        cid: u64,
-        season_id: Option<u64>,
-        ep_id: Option<u64>,
+        params: VideoPlayerInfoParams,
     ) -> Result<BpiResponse<PlayerInfoResponseData>, BpiError> {
-        if aid.is_none() && bvid.is_none() {
-            return Err(BpiError::parse("必须提供 aid 或 bvid"));
-        }
+        let params = self.get_wbi_sign2(params.query_pairs()).await?;
 
-        let mut params = vec![("cid", cid.to_string())];
-        if let Some(a) = aid {
-            params.push(("aid", a.to_string()));
-        }
-        if let Some(b) = bvid {
-            params.push(("bvid", b.to_string()));
-        }
-        if let Some(s) = season_id {
-            params.push(("season_id", s.to_string()));
-        }
-        if let Some(e) = ep_id {
-            params.push(("ep_id", e.to_string()));
-        }
-        let params = self.get_wbi_sign2(params).await?;
-
-        self.get("https://api.bilibili.com/x/player/wbi/v2")
+        self.get(PLAYER_INFO_V2_ENDPOINT)
             .query(&params)
             .send_bpi("获取 web 播放器信息")
             .await
@@ -249,6 +225,10 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::{Aid, Cid};
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 1906473802;
@@ -258,9 +238,8 @@ mod tests {
     #[tokio::test]
     async fn test_video_player_info_v2_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_player_info_v2(Some(TEST_AID), None, TEST_CID, None, None)
-            .await?;
+        let params = VideoPlayerInfoParams::from_aid(Aid::new(TEST_AID)?, Cid::new(TEST_CID)?);
+        let resp = bpi.video_player_info_v2(params).await?;
         let data = resp.into_data()?;
 
         info!("播放器信息: {:?}", data);
@@ -275,9 +254,8 @@ mod tests {
     #[tokio::test]
     async fn test_video_player_info_v2_by_bvid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_player_info_v2(Some(TEST_AID), None, TEST_CID, None, None)
-            .await?;
+        let params = VideoPlayerInfoParams::from_aid(Aid::new(TEST_AID)?, Cid::new(TEST_CID)?);
+        let resp = bpi.video_player_info_v2(params).await?;
         let data = resp.into_data()?;
 
         info!("播放器信息: {:?}", data);
@@ -285,6 +263,91 @@ mod tests {
         assert_eq!(data.aid, TEST_AID);
         assert_eq!(data.cid, TEST_CID);
 
+        Ok(())
+    }
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/video/player-read/player-info-v2/contract.json"
+        ))
+    }
+
+    #[test]
+    fn video_player_info_v2_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params = VideoPlayerInfoParams::from_bvid("BV1xx411c7mD".parse()?, Cid::new(62131)?);
+
+        assert_eq!(contract.name, "video.player_info_v2");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), PLAYER_INFO_V2_ENDPOINT);
+        assert!(contract.request.auth.requires_wbi());
+        assert_eq!(
+            contract.request.query.get("bvid").map(String::as_str),
+            Some("BV1xx411c7mD")
+        );
+        assert_eq!(
+            contract.request.query.get("cid").map(String::as_str),
+            Some("62131")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("cid", "62131".to_string()),
+                ("bvid", "BV1xx411c7mD".to_string())
+            ]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        Ok(())
+    }
+
+    #[test]
+    fn video_player_info_v2_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/video/player-read/player-info-v2/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/video/player-read/player-info-v2/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/video/player-read/player-info-v2/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload =
+                ApiEnvelope::<PlayerInfoResponseData>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.bvid, "BV1xx411c7mD");
+            assert_eq!(payload.cid, 62131);
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!(
+            "target/bpi-probe-runs/video/player-read/player-info-v2/{profile}.response.json"
+        );
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn video_player_info_v2_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload = serde_json::from_value::<ApiEnvelope<PlayerInfoResponseData>>(body)?
+                .into_payload()?;
+
+            assert_eq!(payload.bvid, "BV1xx411c7mD");
+        }
         Ok(())
     }
 }

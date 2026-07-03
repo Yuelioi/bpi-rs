@@ -1,8 +1,13 @@
 //! 视频推荐相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
+use super::params::{VideoHomepageRecommendationsParams, VideoRelatedParams};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
+
+const HOMEPAGE_RECOMMENDATIONS_ENDPOINT: &str =
+    "https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd";
+const RELATED_VIDEOS_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/archive/related";
 
 // --- 视频推荐相关数据结构体 ---
 
@@ -174,31 +179,17 @@ impl BpiClient {
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/recommend.html#获取单视频推荐列表)
     ///
     /// # 参数
-    /// | 名称   | 类型         | 说明                 |
-    /// | ------ | ------------| -------------------- |
-    /// | `aid`  | `Option<u64>` | 稿件 avid，可选      |
-    /// | `bvid` | `Option<&str>`| 稿件 bvid，可选      |
-    ///
-    /// `aid` 和 `bvid` 必须提供一个。
+    /// | 名称     | 类型                 | 说明              |
+    /// | -------- | -------------------- | ----------------- |
+    /// | `params` | `VideoRelatedParams` | 稿件 id 参数      |
     pub async fn video_related_videos(
         &self,
-        aid: Option<u64>,
-        bvid: Option<&str>,
+        params: VideoRelatedParams,
     ) -> Result<BpiResponse<Vec<RelatedVideo>>, BpiError> {
-        if aid.is_none() && bvid.is_none() {
-            return Err(BpiError::parse("必须提供 aid 或 bvid"));
-        }
-
-        let mut req = self.get("https://api.bilibili.com/x/web-interface/archive/related");
-
-        if let Some(a) = aid {
-            req = req.query(&[("aid", &a.to_string())]);
-        }
-        if let Some(b) = bvid {
-            req = req.query(&[("bvid", b)]);
-        }
-
-        req.send_bpi("获取单视频推荐列表").await
+        self.get(RELATED_VIDEOS_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi("获取单视频推荐列表")
+            .await
     }
 
     /// 获取首页视频推荐列表
@@ -207,33 +198,16 @@ impl BpiClient {
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/recommend.html#获取首页视频推荐列表)
     ///
     /// # 参数
-    /// | 名称        | 类型         | 说明                 |
-    /// | ----------- | ------------| -------------------- |
-    /// | `ps`        | `Option<u8>`  | 单页返回的记录条数，最多30，可选 |
-    /// | `fresh_idx` | `Option<u32>` | 当前翻页号，可选，默认1 |
-    /// | `fetch_row` | `Option<u32>` | 本次抓取的最后一行行号，可选 |
+    /// | 名称     | 类型                                  | 说明                 |
+    /// | -------- | ------------------------------------- | -------------------- |
+    /// | `params` | `VideoHomepageRecommendationsParams`  | 推荐分页参数         |
     pub async fn video_homepage_recommendations(
         &self,
-        ps: Option<u8>,
-        fresh_idx: Option<u32>,
-        fetch_row: Option<u32>,
+        params: VideoHomepageRecommendationsParams,
     ) -> Result<BpiResponse<RcmdFeedResponseData>, BpiError> {
-        let ps_val = ps.unwrap_or(12);
-        let fresh_idx_val = fresh_idx.unwrap_or(1);
-        let fetch_row_val = fetch_row.unwrap_or(1);
-        let params = vec![
-            ("fresh_type", "4".to_string()),
-            ("ps", ps_val.to_string()),
-            ("fresh_idx", fresh_idx_val.to_string()),
-            ("fresh_idx_1h", fresh_idx_val.to_string()),
-            ("brush", fresh_idx_val.to_string()),
-            ("fetch_row", fetch_row_val.to_string()),
-        ];
-        let params = self.get_wbi_sign2(params).await?;
+        let params = self.get_wbi_sign2(params.query_pairs()).await?;
 
-        let req = self
-            .get("https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd")
-            .query(&params);
+        let req = self.get(HOMEPAGE_RECOMMENDATIONS_ENDPOINT).query(&params);
 
         req.send_bpi("获取首页视频推荐列表").await
     }
@@ -244,6 +218,10 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::Aid;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 10001;
@@ -252,7 +230,9 @@ mod tests {
     #[tokio::test]
     async fn test_video_related_videos_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.video_related_videos(Some(TEST_AID), None).await?;
+        let resp = bpi
+            .video_related_videos(VideoRelatedParams::from_aid(Aid::new(TEST_AID)?))
+            .await?;
         let data = resp.into_data()?;
 
         info!("单视频推荐列表: {:?}", data);
@@ -267,9 +247,11 @@ mod tests {
     #[tokio::test]
     async fn test_video_homepage_recommendations() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_homepage_recommendations(Some(12), Some(1), Some(1))
-            .await?;
+        let params = VideoHomepageRecommendationsParams::new()
+            .page_size(12)?
+            .fresh_idx(1)?
+            .fetch_row(1)?;
+        let resp = bpi.video_homepage_recommendations(params).await?;
         let data = resp.into_data()?;
 
         info!("首页推荐列表: {:?}", data);
@@ -277,6 +259,116 @@ mod tests {
         assert!(!data.item.is_empty());
         assert!(data.item.len() <= 30);
 
+        Ok(())
+    }
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "related-videos" => include_bytes!(
+                "../../tests/contracts/video/player-read/related-videos/contract.json"
+            )
+            .as_slice(),
+            "homepage-recommendations" => include_bytes!(
+                "../../tests/contracts/video/player-read/homepage-recommendations/contract.json"
+            )
+            .as_slice(),
+            _ => unreachable!("unknown video recommend contract"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
+
+    #[test]
+    fn video_related_videos_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("related-videos")?;
+        let params = VideoRelatedParams::from_bvid("BV1xx411c7mD".parse()?);
+
+        assert_eq!(contract.name, "video.related_videos");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), RELATED_VIDEOS_ENDPOINT);
+        assert_eq!(
+            contract.request.query.get("bvid").map(String::as_str),
+            Some("BV1xx411c7mD")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![("bvid", "BV1xx411c7mD".to_string())]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        Ok(())
+    }
+
+    #[test]
+    fn video_related_videos_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<Vec<RelatedVideo>>::from_slice(include_bytes!(
+            "../../tests/contracts/video/player-read/related-videos/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.len(), 1);
+        Ok(())
+    }
+
+    #[test]
+    fn video_homepage_recommendations_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("homepage-recommendations")?;
+        let params = VideoHomepageRecommendationsParams::new();
+
+        assert_eq!(contract.name, "video.homepage_recommendations");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            HOMEPAGE_RECOMMENDATIONS_ENDPOINT
+        );
+        assert!(contract.request.auth.requires_wbi());
+        assert_eq!(
+            contract.request.query.get("ps").map(String::as_str),
+            Some("12")
+        );
+        assert_eq!(params.query_pairs().len(), 6);
+        assert_eq!(contract.cases.len(), 3);
+        Ok(())
+    }
+
+    #[test]
+    fn video_homepage_recommendations_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<RcmdFeedResponseData>::from_slice(include_bytes!(
+            "../../tests/contracts/video/player-read/homepage-recommendations/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.item.len(), 1);
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/video/player-read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn video_recommend_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("related-videos", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<Vec<RelatedVideo>>>(body)?
+                    .into_payload()?;
+
+                assert!(!payload.is_empty());
+            }
+
+            if let Some(body) = local_probe_body("homepage-recommendations", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<RcmdFeedResponseData>>(body)?
+                    .into_payload()?;
+
+                assert!(!payload.item.is_empty());
+            }
+        }
         Ok(())
     }
 }

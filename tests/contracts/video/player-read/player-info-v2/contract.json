@@ -1,0 +1,82 @@
+{
+  "name": "video.player_info_v2",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/player/wbi/v2",
+    "query": {
+      "bvid": "BV1xx411c7mD",
+      "cid": "62131"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": [
+          "wbi"
+        ]
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "login/account state, IP, subtitle/mask URLs, and playback progress are sanitized before promotion"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": [
+          "wbi"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/anonymous.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "PlayerInfoResponseData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie",
+          "wbi"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "PlayerInfoResponseData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie",
+          "wbi"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "PlayerInfoResponseData"
+      }
+    }
+  ]
+}
+
+

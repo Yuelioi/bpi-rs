@@ -1,8 +1,11 @@
 //! 视频在线人数相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
+use super::params::VideoOnlineTotalParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
+
+const ONLINE_TOTAL_ENDPOINT: &str = "https://api.bilibili.com/x/player/online/total";
 
 // --- 响应数据结构体 ---
 
@@ -33,35 +36,17 @@ impl BpiClient {
     /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/online.md)
     ///
     /// # 参数
-    /// | 名称    | 类型         | 说明                 |
-    /// | ------- | ------------| -------------------- |
-    /// | `aid`   | `Option<u64>` | 稿件 avid，可选      |
-    /// | `bvid`  | `Option<&str>`| 稿件 bvid，可选      |
-    /// | `cid`   | u64         | 视频 cid             |
-    ///
-    /// `aid` 和 `bvid` 必须提供一个。
+    /// | 名称     | 类型                     | 说明                 |
+    /// | -------- | ------------------------ | -------------------- |
+    /// | `params` | `VideoOnlineTotalParams` | 稿件 id 和视频 cid   |
     pub async fn video_online_total(
         &self,
-        aid: Option<u64>,
-        bvid: Option<&str>,
-        cid: u64,
+        params: VideoOnlineTotalParams,
     ) -> Result<BpiResponse<OnlineTotalResponseData>, BpiError> {
-        if aid.is_none() && bvid.is_none() {
-            return Err(BpiError::parse("必须提供 aid 或 bvid"));
-        }
-
-        let mut req = self
-            .get("https://api.bilibili.com/x/player/online/total")
-            .query(&[("cid", &cid.to_string())]);
-
-        if let Some(a) = aid {
-            req = req.query(&[("aid", &a.to_string())]);
-        }
-        if let Some(b) = bvid {
-            req = req.query(&[("bvid", b)]);
-        }
-
-        req.send_bpi("获取视频在线人数").await
+        self.get(ONLINE_TOTAL_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi("获取视频在线人数")
+            .await
     }
 }
 
@@ -70,6 +55,10 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::{Aid, Cid};
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     // 假设这是一个已知的视频
@@ -81,9 +70,8 @@ mod tests {
     #[tokio::test]
     async fn test_video_online_total_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_online_total(Some(TEST_AID), None, TEST_CID)
-            .await?;
+        let params = VideoOnlineTotalParams::from_aid(Aid::new(TEST_AID)?, Cid::new(TEST_CID)?);
+        let resp = bpi.video_online_total(params).await?;
 
         let data = resp.into_data()?;
 
@@ -98,9 +86,8 @@ mod tests {
     #[tokio::test]
     async fn test_video_online_total_by_bvid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_online_total(None, Some(TEST_BVID), TEST_CID)
-            .await?;
+        let params = VideoOnlineTotalParams::from_bvid(TEST_BVID.parse()?, Cid::new(TEST_CID)?);
+        let resp = bpi.video_online_total(params).await?;
 
         let data = resp.into_data()?;
 
@@ -109,6 +96,76 @@ mod tests {
         assert!(!data.count.is_empty());
         assert!(!data.total.is_empty());
 
+        Ok(())
+    }
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/video/player-read/online-total/contract.json"
+        ))
+    }
+
+    #[test]
+    fn video_online_total_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params = VideoOnlineTotalParams::from_bvid("BV1xx411c7mD".parse()?, Cid::new(62131)?);
+
+        assert_eq!(contract.name, "video.online_total");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), ONLINE_TOTAL_ENDPOINT);
+        assert_eq!(
+            contract.request.query.get("bvid").map(String::as_str),
+            Some("BV1xx411c7mD")
+        );
+        assert_eq!(
+            contract.request.query.get("cid").map(String::as_str),
+            Some("62131")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("cid", "62131".to_string()),
+                ("bvid", "BV1xx411c7mD".to_string())
+            ]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        Ok(())
+    }
+
+    #[test]
+    fn video_online_total_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<OnlineTotalResponseData>::from_slice(include_bytes!(
+            "../../tests/contracts/video/player-read/online-total/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert!(!payload.count.is_empty());
+        assert!(!payload.total.is_empty());
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/video/player-read/online-total/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn video_online_total_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload = serde_json::from_value::<ApiEnvelope<OnlineTotalResponseData>>(body)?
+                .into_payload()?;
+
+            assert!(!payload.total.is_empty());
+        }
         Ok(())
     }
 }

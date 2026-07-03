@@ -1,4 +1,5 @@
 use crate::ids::{Aid, Bvid, Cid};
+use crate::{BpiError, BpiResult};
 
 /// Identifies a Bilibili video by either AV numeric ID or BV string ID.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -241,11 +242,298 @@ impl VideoPlayUrlParams {
     }
 }
 
+/// Parameters for `/x/player/online/total`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoOnlineTotalParams {
+    id: VideoId,
+    cid: Cid,
+}
+
+impl VideoOnlineTotalParams {
+    pub fn from_aid(aid: Aid, cid: Cid) -> Self {
+        Self {
+            id: VideoId::Aid(aid),
+            cid,
+        }
+    }
+
+    pub fn from_bvid(bvid: Bvid, cid: Cid) -> Self {
+        Self {
+            id: VideoId::Bvid(bvid),
+            cid,
+        }
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut params = vec![("cid", self.cid.to_string())];
+        params.extend(video_id_query_pairs(&self.id));
+        params
+    }
+}
+
+/// Parameters for `/x/player/wbi/v2`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoPlayerInfoParams {
+    id: VideoId,
+    cid: Cid,
+    season_id: Option<u64>,
+    ep_id: Option<u64>,
+}
+
+impl VideoPlayerInfoParams {
+    pub fn from_aid(aid: Aid, cid: Cid) -> Self {
+        Self::new(VideoId::Aid(aid), cid)
+    }
+
+    pub fn from_bvid(bvid: Bvid, cid: Cid) -> Self {
+        Self::new(VideoId::Bvid(bvid), cid)
+    }
+
+    fn new(id: VideoId, cid: Cid) -> Self {
+        Self {
+            id,
+            cid,
+            season_id: None,
+            ep_id: None,
+        }
+    }
+
+    pub fn season_id(mut self, season_id: u64) -> BpiResult<Self> {
+        self.season_id = Some(validate_nonzero_u64("season_id", season_id)?);
+        Ok(self)
+    }
+
+    pub fn ep_id(mut self, ep_id: u64) -> BpiResult<Self> {
+        self.ep_id = Some(validate_nonzero_u64("ep_id", ep_id)?);
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut params = vec![("cid", self.cid.to_string())];
+        params.extend(video_id_query_pairs(&self.id));
+        if let Some(season_id) = self.season_id {
+            params.push(("season_id", season_id.to_string()));
+        }
+        if let Some(ep_id) = self.ep_id {
+            params.push(("ep_id", ep_id.to_string()));
+        }
+        params
+    }
+}
+
+/// Parameters for `/x/web-interface/archive/related`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoRelatedParams {
+    id: VideoId,
+}
+
+impl VideoRelatedParams {
+    pub fn from_aid(aid: Aid) -> Self {
+        Self {
+            id: VideoId::Aid(aid),
+        }
+    }
+
+    pub fn from_bvid(bvid: Bvid) -> Self {
+        Self {
+            id: VideoId::Bvid(bvid),
+        }
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        video_id_query_pairs(&self.id)
+    }
+}
+
+/// Parameters for `/x/web-interface/wbi/index/top/feed/rcmd`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct VideoHomepageRecommendationsParams {
+    page_size: u8,
+    fresh_idx: u32,
+    fetch_row: u32,
+}
+
+impl VideoHomepageRecommendationsParams {
+    pub fn new() -> Self {
+        Self {
+            page_size: 12,
+            fresh_idx: 1,
+            fetch_row: 1,
+        }
+    }
+
+    pub fn page_size(mut self, page_size: u8) -> BpiResult<Self> {
+        if page_size == 0 || page_size > 30 {
+            return Err(BpiError::invalid_parameter(
+                "ps",
+                "value must be between 1 and 30",
+            ));
+        }
+
+        self.page_size = page_size;
+        Ok(self)
+    }
+
+    pub fn fresh_idx(mut self, fresh_idx: u32) -> BpiResult<Self> {
+        self.fresh_idx = validate_nonzero_u32("fresh_idx", fresh_idx)?;
+        Ok(self)
+    }
+
+    pub fn fetch_row(mut self, fetch_row: u32) -> BpiResult<Self> {
+        self.fetch_row = validate_nonzero_u32("fetch_row", fetch_row)?;
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("fresh_type", "4".to_string()),
+            ("ps", self.page_size.to_string()),
+            ("fresh_idx", self.fresh_idx.to_string()),
+            ("fresh_idx_1h", self.fresh_idx.to_string()),
+            ("brush", self.fresh_idx.to_string()),
+            ("fetch_row", self.fetch_row.to_string()),
+        ]
+    }
+}
+
+impl Default for VideoHomepageRecommendationsParams {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Parameters for `/x/web-interface/view/conclusion/get`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoAiSummaryParams {
+    id: VideoId,
+    cid: Cid,
+    up_mid: u64,
+}
+
+impl VideoAiSummaryParams {
+    pub fn from_aid(aid: Aid, cid: Cid, up_mid: u64) -> BpiResult<Self> {
+        Self::new(VideoId::Aid(aid), cid, up_mid)
+    }
+
+    pub fn from_bvid(bvid: Bvid, cid: Cid, up_mid: u64) -> BpiResult<Self> {
+        Self::new(VideoId::Bvid(bvid), cid, up_mid)
+    }
+
+    fn new(id: VideoId, cid: Cid, up_mid: u64) -> BpiResult<Self> {
+        Ok(Self {
+            id,
+            cid,
+            up_mid: validate_nonzero_u64("up_mid", up_mid)?,
+        })
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut params = vec![
+            ("cid", self.cid.to_string()),
+            ("up_mid", self.up_mid.to_string()),
+        ];
+        params.extend(video_id_query_pairs(&self.id));
+        params
+    }
+}
+
+/// Parameters for `/x/web-interface/view/detail/tag`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoTagsParams {
+    id: VideoId,
+    cid: Option<Cid>,
+}
+
+impl VideoTagsParams {
+    pub fn from_aid(aid: Aid) -> Self {
+        Self {
+            id: VideoId::Aid(aid),
+            cid: None,
+        }
+    }
+
+    pub fn from_bvid(bvid: Bvid) -> Self {
+        Self {
+            id: VideoId::Bvid(bvid),
+            cid: None,
+        }
+    }
+
+    pub fn cid(mut self, cid: Cid) -> Self {
+        self.cid = Some(cid);
+        self
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut params = video_id_query_pairs(&self.id);
+        if let Some(cid) = self.cid {
+            params.push(("cid", cid.to_string()));
+        }
+        params
+    }
+}
+
+/// Parameters for `/x/stein/edgeinfo_v2`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct InteractiveVideoInfoParams {
+    id: VideoId,
+    graph_version: u64,
+    edge_id: Option<u64>,
+}
+
+impl InteractiveVideoInfoParams {
+    pub fn from_aid(aid: Aid, graph_version: u64) -> BpiResult<Self> {
+        Self::new(VideoId::Aid(aid), graph_version)
+    }
+
+    pub fn from_bvid(bvid: Bvid, graph_version: u64) -> BpiResult<Self> {
+        Self::new(VideoId::Bvid(bvid), graph_version)
+    }
+
+    fn new(id: VideoId, graph_version: u64) -> BpiResult<Self> {
+        Ok(Self {
+            id,
+            graph_version: validate_nonzero_u64("graph_version", graph_version)?,
+            edge_id: None,
+        })
+    }
+
+    pub fn edge_id(mut self, edge_id: u64) -> BpiResult<Self> {
+        self.edge_id = Some(validate_nonzero_u64("edge_id", edge_id)?);
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut params = vec![("graph_version", self.graph_version.to_string())];
+        params.extend(video_id_query_pairs(&self.id));
+        if let Some(edge_id) = self.edge_id {
+            params.push(("edge_id", edge_id.to_string()));
+        }
+        params
+    }
+}
+
 fn video_id_query_pairs(id: &VideoId) -> Vec<(&'static str, String)> {
     match id {
         VideoId::Aid(aid) => vec![("aid", aid.to_string())],
         VideoId::Bvid(bvid) => vec![("bvid", bvid.to_string())],
     }
+}
+
+fn validate_nonzero_u32(field: &'static str, value: u32) -> BpiResult<u32> {
+    if value == 0 {
+        return Err(BpiError::invalid_parameter(field, "value must be non-zero"));
+    }
+
+    Ok(value)
+}
+
+fn validate_nonzero_u64(field: &'static str, value: u64) -> BpiResult<u64> {
+    if value == 0 {
+        return Err(BpiError::invalid_parameter(field, "value must be non-zero"));
+    }
+
+    Ok(value)
 }
 
 #[cfg(test)]
@@ -343,6 +631,110 @@ mod tests {
                 ("platform", "pc".to_string()),
                 ("high_quality", "1".to_string()),
                 ("try_look", "0".to_string())
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn video_online_total_params_serializes_bvid_and_cid_query() -> Result<(), BpiError> {
+        let params = VideoOnlineTotalParams::from_bvid("BV1xx411c7mD".parse()?, Cid::new(62131)?);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("cid", "62131".to_string()),
+                ("bvid", "BV1xx411c7mD".to_string())
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn video_player_info_params_serializes_optional_context() -> Result<(), BpiError> {
+        let params = VideoPlayerInfoParams::from_aid(Aid::new(170001)?, Cid::new(180001)?)
+            .season_id(42)?
+            .ep_id(43)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("cid", "180001".to_string()),
+                ("aid", "170001".to_string()),
+                ("season_id", "42".to_string()),
+                ("ep_id", "43".to_string())
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn video_homepage_recommendations_params_serializes_defaults() {
+        let params = VideoHomepageRecommendationsParams::new();
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("fresh_type", "4".to_string()),
+                ("ps", "12".to_string()),
+                ("fresh_idx", "1".to_string()),
+                ("fresh_idx_1h", "1".to_string()),
+                ("brush", "1".to_string()),
+                ("fetch_row", "1".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn video_homepage_recommendations_params_rejects_oversized_page() {
+        let err = VideoHomepageRecommendationsParams::new()
+            .page_size(31)
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "ps", .. }
+        ));
+    }
+
+    #[test]
+    fn video_ai_summary_params_rejects_zero_up_mid() -> Result<(), BpiError> {
+        let err = VideoAiSummaryParams::from_bvid("BV1xx411c7mD".parse()?, Cid::new(62131)?, 0)
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "up_mid",
+                ..
+            }
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn video_tags_params_serializes_optional_cid() -> Result<(), BpiError> {
+        let params = VideoTagsParams::from_bvid("BV1xx411c7mD".parse()?).cid(Cid::new(62131)?);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("bvid", "BV1xx411c7mD".to_string()),
+                ("cid", "62131".to_string())
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn interactive_video_info_params_serializes_start_node() -> Result<(), BpiError> {
+        let params = InteractiveVideoInfoParams::from_aid(Aid::new(114347430905959)?, 1273647)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("graph_version", "1273647".to_string()),
+                ("aid", "114347430905959".to_string())
             ]
         );
         Ok(())
