@@ -5,7 +5,7 @@ use reqwest::RequestBuilder;
 
 use crate::probe::account::RawProbeConfig;
 use crate::probe::contract::{
-    ApiContract, CapturedRequest, HttpMethod, ProbeResponse, ProbeResult,
+    ApiContract, CapturedRequest, HttpMethod, ProbeResponse, ProbeResult, ResponseDecoding,
 };
 use crate::{BpiClient, BpiError, BpiResult};
 
@@ -45,6 +45,13 @@ pub async fn execute_contract(
 fn client_for_contract(contract: &ApiContract, accounts: &RawProbeConfig) -> BpiResult<BpiClient> {
     let mut builder = BpiClient::builder();
 
+    if matches!(
+        contract.request.response_decoding,
+        ResponseDecoding::Disabled
+    ) {
+        builder = builder.reqwest_client(raw_response_client()?);
+    }
+
     if let Some(profile) = contract.request.auth.profile.as_deref() {
         let account = accounts
             .account(profile)?
@@ -63,6 +70,17 @@ fn client_for_contract(contract: &ApiContract, accounts: &RawProbeConfig) -> Bpi
     }
 
     builder.build()
+}
+
+fn raw_response_client() -> BpiResult<reqwest::Client> {
+    reqwest::Client::builder()
+        .no_gzip()
+        .no_brotli()
+        .no_deflate()
+        .no_proxy()
+        .pool_max_idle_per_host(0)
+        .build()
+        .map_err(BpiError::from)
 }
 
 async fn build_request(client: &BpiClient, contract: &ApiContract) -> BpiResult<RequestBuilder> {

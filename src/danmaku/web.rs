@@ -326,8 +326,7 @@ impl BpiClient {
     ) -> Result<Bytes, BpiError> {
         let query = params.query_pairs();
 
-        self.get("https://api.bilibili.com/x/v2/dm/history")
-            .with_bilibili_headers()
+        self.get_without_response_decoding("https://api.bilibili.com/x/v2/dm/history")?
             .query(&query)
             .send_request("历史弹幕 XML /dm/history")
             .await
@@ -375,6 +374,9 @@ pub mod tests {
                 "../../tests/contracts/danmaku/non-json-read/web-history-seg/contract.json"
             )
             .as_slice(),
+            "history-xml" => {
+                include_bytes!("../../tests/contracts/danmaku/history-xml/contract.json").as_slice()
+            }
             _ => unreachable!("unknown danmaku non-json contract"),
         };
         crate::probe::endpoint_contract::EndpointContract::from_slice(bytes)
@@ -385,13 +387,17 @@ pub mod tests {
     }
 
     fn assert_binary_fixture(bytes: &[u8]) -> BpiResult<Vec<u8>> {
+        assert_binary_fixture_with_content_type(bytes, Some("application/octet-stream"))
+    }
+
+    fn assert_binary_fixture_with_content_type(
+        bytes: &[u8],
+        content_type: Option<&str>,
+    ) -> BpiResult<Vec<u8>> {
         let body: BinaryProbeBody = serde_json::from_slice(bytes)?;
         assert_eq!(body.kind, "binary");
         assert_eq!(body.encoding, "base64");
-        assert_eq!(
-            body.content_type.as_deref(),
-            Some("application/octet-stream")
-        );
+        assert_eq!(body.content_type.as_deref(), content_type);
 
         let decoded = general_purpose::STANDARD
             .decode(body.body_base64)
@@ -601,6 +607,21 @@ pub mod tests {
             query_map(history_params.query_pairs()),
             history_seg.request.query
         );
+
+        let history_xml = contract("history-xml")?;
+        assert_eq!(history_xml.name, "danmaku.history.xml");
+        assert_eq!(
+            history_xml.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/dm/history"
+        );
+        assert_eq!(
+            query_map(DanmakuHistoryBytesParams::new(1, TEST_OID, TEST_DATE)?.query_pairs()),
+            history_xml.request.query
+        );
+        assert_eq!(
+            history_xml.request.response_decoding,
+            crate::probe::contract::ResponseDecoding::Disabled
+        );
         Ok(())
     }
 
@@ -670,9 +691,37 @@ pub mod tests {
     }
 
     #[test]
+    fn danmaku_history_xml_fixtures_preserve_raw_compressed_xml() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/danmaku/history-xml/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!("../../tests/contracts/danmaku/history-xml/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let decoded = assert_binary_fixture_with_content_type(bytes, Some("text/xml"))?;
+            assert!(!decoded.starts_with(b"{"));
+        }
+        Ok(())
+    }
+
+    #[test]
     fn danmaku_web_history_seg_anonymous_fixture_records_login_error() -> BpiResult<()> {
         let err = crate::response::ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
             "../../tests/contracts/danmaku/non-json-read/web-history-seg/responses/anonymous.requires_login.json"
+        ))
+        .and_then(crate::response::ApiEnvelope::ensure_success)
+        .unwrap_err();
+
+        assert!(err.requires_login());
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_history_xml_anonymous_fixture_records_login_error() -> BpiResult<()> {
+        let err = crate::response::ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/danmaku/history-xml/responses/anonymous.requires_login.json"
         ))
         .and_then(crate::response::ApiEnvelope::ensure_success)
         .unwrap_err();

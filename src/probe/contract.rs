@@ -33,6 +33,7 @@ pub struct ContractRequest {
     pub headers: BTreeMap<String, String>,
     pub auth: ContractAuth,
     pub body: Option<serde_json::Value>,
+    pub response_decoding: ResponseDecoding,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -49,6 +50,19 @@ impl ContractUrl {
 pub enum HttpMethod {
     Get,
     Post,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ResponseDecoding {
+    Auto,
+    Disabled,
+}
+
+impl Default for ResponseDecoding {
+    fn default() -> Self {
+        Self::Auto
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
@@ -202,6 +216,8 @@ struct RawContractRequest {
     auth: ContractAuth,
     #[serde(default)]
     body: Option<serde_json::Value>,
+    #[serde(default)]
+    response_decoding: RawResponseDecoding,
 }
 
 impl TryFrom<RawApiContract> for ApiContract {
@@ -221,9 +237,27 @@ impl TryFrom<RawApiContract> for ApiContract {
                 headers: raw.request.headers,
                 auth: raw.request.auth,
                 body: raw.request.body,
+                response_decoding: raw.request.response_decoding.into(),
             },
             expect: raw.expect,
         })
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum RawResponseDecoding {
+    #[default]
+    Auto,
+    Disabled,
+}
+
+impl From<RawResponseDecoding> for ResponseDecoding {
+    fn from(value: RawResponseDecoding) -> Self {
+        match value {
+            RawResponseDecoding::Auto => Self::Auto,
+            RawResponseDecoding::Disabled => Self::Disabled,
+        }
     }
 }
 
@@ -294,6 +328,7 @@ mod tests {
             contract.request.required_headers,
             ["user-agent", "referer", "origin", "cookie"]
         );
+        assert_eq!(contract.request.response_decoding, ResponseDecoding::Auto);
         assert!(contract.request.auth.requires_cookie());
         Ok(())
     }
@@ -430,6 +465,35 @@ mod tests {
                 ..
             }
         ));
+    }
+
+    #[test]
+    fn contract_deserializes_disabled_response_decoding() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "danmaku.history_xml.normal",
+                "request": {
+                    "method": "GET",
+                    "url": "https://api.bilibili.com/x/v2/dm/history",
+                    "query": {
+                        "type": "1",
+                        "oid": "16546",
+                        "date": "2022-01-01"
+                    },
+                    "auth": {
+                        "profile": "normal",
+                        "requires": ["cookie"]
+                    },
+                    "response_decoding": "disabled"
+                }
+            }"#,
+        )?;
+
+        assert_eq!(
+            contract.request.response_decoding,
+            ResponseDecoding::Disabled
+        );
+        Ok(())
     }
 
     #[test]

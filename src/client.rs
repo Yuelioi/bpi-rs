@@ -286,6 +286,23 @@ impl BpiClient {
         self.apply_default_headers(url, self.client.get(url))
     }
 
+    /// Creates a GET request that preserves raw compressed response bytes.
+    pub(crate) fn get_without_response_decoding(
+        &self,
+        url: &str,
+    ) -> Result<RequestBuilder, BpiError> {
+        let client = Client::builder()
+            .no_gzip()
+            .no_brotli()
+            .no_deflate()
+            .no_proxy()
+            .cookie_provider(self.jar.clone())
+            .pool_max_idle_per_host(0)
+            .build()?;
+
+        Ok(self.apply_default_headers(url, client.get(url)))
+    }
+
     /// Creates a POST request with this client's default Bilibili headers.
     pub fn post(&self, url: &str) -> RequestBuilder {
         self.apply_default_headers(url, self.client.post(url))
@@ -537,6 +554,28 @@ mod tests {
         assert_eq!(request.headers()[USER_AGENT], "test-agent");
         assert_eq!(request.headers()[REFERER], "https://example.com/referer");
         assert_eq!(request.headers()[ORIGIN], "https://example.com");
+        Ok(())
+    }
+
+    #[test]
+    fn raw_response_request_keeps_default_headers_and_cookie() -> Result<(), BpiError> {
+        let client = BpiClient::builder()
+            .user_agent("test-agent")
+            .cookie("DedeUserID=42; SESSDATA=session; bili_jct=csrf; buvid3=buvid")
+            .build()?;
+
+        let request = client
+            .get_without_response_decoding("https://api.bilibili.com/x/v2/dm/history")?
+            .build()?;
+
+        assert_eq!(request.headers()[USER_AGENT], "test-agent");
+        assert!(
+            request
+                .headers()
+                .get(COOKIE)
+                .and_then(|value| value.to_str().ok())
+                .is_some_and(|value| value.contains("SESSDATA=session"))
+        );
         Ok(())
     }
 
