@@ -10,6 +10,8 @@ use crate::BpiError;
 use crate::activity::ActivityClient;
 #[cfg(feature = "article")]
 use crate::article::ArticleClient;
+#[cfg(feature = "audio")]
+use crate::audio::AudioClient;
 use crate::auth::Account;
 #[cfg(feature = "bangumi")]
 use crate::bangumi::BangumiClient;
@@ -406,6 +408,12 @@ impl BpiClient {
         ArticleClient::new(self)
     }
 
+    /// Creates an audio domain client.
+    #[cfg(feature = "audio")]
+    pub fn audio(&self) -> AudioClient<'_> {
+        AudioClient::new(self)
+    }
+
     /// Creates a bangumi domain client.
     #[cfg(feature = "bangumi")]
     pub fn bangumi(&self) -> BangumiClient<'_> {
@@ -762,6 +770,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _activity = client.activity();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "audio")]
+    #[test]
+    fn audio_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _audio = client.audio();
 
         Ok(())
     }

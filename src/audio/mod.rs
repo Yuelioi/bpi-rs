@@ -9,6 +9,7 @@
 //! 歌曲: [查看](https://www.bilibili.com/audio/au305581)
 
 pub mod action;
+pub mod client;
 pub mod info;
 pub mod music_list;
 pub mod musicstream_url;
@@ -16,6 +17,7 @@ pub mod params;
 pub mod rank;
 pub mod status_number;
 
+pub use client::AudioClient;
 pub use params::{
     AudioCollectionInfoParams, AudioPageParams, AudioRankListParams, AudioRankListType,
     AudioRankPeriodParams, AudioSongParams, AudioStreamUrlParams, AudioStreamUrlWebParams,
