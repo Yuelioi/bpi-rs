@@ -1,0 +1,44 @@
+{
+  "code": 0,
+  "data": {
+    "activityId": 0,
+    "aid": 9631831,
+    "attr": 0,
+    "author": "少年霜",
+    "bvid": "BV1qx411Q7Fb",
+    "cid": 15918751,
+    "coin_num": 71,
+    "collectIds": [],
+    "cover": "http://i0.hdslb.com/bfs/music/f61e4e311a248d134273abb13f2287381d44cdfa.jpg",
+    "crtype": 1,
+    "ctime": 1501578219000,
+    "curtime": 1783038677,
+    "duration": 270,
+    "id": 13603,
+    "intro": "找了几版词还是喜欢这版，有很多高音美好的版本，不过我唱不上去TUT。。\n因为是昨晚做梦的时候脑子一直回荡的旋律，今天起来之后就直接录音，后期，视频。。\n哭腔真的差点哭了唉。。_(:з」∠)_",
+    "is_cooper": 0,
+    "limit": 0,
+    "limitdesc": "",
+    "lyric": "http://i0.hdslb.com/bfs/music/151237388313603.lrc",
+    "msid": 0,
+    "passtime": 1501640554,
+    "statistic": {
+      "collect": 542,
+      "comment": 12,
+      "play": 15934,
+      "share": 12,
+      "sid": 13603
+    },
+    "title": "终有一天，我会抛弃你们",
+    "uid": 655181,
+    "uname": "少年霜",
+    "vipInfo": {
+      "due_date": 1799424000000,
+      "status": 1,
+      "type": 2,
+      "vip_pay_type": 0
+    }
+  },
+  "message": "OK",
+  "msg": "success"
+}

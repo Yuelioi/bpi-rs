@@ -209,7 +209,26 @@ impl BpiClient {
 mod tests {
     use super::*;
     use crate::ids::AudioId;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
     const TEST_SID: u64 = 13603;
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "info" => include_bytes!("../../tests/contracts/audio/info/contract.json").as_slice(),
+            "tags" => include_bytes!("../../tests/contracts/audio/tags/contract.json").as_slice(),
+            "members" => {
+                include_bytes!("../../tests/contracts/audio/members/contract.json").as_slice()
+            }
+            "lyric" => include_bytes!("../../tests/contracts/audio/lyric/contract.json").as_slice(),
+            _ => unreachable!("unknown audio info contract"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
+
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_audio_info() -> Result<(), Box<BpiError>> {
@@ -291,6 +310,210 @@ mod tests {
         assert!(stats.play >= 0);
         assert!(stats.collect >= 0);
 
+        Ok(())
+    }
+
+    #[test]
+    fn audio_info_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("info")?;
+        let params = AudioSongParams::new(AudioId::new(TEST_SID)?);
+
+        assert_eq!(contract.name, "audio.info");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://www.bilibili.com/audio/music-service-c/web/song/info"
+        );
+        assert_eq!(
+            contract.request.query.get("sid").map(String::as_str),
+            Some("13603")
+        );
+        assert_eq!(params.query_pairs(), vec![("sid", "13603".to_string())]);
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("AudioInfoData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_info_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!("../../tests/contracts/audio/info/responses/anonymous.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/audio/info/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/audio/info/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<AudioInfoData>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.id, TEST_SID as i64);
+            assert!(!payload.title.is_empty());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn audio_tags_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("tags")?;
+
+        assert_eq!(contract.name, "audio.tags");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://www.bilibili.com/audio/music-service-c/web/tag/song"
+        );
+        assert_eq!(
+            contract.request.query.get("sid").map(String::as_str),
+            Some("13603")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("Vec<AudioTag>")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_tags_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!("../../tests/contracts/audio/tags/responses/anonymous.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/audio/tags/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/audio/tags/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<Vec<AudioTag>>::from_slice(bytes)?.into_payload()?;
+
+            assert!(!payload.is_empty());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn audio_members_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("members")?;
+
+        assert_eq!(contract.name, "audio.members");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://www.bilibili.com/audio/music-service-c/web/member/song"
+        );
+        assert_eq!(
+            contract.request.query.get("sid").map(String::as_str),
+            Some("13603")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("Vec<AudioMemberType>")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_members_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!("../../tests/contracts/audio/members/responses/anonymous.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/audio/members/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/audio/members/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<Vec<AudioMemberType>>::from_slice(bytes)?.into_payload()?;
+
+            assert!(!payload.is_empty());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn audio_lyric_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("lyric")?;
+
+        assert_eq!(contract.name, "audio.lyric");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://www.bilibili.com/audio/music-service-c/web/song/lyric"
+        );
+        assert_eq!(
+            contract.request.query.get("sid").map(String::as_str),
+            Some("13603")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.fixture_kind.as_deref(),
+            Some("sanitized_probe_body")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn audio_lyric_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!("../../tests/contracts/audio/lyric/responses/anonymous.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/audio/lyric/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/audio/lyric/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<String>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload, "<lyrics redacted from probe body>");
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/audio/public-read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn audio_info_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("info", profile) {
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<AudioInfoData>>(body)?.into_payload()?;
+
+                assert_eq!(payload.id, TEST_SID as i64);
+            }
+
+            if let Some(body) = local_probe_body("tags", profile) {
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<Vec<AudioTag>>>(body)?.into_payload()?;
+
+                assert!(!payload.is_empty());
+            }
+
+            if let Some(body) = local_probe_body("members", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<Vec<AudioMemberType>>>(body)?
+                    .into_payload()?;
+
+                assert!(!payload.is_empty());
+            }
+
+            if let Some(body) = local_probe_body("lyric", profile) {
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<String>>(body)?.into_payload()?;
+
+                assert!(!payload.is_empty());
+            }
+        }
         Ok(())
     }
 }

@@ -1,0 +1,70 @@
+{
+  "name": "audio.collection_status",
+  "request": {
+    "method": "GET",
+    "url": "https://www.bilibili.com/audio/music-service-c/web/collections/songs-coll",
+    "query": {
+      "sid": "13603"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "public audio response body promoted without account headers"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 4511003,
+        "fixture": "responses/anonymous.error.json",
+        "fixture_kind": "probe_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "bool"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "bool"
+      }
+    }
+  ]
+}

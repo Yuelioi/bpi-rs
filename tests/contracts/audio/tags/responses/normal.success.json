@@ -1,0 +1,43 @@
+{
+  "code": 0,
+  "data": [
+    {
+      "info": "音乐",
+      "key": 1,
+      "subtype": 0,
+      "type": "song"
+    },
+    {
+      "info": "人声",
+      "key": 3,
+      "subtype": 1,
+      "type": "song"
+    },
+    {
+      "info": "翻唱",
+      "key": 2,
+      "subtype": 2,
+      "type": "song"
+    },
+    {
+      "info": "汉语",
+      "key": 32,
+      "subtype": 3,
+      "type": "song"
+    },
+    {
+      "info": "网络歌曲",
+      "key": 41,
+      "subtype": 5,
+      "type": "song"
+    },
+    {
+      "info": "流行",
+      "key": 7,
+      "subtype": 4,
+      "type": "song"
+    }
+  ],
+  "message": "OK",
+  "msg": "success"
+}

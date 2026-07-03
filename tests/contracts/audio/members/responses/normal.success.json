@@ -1,0 +1,47 @@
+{
+  "code": 0,
+  "data": [
+    {
+      "list": [
+        {
+          "member_id": 221,
+          "mid": 0,
+          "name": "少年霜"
+        }
+      ],
+      "type": 1
+    },
+    {
+      "list": [
+        {
+          "member_id": 13800,
+          "mid": 0,
+          "name": "心做し"
+        }
+      ],
+      "type": 3
+    },
+    {
+      "list": [
+        {
+          "member_id": 13712,
+          "mid": 0,
+          "name": ""
+        }
+      ],
+      "type": 6
+    },
+    {
+      "list": [
+        {
+          "member_id": 223,
+          "mid": 0,
+          "name": "少年霜"
+        }
+      ],
+      "type": 127
+    }
+  ],
+  "message": "OK",
+  "msg": "success"
+}
