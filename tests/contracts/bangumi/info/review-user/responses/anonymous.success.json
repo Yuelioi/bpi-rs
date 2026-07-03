@@ -1,0 +1,31 @@
+{
+  "code": 0,
+  "message": "success",
+  "result": {
+    "media": {
+      "areas": [
+        {
+          "id": 2,
+          "name": "日本"
+        }
+      ],
+      "cover": "http://i0.hdslb.com/bfs/bangumi/8aa0bfce050c72c6626b63d3093a88527c251026.jpg",
+      "horizontal_picture": "http://i0.hdslb.com/bfs/bangumi/8aa0bfce050c72c6626b63d3093a88527c251026.jpg",
+      "media_id": 28220978,
+      "new_ep": {
+        "id": 21278,
+        "index": "14",
+        "index_show": "全14话"
+      },
+      "rating": {
+        "count": 97652,
+        "score": 9.9
+      },
+      "season_id": 1172,
+      "share_url": "https://www.bilibili.com/bangumi/media/md28220978",
+      "title": "轻音少女 第一季",
+      "type": 1,
+      "type_name": "番剧"
+    }
+  }
+}

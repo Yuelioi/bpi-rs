@@ -791,10 +791,37 @@ impl BpiClient {
 mod tests {
     use super::*;
     use crate::ids::MediaId;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
 
     const TEST_SEASON_ID: u64 = 1172; // ssid
     const TEST_EP_ID: u64 = 21265; // epid
     const TEST_MEDIA_ID: u64 = 28220978; //  mdid
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "review-user" => {
+                include_bytes!("../../tests/contracts/bangumi/info/review-user/contract.json")
+                    .as_slice()
+            }
+            "season-detail-season" => include_bytes!(
+                "../../tests/contracts/bangumi/info/season-detail-season/contract.json"
+            )
+            .as_slice(),
+            "season-detail-episode" => include_bytes!(
+                "../../tests/contracts/bangumi/info/season-detail-episode/contract.json"
+            )
+            .as_slice(),
+            "season-section" => {
+                include_bytes!("../../tests/contracts/bangumi/info/season-section/contract.json")
+                    .as_slice()
+            }
+            _ => unreachable!("unknown bangumi info contract"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -860,6 +887,240 @@ mod tests {
 
         assert!(!data.main_section.episodes.is_empty());
 
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_review_user_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("review-user")?;
+        let params = BangumiInfoParams::new(MediaId::new(TEST_MEDIA_ID)?);
+
+        assert_eq!(contract.name, "bangumi.info.review_user");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/pgc/review/user"
+        );
+        assert_eq!(
+            contract.request.query.get("media_id").map(String::as_str),
+            Some("28220978")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![("media_id", "28220978".to_string())]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("BangumiInfoResult")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_review_user_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/review-user/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/review-user/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/review-user/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<BangumiInfoResult>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.media.media_id, TEST_MEDIA_ID);
+            assert_eq!(payload.media.season_id, TEST_SEASON_ID);
+            assert!(!payload.media.title.is_empty());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_detail_by_season_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("season-detail-season")?;
+        let params = BangumiDetailParams::from_season_id(SeasonId::new(TEST_SEASON_ID)?);
+
+        assert_eq!(contract.name, "bangumi.info.season_detail_by_season_id");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/pgc/view/web/season"
+        );
+        assert_eq!(
+            contract.request.query.get("season_id").map(String::as_str),
+            Some("1172")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![("season_id", "1172".to_string())]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("BangumiDetailResult")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_detail_by_episode_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("season-detail-episode")?;
+        let params = BangumiDetailParams::from_episode_id(EpisodeId::new(TEST_EP_ID)?);
+
+        assert_eq!(contract.name, "bangumi.info.season_detail_by_ep_id");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/pgc/view/web/season"
+        );
+        assert_eq!(
+            contract.request.query.get("ep_id").map(String::as_str),
+            Some("21265")
+        );
+        assert_eq!(params.query_pairs(), vec![("ep_id", "21265".to_string())]);
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("BangumiDetailResult")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_detail_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/season-detail-season/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/season-detail-season/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/season-detail-season/responses/vip.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/season-detail-episode/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/season-detail-episode/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/season-detail-episode/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<BangumiDetailResult>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.season_id, TEST_SEASON_ID);
+            assert!(!payload.title.is_empty());
+            assert!(!payload.episodes.is_empty());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_section_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("season-section")?;
+        let params = BangumiSectionsParams::new(SeasonId::new(TEST_SEASON_ID)?);
+
+        assert_eq!(contract.name, "bangumi.info.season_section");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/pgc/web/season/section"
+        );
+        assert_eq!(
+            contract.request.query.get("season_id").map(String::as_str),
+            Some("1172")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![("season_id", "1172".to_string())]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("BangumiSectionResult")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_section_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/season-section/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/season-section/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/bangumi/info/season-section/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<BangumiSectionResult>::from_slice(bytes)?.into_payload()?;
+
+            assert!(!payload.main_section.episodes.is_empty());
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/bangumi/info/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn bangumi_info_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("review-user", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<BangumiInfoResult>>(body)?
+                    .into_payload()?;
+
+                assert_eq!(payload.media.media_id, TEST_MEDIA_ID);
+            }
+
+            if let Some(body) = local_probe_body("season-detail-season", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<BangumiDetailResult>>(body)?
+                    .into_payload()?;
+
+                assert_eq!(payload.season_id, TEST_SEASON_ID);
+            }
+
+            if let Some(body) = local_probe_body("season-detail-episode", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<BangumiDetailResult>>(body)?
+                    .into_payload()?;
+
+                assert_eq!(payload.season_id, TEST_SEASON_ID);
+            }
+
+            if let Some(body) = local_probe_body("season-section", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<BangumiSectionResult>>(body)?
+                    .into_payload()?;
+
+                assert!(!payload.main_section.episodes.is_empty());
+            }
+        }
         Ok(())
     }
 }

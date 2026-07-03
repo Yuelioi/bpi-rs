@@ -1,0 +1,1028 @@
+{
+  "code": 0,
+  "message": "success",
+  "result": {
+    "activity": {
+      "head_bg_url": "",
+      "id": 0,
+      "title": ""
+    },
+    "actors": "平泽唯：丰崎爱生\n秋山澪：日笠阳子\n田井中律：佐藤聪美\n琴吹䌷：寿美菜子\n中野梓：竹达彩奈\n山中佐和子：真田麻美\n真锅和：藤东知夏\n平泽忧：米泽圆\n铃木纯：永田依子",
+    "alias": "",
+    "areas": [
+      {
+        "id": 2,
+        "name": "日本"
+      }
+    ],
+    "bkg_cover": "",
+    "cover": "http://i0.hdslb.com/bfs/bangumi/8aa0bfce050c72c6626b63d3093a88527c251026.jpg",
+    "delivery_fragment_video": false,
+    "enable_vt": false,
+    "episodes": [
+      {
+        "aid": 52307583,
+        "badge": "",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": ""
+        },
+        "badge_type": 0,
+        "bvid": "BV1b4411a75j",
+        "cid": 91549662,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/25cb01c3c144699514aef00ec1fba9229def3b6c.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21265,
+        "from": "bangumi",
+        "id": 21265,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21265",
+        "long_title": "废部！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第1话 废部！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21265",
+        "short_link": "https://b23.tv/ep21265",
+        "showDrmLoginDialog": false,
+        "show_title": "第1话 废部！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 205,
+            "start": 114
+          }
+        },
+        "status": 2,
+        "subtitle": "已观看1.1亿次",
+        "title": "1",
+        "vid": "1007863|549505"
+      },
+      {
+        "aid": 336780278,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1SR4y1t7b2",
+        "cid": 91549734,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/662697ecc7dbe6d66e67880ab06d3eb4b04fbc78.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21266,
+        "from": "bangumi",
+        "id": 21266,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21266",
+        "long_title": "乐器！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第2话 乐器！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21266",
+        "short_link": "https://b23.tv/ep21266",
+        "showDrmLoginDialog": false,
+        "show_title": "第2话 乐器！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 142,
+            "start": 51
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "2",
+        "vid": "1007863|549509"
+      },
+      {
+        "aid": 806839671,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1c34y1o7SF",
+        "cid": 91549799,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/79f1df5507ea5b153c9aac8554e16292df5ea978.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21267,
+        "from": "bangumi",
+        "id": 21267,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21267",
+        "long_title": "特训！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第3话 特训！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21267",
+        "short_link": "https://b23.tv/ep21267",
+        "showDrmLoginDialog": false,
+        "show_title": "第3话 特训！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 141,
+            "start": 50
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "3",
+        "vid": "1007863|549514"
+      },
+      {
+        "aid": 806836720,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1F34y1o7L8",
+        "cid": 91549892,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/355434657eb5e5a85bda2c7565bae745b37b2224.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21268,
+        "from": "bangumi",
+        "id": 21268,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21268",
+        "long_title": "住宿集训！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第4话 住宿集训！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21268",
+        "short_link": "https://b23.tv/ep21268",
+        "showDrmLoginDialog": false,
+        "show_title": "第4话 住宿集训！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 130,
+            "start": 45
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "4",
+        "vid": "1007863|549519"
+      },
+      {
+        "aid": 934308460,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1BM4y1A7tV",
+        "cid": 91550006,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/5effd9687f6e563c7de365d68c6a9474fe7c3c6b.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21269,
+        "from": "bangumi",
+        "id": 21269,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21269",
+        "long_title": "顾问！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第5话 顾问！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21269",
+        "short_link": "https://b23.tv/ep21269",
+        "showDrmLoginDialog": false,
+        "show_title": "第5话 顾问！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 131,
+            "start": 41
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "5",
+        "vid": "1007863|549523"
+      },
+      {
+        "aid": 764362198,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1Ur4y1k7rx",
+        "cid": 91550093,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/d15acf3095308320db52ab32c997770c3655f3b8.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21270,
+        "from": "bangumi",
+        "id": 21270,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21270",
+        "long_title": "校庆！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第6话 校庆！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21270",
+        "short_link": "https://b23.tv/ep21270",
+        "showDrmLoginDialog": false,
+        "show_title": "第6话 校庆！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 112,
+            "start": 22
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "6",
+        "vid": "1007863|549527"
+      },
+      {
+        "aid": 421782279,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1d341187S1",
+        "cid": 91550199,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/12b8c86252c5074793615d24dbce06c4d57fe82b.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21271,
+        "from": "bangumi",
+        "id": 21271,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21271",
+        "long_title": "圣诞节！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第7话 圣诞节！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21271",
+        "short_link": "https://b23.tv/ep21271",
+        "showDrmLoginDialog": false,
+        "show_title": "第7话 圣诞节！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 232,
+            "start": 141
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "7",
+        "vid": "1007863|549532"
+      },
+      {
+        "aid": 891794419,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV15P4y1L7aQ",
+        "cid": 91550317,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/c0bc0591953c611eff893e6787b6fa9304aa2efa.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21272,
+        "from": "bangumi",
+        "id": 21272,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21272",
+        "long_title": "欢迎新生！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第8话 欢迎新生！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21272",
+        "short_link": "https://b23.tv/ep21272",
+        "showDrmLoginDialog": false,
+        "show_title": "第8话 欢迎新生！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 173,
+            "start": 82
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "8",
+        "vid": "1007863|549535"
+      },
+      {
+        "aid": 464321345,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1XL411T7WS",
+        "cid": 91550451,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/2181cbb69653aba0ba0435427f2a3202657b4139.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21273,
+        "from": "bangumi",
+        "id": 21273,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21273",
+        "long_title": "新成员！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第9话 新成员！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21273",
+        "short_link": "https://b23.tv/ep21273",
+        "showDrmLoginDialog": false,
+        "show_title": "第9话 新成员！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 117,
+            "start": 27
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "9",
+        "vid": "1007863|549539"
+      },
+      {
+        "aid": 209268805,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1Vh411476P",
+        "cid": 91550519,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/2e2f496920a26ca37bf0ee1bf4fab54cf142a539.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21274,
+        "from": "bangumi",
+        "id": 21274,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21274",
+        "long_title": "再度住宿集训！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第10话 再度住宿集训！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21274",
+        "short_link": "https://b23.tv/ep21274",
+        "showDrmLoginDialog": false,
+        "show_title": "第10话 再度住宿集训！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 157,
+            "start": 67
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "10",
+        "vid": "1007863|549542"
+      },
+      {
+        "aid": 379360211,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV13f4y1K7s1",
+        "cid": 91550607,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/a8048741037d69aca2484482277db88d3ec51745.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21275,
+        "from": "bangumi",
+        "id": 21275,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21275",
+        "long_title": "危机！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第11话 危机！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21275",
+        "short_link": "https://b23.tv/ep21275",
+        "showDrmLoginDialog": false,
+        "show_title": "第11话 危机！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 150,
+            "start": 60
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "11",
+        "vid": "1007863|549546"
+      },
+      {
+        "aid": 464340700,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1fL411T76B",
+        "cid": 91550727,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/f0481306657e70c21b24db6df09b539bc472c209.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21276,
+        "from": "bangumi",
+        "id": 21276,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21276",
+        "long_title": "轻音！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第12话 轻音！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21276",
+        "short_link": "https://b23.tv/ep21276",
+        "showDrmLoginDialog": false,
+        "show_title": "第12话 轻音！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 167,
+            "start": 76
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "12",
+        "vid": "1007863|549549"
+      },
+      {
+        "aid": 634264586,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1wb4y1b76X",
+        "cid": 91550837,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/b87d0ab949bf7d254e2954eb6617270d4451423d.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1452000,
+        "enable_vt": false,
+        "ep_id": 21277,
+        "from": "bangumi",
+        "id": 21277,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21277",
+        "long_title": "冬之日！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第13话 冬之日！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21277",
+        "short_link": "https://b23.tv/ep21277",
+        "showDrmLoginDialog": false,
+        "show_title": "第13话 冬之日！",
+        "skip": {
+          "ed": {
+            "end": 1419,
+            "start": 1329
+          },
+          "op": {
+            "end": 210,
+            "start": 120
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "13",
+        "vid": "1007863|549554"
+      },
+      {
+        "aid": 719252870,
+        "badge": "会员",
+        "badge_info": {
+          "bg_color": "#FB7299",
+          "bg_color_night": "#D44E7D",
+          "text": "会员"
+        },
+        "badge_type": 0,
+        "bvid": "BV1JQ4y1U7yt",
+        "cid": 91550935,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/66aeca199a88b601ce5d115a23d0fd7893bc3783.jpg",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1423000,
+        "enable_vt": false,
+        "ep_id": 21278,
+        "from": "bangumi",
+        "id": 21278,
+        "is_view_hide": false,
+        "link": "https://www.bilibili.com/bangumi/play/ep21278",
+        "long_title": "Live House！",
+        "pub_time": 1557720000,
+        "pv": 0,
+        "release_date": "",
+        "rights": {
+          "allow_dm": 1,
+          "allow_download": 0,
+          "area_limit": 0,
+          "cache_auth": 0
+        },
+        "section_type": 0,
+        "share_copy": "《轻音少女 第一季》第14话 Live House！",
+        "share_url": "https://www.bilibili.com/bangumi/play/ep21278",
+        "short_link": "https://b23.tv/ep21278",
+        "showDrmLoginDialog": false,
+        "show_title": "第14话 Live House！",
+        "skip": {
+          "ed": {
+            "end": 1421,
+            "start": 1329
+          },
+          "op": {
+            "end": 180,
+            "start": 89
+          }
+        },
+        "status": 13,
+        "subtitle": "已观看1.1亿次",
+        "title": "14",
+        "vid": "1007863|549559"
+      }
+    ],
+    "evaluate": "【本片翻译由华盟字幕社提供】新学年开始，高中一年级新生平泽唯在误将“轻音乐”当做了“轻便、简易的音乐”，而由于自己小时候玩响板得到老师表扬，于是萌发申请入部的想法。\n另一方面，樱丘高中“轻音部”因原来的部员全部毕业离校，此时轻音部新成员只有秋山澪和田井中律两人，无法满足部员至少四人的最低人数要求即将废部，这下该如何是好呢？\n此外，温柔可爱的千金小姐琴吹䌷被律强拉进入轻音部。\n于是，这四名高一女生机缘巧合聚在了一起，便有了吉他手平泽唯、贝司手秋山澪、鼓手田井中律以及键盘手琴吹䌷，轻音部的故事也由此展开。",
+    "freya": {
+      "bubble_desc": "",
+      "bubble_show_cnt": 0,
+      "icon_show": 1
+    },
+    "hide_ep_vv_vt_dm": 1,
+    "icon_font": {
+      "name": "playdata-square-line@500",
+      "text": "1.1亿"
+    },
+    "jp_title": "",
+    "link": "http://www.bilibili.com/bangumi/media/md28220978/",
+    "media_id": 28220978,
+    "mode": 2,
+    "new_ep": {
+      "desc": "已完结, 全14话",
+      "id": 21278,
+      "is_new": 0,
+      "title": "14"
+    },
+    "payment": {
+      "discount": 100,
+      "pay_type": {
+        "allow_discount": 0,
+        "allow_pack": 0,
+        "allow_ticket": 0,
+        "allow_time_limit": 0,
+        "allow_vip_discount": 0,
+        "forbid_bb": 0
+      },
+      "price": "0.0",
+      "promotion": "",
+      "tip": "大会员专享观看特权哦~",
+      "view_start_time": 0,
+      "vip_discount": 100,
+      "vip_first_promotion": "",
+      "vip_price": "0",
+      "vip_promotion": "开通大会员观看"
+    },
+    "play_strategy": {
+      "strategies": [
+        "common_section-formal_first_ep",
+        "common_section-common_section",
+        "common_section-next_season",
+        "formal-finish-next_season",
+        "formal-end-other_section",
+        "formal-end-next_season",
+        "ord"
+      ]
+    },
+    "positive": {
+      "id": 18130,
+      "title": "正片"
+    },
+    "publish": {
+      "is_finish": 1,
+      "is_started": 1,
+      "pub_time": "2009-04-02 00:00:01",
+      "pub_time_show": "2009年4月2日",
+      "unknow_pub_date": 0,
+      "weekday": 0
+    },
+    "rating": {
+      "count": 97652,
+      "score": 9.9
+    },
+    "record": "登记号：10417060209622506",
+    "rights": {
+      "allow_bp": 0,
+      "allow_bp_rank": 0,
+      "allow_download": 0,
+      "allow_review": 1,
+      "area_limit": 328,
+      "ban_area_show": 1,
+      "can_watch": 1,
+      "copyright": "dujia",
+      "forbid_pre": 0,
+      "freya_white": 0,
+      "is_cover_show": 0,
+      "is_preview": 1,
+      "is_sponsor": 0,
+      "only_vip_download": 0,
+      "resource": "",
+      "watch_platform": 0
+    },
+    "season_id": 1172,
+    "season_title": "轻音少女 第一季",
+    "seasons": [
+      {
+        "badge": "独家",
+        "badge_info": {
+          "bg_color": "#00C0FF",
+          "bg_color_night": "#0B91BE",
+          "text": "独家"
+        },
+        "badge_type": 1,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/8aa0bfce050c72c6626b63d3093a88527c251026.jpg",
+        "enable_vt": false,
+        "horizontal_cover_1610": "",
+        "horizontal_cover_169": "",
+        "icon_font": {
+          "name": "playdata-square-line@500",
+          "text": "1.1亿"
+        },
+        "media_id": 28220978,
+        "new_ep": {
+          "cover": "http://i0.hdslb.com/bfs/bangumi/66aeca199a88b601ce5d115a23d0fd7893bc3783.jpg",
+          "id": 21278,
+          "index_show": "全14话"
+        },
+        "season_id": 1172,
+        "season_title": "第一季",
+        "season_type": 1,
+        "stat": {
+          "favorites": 3943882,
+          "series_follow": 4366484,
+          "views": 105072069,
+          "vt": 0
+        }
+      },
+      {
+        "badge": "独家",
+        "badge_info": {
+          "bg_color": "#00C0FF",
+          "bg_color_night": "#0B91BE",
+          "text": "独家"
+        },
+        "badge_type": 1,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/c3c68d569810a1eec76d878ae39f62e8c0096d3e.jpg",
+        "enable_vt": false,
+        "horizontal_cover_1610": "",
+        "horizontal_cover_169": "",
+        "icon_font": {
+          "name": "playdata-square-line@500",
+          "text": "1.1亿"
+        },
+        "media_id": 28220984,
+        "new_ep": {
+          "cover": "http://i0.hdslb.com/bfs/bangumi/ddd20fd3b2fcfe9e613ff0cc95dff6f674125251.jpg",
+          "id": 21305,
+          "index_show": "全27话"
+        },
+        "season_id": 1173,
+        "season_title": "第二季",
+        "season_type": 1,
+        "stat": {
+          "favorites": 2126121,
+          "series_follow": 4366484,
+          "views": 111416013,
+          "vt": 0
+        }
+      },
+      {
+        "badge": "独家",
+        "badge_info": {
+          "bg_color": "#00C0FF",
+          "bg_color_night": "#0B91BE",
+          "text": "独家"
+        },
+        "badge_type": 1,
+        "cover": "http://i0.hdslb.com/bfs/bangumi/image/07a2fa07836e0006ba9d6a2d5d0552b23463bb2b.jpg",
+        "enable_vt": false,
+        "horizontal_cover_1610": "",
+        "horizontal_cover_169": "",
+        "icon_font": {
+          "name": "playdata-square-line@500",
+          "text": "968.1万"
+        },
+        "media_id": 28220988,
+        "new_ep": {
+          "cover": "http://i0.hdslb.com/bfs/archive/0eec7940ad230ff6b561c193343dbfebede27041.jpg",
+          "id": 21315,
+          "index_show": "全1话"
+        },
+        "season_id": 1175,
+        "season_title": "剧场版",
+        "season_type": 1,
+        "stat": {
+          "favorites": 1063592,
+          "series_follow": 4366484,
+          "views": 9681316,
+          "vt": 0
+        }
+      }
+    ],
+    "series": {
+      "display_type": 0,
+      "series_id": 771,
+      "series_title": "轻音少女"
+    },
+    "share_copy": "《轻音少女 第一季》从响板开始玩乐队！",
+    "share_sub_title": "从响板开始玩乐队！",
+    "share_url": "https://www.bilibili.com/bangumi/play/ss1172",
+    "show": {
+      "wide_screen": 0
+    },
+    "show_season_type": 1,
+    "square_cover": "http://i0.hdslb.com/bfs/bangumi/cba95bb21fd07e4679935621b4b9bc8e6939d486.jpg",
+    "staff": "原作：かきふらい (芳文社「まんがタイムきらら」連載)\n监督：山田尚子\n系列构成：吉田玲子\n角色设计 / 总作画监督：堀口悠紀子\n乐器监修：高橋博行\n美术监督：田村せいき\n色彩设计：竹田明代\n摄影监督：山本倫\n编集：重村建吾\n音响监督：鶴岡陽太\n音响效果：神保大介\n音乐：百石元\n音乐总监：小森茂生\n音乐制作：ポニーキャニオン（波丽佳音）\n顾问：石原立也\n制作人：中山佳久 / 中村伸一 / 太布尚弘 / 八田陽子\n动画制作人：大橋永晴\n动画制作：京都アニメーション（京都动画）\n制作协力：ポニーキャニオン（波丽佳音）、ムービック（Movic）、京都アニメーション（京都动画）",
+    "stat": {
+      "coins": 828353,
+      "danmakus": 2222842,
+      "favorite": 171327,
+      "favorites": 3943882,
+      "follow_text": "436.6万系列追番",
+      "likes": 1335100,
+      "reply": 75863,
+      "share": 88326,
+      "views": 105072069,
+      "vt": 0
+    },
+    "status": 13,
+    "styles": [
+      "音乐",
+      "漫画改",
+      "日常",
+      "校园"
+    ],
+    "subtitle": "已观看1.1亿次",
+    "title": "轻音少女 第一季",
+    "total": 14,
+    "type": 1,
+    "user_status": {
+      "area_limit": 0,
+      "ban_area_show": 0,
+      "follow": 0,
+      "follow_status": 0,
+      "login": 0,
+      "pay": 0,
+      "pay_pack_paid": 0,
+      "sponsor": 0
+    }
+  }
+}

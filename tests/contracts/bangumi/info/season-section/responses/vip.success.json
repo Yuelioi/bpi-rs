@@ -1,0 +1,294 @@
+{
+  "code": 0,
+  "message": "success",
+  "result": {
+    "main_section": {
+      "episodes": [
+        {
+          "aid": 52307583,
+          "badge": "",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": ""
+          },
+          "badge_type": 0,
+          "cid": 91549662,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/25cb01c3c144699514aef00ec1fba9229def3b6c.jpg",
+          "from": "bangumi",
+          "id": 21265,
+          "is_premiere": 0,
+          "long_title": "废部！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21265",
+          "status": 2,
+          "title": "1",
+          "vid": "1007863|549505"
+        },
+        {
+          "aid": 336780278,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91549734,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/662697ecc7dbe6d66e67880ab06d3eb4b04fbc78.jpg",
+          "from": "bangumi",
+          "id": 21266,
+          "is_premiere": 0,
+          "long_title": "乐器！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21266",
+          "status": 13,
+          "title": "2",
+          "vid": "1007863|549509"
+        },
+        {
+          "aid": 806839671,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91549799,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/79f1df5507ea5b153c9aac8554e16292df5ea978.jpg",
+          "from": "bangumi",
+          "id": 21267,
+          "is_premiere": 0,
+          "long_title": "特训！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21267",
+          "status": 13,
+          "title": "3",
+          "vid": "1007863|549514"
+        },
+        {
+          "aid": 806836720,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91549892,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/355434657eb5e5a85bda2c7565bae745b37b2224.jpg",
+          "from": "bangumi",
+          "id": 21268,
+          "is_premiere": 0,
+          "long_title": "住宿集训！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21268",
+          "status": 13,
+          "title": "4",
+          "vid": "1007863|549519"
+        },
+        {
+          "aid": 934308460,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91550006,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/5effd9687f6e563c7de365d68c6a9474fe7c3c6b.jpg",
+          "from": "bangumi",
+          "id": 21269,
+          "is_premiere": 0,
+          "long_title": "顾问！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21269",
+          "status": 13,
+          "title": "5",
+          "vid": "1007863|549523"
+        },
+        {
+          "aid": 764362198,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91550093,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/d15acf3095308320db52ab32c997770c3655f3b8.jpg",
+          "from": "bangumi",
+          "id": 21270,
+          "is_premiere": 0,
+          "long_title": "校庆！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21270",
+          "status": 13,
+          "title": "6",
+          "vid": "1007863|549527"
+        },
+        {
+          "aid": 421782279,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91550199,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/12b8c86252c5074793615d24dbce06c4d57fe82b.jpg",
+          "from": "bangumi",
+          "id": 21271,
+          "is_premiere": 0,
+          "long_title": "圣诞节！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21271",
+          "status": 13,
+          "title": "7",
+          "vid": "1007863|549532"
+        },
+        {
+          "aid": 891794419,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91550317,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/c0bc0591953c611eff893e6787b6fa9304aa2efa.jpg",
+          "from": "bangumi",
+          "id": 21272,
+          "is_premiere": 0,
+          "long_title": "欢迎新生！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21272",
+          "status": 13,
+          "title": "8",
+          "vid": "1007863|549535"
+        },
+        {
+          "aid": 464321345,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91550451,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/2181cbb69653aba0ba0435427f2a3202657b4139.jpg",
+          "from": "bangumi",
+          "id": 21273,
+          "is_premiere": 0,
+          "long_title": "新成员！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21273",
+          "status": 13,
+          "title": "9",
+          "vid": "1007863|549539"
+        },
+        {
+          "aid": 209268805,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91550519,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/2e2f496920a26ca37bf0ee1bf4fab54cf142a539.jpg",
+          "from": "bangumi",
+          "id": 21274,
+          "is_premiere": 0,
+          "long_title": "再度住宿集训！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21274",
+          "status": 13,
+          "title": "10",
+          "vid": "1007863|549542"
+        },
+        {
+          "aid": 379360211,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91550607,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/a8048741037d69aca2484482277db88d3ec51745.jpg",
+          "from": "bangumi",
+          "id": 21275,
+          "is_premiere": 0,
+          "long_title": "危机！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21275",
+          "status": 13,
+          "title": "11",
+          "vid": "1007863|549546"
+        },
+        {
+          "aid": 464340700,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91550727,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/f0481306657e70c21b24db6df09b539bc472c209.jpg",
+          "from": "bangumi",
+          "id": 21276,
+          "is_premiere": 0,
+          "long_title": "轻音！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21276",
+          "status": 13,
+          "title": "12",
+          "vid": "1007863|549549"
+        },
+        {
+          "aid": 634264586,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91550837,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/b87d0ab949bf7d254e2954eb6617270d4451423d.jpg",
+          "from": "bangumi",
+          "id": 21277,
+          "is_premiere": 0,
+          "long_title": "冬之日！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21277",
+          "status": 13,
+          "title": "13",
+          "vid": "1007863|549554"
+        },
+        {
+          "aid": 719252870,
+          "badge": "会员",
+          "badge_info": {
+            "bg_color": "#FB7299",
+            "bg_color_night": "#D44E7D",
+            "text": "会员"
+          },
+          "badge_type": 0,
+          "cid": 91550935,
+          "cover": "http://i0.hdslb.com/bfs/bangumi/66aeca199a88b601ce5d115a23d0fd7893bc3783.jpg",
+          "from": "bangumi",
+          "id": 21278,
+          "is_premiere": 0,
+          "long_title": "Live House！",
+          "share_url": "https://www.bilibili.com/bangumi/play/ep21278",
+          "status": 13,
+          "title": "14",
+          "vid": "1007863|549559"
+        }
+      ],
+      "id": 18130,
+      "title": "正片",
+      "type": 0
+    },
+    "section": []
+  }
+}
