@@ -1,4 +1,8 @@
-use crate::{BpiError, response::BpiResponse, transport::ReqwestTransport};
+use crate::{
+    BpiError,
+    response::BpiResponse,
+    transport::{ReqwestTransport, TransportEnvelope, TransportResponse},
+};
 use reqwest::RequestBuilder;
 use serde::de::DeserializeOwned;
 use tokio::time::Instant;
@@ -30,6 +34,22 @@ pub trait BilibiliRequest {
         self,
         operation_name: &str,
     ) -> impl std::future::Future<Output = Result<BpiResponse<T>, BpiError>> + Send
+    where
+        Self: Sized + Send,
+        T: DeserializeOwned;
+
+    fn send_bpi_payload<T>(
+        self,
+        operation_name: &str,
+    ) -> impl std::future::Future<Output = Result<T, BpiError>> + Send
+    where
+        Self: Sized + Send,
+        T: DeserializeOwned;
+
+    fn send_bpi_optional_payload<T>(
+        self,
+        operation_name: &str,
+    ) -> impl std::future::Future<Output = Result<Option<T>, BpiError>> + Send
     where
         Self: Sized + Send,
         T: DeserializeOwned;
@@ -66,24 +86,37 @@ impl BilibiliRequest for RequestBuilder {
         let response =
             ReqwestTransport::send_request_builder(self.log_url(operation_name), operation_name)
                 .await?;
+        let result = decode_bpi_legacy_response(operation_name, &response)?;
 
-        let result = match response
-            .decode_api_envelope::<T>()
-            .and_then(|decoded| decoded.into_legacy_response())
-        {
-            Ok(response) => response,
-            Err(err) => {
-                if let BpiError::Decode { source } = &err {
-                    log_decode_error(operation_name, &response.body, source);
-                } else {
-                    tracing::error!("{} API错误: {}", operation_name, err);
-                }
-                return Err(err);
-            }
-        };
+        log_success(operation_name, start);
+        Ok(result)
+    }
 
-        let duration = start.elapsed();
-        tracing::info!("{} 请求成功，耗时: {:.2?}", operation_name, duration);
+    async fn send_bpi_payload<T>(self, operation_name: &str) -> Result<T, BpiError>
+    where
+        T: DeserializeOwned,
+    {
+        let start = Instant::now();
+        let response =
+            ReqwestTransport::send_request_builder(self.log_url(operation_name), operation_name)
+                .await?;
+        let result = decode_bpi_payload_response(operation_name, &response)?;
+
+        log_success(operation_name, start);
+        Ok(result)
+    }
+
+    async fn send_bpi_optional_payload<T>(self, operation_name: &str) -> Result<Option<T>, BpiError>
+    where
+        T: DeserializeOwned,
+    {
+        let start = Instant::now();
+        let response =
+            ReqwestTransport::send_request_builder(self.log_url(operation_name), operation_name)
+                .await?;
+        let result = decode_bpi_optional_payload_response(operation_name, &response)?;
+
+        log_success(operation_name, start);
         Ok(result)
     }
 
@@ -92,6 +125,70 @@ impl BilibiliRequest for RequestBuilder {
 
         self
     }
+}
+
+fn decode_bpi_legacy_response<T>(
+    operation_name: &str,
+    response: &TransportResponse,
+) -> Result<BpiResponse<T>, BpiError>
+where
+    T: DeserializeOwned,
+{
+    decode_bpi_transport_response(operation_name, response, |decoded| {
+        decoded.into_legacy_response()
+    })
+}
+
+fn decode_bpi_payload_response<T>(
+    operation_name: &str,
+    response: &TransportResponse,
+) -> Result<T, BpiError>
+where
+    T: DeserializeOwned,
+{
+    decode_bpi_transport_response(operation_name, response, |decoded| {
+        decoded.into_payload().map(|payload| payload.payload)
+    })
+}
+
+fn decode_bpi_optional_payload_response<T>(
+    operation_name: &str,
+    response: &TransportResponse,
+) -> Result<Option<T>, BpiError>
+where
+    T: DeserializeOwned,
+{
+    decode_bpi_transport_response(operation_name, response, |decoded| {
+        decoded
+            .into_optional_payload()
+            .map(|payload| payload.payload)
+    })
+}
+
+fn decode_bpi_transport_response<T, R>(
+    operation_name: &str,
+    response: &TransportResponse,
+    extract: impl FnOnce(TransportEnvelope<T>) -> Result<R, BpiError>,
+) -> Result<R, BpiError>
+where
+    T: DeserializeOwned,
+{
+    match response.decode_api_envelope::<T>().and_then(extract) {
+        Ok(result) => Ok(result),
+        Err(err) => {
+            if let BpiError::Decode { source } = &err {
+                log_decode_error(operation_name, &response.body, source);
+            } else {
+                tracing::error!("{} API错误: {}", operation_name, err);
+            }
+            Err(err)
+        }
+    }
+}
+
+fn log_success(operation_name: &str, start: Instant) {
+    let duration = start.elapsed();
+    tracing::info!("{} 请求成功，耗时: {:.2?}", operation_name, duration);
 }
 
 fn log_decode_error(operation_name: &str, bytes: &[u8], error: &serde_json::Error) {
@@ -118,5 +215,66 @@ fn log_decode_error(operation_name: &str, bytes: &[u8], error: &serde_json::Erro
     #[cfg(not(any(test, debug_assertions)))]
     {
         tracing::error!("{} JSON解析失败: {}", operation_name, error);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use bytes::Bytes;
+    use serde::Deserialize;
+
+    use super::*;
+    use crate::transport::{ResponseMetadata, TransportResponse};
+    use crate::{BpiError, BpiResult};
+
+    #[derive(Debug, Deserialize, PartialEq, Eq)]
+    struct Payload {
+        value: u64,
+    }
+
+    #[test]
+    fn decode_bpi_payload_response_returns_required_payload() -> BpiResult<()> {
+        let payload = decode_bpi_payload_response::<Payload>(
+            "unit",
+            &response(br#"{ "code": 0, "data": { "value": 42 } }"#),
+        )?;
+
+        assert_eq!(payload.value, 42);
+        Ok(())
+    }
+
+    #[test]
+    fn decode_bpi_payload_response_rejects_missing_required_payload() {
+        let err = decode_bpi_payload_response::<Payload>(
+            "unit",
+            &response(br#"{ "code": 0, "message": "0" }"#),
+        )
+        .unwrap_err();
+
+        assert!(matches!(err, BpiError::MissingData));
+    }
+
+    #[test]
+    fn decode_bpi_optional_payload_response_allows_missing_payload() -> BpiResult<()> {
+        let payload = decode_bpi_optional_payload_response::<Payload>(
+            "unit",
+            &response(br#"{ "code": 0, "message": "0" }"#),
+        )?;
+
+        assert!(payload.is_none());
+        Ok(())
+    }
+
+    fn response(body: &'static [u8]) -> TransportResponse {
+        TransportResponse {
+            metadata: ResponseMetadata {
+                status: 200,
+                duration: Duration::from_millis(1),
+                api_code: None,
+            },
+            body: Bytes::from_static(body),
+        }
     }
 }
