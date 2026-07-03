@@ -85,6 +85,12 @@ impl ContractAuth {
             .iter()
             .any(|requirement| matches!(requirement, AuthRequirement::Wbi))
     }
+
+    pub fn requires_csrf(&self) -> bool {
+        self.requires
+            .iter()
+            .any(|requirement| matches!(requirement, AuthRequirement::Csrf))
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -529,6 +535,30 @@ mod tests {
             contract.request.response_decoding,
             ResponseDecoding::Disabled
         );
+        Ok(())
+    }
+
+    #[test]
+    fn contract_auth_detects_csrf_requirement() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "wallet.info.normal",
+                "request": {
+                    "method": "POST",
+                    "url": "https://pay.bilibili.com/paywallet/wallet/getUserWallet",
+                    "auth": {
+                        "profile": "normal",
+                        "requires": ["cookie", "csrf"]
+                    },
+                    "body": {
+                        "csrf": "${csrf}"
+                    }
+                }
+            }"#,
+        )?;
+
+        assert!(contract.request.auth.requires_cookie());
+        assert!(contract.request.auth.requires_csrf());
         Ok(())
     }
 

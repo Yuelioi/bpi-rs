@@ -62,10 +62,10 @@ fn client_for_contract(contract: &ApiContract, accounts: &RawProbeConfig) -> Bpi
                 )
             })?;
         builder = builder.account(account);
-    } else if contract.request.auth.requires_cookie() {
+    } else if contract.request.auth.requires_cookie() || contract.request.auth.requires_csrf() {
         return Err(BpiError::invalid_parameter(
             "profile",
-            "cookie-authenticated contracts must name an account profile",
+            "authenticated contracts must name an account profile",
         ));
     }
 
@@ -88,31 +88,97 @@ async fn build_request(client: &BpiClient, contract: &ApiContract) -> BpiResult<
         HttpMethod::Get => client.get(contract.request.url.as_str()),
         HttpMethod::Post => client.post(contract.request.url.as_str()),
     };
+    let variables = template_variables(client, contract)?;
+    let query = render_string_map(&contract.request.query, &variables)?;
 
     let query = if contract.request.auth.requires_wbi() {
-        client.get_wbi_sign2(contract.request.query.iter()).await?
+        client.get_wbi_sign2(query.iter()).await?
     } else {
-        contract
-            .request
-            .query
-            .iter()
-            .map(|(key, value)| (key.clone(), value.clone()))
-            .collect()
+        query.into_iter().collect()
     };
 
     if !query.is_empty() {
         request = request.query(&query);
     }
 
-    for (name, value) in &contract.request.headers {
+    let headers = render_string_map(&contract.request.headers, &variables)?;
+    for (name, value) in headers {
         request = request.header(name, value);
     }
 
     if let Some(body) = contract.request.body.as_ref() {
-        request = request.json(body);
+        let body = render_value(body, &variables)?;
+        request = request.json(&body);
     }
 
     Ok(request)
+}
+
+fn template_variables(
+    client: &BpiClient,
+    contract: &ApiContract,
+) -> BpiResult<BTreeMap<String, String>> {
+    let mut variables = BTreeMap::new();
+
+    if contract.request.auth.requires_csrf() {
+        variables.insert("csrf".to_string(), client.csrf()?);
+    }
+
+    Ok(variables)
+}
+
+fn render_string_map(
+    values: &BTreeMap<String, String>,
+    variables: &BTreeMap<String, String>,
+) -> BpiResult<BTreeMap<String, String>> {
+    values
+        .iter()
+        .map(|(key, value)| Ok((key.clone(), render_string(value, variables)?)))
+        .collect()
+}
+
+fn render_value(
+    value: &serde_json::Value,
+    variables: &BTreeMap<String, String>,
+) -> BpiResult<serde_json::Value> {
+    match value {
+        serde_json::Value::String(value) => {
+            Ok(serde_json::Value::String(render_string(value, variables)?))
+        }
+        serde_json::Value::Array(values) => values
+            .iter()
+            .map(|value| render_value(value, variables))
+            .collect::<BpiResult<Vec<_>>>()
+            .map(serde_json::Value::Array),
+        serde_json::Value::Object(values) => values
+            .iter()
+            .map(|(key, value)| Ok((key.clone(), render_value(value, variables)?)))
+            .collect::<BpiResult<serde_json::Map<_, _>>>()
+            .map(serde_json::Value::Object),
+        value => Ok(value.clone()),
+    }
+}
+
+fn render_string(input: &str, variables: &BTreeMap<String, String>) -> BpiResult<String> {
+    let mut output = String::new();
+    let mut rest = input;
+
+    while let Some(start) = rest.find("${") {
+        output.push_str(&rest[..start]);
+        let after_open = &rest[start + 2..];
+        let end = after_open.find('}').ok_or_else(|| {
+            BpiError::invalid_parameter("template", "missing closing brace in contract variable")
+        })?;
+        let name = &after_open[..end];
+        let value = variables.get(name).ok_or_else(|| {
+            BpiError::invalid_parameter("template", "contract variable is not defined")
+        })?;
+        output.push_str(value);
+        rest = &after_open[end + 1..];
+    }
+
+    output.push_str(rest);
+    Ok(output)
 }
 
 fn capture_request(request: &RequestBuilder) -> BpiResult<CapturedRequest> {
@@ -292,6 +358,96 @@ mod tests {
         assert_eq!(body["notExpired"], true);
         assert_eq!(body["tabType"], 1);
         assert_eq!(body["type"], 0);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn build_request_injects_profile_csrf_into_json_body() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "wallet.info.normal",
+                "request": {
+                    "method": "POST",
+                    "url": "https://pay.bilibili.com/paywallet/wallet/getUserWallet",
+                    "auth": {
+                        "profile": "normal",
+                        "requires": ["cookie", "csrf"]
+                    },
+                    "body": {
+                        "csrf": "${csrf}",
+                        "platformType": 3,
+                        "timestamp": 1700000000000,
+                        "traceId": 1700000000000,
+                        "version": "1.0"
+                    }
+                }
+            }"#,
+        )?;
+        let config = RawProbeConfig {
+            probe: ProbeAccountConfig {
+                normal: Some(ProbeAccountProfile {
+                    bili_jct: "normal-csrf".to_string(),
+                    dede_user_id: "43".to_string(),
+                    dede_user_id_ckmd5: "ck-normal".to_string(),
+                    sessdata: "session-normal".to_string(),
+                    buvid3: "buvid-normal".to_string(),
+                }),
+                vip: None,
+            },
+            ..RawProbeConfig::default()
+        };
+        let client = client_for_contract(&contract, &config)?;
+        let request = build_request(&client, &contract).await?;
+        let captured = capture_request(&request)?;
+
+        assert_eq!(
+            captured
+                .body
+                .as_ref()
+                .and_then(|body| body["csrf"].as_str()),
+            Some("normal-csrf")
+        );
+        assert_eq!(
+            captured.sanitized().body.as_ref().map(|body| &body["csrf"]),
+            Some(&serde_json::Value::String("<redacted>".to_string()))
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn csrf_contract_requires_named_profile() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "wallet.info.missing_profile",
+                "request": {
+                    "method": "POST",
+                    "url": "https://pay.bilibili.com/paywallet/wallet/getUserWallet",
+                    "auth": {
+                        "requires": ["csrf"]
+                    },
+                    "body": {
+                        "csrf": "${csrf}"
+                    }
+                }
+            }"#,
+        )?;
+
+        let err = match client_for_contract(&contract, &RawProbeConfig::default()) {
+            Ok(_) => {
+                return Err(BpiError::unsupported_response(
+                    "csrf contract without profile should be rejected",
+                ));
+            }
+            Err(err) => err,
+        };
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "profile",
+                ..
+            }
+        ));
         Ok(())
     }
 
