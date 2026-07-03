@@ -1,0 +1,99 @@
+{
+  "code": 0,
+  "data": {
+    "config": {
+      "color": 2,
+      "cover": "http://i0.hdslb.com/bfs/archive/59e86c3874a77529708e49bd3d10abe9b662f6de.png",
+      "etime": 1553788799,
+      "hint": "本周热词：",
+      "id": 1,
+      "label": "第1期(0329更新)",
+      "media_id": 448235488,
+      "name": "2019第1期 03.22 - 03.28",
+      "number": 1,
+      "share_subtitle": "暴风哭泣！今天也是为别人的神仙爱情流泪的一天……",
+      "share_title": "这是什么神仙爱情？ | B站每周必看2019年第1期",
+      "status": 2,
+      "stime": 1553184000,
+      "subject": "神仙爱情",
+      "type": "weekly_selected"
+    },
+    "list": [
+      {
+        "ai_rcmd": null,
+        "aid": 46900196,
+        "bvid": "BV14b411J7ML",
+        "cid": 82142406,
+        "copyright": 1,
+        "cover43": "",
+        "ctime": 1553152210,
+        "desc": "我在18岁认识了你，\n然后我们开始了长达8年的异地恋，\n2019年03月16日\n我们在认识十年后终于结婚了，\n这当中的酸甜苦辣只有我们自己能懂。",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 504,
+        "dynamic": "请允许我在Hyperlapse的Vlog中间插播一集！\n刚拿到婚礼素材，终于可以把这集诠释着我们十年青春的vlog补完整了！",
+        "enable_vt": 0,
+        "is_ogv": false,
+        "ogv_info": null,
+        "owner": {
+          "face": "https://i1.hdslb.com/bfs/face/1917454d730732b0b1b091e5cce9f76ad06ea7f3.jpg",
+          "mid": 326257138,
+          "name": "AresserA艾瑞斯"
+        },
+        "pic": "http://i0.hdslb.com/bfs/archive/f42edcdd84853a06e00a779162fa8655a74030a2.jpg",
+        "pid_name_v2": "vlog",
+        "pid_v2": 1029,
+        "pubdate": 1553152210,
+        "rcmd_reason": "暴风流泪推荐！今天也是为别人的神仙爱情流泪的一天！",
+        "rights": {
+          "arc_pay": 0,
+          "autoplay": 1,
+          "bp": 0,
+          "download": 0,
+          "elec": 0,
+          "hd5": 1,
+          "is_cooperation": 0,
+          "movie": 0,
+          "no_background": 0,
+          "no_reprint": 1,
+          "pay": 0,
+          "pay_free_watch": 0,
+          "ugc_pay": 0,
+          "ugc_pay_preview": 0
+        },
+        "season_type": 0,
+        "short_link_v2": "https://b23.tv/BV14b411J7ML",
+        "stat": {
+          "aid": 46900196,
+          "coin": 553772,
+          "danmaku": 70097,
+          "dislike": 0,
+          "fav_g": 0,
+          "favorite": 237563,
+          "his_rank": 1,
+          "like": 509506,
+          "like_g": 0,
+          "now_rank": 0,
+          "reply": 22501,
+          "share": 213036,
+          "view": 5394550,
+          "vt": 0,
+          "vv": 5394550
+        },
+        "state": 0,
+        "tid": 250,
+        "tidv2": 2197,
+        "title": "这集vlog我们拍了十年，致最美好的青春",
+        "tname": "出行",
+        "tnamev2": "其他vlog",
+        "videos": 1
+      }
+    ],
+    "reminder": "每周五晚18:00更新"
+  },
+  "message": "OK",
+  "ttl": 1
+}

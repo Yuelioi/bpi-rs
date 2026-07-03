@@ -5,6 +5,10 @@ use super::params::{
     VideoRegionDynamicParams, VideoRegionNewListParams, VideoRegionNewListRankParams,
     VideoRegionTagDynamicParams,
 };
+use super::{
+    REGION_DYNAMIC_ENDPOINT, REGION_NEWLIST_ENDPOINT, REGION_NEWLIST_RANK_ENDPOINT,
+    REGION_TAG_DYNAMIC_ENDPOINT,
+};
 
 // --- 获取分区最新视频列表 ---
 
@@ -110,7 +114,7 @@ impl BpiClient {
         &self,
         params: VideoRegionDynamicParams,
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/dynamic/region")
+        self.get(REGION_DYNAMIC_ENDPOINT)
             .query(&params.query_pairs())
             .send_bpi("获取分区最新视频列表")
             .await
@@ -129,7 +133,7 @@ impl BpiClient {
         &self,
         params: VideoRegionTagDynamicParams,
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/dynamic/tag")
+        self.get(REGION_TAG_DYNAMIC_ENDPOINT)
             .query(&params.query_pairs())
             .send_bpi("获取分区标签近期互动列表")
             .await
@@ -148,7 +152,7 @@ impl BpiClient {
         &self,
         params: VideoRegionNewListParams,
     ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/newlist")
+        self.get(REGION_NEWLIST_ENDPOINT)
             .query(&params.query_pairs())
             .send_bpi("获取分区近期投稿列表")
             .await
@@ -167,7 +171,7 @@ impl BpiClient {
         &self,
         params: VideoRegionNewListRankParams,
     ) -> Result<BpiResponse<NewListRankData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/newlist_rank")
+        self.get(REGION_NEWLIST_RANK_ENDPOINT)
             .query(&params.query_pairs())
             .send_bpi("获取分区近期投稿列表 (带排序)")
             .await

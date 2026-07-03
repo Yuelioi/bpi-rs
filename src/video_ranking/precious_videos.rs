@@ -1,6 +1,8 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+use super::POPULAR_PRECIOUS_ENDPOINT;
+
 // --- 获取入站必刷视频 ---
 
 /// 入站必刷视频列表中的单个视频
@@ -23,7 +25,7 @@ impl BpiClient {
     /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/precious_videos.html#获取入站必刷视频)
     ///
     pub async fn video_popular_precious(&self) -> Result<BpiResponse<PreciousVideoData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/popular/precious")
+        self.get(POPULAR_PRECIOUS_ENDPOINT)
             .send_bpi("获取入站必刷视频")
             .await
     }

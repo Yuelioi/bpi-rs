@@ -2,6 +2,7 @@ use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 use super::params::{PopularSeriesOneParams, VideoPopularListParams};
+use super::{POPULAR_LIST_ENDPOINT, POPULAR_SERIES_LIST_ENDPOINT, POPULAR_SERIES_ONE_ENDPOINT};
 
 // --- 获取当前热门视频列表 ---
 
@@ -99,7 +100,7 @@ impl BpiClient {
         &self,
         params: VideoPopularListParams,
     ) -> Result<BpiResponse<PopularListData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/popular")
+        self.get(POPULAR_LIST_ENDPOINT)
             .query(&params.query_pairs())
             .send_bpi("获取当前热门视频列表")
             .await
@@ -113,7 +114,7 @@ impl BpiClient {
     pub async fn video_popular_series_list(
         &self,
     ) -> Result<BpiResponse<PopularSeriesListData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/popular/series/list")
+        self.get(POPULAR_SERIES_LIST_ENDPOINT)
             .send_bpi("获取每周必看全部列表")
             .await
     }
@@ -131,8 +132,10 @@ impl BpiClient {
         &self,
         params: PopularSeriesOneParams,
     ) -> Result<BpiResponse<PopularSeriesOneData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/popular/series/one")
-            .query(&params.query_pairs())
+        let params = self.get_wbi_sign2(params.query_pairs()).await?;
+
+        self.get(POPULAR_SERIES_ONE_ENDPOINT)
+            .query(&params)
             .send_bpi("获取每周必看选期详细信息")
             .await
     }

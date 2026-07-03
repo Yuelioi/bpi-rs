@@ -1,0 +1,76 @@
+{
+  "name": "video_ranking.region_newlist",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/newlist",
+    "query": {
+      "rid": "231",
+      "pn": "1",
+      "ps": "2",
+      "type": "1"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixtures contain public video ranking metadata only; raw profile outputs remain ignored under target/bpi-probe-runs/video_ranking/read"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/anonymous.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "RegionArchivesData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "RegionArchivesData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "RegionArchivesData"
+      }
+    }
+  ]
+}

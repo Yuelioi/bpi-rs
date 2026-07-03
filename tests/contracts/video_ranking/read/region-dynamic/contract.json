@@ -1,0 +1,75 @@
+{
+  "name": "video_ranking.region_dynamic",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/dynamic/region",
+    "query": {
+      "rid": "21",
+      "pn": "1",
+      "ps": "2"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixtures contain public video ranking metadata only; raw profile outputs remain ignored under target/bpi-probe-runs/video_ranking/read"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": -404,
+        "fixture": "responses/anonymous.error.json",
+        "fixture_kind": "probe_error_body",
+        "error": "not_found"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": -404,
+        "fixture": "responses/normal.error.json",
+        "fixture_kind": "probe_error_body",
+        "error": "not_found"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": -404,
+        "fixture": "responses/vip.error.json",
+        "fixture_kind": "probe_error_body",
+        "error": "not_found"
+      }
+    }
+  ]
+}

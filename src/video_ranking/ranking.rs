@@ -1,6 +1,7 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+use super::RANKING_LIST_ENDPOINT;
 use super::params::VideoRankingListParams;
 
 // --- 获取分区视频排行榜列表 ---
@@ -37,19 +38,10 @@ impl BpiClient {
         &self,
         params: VideoRankingListParams,
     ) -> Result<BpiResponse<RankingListData>, BpiError> {
-        // 添加 User-Agent 以通过鉴权
-        let request = self
-            .get("https://api.bilibili.com/x/web-interface/ranking/v2")
+        self.get(RANKING_LIST_ENDPOINT)
             .query(&params.query_pairs())
-            .header(
-                "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
-            );
-
-        // WBI签名相关参数文档未给出完整说明，忽略
-        // request = request.query(&[("w_rid", "wbi_signature"), ("wts", "wbi_timestamp")]);
-
-        request.send_bpi("获取分区视频排行榜列表").await
+            .send_bpi("获取分区视频排行榜列表")
+            .await
     }
 }
 
