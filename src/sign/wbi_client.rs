@@ -4,7 +4,7 @@ use chrono::Local;
 use serde::{Deserialize, Serialize};
 
 use crate::sign::wbi::{WbiKeys, sign_params_at};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{ApiEnvelope, BpiClient, BpiError};
 
 const WBI_NAV_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/nav";
 
@@ -42,15 +42,19 @@ impl BpiClient {
     }
 
     async fn fetch_wbi_keys(&self) -> Result<WbiKeys, BpiError> {
-        let resp: BpiResponse<NavData> =
-            self.get(WBI_NAV_ENDPOINT).send_bpi("获取 wbi 签名").await?;
+        let bytes = self.get(WBI_NAV_ENDPOINT).send().await?.bytes().await?;
 
-        let data = resp
-            .data
-            .ok_or_else(|| BpiError::parse("获取 wbi 签名失败"))?;
-
-        WbiKeys::from_nav_urls(&data.wbi_img.img_url, &data.wbi_img.sub_url)
+        wbi_keys_from_nav_bytes(&bytes)
     }
+}
+
+fn wbi_keys_from_nav_bytes(bytes: &[u8]) -> Result<WbiKeys, BpiError> {
+    let resp = ApiEnvelope::<NavData>::from_slice(bytes)?;
+    let data = resp
+        .data
+        .ok_or_else(|| BpiError::parse("获取 wbi 签名失败"))?;
+
+    WbiKeys::from_nav_urls(&data.wbi_img.img_url, &data.wbi_img.sub_url)
 }
 
 pub(crate) fn current_wbi_cache_bucket() -> String {
@@ -66,7 +70,7 @@ fn current_unix_timestamp() -> Result<u64, BpiError> {
 
 #[cfg(test)]
 mod tests {
-    use super::current_wbi_cache_bucket;
+    use super::{current_wbi_cache_bucket, wbi_keys_from_nav_bytes};
     use crate::sign::wbi::WbiKeys;
     use crate::{BpiClient, BpiError};
 
@@ -87,6 +91,28 @@ mod tests {
         assert!(signed.contains(&("mid".to_string(), "1001".to_string())));
         assert!(signed.iter().any(|(key, _)| key == "wts"));
         assert!(signed.iter().any(|(key, _)| key == "w_rid"));
+        Ok(())
+    }
+
+    #[test]
+    fn wbi_keys_parse_from_anonymous_nav_error_envelope() -> Result<(), BpiError> {
+        let keys = wbi_keys_from_nav_bytes(
+            br#"{
+                "code": -101,
+                "message": "not logged in",
+                "ttl": 1,
+                "data": {
+                    "isLogin": false,
+                    "wbi_img": {
+                        "img_url": "https://i0.hdslb.com/bfs/wbi/7cd084941338484aae1ad9425b84077c.png",
+                        "sub_url": "https://i0.hdslb.com/bfs/wbi/4932caff0ff746eab6f01bf08b70ac45.png"
+                    }
+                }
+            }"#,
+        )?;
+
+        assert_eq!(keys.img_key(), "7cd084941338484aae1ad9425b84077c");
+        assert_eq!(keys.sub_key(), "4932caff0ff746eab6f01bf08b70ac45");
         Ok(())
     }
 }

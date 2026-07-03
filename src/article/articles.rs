@@ -125,13 +125,24 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    const TEST_LIST_ID: i64 = 207146;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/article/articles/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_articles_info() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let params = ArticleArticlesInfoParams::new(207146)?;
+        let params = ArticleArticlesInfoParams::new(TEST_LIST_ID)?;
 
         let result = bpi.article_articles_info(params).await?;
         let data = result.into_data()?;
@@ -141,6 +152,74 @@ mod tests {
         assert!(!data.articles.is_empty());
         assert!(!data.author.name.is_empty());
 
+        Ok(())
+    }
+
+    #[test]
+    fn article_articles_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params = ArticleArticlesInfoParams::new(TEST_LIST_ID)?;
+
+        assert_eq!(contract.name, "article.articles_info");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/article/list/web/articles"
+        );
+        assert_eq!(
+            contract.request.query.get("id").map(String::as_str),
+            Some("207146")
+        );
+        assert_eq!(params.query_pairs(), vec![("id", "207146".to_string())]);
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("ArticlesData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn article_articles_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/article/articles/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!("../../tests/contracts/article/articles/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/article/articles/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<ArticlesData>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.list.id, TEST_LIST_ID);
+            assert!(!payload.articles.is_empty());
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/article/read/articles/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn article_articles_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<ArticlesData>>(body)?.into_payload()?;
+
+            assert_eq!(payload.list.id, TEST_LIST_ID);
+        }
         Ok(())
     }
 }

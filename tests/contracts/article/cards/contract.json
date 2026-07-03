@@ -1,0 +1,77 @@
+{
+  "name": "article.cards",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/article/cards",
+    "query": {
+      "ids": "av2,cv1,cv2",
+      "web_location": "333.1305"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": [
+        "wbi"
+      ]
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "public article response body promoted without account headers"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": [
+          "wbi"
+        ]
+      },
+      "response": {
+        "api_code": -352,
+        "fixture": "responses/anonymous.error.json",
+        "fixture_kind": "probe_body",
+        "error": "wbi_risk_control"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "wbi",
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "CardData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "wbi",
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "CardData"
+      }
+    }
+  ]
+}

@@ -1,0 +1,218 @@
+{
+  "code": 0,
+  "data": {
+    "articles": [
+      {
+        "attributes": 0,
+        "author_uid": 293793435,
+        "categories": [
+          {
+            "id": 17,
+            "name": "科技",
+            "parent_id": 0
+          },
+          {
+            "id": 26,
+            "name": "数码",
+            "parent_id": 17
+          }
+        ],
+        "category": {
+          "id": 26,
+          "name": "数码",
+          "parent_id": 17
+        },
+        "dyn_id_str": "359941916086007588",
+        "id": 4815593,
+        "image_urls": [
+          "https://i0.hdslb.com/bfs/article/00497c8df7130f22e5b953694b8931a22d32f133.jpg"
+        ],
+        "like_state": 0,
+        "only_fans": 0,
+        "publish_time": 1582643908,
+        "state": 0,
+        "stats": {
+          "coin": 31,
+          "dislike": 0,
+          "dynamic": 0,
+          "favorite": 127,
+          "like": 80,
+          "reply": 37,
+          "share": 9,
+          "view": 7689
+        },
+        "summary": "各位小可爱们大家好啊，终于可以结束我长达一年的咕咕了.........在这蝠想联翩的日子里也闲的没事，除了上课就是睡觉，还不如搞点事情哪个猿不想拥有自己的B站爬虫呢（误），当然自制一个B站的综合信息台也是可以的，比如显示粉丝数  获赞数（掉粉警告）于是就萌生了这个研究B站api的想法，以后也会继续不定期分享我的主体思路是利用Chrome中的F12工具进行分析，再用curl进行验证先从视频下手吧qwq我们以av2075941为例network检测下，有各种图片、视频、网页、js。。。。。的传输记录",
+        "title": "【B站API】api研究笔记ep1-视频基本信息",
+        "type": 0,
+        "words": 2906
+      },
+      {
+        "attributes": 0,
+        "author_uid": 293793435,
+        "categories": [
+          {
+            "id": 17,
+            "name": "科技",
+            "parent_id": 0
+          },
+          {
+            "id": 26,
+            "name": "数码",
+            "parent_id": 17
+          }
+        ],
+        "category": {
+          "id": 26,
+          "name": "数码",
+          "parent_id": 17
+        },
+        "dyn_id_str": "360132101532120524",
+        "id": 4820548,
+        "image_urls": [
+          "https://i0.hdslb.com/bfs/article/2416ee72759a5c2c8bba0f10d42e789fc0c0ae2b.jpg"
+        ],
+        "like_state": 0,
+        "only_fans": 0,
+        "publish_time": 1582688189,
+        "state": 0,
+        "stats": {
+          "coin": 10,
+          "dislike": 0,
+          "dynamic": 0,
+          "favorite": 43,
+          "like": 44,
+          "reply": 27,
+          "share": 2,
+          "view": 4126
+        },
+        "summary": "大家中午好鸭昨天我们研究了B站api的获取方法和使用方法 这一期我们继续分享另一个从网页中寻找api的方法以及研究视频的其他api接口以av170001为例首先打开视频，在F12的network下的监控中加载页面筛选XHR对象用搜索法的效率较低，不如我们直接进行筛选&观察通过对资源路径的观察可以猜到某些有关的项比如playurl有可能是播放的地址，pagelist可能是分P列表，view不就是昨天研究的『视频基本信息』吗通过继续分析我总结出了以下api这个可以在只想获取简介时应用，而不用处理多余",
+        "title": "【B站API】api研究笔记ep2-视频其他信息",
+        "type": 0,
+        "words": 4319
+      },
+      {
+        "attributes": 0,
+        "author_uid": 293793435,
+        "categories": [
+          {
+            "id": 17,
+            "name": "科技",
+            "parent_id": 0
+          },
+          {
+            "id": 26,
+            "name": "数码",
+            "parent_id": 17
+          }
+        ],
+        "category": {
+          "id": 26,
+          "name": "数码",
+          "parent_id": 17
+        },
+        "dyn_id_str": "370256645123647098",
+        "id": 5263184,
+        "image_urls": [
+          "https://i0.hdslb.com/bfs/article/b520939046899303cfcac1511308eb87ede760d7.jpg"
+        ],
+        "like_state": 0,
+        "only_fans": 0,
+        "publish_time": 1585045493,
+        "state": 0,
+        "stats": {
+          "coin": 5,
+          "dislike": 0,
+          "dynamic": 0,
+          "favorite": 35,
+          "like": 30,
+          "reply": 11,
+          "share": 1,
+          "view": 2463
+        },
+        "summary": "昨天视频新编号BV上线了，所有视频的编号默认都变成了BVxxx，不再是avxxx，兼容在链接和搜索中输入av号，评论区和动态av和bv都可以一键传送显然日益增长的投稿量对于编号是个问题，int是有上限的，但一串“乱码”缺少了灵魂，还会让我们想到磁力链接或者熊掌盘的链接（手动狗头）看到av170001，我会想到“法克儿~~”，但看到BV17x411w7KC，我？？？？？其实av号并没有消失，只不过它已经隐藏于大众的视野里了，av和bv本质上是可以双向转换的方法一（电脑版推荐）：打开一个视频，会发现",
+        "title": "【B站API】api研究笔记Special-AV与BV互转",
+        "type": 0,
+        "words": 1472
+      }
+    ],
+    "attention": false,
+    "author": {
+      "face": "https://i0.hdslb.com/bfs/face/aebb2639a0d47f2ce1fec0631f412eaf53d4a0be.jpg",
+      "fans": 0,
+      "level": 6,
+      "mid": 293793435,
+      "name": "社会易姐QwQ",
+      "nameplate": {
+        "condition": "单个自制视频总播放数>=10万，数据次日更新",
+        "image": "https://i1.hdslb.com/bfs/face/f6a31275029365ae5dc710006585ddcf1139bde1.png",
+        "image_small": "https://i2.hdslb.com/bfs/face/b09cdb4c119c467cf2d15db5263b4f539fa6e30b.png",
+        "level": "高级勋章",
+        "name": "白银殿堂",
+        "nid": 3
+      },
+      "official_verify": {
+        "desc": "",
+        "type": -1
+      },
+      "pendant": {
+        "expire": 0,
+        "image": "https://i0.hdslb.com/bfs/garb/item/4f8f3f1f2d47f0dad84f66aa57acd4409ea46361.png",
+        "name": "初音未来13周年",
+        "pid": 2511
+      },
+      "vip": {
+        "avatar_subscript": 1,
+        "due_date": 0,
+        "label": {
+          "label_theme": "annual_vip",
+          "path": "http://i0.hdslb.com/bfs/vip/label_annual.png",
+          "text": "年度大会员"
+        },
+        "nickname_color": "#FB7299",
+        "status": 1,
+        "theme_type": 0,
+        "type": 2,
+        "vip_pay_type": 0
+      }
+    },
+    "last": {
+      "attributes": 0,
+      "author_uid": 0,
+      "categories": [],
+      "category": {
+        "id": 0,
+        "name": "",
+        "parent_id": 0
+      },
+      "dyn_id_str": "",
+      "id": 0,
+      "image_urls": [],
+      "only_fans": 0,
+      "publish_time": 0,
+      "state": 0,
+      "summary": "",
+      "title": "",
+      "type": 0,
+      "words": 0
+    },
+    "list": {
+      "apply_time": "",
+      "articles_count": 3,
+      "check_time": "",
+      "ctime": 1582718126,
+      "id": 207146,
+      "image_url": "https://i0.hdslb.com/bfs/article/96d2b3d2a72e6497a011c885ab9245c51507ce18.png",
+      "mid": 293793435,
+      "name": "B站api研究笔记",
+      "publish_time": 1585045493,
+      "read": 14278,
+      "reason": "",
+      "state": 1,
+      "summary": "",
+      "update_time": 1585036952,
+      "words": 8697
+    }
+  },
+  "message": "OK",
+  "ttl": 1
+}

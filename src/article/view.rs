@@ -165,6 +165,7 @@ pub struct ArticleTag {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ArticleOpus {
     /// 以JSON呈现的文本内容
+    #[serde(default)]
     pub ops: Vec<OpusOperation>,
 }
 
@@ -363,14 +364,25 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use std::mem;
+
+    const TEST_CVID: i64 = 2;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/article/view/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_article_view() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let params = ArticleViewParams::new(2)?;
+        let params = ArticleViewParams::new(TEST_CVID)?;
 
         let result = bpi.article_view(params).await?;
 
@@ -385,5 +397,99 @@ mod tests {
     #[test]
     fn opus_insert_keeps_rich_payload_boxed() {
         assert!(mem::size_of::<OpusInsert>() <= 64);
+    }
+
+    #[test]
+    fn article_view_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params = ArticleViewParams::new(TEST_CVID)?;
+
+        assert_eq!(contract.name, "article.view");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/article/view"
+        );
+        assert_eq!(
+            contract.request.query.get("id").map(String::as_str),
+            Some("2")
+        );
+        assert_eq!(
+            contract
+                .request
+                .query
+                .get("gaia_source")
+                .map(String::as_str),
+            Some("main_web")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("id", "2".to_string()),
+                ("gaia_source", "main_web".to_string()),
+            ]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("wbi_risk_control")
+        );
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("ArticleViewData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn article_view_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!("../../tests/contracts/article/view/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/article/view/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<ArticleViewData>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.id, TEST_CVID);
+            assert!(!payload.title.is_empty());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn article_view_anonymous_fixture_records_wbi_error() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/article/view/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+
+        assert_eq!(err.code(), Some(-352));
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/article/read/view/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn article_view_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<ArticleViewData>>(body)?.into_payload()?;
+
+            assert_eq!(payload.id, TEST_CVID);
+        }
+        Ok(())
     }
 }

@@ -8,7 +8,10 @@ use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 卡片信息响应类型
-pub type CardResponse = BpiResponse<std::collections::HashMap<String, CardItem>>;
+pub type CardData = std::collections::HashMap<String, CardItem>;
+
+/// 卡片信息响应类型
+pub type CardResponse = BpiResponse<CardData>;
 
 /// 卡片项目（可以是视频、专栏或直播间）
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -362,7 +365,16 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use std::mem;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/article/cards/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -381,5 +393,98 @@ mod tests {
     #[test]
     fn card_item_keeps_large_payloads_boxed() {
         assert!(mem::size_of::<CardItem>() <= 64);
+    }
+
+    #[test]
+    fn article_cards_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params = ArticleCardsParams::new("av2,cv1,cv2")?;
+
+        assert_eq!(contract.name, "article.cards");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/article/cards"
+        );
+        assert_eq!(
+            contract.request.query.get("ids").map(String::as_str),
+            Some("av2,cv1,cv2")
+        );
+        assert_eq!(
+            contract
+                .request
+                .query
+                .get("web_location")
+                .map(String::as_str),
+            Some("333.1305")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("ids", "av2,cv1,cv2".to_string()),
+                ("web_location", "333.1305".to_string()),
+            ]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("wbi_risk_control")
+        );
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("CardData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn article_cards_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!("../../tests/contracts/article/cards/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/article/cards/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<CardData>::from_slice(bytes)?.into_payload()?;
+
+            assert!(payload.contains_key("av2"));
+            assert!(payload.contains_key("cv1"));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn article_cards_anonymous_fixture_records_wbi_error() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/article/cards/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+
+        assert_eq!(err.code(), Some(-352));
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/article/read/cards/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn article_cards_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload = serde_json::from_value::<ApiEnvelope<CardData>>(body)?.into_payload()?;
+
+            assert!(payload.contains_key("cv1"));
+        }
+        Ok(())
     }
 }

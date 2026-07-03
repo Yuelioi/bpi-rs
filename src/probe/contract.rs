@@ -65,6 +65,12 @@ impl ContractAuth {
             .iter()
             .any(|requirement| matches!(requirement, AuthRequirement::Cookie))
     }
+
+    pub fn requires_wbi(&self) -> bool {
+        self.requires
+            .iter()
+            .any(|requirement| matches!(requirement, AuthRequirement::Wbi))
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

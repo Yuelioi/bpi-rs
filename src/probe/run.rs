@@ -13,7 +13,7 @@ pub async fn execute_contract(
     accounts: &RawProbeConfig,
 ) -> BpiResult<ProbeResult> {
     let client = client_for_contract(contract, accounts)?;
-    let request = build_request(&client, contract)?;
+    let request = build_request(&client, contract).await?;
     let captured_request = capture_request(&request)?;
     let response = request.send().await?;
     let status = response.status().as_u16();
@@ -59,14 +59,25 @@ fn client_for_contract(contract: &ApiContract, accounts: &RawProbeConfig) -> Bpi
     builder.build()
 }
 
-fn build_request(client: &BpiClient, contract: &ApiContract) -> BpiResult<RequestBuilder> {
+async fn build_request(client: &BpiClient, contract: &ApiContract) -> BpiResult<RequestBuilder> {
     let mut request = match contract.request.method {
         HttpMethod::Get => client.get(contract.request.url.as_str()),
         HttpMethod::Post => client.post(contract.request.url.as_str()),
     };
 
-    if !contract.request.query.is_empty() {
-        request = request.query(&contract.request.query);
+    let query = if contract.request.auth.requires_wbi() {
+        client.get_wbi_sign2(contract.request.query.iter()).await?
+    } else {
+        contract
+            .request
+            .query
+            .iter()
+            .map(|(key, value)| (key.clone(), value.clone()))
+            .collect()
+    };
+
+    if !query.is_empty() {
+        request = request.query(&query);
     }
 
     for (name, value) in &contract.request.headers {
@@ -138,6 +149,8 @@ mod tests {
     use crate::BpiError;
     use crate::probe::account::{ProbeAccountConfig, ProbeAccountProfile, RawProbeConfig};
     use crate::probe::contract::ApiContract;
+    use crate::sign::wbi::WbiKeys;
+    use crate::sign::wbi_client::current_wbi_cache_bucket;
 
     #[tokio::test]
     async fn execute_rejects_cookie_contract_without_named_profile() {
@@ -166,8 +179,8 @@ mod tests {
         ));
     }
 
-    #[test]
-    fn captured_request_includes_default_cookie_but_sanitized_output_redacts_it()
+    #[tokio::test]
+    async fn captured_request_includes_default_cookie_but_sanitized_output_redacts_it()
     -> Result<(), BpiError> {
         let contract = ApiContract::from_slice(
             br#"{
@@ -197,13 +210,51 @@ mod tests {
         };
 
         let client = client_for_contract(&contract, &config)?;
-        let request = build_request(&client, &contract)?;
+        let request = build_request(&client, &contract).await?;
         let captured = capture_request(&request)?;
 
         assert!(captured.headers.contains_key("cookie"));
 
         let sanitized = captured.sanitized();
         assert_eq!(sanitized.headers["cookie"], "<redacted>");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn build_request_adds_wbi_signature_when_required() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "article.view.anonymous",
+                "request": {
+                    "method": "GET",
+                    "url": "https://api.bilibili.com/x/article/view",
+                    "query": {
+                        "id": "2",
+                        "gaia_source": "main_web"
+                    },
+                    "auth": { "requires": ["wbi"] }
+                }
+            }"#,
+        )?;
+        let client = BpiClient::new()?;
+        client.wbi_key_cache().insert(
+            current_wbi_cache_bucket(),
+            WbiKeys::new(
+                "abcdefghijklmnopqrstuvwxyz123456",
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ654321",
+            )?,
+        )?;
+
+        let request = build_request(&client, &contract).await?;
+        let captured = capture_request(&request)?;
+
+        assert_eq!(captured.query.get("id").map(String::as_str), Some("2"));
+        assert_eq!(
+            captured.query.get("gaia_source").map(String::as_str),
+            Some("main_web")
+        );
+        assert!(captured.query.contains_key("wts"));
+        assert!(captured.query.contains_key("w_rid"));
         Ok(())
     }
 }

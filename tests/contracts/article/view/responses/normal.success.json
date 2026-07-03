@@ -1,0 +1,2575 @@
+{
+  "code": 0,
+  "data": {
+    "act_id": 0,
+    "apply_time": "",
+    "authenMark": null,
+    "author": {
+      "face": "http://i0.hdslb.com/bfs/face/ff6b51c3b339dae5f341d1693f52132ab11c86b6.jpg",
+      "fans": 33161,
+      "level": 4,
+      "mid": 144900660,
+      "name": "专栏小天使",
+      "nameplate": {
+        "condition": "",
+        "image": "",
+        "image_small": "",
+        "level": "",
+        "name": "",
+        "nid": 0
+      },
+      "official_verify": {
+        "desc": "专栏小天使 官方账号",
+        "type": 0
+      },
+      "pendant": {
+        "expire": 0,
+        "image": "",
+        "name": "",
+        "pid": 0
+      },
+      "vip": {
+        "avatar_subscript": 0,
+        "due_date": 0,
+        "label": {
+          "label_theme": "",
+          "path": "",
+          "text": ""
+        },
+        "nickname_color": "",
+        "status": 0,
+        "theme_type": 0,
+        "type": 0,
+        "vip_pay_type": 0
+      }
+    },
+    "banner_url": "https://i0.hdslb.com/bfs/article/131b1d41b857d5308f5bff36591d117bddc48d96.jpg@90p.webp",
+    "categories": [
+      {
+        "id": 3,
+        "name": "生活",
+        "parent_id": 0
+      },
+      {
+        "id": 15,
+        "name": "日常",
+        "parent_id": 3
+      }
+    ],
+    "category": {
+      "id": 15,
+      "name": "日常",
+      "parent_id": 3
+    },
+    "check_state": 0,
+    "check_time": "",
+    "content": "<p>欢迎各位使用bilibili专栏，为了保证bilibili专栏的内容质量，维护专栏的内容生态，让创作者和读者都拥有良好的使用体验和阅读体验，请各位谨遵以下规范条例：</p><h1><br/></h1><h1><strong>严令禁止条例</strong><br/></h1><p>bilibili严格遵守我国政府颁布的《互联网信息服务管理办法》第十五条规定，并将此作为bilibili平台运行的基本准则；对于含有以下内容的信息，我们将视违规情节严重性封禁专栏权限，严重者将导致您的账号被封停，并且我们还将保留追究相应的法律责任的权利：</p><p>(一)反对宪法所确定的基本原则的；<br/>(二)危害国家安全，泄露国家秘密，颠覆国家政权，破坏国家统一的；<br/>(三)损害国家荣誉和利益的；<br/>(四)煽动民族仇恨、民族歧视，破坏民族团结的；<br/>(五)破坏国家宗教政策，宣扬邪教和封建迷信的；<br/>(六)散布谣言，扰乱社会秩序，破坏社会稳定的；<br/>(七)散布淫秽、色情、赌博、暴力、凶杀、恐怖或者教唆犯罪的；<br/>(八)侮辱或者诽谤他人，侵害他们合法权益的；<br/>(九)含有法律、行政法规禁止的其他内容的。</p><p><br/></p><h1><strong>一般违禁条例</strong><br/></h1><p>为了保护用户创造的内容、维护良好的社区氛围，我们会对以下违禁行为进行处理，对相关稿件进行退回或锁定，同时将视违规情节严重性封禁专栏权限，情节特别严重参照严令禁止条例处理方式：</p><p><strong>一、含有低俗、色情内容</strong><br/></p><p>文章中不允许含有性暗示类型的露骨内容，如色情描写、露点图片等。</p><p>禁止在文章及评论中发布与色情内容有关的第三方网址、社交账号、网盘代码等违规信息。<br/></p><p><strong>二、涉及欺诈、诈骗行为</strong><br/></p><p>所有通过欺骗他人，为自己谋取经济利益的行为都是不允许的。</p><p><strong>三、人身攻击</strong><br/></p><p>请不要对任何个人或群体进行嘲讽、发布仇恨言论、挑拨他人矛盾。</p><p><strong>四、侵犯个人隐私</strong><br/></p><p>文章内容涉嫌跟踪、威胁、骚扰、胁迫、侵犯用户个人隐私、披露用户个人信息等情况，将会受到严肃处理。</p><p><strong>五、恶意冒充他人</strong><br/></p><p>禁止通过自己的账号信息（昵称、头像、签名、个人空间等），恶意模仿特定用户。另外，伪装成涉及官方业务的账号，同样也是不允许的。</p><p><strong>六、侵犯他人版权</strong><br/></p><p>未注明详细出处，在投稿中存在大量抄袭引用他人原创的文章内容；</p><p>未经原作者允许，以冒充原作者身份的方式，或以已获得转载授权为由，搬运转载他人的作品。</p><p>对于涉及以上侵权行为的用户，我们将严肃处理。</p><p><strong>七、恶意投稿</strong></p><p>请勿恶意规避审核检测，以任意漏洞提交含有违禁内容的文章。</p><p>对于诸如错区或题文不符等文章投稿，我们会打回并给予修改的建议方式。请勿无视管理员修改提示，多次反复提交或多次删稿重投。</p><p><br/></p><h1><strong>内容规范条例</strong></h1><p><strong>一、不接受的内容类型</strong></p><p>专栏欢迎并推广原创的内容投稿，不接受未授权的转载搬运。除了涉及违规内容外，同时不接受以下分类主题的文章投稿：时事政治、健康医疗、民族宗教，以及其他带有渲染社会负面现象，对于社会导向有误的文章。</p><p>另外同样不接受内容不完整、主题不清晰、排版格式混乱（无标点或无段落）等无法满足正常阅读体验的文章稿件。</p><p>※&nbsp; 目前仅接受中文、英文、日文三种语言的投稿。外语相关部分请尽量备注中文翻译哦。</p><p><strong>二、不推荐的投稿类型</strong><br/></p><p>为了建立健康的创作环境与良好的用户体验，除了违法违规和以上不适宜的内容外，我们也同样不推荐发布以下分类主题的投稿：短文资讯、情感鸡汤、图集展示（美图壁纸、涂鸦手绘、表情斗图等），以及个人动态（随笔日记、晒物晒照、投稿预告等）。</p><p>个人动态等个性化内容建议使用“发布动态”的功能哟。</p><p><span class=\"font-size-16\"><strong>三、鼓励原创内容</strong></span></p><p>哔哩哔哩专栏鼓励用户发布原创文章。作者在投稿时可以勾选原创声明，相应的专栏会展示原创标识。<a href=\"https://www.bilibili.com/read/cv2425181\">（关于原创标识）</a></p><p>勾选原创声明意味着作者承诺文章是本人独立创作，并愿意承担一切相关责任。对于冒充原创的行为，我们将按照平台规范给予处罚，包括但不限于锁定相应文章、收回创作激励计划收益、取消专栏投稿权限、封禁账号等。</p><p>勾选“原创文章”即代表您承诺该文章是由您本人（或持有该账号之组织）独立创作完成，且不属于以下三种情况：</p><p>1.歪曲、篡改、抄袭、剽窃他人创作而产生的作品，</p><p>2.转发、大量引用、未经授权进行改编、翻译、注释、整理他人作品形成的内容，</p><p>3.通过其他侵犯著作权方式获得的内容。</p><p>在取得原作者同意后，对作品进行改编、翻译、注释、整理等二次创作的，视同原创。</p><p>对二次创作作品进行改编、翻译、注释、整理的，应获得原作者及二次创作作品作者的同意。</p><p>哔哩哔哩专栏鼓励用户发布原创文章，完成原创声明的文章会展示原创标识，但哔哩哔哩专栏无法对原创声明的真实性进行核实。若您在进行原创声明后，被证明的确存在侵权、抄袭等违规行为，我们将按照平台规范从严处罚。包括但不限于收回投稿权限，封禁相关账号等。</p><p><strong>四、不允许的垃圾广告</strong><br/></p><p>为了保证用户的阅读体验，我们拒绝各类垃圾营销广告！<br/>以下行为会被视为散播垃圾广告信息，我们会对其进行相应处理：<br/>（1）内容主题涉及商业产品、品牌活动、物品交易等推广，或与投稿者个人及文章内容无关的推广；<br/>（2）散播各类游戏、社区的邀请码与相关链接；<br/>（3）纯招聘类信息等；</p><p>（4）金融理财产品广告，包含但不限于股票基金、虚拟货币、保险产品、培训课程的推销和荐购</p><p>（5）多个账号发布同类内容的推广，且稿件内容重复、质量低下，或涉及标题封面党、错区刷版等其他恶意投稿行为</p><p>以上内容将会被退回要求修改或者锁定处理。对于多次涉及发布垃圾广告行为的用户，将直接视为垃圾营销账号，取消专栏的投稿权限。</p><p><strong>五、不适宜的标题形式</strong><br/></p><p>为了保证bilibili专栏的文章内容质量，我们拒绝各种以过度夸张、耸动的标题和内容去吸引人眼球的行为，标题党的标题种类包括但不限于：</p><p>（1） 使用过度夸张的惊叹词；<br/>（2）&nbsp; 断章取义歪曲事实真相；<br/>（3）&nbsp; 故意营造悬念引人好奇；<br/>（4）&nbsp; 捏造正文中不存在的人、物、情节；<br/>（5）&nbsp; 题文不符，标题存在歧义。</p><p>以上内容我们建议作者修改完毕后再次提交，请勿不经修改重复提交或删除重投。</p><p><br/></p><h1><strong>专栏分区介绍</strong><br/></h1><p>目前专栏开放了动画、游戏、影视、生活、兴趣、轻小说、科技七个分区。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/414b05b103c0d74a1896588bd22139a3bbfbf11a.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>热爱动画的小伙伴，可投稿海内外番剧动画、动态漫画、独立动画短片相关的作品推荐、解读杂谈、盘点资讯、制作技巧等类型文章。<br/></p><p><span class=\"color-purple-02\"><strong>动漫杂谈：</strong></span>与动画、漫画有关的科普杂谈、深度解读、盘点推荐等相关文章。</p><p><span class=\"color-purple-02\"><strong>动漫资讯：</strong></span>与动画、漫画有关的作品预告、业界资讯、职人访谈等相关文章。</p><p><span class=\"color-purple-02\"><strong>动画技术：</strong></span>与动画制作有关研究讨论、技术教学，或个人学院派作品展示与分析等相关文章。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/c39acb86a46b8c8d36563d9e5b5fdfa5fdd26d1a.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p><span class=\"color-default\">喜欢游戏的小伙伴们，可投稿单机联机、电子竞技、网络游戏、手机游戏、桌游棋牌相关的作品推荐、剧情解析、技巧攻略、业界杂谈等类型文章。</span><br/></p><p><span class=\"color-purple-02\"><strong>单机游戏：</strong></span>以单机或其联机模式为主要内容的相关文章。</p><p><span class=\"color-purple-02\"><strong>电子竞技：</strong></span>电子竞技游戏项目为主要内容的相关文章。</p><p><span class=\"color-purple-02\"><strong>手机游戏：</strong></span>手机及平板设备平台上的游戏相关文章。</p><p><span class=\"color-purple-02\"><strong>网络游戏：</strong></span>多人在线游戏为主要内容的相关文章。</p><p><span class=\"color-purple-02\"><strong>桌游棋牌：</strong></span>桌游、棋牌、卡牌对战等为主要内容的相关文章。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/9871f72ef4b661e057649250093a399afe5b9e23.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>在影视分区，小伙伴们可以发布你对影视作品内容的解读或推荐。不论是电影、电视剧，还是纪录片或综艺明星相关的文章，都可以在这里与大家分享。<br/></p><p><span class=\"color-purple-02\"><strong>电影：</strong></span>对电影作品内容的解读或推荐。</p><p><span class=\"color-purple-02\"><strong>电视剧：</strong></span>对电视剧作品内容的解读或推荐。</p><p><span class=\"color-purple-02\"><strong>纪录片：</strong></span>对纪录片作品内容的解读或推荐。</p><p><span class=\"color-purple-02\"><strong>综艺：</strong></span>对国内外电视节目或网络自制的综艺类节目的解读或推荐。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/b4b9abcf63db3ef6d72d0b4fb9f130e16f972d00.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>这里是各种美食、萌宠的聚集地，还有许多时尚达人带你走在时尚前沿。热爱生活的你还能在这里找到运动攻略、或是享受闲散的日常时光。一定要来生活区看看哦！<br/></p><p><span class=\"color-purple-02\"><strong>美食：</strong></span>一切和食物相关的鉴赏或料理制作教程。</p><p><span class=\"color-purple-02\"><strong>萌宠：</strong></span>可爱的、萌萌哒的宠物相关文章。</p><p><span class=\"color-purple-02\"><strong>时尚：</strong></span>包括但不限于服饰、化妆/护肤的推荐、分享和测评。</p><p><span class=\"color-purple-02\"><strong>运动：</strong></span>运动及健身项目相关的文章。</p><p><span class=\"color-purple-02\"><strong>日常：</strong></span>一般日常向的生活类文章。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/421afa78b59ac18a471b3df4392618b2d070d741.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>你有什么兴趣爱好吗？绘画、手工、摄影、音乐、舞蹈、模型手办，这是一个精彩纷呈的小世界。与小伙伴们分享你的爱好，和兴趣相投的朋友交流技术经验。把你的最得意的作品和大家展示一下吧！<br/></p><p><span class=\"color-purple-02\"><strong>绘画：</strong></span>绘画爱好者们关于绘画技巧、绘图过程的分享交流场所。</p><p><span class=\"color-purple-02\"><strong>手工：</strong></span>简易手工艺品的diy制作教程，例如；折纸、手账、橡皮章等。</p><p><span class=\"color-purple-02\"><strong>摄影：</strong></span>摄影相关的器材、教程分享，摄影图集等。</p><p><span class=\"color-purple-02\"><strong>音乐舞蹈：</strong></span>以音乐、舞蹈为主要内容的相关文章。</p><p><span class=\"color-purple-02\"><strong>模型手办：</strong></span>模型手办的相关评测、美图分享、购买贴士等。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/34019fb70ec1e828ed772934d2855e9a6e8b1640.png\" width=\"118\" height=\"44\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>欢迎大家将自己撰写的原创、同人小说等作品，分享给同样爱好阅读轻小说的小伙伴哦。同时，在“小说杂谈”分类中，您还可以分享出对各个书籍作品的推荐与读后感，和大家一起讨论写作技巧与喜爱的作者吧。下一个文豪就是您啦！&nbsp;<br/></p><p><span class=\"color-purple-02\"><strong>原创连载：</strong></span>由创作者本人参与创作的、篇幅不低于2篇的小说作品。</p><p><span class=\"color-purple-02\"><strong>同人连载：</strong></span>对原有作品进行二次创作、篇幅不低于2篇的小说作品。</p><p><span class=\"color-purple-02\"><strong>短篇小说：</strong></span>篇幅仅限于1篇的小说，包括原创和同人作品。</p><p><span class=\"color-purple-02\"><strong>小说杂谈：</strong></span>写作技巧、读书心得、或书籍推荐等文章。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/3069b764dc41745cdf6a7bc100d4f06bced56e7f.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>如果你对科学技术、人文地理有一定的专业知识，可投稿相关的趣味科普向的文章。对3C数码与汽车有一定了解的兴趣的小伙伴们，也可以投稿相关产品的测评推荐、原理知识、历史文化、使用或购买贴士等内容的文章，但不包括广告哦。<br/></p><p><span class=\"color-purple-02\"><strong>人文历史：</strong></span>体现人文或历史的稿件，如民间文化传承、讲谈人文历史等。</p><p><span class=\"color-purple-02\"><strong>自然：</strong></span>具有科普性质的，与地球、宇宙、自然科学等相关的文章。</p><p><span class=\"color-purple-02\"><strong>数码：</strong></span>3C数码相关产品的测评推荐、原理知识、使用等文章。</p><p><span class=\"color-purple-02\"><strong>汽车：</strong></span>汽车、摩托车、公交车以及竞赛用车等轮式交通工具相关。</p><p><span class=\"color-purple-02\"><strong>学习：</strong></span>技能演示及学习心得经验分享。</p>",
+    "content_pic_list": null,
+    "cover_avid": 0,
+    "ctime": 1497973871,
+    "dispute": null,
+    "dyn_id_str": "20105742642030106",
+    "id": 2,
+    "image_urls": [
+      "https://i0.hdslb.com/bfs/article/0a72422ce8e77d8512f010d93b1b7f9bc4e64e52.jpg"
+    ],
+    "is_like": false,
+    "keywords": "欢迎各位使用Bilibili专栏，为了保证Bilibili专栏的内容质量，维护专栏的内容生态，让创作者和读者都拥有良好的使用体验和阅读体验，请各位谨遵以下规范条例：\n\n严令禁止条例\nbilibili严",
+    "list": null,
+    "media": {
+      "area": "",
+      "cover": "",
+      "media_id": 0,
+      "score": 0,
+      "season_id": 0,
+      "spoiler": 0,
+      "title": "",
+      "type_id": 0,
+      "type_name": ""
+    },
+    "mtime": 1640696950,
+    "opus": {
+      "article": {
+        "biz_tags": [
+          "哔哩哔哩"
+        ],
+        "category_id": 15,
+        "cover": [
+          {
+            "height": 359,
+            "size": 140.1494140625,
+            "url": "https://i0.hdslb.com/bfs/article/0a72422ce8e77d8512f010d93b1b7f9bc4e64e52.jpg",
+            "width": 1220
+          }
+        ],
+        "reproduced": 1
+      },
+      "content": {
+        "paragraphs": [
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "欢迎各位使用bilibili专栏，为了保证bilibili专栏的内容质量，维护专栏的内容生态，让创作者和读者都拥有良好的使用体验和阅读体验，请各位谨遵以下规范条例："
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 24,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 24,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "严令禁止条例"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 24,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "bilibili严格遵守我国政府颁布的《互联网信息服务管理办法》第十五条规定，并将此作为bilibili平台运行的基本准则；对于含有以下内容的信息，我们将视违规情节严重性封禁专栏权限，严重者将导致您的账号被封停，并且我们还将保留追究相应的法律责任的权利："
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "(一)反对宪法所确定的基本原则的；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "(二)危害国家安全，泄露国家秘密，颠覆国家政权，破坏国家统一的；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "(三)损害国家荣誉和利益的；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "(四)煽动民族仇恨、民族歧视，破坏民族团结的；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "(五)破坏国家宗教政策，宣扬邪教和封建迷信的；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "(六)散布谣言，扰乱社会秩序，破坏社会稳定的；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "(七)散布淫秽、色情、赌博、暴力、凶杀、恐怖或者教唆犯罪的；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "(八)侮辱或者诽谤他人，侵害他们合法权益的；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "(九)含有法律、行政法规禁止的其他内容的。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 24,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "一般违禁条例"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 24,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "为了保护用户创造的内容、维护良好的社区氛围，我们会对以下违禁行为进行处理，对相关稿件进行退回或锁定，同时将视违规情节严重性封禁专栏权限，情节特别严重参照严令禁止条例处理方式："
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "一、含有低俗、色情内容"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "文章中不允许含有性暗示类型的露骨内容，如色情描写、露点图片等。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "禁止在文章及评论中发布与色情内容有关的第三方网址、社交账号、网盘代码等违规信息。"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "二、涉及欺诈、诈骗行为"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "所有通过欺骗他人，为自己谋取经济利益的行为都是不允许的。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "三、人身攻击"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "请不要对任何个人或群体进行嘲讽、发布仇恨言论、挑拨他人矛盾。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "四、侵犯个人隐私"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "文章内容涉嫌跟踪、威胁、骚扰、胁迫、侵犯用户个人隐私、披露用户个人信息等情况，将会受到严肃处理。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "五、恶意冒充他人"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "禁止通过自己的账号信息（昵称、头像、签名、个人空间等），恶意模仿特定用户。另外，伪装成涉及官方业务的账号，同样也是不允许的。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "六、侵犯他人版权"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "未注明详细出处，在投稿中存在大量抄袭引用他人原创的文章内容；"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "未经原作者允许，以冒充原作者身份的方式，或以已获得转载授权为由，搬运转载他人的作品。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "对于涉及以上侵权行为的用户，我们将严肃处理。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "七、恶意投稿"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "请勿恶意规避审核检测，以任意漏洞提交含有违禁内容的文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "对于诸如错区或题文不符等文章投稿，我们会打回并给予修改的建议方式。请勿无视管理员修改提示，多次反复提交或多次删稿重投。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 24,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "内容规范条例"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "一、不接受的内容类型"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "专栏欢迎并推广原创的内容投稿，不接受未授权的转载搬运。除了涉及违规内容外，同时不接受以下分类主题的文章投稿：时事政治、健康医疗、民族宗教，以及其他带有渲染社会负面现象，对于社会导向有误的文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "另外同样不接受内容不完整、主题不清晰、排版格式混乱（无标点或无段落）等无法满足正常阅读体验的文章稿件。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "※&nbsp; 目前仅接受中文、英文、日文三种语言的投稿。外语相关部分请尽量备注中文翻译哦。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "二、不推荐的投稿类型"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "为了建立健康的创作环境与良好的用户体验，除了违法违规和以上不适宜的内容外，我们也同样不推荐发布以下分类主题的投稿：短文资讯、情感鸡汤、图集展示（美图壁纸、涂鸦手绘、表情斗图等），以及个人动态（随笔日记、晒物晒照、投稿预告等）。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "个人动态等个性化内容建议使用“发布动态”的功能哟。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "三、鼓励原创内容"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "哔哩哔哩专栏鼓励用户发布原创文章。作者在投稿时可以勾选原创声明，相应的专栏会展示原创标识。"
+                  }
+                },
+                {
+                  "link": {
+                    "link": "https://www.bilibili.com/read/cv2425181",
+                    "link_type": 16,
+                    "show_text": "（关于原创标识）",
+                    "style": {}
+                  },
+                  "node_type": 4
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "勾选原创声明意味着作者承诺文章是本人独立创作，并愿意承担一切相关责任。对于冒充原创的行为，我们将按照平台规范给予处罚，包括但不限于锁定相应文章、收回创作激励计划收益、取消专栏投稿权限、封禁账号等。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "勾选“原创文章”即代表您承诺该文章是由您本人（或持有该账号之组织）独立创作完成，且不属于以下三种情况："
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "1.歪曲、篡改、抄袭、剽窃他人创作而产生的作品，"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "2.转发、大量引用、未经授权进行改编、翻译、注释、整理他人作品形成的内容，"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "3.通过其他侵犯著作权方式获得的内容。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "在取得原作者同意后，对作品进行改编、翻译、注释、整理等二次创作的，视同原创。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "对二次创作作品进行改编、翻译、注释、整理的，应获得原作者及二次创作作品作者的同意。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "哔哩哔哩专栏鼓励用户发布原创文章，完成原创声明的文章会展示原创标识，但哔哩哔哩专栏无法对原创声明的真实性进行核实。若您在进行原创声明后，被证明的确存在侵权、抄袭等违规行为，我们将按照平台规范从严处罚。包括但不限于收回投稿权限，封禁相关账号等。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "四、不允许的垃圾广告"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "为了保证用户的阅读体验，我们拒绝各类垃圾营销广告！"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "以下行为会被视为散播垃圾广告信息，我们会对其进行相应处理："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "（1）内容主题涉及商业产品、品牌活动、物品交易等推广，或与投稿者个人及文章内容无关的推广；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "（2）散播各类游戏、社区的邀请码与相关链接；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "（3）纯招聘类信息等；"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "（4）金融理财产品广告，包含但不限于股票基金、虚拟货币、保险产品、培训课程的推销和荐购"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "（5）多个账号发布同类内容的推广，且稿件内容重复、质量低下，或涉及标题封面党、错区刷版等其他恶意投稿行为"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "以上内容将会被退回要求修改或者锁定处理。对于多次涉及发布垃圾广告行为的用户，将直接视为垃圾营销账号，取消专栏的投稿权限。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "五、不适宜的标题形式"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "为了保证bilibili专栏的文章内容质量，我们拒绝各种以过度夸张、耸动的标题和内容去吸引人眼球的行为，标题党的标题种类包括但不限于："
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "（1） 使用过度夸张的惊叹词；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "（2）&nbsp; 断章取义歪曲事实真相；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "（3）&nbsp; 故意营造悬念引人好奇；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "（4）&nbsp; 捏造正文中不存在的人、物、情节；"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "（5）&nbsp; 题文不符，标题存在歧义。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "以上内容我们建议作者修改完毕后再次提交，请勿不经修改重复提交或删除重投。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 24,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "专栏分区介绍"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 24,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "目前专栏开放了动画、游戏、影视、生活、兴趣、轻小说、科技七个分区。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 2,
+            "pic": {
+              "pics": [
+                {
+                  "height": 45,
+                  "size": 5.7431640625,
+                  "url": "https://i0.hdslb.com/bfs/article/414b05b103c0d74a1896588bd22139a3bbfbf11a.png",
+                  "width": 96
+                }
+              ],
+              "style": 1
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "热爱动画的小伙伴，可投稿海内外番剧动画、动态漫画、独立动画短片相关的作品推荐、解读杂谈、盘点资讯、制作技巧等类型文章。"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "动漫杂谈："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "与动画、漫画有关的科普杂谈、深度解读、盘点推荐等相关文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "动漫资讯："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "与动画、漫画有关的作品预告、业界资讯、职人访谈等相关文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "动画技术："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "与动画制作有关研究讨论、技术教学，或个人学院派作品展示与分析等相关文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 2,
+            "pic": {
+              "pics": [
+                {
+                  "height": 45,
+                  "size": 5.9501953125,
+                  "url": "https://i0.hdslb.com/bfs/article/c39acb86a46b8c8d36563d9e5b5fdfa5fdd26d1a.png",
+                  "width": 96
+                }
+              ],
+              "style": 1
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "喜欢游戏的小伙伴们，可投稿单机联机、电子竞技、网络游戏、手机游戏、桌游棋牌相关的作品推荐、剧情解析、技巧攻略、业界杂谈等类型文章。"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "单机游戏："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "以单机或其联机模式为主要内容的相关文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "电子竞技："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "电子竞技游戏项目为主要内容的相关文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "手机游戏："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "手机及平板设备平台上的游戏相关文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "网络游戏："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "多人在线游戏为主要内容的相关文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "桌游棋牌："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "桌游、棋牌、卡牌对战等为主要内容的相关文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 2,
+            "pic": {
+              "pics": [
+                {
+                  "height": 45,
+                  "size": 6.154296875,
+                  "url": "https://i0.hdslb.com/bfs/article/9871f72ef4b661e057649250093a399afe5b9e23.png",
+                  "width": 96
+                }
+              ],
+              "style": 1
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "在影视分区，小伙伴们可以发布你对影视作品内容的解读或推荐。不论是电影、电视剧，还是纪录片或综艺明星相关的文章，都可以在这里与大家分享。"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "电影："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "对电影作品内容的解读或推荐。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "电视剧："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "对电视剧作品内容的解读或推荐。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "纪录片："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "对纪录片作品内容的解读或推荐。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "综艺："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "对国内外电视节目或网络自制的综艺类节目的解读或推荐。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 2,
+            "pic": {
+              "pics": [
+                {
+                  "height": 45,
+                  "size": 6.025390625,
+                  "url": "https://i0.hdslb.com/bfs/article/b4b9abcf63db3ef6d72d0b4fb9f130e16f972d00.png",
+                  "width": 96
+                }
+              ],
+              "style": 1
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "这里是各种美食、萌宠的聚集地，还有许多时尚达人带你走在时尚前沿。热爱生活的你还能在这里找到运动攻略、或是享受闲散的日常时光。一定要来生活区看看哦！"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "美食："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "一切和食物相关的鉴赏或料理制作教程。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "萌宠："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "可爱的、萌萌哒的宠物相关文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "时尚："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "包括但不限于服饰、化妆/护肤的推荐、分享和测评。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "运动："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "运动及健身项目相关的文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "日常："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "一般日常向的生活类文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 2,
+            "pic": {
+              "pics": [
+                {
+                  "height": 45,
+                  "size": 4.7587890625,
+                  "url": "https://i0.hdslb.com/bfs/article/421afa78b59ac18a471b3df4392618b2d070d741.png",
+                  "width": 96
+                }
+              ],
+              "style": 1
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "你有什么兴趣爱好吗？绘画、手工、摄影、音乐、舞蹈、模型手办，这是一个精彩纷呈的小世界。与小伙伴们分享你的爱好，和兴趣相投的朋友交流技术经验。把你的最得意的作品和大家展示一下吧！"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "绘画："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "绘画爱好者们关于绘画技巧、绘图过程的分享交流场所。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "手工："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "简易手工艺品的diy制作教程，例如；折纸、手账、橡皮章等。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "摄影："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "摄影相关的器材、教程分享，摄影图集等。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "音乐舞蹈："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "以音乐、舞蹈为主要内容的相关文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "模型手办："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "模型手办的相关评测、美图分享、购买贴士等。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 2,
+            "pic": {
+              "pics": [
+                {
+                  "height": 44,
+                  "size": 5.38671875,
+                  "url": "https://i0.hdslb.com/bfs/article/34019fb70ec1e828ed772934d2855e9a6e8b1640.png",
+                  "width": 118
+                }
+              ],
+              "style": 1
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "欢迎大家将自己撰写的原创、同人小说等作品，分享给同样爱好阅读轻小说的小伙伴哦。同时，在“小说杂谈”分类中，您还可以分享出对各个书籍作品的推荐与读后感，和大家一起讨论写作技巧与喜爱的作者吧。下一个文豪就是您啦！&nbsp;"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "原创连载："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "由创作者本人参与创作的、篇幅不低于2篇的小说作品。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "同人连载："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "对原有作品进行二次创作、篇幅不低于2篇的小说作品。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "短篇小说："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "篇幅仅限于1篇的小说，包括原创和同人作品。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "小说杂谈："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "写作技巧、读书心得、或书籍推荐等文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 2,
+            "pic": {
+              "pics": [
+                {
+                  "height": 45,
+                  "size": 5.9814453125,
+                  "url": "https://i0.hdslb.com/bfs/article/3069b764dc41745cdf6a7bc100d4f06bced56e7f.png",
+                  "width": 96
+                }
+              ],
+              "style": 1
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "如果你对科学技术、人文地理有一定的专业知识，可投稿相关的趣味科普向的文章。对3C数码与汽车有一定了解的兴趣的小伙伴们，也可以投稿相关产品的测评推荐、原理知识、历史文化、使用或购买贴士等内容的文章，但不包括广告哦。"
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "\n"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "人文历史："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "体现人文或历史的稿件，如民间文化传承、讲谈人文历史等。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "自然："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "具有科普性质的，与地球、宇宙、自然科学等相关的文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "数码："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "3C数码相关产品的测评推荐、原理知识、使用等文章。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "汽车："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "汽车、摩托车、公交车以及竞赛用车等轮式交通工具相关。"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "para_type": 1,
+            "text": {
+              "nodes": [
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {
+                      "bold": true
+                    },
+                    "words": "学习："
+                  }
+                },
+                {
+                  "node_type": 1,
+                  "word": {
+                    "font_size": 17,
+                    "style": {},
+                    "words": "技能演示及学习心得经验分享。"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "h5_content": "<p>欢迎各位使用bilibili专栏，为了保证bilibili专栏的内容质量，维护专栏的内容生态，让创作者和读者都拥有良好的使用体验和阅读体验，请各位谨遵以下规范条例：</p><h1><br/></h1><h1><strong>严令禁止条例</strong><br/></h1><p>bilibili严格遵守我国政府颁布的《互联网信息服务管理办法》第十五条规定，并将此作为bilibili平台运行的基本准则；对于含有以下内容的信息，我们将视违规情节严重性封禁专栏权限，严重者将导致您的账号被封停，并且我们还将保留追究相应的法律责任的权利：</p><p>(一)反对宪法所确定的基本原则的；<br/>(二)危害国家安全，泄露国家秘密，颠覆国家政权，破坏国家统一的；<br/>(三)损害国家荣誉和利益的；<br/>(四)煽动民族仇恨、民族歧视，破坏民族团结的；<br/>(五)破坏国家宗教政策，宣扬邪教和封建迷信的；<br/>(六)散布谣言，扰乱社会秩序，破坏社会稳定的；<br/>(七)散布淫秽、色情、赌博、暴力、凶杀、恐怖或者教唆犯罪的；<br/>(八)侮辱或者诽谤他人，侵害他们合法权益的；<br/>(九)含有法律、行政法规禁止的其他内容的。</p><p><br/></p><h1><strong>一般违禁条例</strong><br/></h1><p>为了保护用户创造的内容、维护良好的社区氛围，我们会对以下违禁行为进行处理，对相关稿件进行退回或锁定，同时将视违规情节严重性封禁专栏权限，情节特别严重参照严令禁止条例处理方式：</p><p><strong>一、含有低俗、色情内容</strong><br/></p><p>文章中不允许含有性暗示类型的露骨内容，如色情描写、露点图片等。</p><p>禁止在文章及评论中发布与色情内容有关的第三方网址、社交账号、网盘代码等违规信息。<br/></p><p><strong>二、涉及欺诈、诈骗行为</strong><br/></p><p>所有通过欺骗他人，为自己谋取经济利益的行为都是不允许的。</p><p><strong>三、人身攻击</strong><br/></p><p>请不要对任何个人或群体进行嘲讽、发布仇恨言论、挑拨他人矛盾。</p><p><strong>四、侵犯个人隐私</strong><br/></p><p>文章内容涉嫌跟踪、威胁、骚扰、胁迫、侵犯用户个人隐私、披露用户个人信息等情况，将会受到严肃处理。</p><p><strong>五、恶意冒充他人</strong><br/></p><p>禁止通过自己的账号信息（昵称、头像、签名、个人空间等），恶意模仿特定用户。另外，伪装成涉及官方业务的账号，同样也是不允许的。</p><p><strong>六、侵犯他人版权</strong><br/></p><p>未注明详细出处，在投稿中存在大量抄袭引用他人原创的文章内容；</p><p>未经原作者允许，以冒充原作者身份的方式，或以已获得转载授权为由，搬运转载他人的作品。</p><p>对于涉及以上侵权行为的用户，我们将严肃处理。</p><p><strong>七、恶意投稿</strong></p><p>请勿恶意规避审核检测，以任意漏洞提交含有违禁内容的文章。</p><p>对于诸如错区或题文不符等文章投稿，我们会打回并给予修改的建议方式。请勿无视管理员修改提示，多次反复提交或多次删稿重投。</p><p><br/></p><h1><strong>内容规范条例</strong></h1><p><strong>一、不接受的内容类型</strong></p><p>专栏欢迎并推广原创的内容投稿，不接受未授权的转载搬运。除了涉及违规内容外，同时不接受以下分类主题的文章投稿：时事政治、健康医疗、民族宗教，以及其他带有渲染社会负面现象，对于社会导向有误的文章。</p><p>另外同样不接受内容不完整、主题不清晰、排版格式混乱（无标点或无段落）等无法满足正常阅读体验的文章稿件。</p><p>※&nbsp; 目前仅接受中文、英文、日文三种语言的投稿。外语相关部分请尽量备注中文翻译哦。</p><p><strong>二、不推荐的投稿类型</strong><br/></p><p>为了建立健康的创作环境与良好的用户体验，除了违法违规和以上不适宜的内容外，我们也同样不推荐发布以下分类主题的投稿：短文资讯、情感鸡汤、图集展示（美图壁纸、涂鸦手绘、表情斗图等），以及个人动态（随笔日记、晒物晒照、投稿预告等）。</p><p>个人动态等个性化内容建议使用“发布动态”的功能哟。</p><p><span class=\"font-size-16\"><strong>三、鼓励原创内容</strong></span></p><p>哔哩哔哩专栏鼓励用户发布原创文章。作者在投稿时可以勾选原创声明，相应的专栏会展示原创标识。<a href=\"https://www.bilibili.com/read/cv2425181\">（关于原创标识）</a></p><p>勾选原创声明意味着作者承诺文章是本人独立创作，并愿意承担一切相关责任。对于冒充原创的行为，我们将按照平台规范给予处罚，包括但不限于锁定相应文章、收回创作激励计划收益、取消专栏投稿权限、封禁账号等。</p><p>勾选“原创文章”即代表您承诺该文章是由您本人（或持有该账号之组织）独立创作完成，且不属于以下三种情况：</p><p>1.歪曲、篡改、抄袭、剽窃他人创作而产生的作品，</p><p>2.转发、大量引用、未经授权进行改编、翻译、注释、整理他人作品形成的内容，</p><p>3.通过其他侵犯著作权方式获得的内容。</p><p>在取得原作者同意后，对作品进行改编、翻译、注释、整理等二次创作的，视同原创。</p><p>对二次创作作品进行改编、翻译、注释、整理的，应获得原作者及二次创作作品作者的同意。</p><p>哔哩哔哩专栏鼓励用户发布原创文章，完成原创声明的文章会展示原创标识，但哔哩哔哩专栏无法对原创声明的真实性进行核实。若您在进行原创声明后，被证明的确存在侵权、抄袭等违规行为，我们将按照平台规范从严处罚。包括但不限于收回投稿权限，封禁相关账号等。</p><p><strong>四、不允许的垃圾广告</strong><br/></p><p>为了保证用户的阅读体验，我们拒绝各类垃圾营销广告！<br/>以下行为会被视为散播垃圾广告信息，我们会对其进行相应处理：<br/>（1）内容主题涉及商业产品、品牌活动、物品交易等推广，或与投稿者个人及文章内容无关的推广；<br/>（2）散播各类游戏、社区的邀请码与相关链接；<br/>（3）纯招聘类信息等；</p><p>（4）金融理财产品广告，包含但不限于股票基金、虚拟货币、保险产品、培训课程的推销和荐购</p><p>（5）多个账号发布同类内容的推广，且稿件内容重复、质量低下，或涉及标题封面党、错区刷版等其他恶意投稿行为</p><p>以上内容将会被退回要求修改或者锁定处理。对于多次涉及发布垃圾广告行为的用户，将直接视为垃圾营销账号，取消专栏的投稿权限。</p><p><strong>五、不适宜的标题形式</strong><br/></p><p>为了保证bilibili专栏的文章内容质量，我们拒绝各种以过度夸张、耸动的标题和内容去吸引人眼球的行为，标题党的标题种类包括但不限于：</p><p>（1） 使用过度夸张的惊叹词；<br/>（2）&nbsp; 断章取义歪曲事实真相；<br/>（3）&nbsp; 故意营造悬念引人好奇；<br/>（4）&nbsp; 捏造正文中不存在的人、物、情节；<br/>（5）&nbsp; 题文不符，标题存在歧义。</p><p>以上内容我们建议作者修改完毕后再次提交，请勿不经修改重复提交或删除重投。</p><p><br/></p><h1><strong>专栏分区介绍</strong><br/></h1><p>目前专栏开放了动画、游戏、影视、生活、兴趣、轻小说、科技七个分区。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/414b05b103c0d74a1896588bd22139a3bbfbf11a.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>热爱动画的小伙伴，可投稿海内外番剧动画、动态漫画、独立动画短片相关的作品推荐、解读杂谈、盘点资讯、制作技巧等类型文章。<br/></p><p><span class=\"color-purple-02\"><strong>动漫杂谈：</strong></span>与动画、漫画有关的科普杂谈、深度解读、盘点推荐等相关文章。</p><p><span class=\"color-purple-02\"><strong>动漫资讯：</strong></span>与动画、漫画有关的作品预告、业界资讯、职人访谈等相关文章。</p><p><span class=\"color-purple-02\"><strong>动画技术：</strong></span>与动画制作有关研究讨论、技术教学，或个人学院派作品展示与分析等相关文章。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/c39acb86a46b8c8d36563d9e5b5fdfa5fdd26d1a.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p><span class=\"color-default\">喜欢游戏的小伙伴们，可投稿单机联机、电子竞技、网络游戏、手机游戏、桌游棋牌相关的作品推荐、剧情解析、技巧攻略、业界杂谈等类型文章。</span><br/></p><p><span class=\"color-purple-02\"><strong>单机游戏：</strong></span>以单机或其联机模式为主要内容的相关文章。</p><p><span class=\"color-purple-02\"><strong>电子竞技：</strong></span>电子竞技游戏项目为主要内容的相关文章。</p><p><span class=\"color-purple-02\"><strong>手机游戏：</strong></span>手机及平板设备平台上的游戏相关文章。</p><p><span class=\"color-purple-02\"><strong>网络游戏：</strong></span>多人在线游戏为主要内容的相关文章。</p><p><span class=\"color-purple-02\"><strong>桌游棋牌：</strong></span>桌游、棋牌、卡牌对战等为主要内容的相关文章。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/9871f72ef4b661e057649250093a399afe5b9e23.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>在影视分区，小伙伴们可以发布你对影视作品内容的解读或推荐。不论是电影、电视剧，还是纪录片或综艺明星相关的文章，都可以在这里与大家分享。<br/></p><p><span class=\"color-purple-02\"><strong>电影：</strong></span>对电影作品内容的解读或推荐。</p><p><span class=\"color-purple-02\"><strong>电视剧：</strong></span>对电视剧作品内容的解读或推荐。</p><p><span class=\"color-purple-02\"><strong>纪录片：</strong></span>对纪录片作品内容的解读或推荐。</p><p><span class=\"color-purple-02\"><strong>综艺：</strong></span>对国内外电视节目或网络自制的综艺类节目的解读或推荐。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/b4b9abcf63db3ef6d72d0b4fb9f130e16f972d00.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>这里是各种美食、萌宠的聚集地，还有许多时尚达人带你走在时尚前沿。热爱生活的你还能在这里找到运动攻略、或是享受闲散的日常时光。一定要来生活区看看哦！<br/></p><p><span class=\"color-purple-02\"><strong>美食：</strong></span>一切和食物相关的鉴赏或料理制作教程。</p><p><span class=\"color-purple-02\"><strong>萌宠：</strong></span>可爱的、萌萌哒的宠物相关文章。</p><p><span class=\"color-purple-02\"><strong>时尚：</strong></span>包括但不限于服饰、化妆/护肤的推荐、分享和测评。</p><p><span class=\"color-purple-02\"><strong>运动：</strong></span>运动及健身项目相关的文章。</p><p><span class=\"color-purple-02\"><strong>日常：</strong></span>一般日常向的生活类文章。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/421afa78b59ac18a471b3df4392618b2d070d741.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>你有什么兴趣爱好吗？绘画、手工、摄影、音乐、舞蹈、模型手办，这是一个精彩纷呈的小世界。与小伙伴们分享你的爱好，和兴趣相投的朋友交流技术经验。把你的最得意的作品和大家展示一下吧！<br/></p><p><span class=\"color-purple-02\"><strong>绘画：</strong></span>绘画爱好者们关于绘画技巧、绘图过程的分享交流场所。</p><p><span class=\"color-purple-02\"><strong>手工：</strong></span>简易手工艺品的diy制作教程，例如；折纸、手账、橡皮章等。</p><p><span class=\"color-purple-02\"><strong>摄影：</strong></span>摄影相关的器材、教程分享，摄影图集等。</p><p><span class=\"color-purple-02\"><strong>音乐舞蹈：</strong></span>以音乐、舞蹈为主要内容的相关文章。</p><p><span class=\"color-purple-02\"><strong>模型手办：</strong></span>模型手办的相关评测、美图分享、购买贴士等。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/34019fb70ec1e828ed772934d2855e9a6e8b1640.png\" width=\"118\" height=\"44\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>欢迎大家将自己撰写的原创、同人小说等作品，分享给同样爱好阅读轻小说的小伙伴哦。同时，在“小说杂谈”分类中，您还可以分享出对各个书籍作品的推荐与读后感，和大家一起讨论写作技巧与喜爱的作者吧。下一个文豪就是您啦！&nbsp;<br/></p><p><span class=\"color-purple-02\"><strong>原创连载：</strong></span>由创作者本人参与创作的、篇幅不低于2篇的小说作品。</p><p><span class=\"color-purple-02\"><strong>同人连载：</strong></span>对原有作品进行二次创作、篇幅不低于2篇的小说作品。</p><p><span class=\"color-purple-02\"><strong>短篇小说：</strong></span>篇幅仅限于1篇的小说，包括原创和同人作品。</p><p><span class=\"color-purple-02\"><strong>小说杂谈：</strong></span>写作技巧、读书心得、或书籍推荐等文章。</p><p><br/></p><figure class=\"img-box\" contenteditable=\"false\"><img src=\"http://i0.hdslb.com/bfs/article/3069b764dc41745cdf6a7bc100d4f06bced56e7f.png\" width=\"96\" height=\"45\"/><figcaption class=\"caption\" contenteditable=\"\"></figcaption></figure><p>如果你对科学技术、人文地理有一定的专业知识，可投稿相关的趣味科普向的文章。对3C数码与汽车有一定了解的兴趣的小伙伴们，也可以投稿相关产品的测评推荐、原理知识、历史文化、使用或购买贴士等内容的文章，但不包括广告哦。<br/></p><p><span class=\"color-purple-02\"><strong>人文历史：</strong></span>体现人文或历史的稿件，如民间文化传承、讲谈人文历史等。</p><p><span class=\"color-purple-02\"><strong>自然：</strong></span>具有科普性质的，与地球、宇宙、自然科学等相关的文章。</p><p><span class=\"color-purple-02\"><strong>数码：</strong></span>3C数码相关产品的测评推荐、原理知识、使用等文章。</p><p><span class=\"color-purple-02\"><strong>汽车：</strong></span>汽车、摩托车、公交车以及竞赛用车等轮式交通工具相关。</p><p><span class=\"color-purple-02\"><strong>学习：</strong></span>技能演示及学习心得经验分享。</p>",
+      "opus_id": 20105742642030106,
+      "opus_source": 5,
+      "pub_info": {
+        "pub_time": 1509517123,
+        "uid": 144900660
+      },
+      "tags": [
+        {
+          "tag": {
+            "link_type": 36,
+            "show_text": "哔哩哔哩"
+          }
+        }
+      ],
+      "title": "专栏行为准则  ",
+      "translate_result": {
+        "lang_match_result": 2,
+        "state": 3
+      },
+      "version": {
+        "cvid": 2,
+        "version_id": 1970160965520384
+      }
+    },
+    "origin_image_urls": [
+      "https://i0.hdslb.com/bfs/article/131b1d41b857d5308f5bff36591d117bddc48d96.jpg"
+    ],
+    "origin_template_id": 4,
+    "original": 0,
+    "private_pub": 0,
+    "publish_time": 1509517123,
+    "reprint": 1,
+    "state": 0,
+    "stats": {
+      "coin": 3718,
+      "dislike": 0,
+      "dynamic": 0,
+      "favorite": 5690,
+      "like": 17119,
+      "reply": 1977,
+      "share": 373,
+      "view": 1223550
+    },
+    "summary": "欢迎各位使用Bilibili专栏，为了保证Bilibili专栏的内容质量，维护专栏的内容生态，让创作者和读者都拥有良好的使用体验和阅读体验，请各位谨遵以下规范条例：\n\n严令禁止条例\nbilibili严",
+    "tags": [
+      {
+        "name": "哔哩哔哩",
+        "tid": 680
+      }
+    ],
+    "template_id": 4,
+    "title": "专栏行为准则  ",
+    "top_video_info": null,
+    "total_art_num": 27,
+    "type": 0,
+    "version_id": 0,
+    "words": 3711
+  },
+  "message": "OK",
+  "ttl": 1
+}
