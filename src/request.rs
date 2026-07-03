@@ -1,7 +1,7 @@
 use crate::{
     BpiError,
     response::{ApiEnvelope, BpiResponse},
-    transport::sanitize_url_for_logging,
+    transport::ReqwestTransport,
 };
 use reqwest::RequestBuilder;
 use serde::de::DeserializeOwned;
@@ -57,25 +57,9 @@ impl BilibiliRequest for RequestBuilder {
     }
 
     async fn send_request(self, operation_name: &str) -> Result<bytes::Bytes, BpiError> {
-        // 发送请求
-        let response = self.send().await.map_err(|e| {
-            tracing::error!("{} 请求失败: {}", operation_name, e);
-            BpiError::from(e) // 使用 From trait 自动转换
-        })?;
-
-        // 检查响应状态
-        let status = response.status();
-        if !status.is_success() {
-            let err = BpiError::http(status.as_u16());
-            tracing::error!("{} HTTP错误: {}", operation_name, err);
-            return Err(err);
-        }
-
-        // 获取响应体
-        response.bytes().await.map_err(|e| {
-            tracing::error!("{} 获取响应体失败: {}", operation_name, e);
-            BpiError::network(format!("获取响应体失败: {}", e))
-        })
+        ReqwestTransport::send_request_builder(self, operation_name)
+            .await
+            .map(|response| response.body)
     }
 
     async fn send_bpi<T>(self, operation_name: &str) -> Result<BpiResponse<T>, BpiError>
@@ -109,13 +93,7 @@ impl BilibiliRequest for RequestBuilder {
     }
 
     fn log_url(self, operation_name: &str) -> Self {
-        let url = self
-            .try_clone() // 注意：这里用不到也行，直接 build 也可以
-            .and_then(|rb| rb.build().ok())
-            .map(|req| sanitize_url_for_logging(req.url().as_str()))
-            .unwrap_or_else(|| "未知URL".to_string());
-
-        tracing::info!("开始请求 {}: {}", operation_name, url);
+        tracing::info!("开始请求 {}", operation_name);
 
         self
     }

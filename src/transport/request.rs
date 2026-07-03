@@ -1,5 +1,4 @@
-use reqwest::Method;
-use reqwest::Url;
+use reqwest::{Method, RequestBuilder, Url};
 
 /// Metadata safe to emit in request logs.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -7,6 +6,19 @@ pub struct RequestMetadata {
     pub method: Method,
     pub endpoint: String,
     pub sanitized_url: String,
+}
+
+impl RequestMetadata {
+    /// Builds safe request metadata from a cloneable reqwest request builder.
+    pub fn from_builder(builder: &RequestBuilder, endpoint: impl Into<String>) -> Option<Self> {
+        let request = builder.try_clone()?.build().ok()?;
+
+        Some(Self {
+            method: request.method().clone(),
+            endpoint: endpoint.into(),
+            sanitized_url: sanitize_url_for_logging(request.url().as_str()),
+        })
+    }
 }
 
 /// Returns a URL string safe for logs.
@@ -100,5 +112,20 @@ mod tests {
         let sanitized = sanitize_header_for_logging("Cookie", "SESSDATA=secret; bili_jct=token");
 
         assert!(sanitized.is_none());
+    }
+
+    #[test]
+    fn request_metadata_from_builder_sanitizes_url_and_preserves_method() {
+        let client = reqwest::Client::new();
+        let builder = client.post("https://api.bilibili.com/x/test?mid=1&csrf=secret&w_rid=signed");
+
+        let metadata = RequestMetadata::from_builder(&builder, "test.endpoint").unwrap();
+
+        assert_eq!(metadata.method, Method::POST);
+        assert_eq!(metadata.endpoint, "test.endpoint");
+        assert_eq!(
+            metadata.sanitized_url,
+            "https://api.bilibili.com/x/test?mid=1"
+        );
     }
 }
