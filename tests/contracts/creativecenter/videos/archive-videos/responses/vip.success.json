@@ -1,0 +1,22 @@
+{
+  "code": 0,
+  "data": {
+    "archive": {
+      "aid": 1,
+      "bvid": "BV1xx411c7xx",
+      "cover": "",
+      "state": 0,
+      "title": "<redacted>"
+    },
+    "videos": [
+      {
+        "cid": 1,
+        "duration": 0,
+        "index": 1,
+        "title": "<redacted>"
+      }
+    ]
+  },
+  "message": "0",
+  "ttl": 1
+}
