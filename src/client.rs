@@ -11,6 +11,8 @@ use crate::activity::ActivityClient;
 use crate::auth::Account;
 #[cfg(feature = "clientinfo")]
 use crate::clientinfo::ClientInfoClient;
+#[cfg(feature = "comment")]
+use crate::comment::CommentClient;
 #[cfg(feature = "login")]
 use crate::login::LoginClient;
 #[cfg(feature = "message")]
@@ -388,6 +390,12 @@ impl BpiClient {
         ClientInfoClient::new(self)
     }
 
+    /// Creates a comment domain client.
+    #[cfg(feature = "comment")]
+    pub fn comment(&self) -> CommentClient<'_> {
+        CommentClient::new(self)
+    }
+
     /// Creates a login domain client.
     #[cfg(feature = "login")]
     pub fn login(&self) -> LoginClient<'_> {
@@ -740,6 +748,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _vip = client.vip();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "comment")]
+    #[test]
+    fn comment_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _comment = client.comment();
 
         Ok(())
     }
