@@ -27,6 +27,16 @@ That protocol is the source of truth for:
 - commit policy
 - done definition
 
+## Goal-Mode Continuation
+
+When this topic is resumed through a broad goal such as `执行 work/bpi-rs-0.2-migration`, treat this file and `api-upgrade-protocol.md` as the execution contract, then use `migration-status.md` only as the local progress board.
+
+Default continuation is an endpoint contract batch: choose a module or cohesive submodule that is not already complete, prepare drafts under `target/bpi-contract-drafts/...`, run real Probe profiles, keep raw Probe output under `target/bpi-probe-runs/...`, promote reviewed `contract.json` plus sanitized `responses/*.json`, update Rust params/models/tests from the observed behavior, verify, update the local status board, and commit the reviewed source/contracts.
+
+Do not repeat a completed contract batch just because it is named as an example. For example, `video/info-read`, `login/read-info`, and `clientinfo/ip` already have promoted endpoint contracts in this workspace.
+
+A non-Probe shared-core or domain-client bridge batch is allowed only when it is explicitly selected as such and it reuses already promoted contracts. In that case, record in `migration-status.md` that the batch is not an endpoint contract batch, that no Probe run is expected, and which existing contracts prove the request/response behavior.
+
 ## Current Contract Mode
 
 The accepted contract shape is:

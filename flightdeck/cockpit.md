@@ -4,10 +4,10 @@ Focus: `work/bpi-rs-0.2-migration/` — staged 0.2 redesign for a high-quality R
 
 ## In flight
 
-- `work/bpi-rs-0.2-migration/` — shared-core/domain bridge is in progress; latest batch adds `client.clientinfo().ip(...)` as a payload-helper-backed module client method.
+- `work/bpi-rs-0.2-migration/` — staged 0.2 migration is active; goal-mode continuation now defaults to Probe-backed endpoint contract batches unless an explicit non-Probe bridge batch is selected.
 
 ## Next
 
-- Continue the next bridge batch from `flightdeck/work/bpi-rs-0.2-migration/migration-status.md`, likely migrating a cohesive read-only module client such as `video/info-read` or `login/read-info` onto payload-returning helpers.
+- Choose the next incomplete module or cohesive submodule from `flightdeck/work/bpi-rs-0.2-migration/migration-status.md`. For normal endpoint migration, follow `api-upgrade-protocol.md`: draft under `target`, run Probe, promote reviewed `contract.json` plus sanitized fixtures, then update Rust/tests.
 
 ## Open questions

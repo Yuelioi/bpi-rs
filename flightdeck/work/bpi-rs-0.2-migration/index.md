@@ -21,7 +21,8 @@ Do not resume the old committed shape `tests/contracts/<domain>/<endpoint>/<prof
 
 ## Next
 
-- Use `migration-status.md` to choose the next module batch.
+- Use `goal.md`, `api-upgrade-protocol.md`, and `migration-status.md` to choose the next module batch.
+- Default to a real endpoint contract batch with Probe evidence unless a non-Probe shared-core/domain-client bridge is explicitly selected and recorded as such.
 - For each batch, follow `api-upgrade-protocol.md`.
 - Update `migration-status.md` after each batch, but do not commit it.
 
@@ -56,8 +57,9 @@ Done:
 - Covered `clientinfo/ip`, `login/vip-info`, `login/read-info`, and `login/qr` in the accepted contract shape.
 
 Current:
-- Shared-core/domain bridge work is active after endpoint contract batches. The latest small batch adds `client.clientinfo().ip(...) -> BpiResult<IpInfo>` as the first payload-helper-backed module client method while keeping the legacy flat method intact.
-- Use the local status board to select and execute the next shared-core/domain bridge batch.
+- Shared-core/domain bridge work has a completed `clientinfo/module-client-bridge` example after endpoint contract batches.
+- Goal-mode continuation now defaults back to Probe-backed endpoint contract batches unless a non-Probe bridge batch is explicitly selected and recorded. Do not repeat completed examples such as `video/info-read`, `login/read-info`, or `clientinfo/ip`.
+- Use the local status board to select the next incomplete module or cohesive submodule batch.
 
 Verified:
 - After commit `6383119`, `cargo fmt --check`, `cargo check --all-features`, and `cargo test --all-features --lib` passed.
