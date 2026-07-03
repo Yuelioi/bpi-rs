@@ -1,0 +1,21 @@
+{
+  "code": 0,
+  "data": {
+    "business_id": 0,
+    "group": "live",
+    "host_list": [
+      {
+        "host": "chat.example.invalid",
+        "port": 2243,
+        "ws_port": 2244,
+        "wss_port": 2245
+      }
+    ],
+    "max_delay": 5000,
+    "refresh_rate": 100,
+    "refresh_row_factor": 0.125,
+    "token": "<redacted>"
+  },
+  "message": "0",
+  "ttl": 1
+}

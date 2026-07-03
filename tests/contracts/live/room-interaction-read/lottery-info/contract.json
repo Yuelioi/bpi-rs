@@ -1,0 +1,76 @@
+{
+  "name": "live.lottery_info",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/xlive/lottery-interface/v1/lottery/getLotteryInfoWeb",
+    "query": {
+      "roomid": "23174842"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": [
+        "wbi"
+      ]
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "success fixture contains public empty lottery state for the probed room"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": [
+          "wbi"
+        ]
+      },
+      "response": {
+        "api_code": -352,
+        "fixture": "responses/anonymous.error.json",
+        "fixture_kind": "probe_error_body",
+        "error": "wbi_risk_control"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "wbi",
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "LotteryInfoData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "wbi",
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "LotteryInfoData"
+      }
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "name": "live.danmu_info",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo",
+    "query": {
+      "id": "21733448",
+      "type": "0"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": [
+        "wbi"
+      ]
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "authenticated fixture redacts websocket token and uses a non-routable host"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": [
+          "wbi"
+        ]
+      },
+      "response": {
+        "api_code": -352,
+        "fixture": "responses/anonymous.error.json",
+        "fixture_kind": "probe_error_body",
+        "error": "wbi_risk_control"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "wbi",
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "LiveDanmuInfoData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "wbi",
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "LiveDanmuInfoData"
+      }
+    }
+  ]
+}

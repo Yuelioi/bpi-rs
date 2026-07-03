@@ -1,0 +1,27 @@
+{
+  "code": 0,
+  "data": {
+    "activity_box": {
+      "ACTIVITY_ID": 0,
+      "ACTIVITY_PIC": ""
+    },
+    "activity_box_info": null,
+    "anchor": null,
+    "anchor_lottery_info": {
+      "asset_icon": "",
+      "jump_url": "",
+      "lot_id": 0
+    },
+    "danmu": null,
+    "gift": null,
+    "guard": null,
+    "magic_wish_info": {},
+    "pk": null,
+    "popularity_red_pocket": null,
+    "red_pocket": null,
+    "silver": null,
+    "storm": null
+  },
+  "message": "0",
+  "ttl": 1
+}

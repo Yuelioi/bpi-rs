@@ -1,0 +1,64 @@
+{
+  "code": 0,
+  "data": {
+    "data": [
+      {
+        "current_cover": "https://example.invalid/emoticon.png",
+        "emoticons": [
+          {
+            "bulge_display": 0,
+            "descript": "[dog]",
+            "emoji": "[dog]",
+            "emoticon_id": 208,
+            "emoticon_unique": "emoji_208",
+            "emoticon_value_type": 0,
+            "height": 0,
+            "identity": 0,
+            "in_player_area": 0,
+            "is_dynamic": 0,
+            "perm": 1,
+            "unlock_need_gift": 0,
+            "unlock_need_level": 0,
+            "unlock_show_color": "",
+            "unlock_show_image": "",
+            "unlock_show_text": "",
+            "url": "https://example.invalid/emoticon.png",
+            "width": 0
+          }
+        ],
+        "pkg_descript": "official emoticons",
+        "pkg_id": 1,
+        "pkg_name": "common",
+        "pkg_perm": 1,
+        "pkg_type": 1,
+        "recently_used_emoticons": [],
+        "top_show": {
+          "top_left": {
+            "image": "",
+            "text": "common"
+          },
+          "top_right": {
+            "image": "",
+            "text": ""
+          }
+        },
+        "top_show_recent": {
+          "top_left": {
+            "image": "",
+            "text": ""
+          },
+          "top_right": {
+            "image": "",
+            "text": ""
+          }
+        },
+        "unlock_identity": 0,
+        "unlock_need_gift": 0
+      }
+    ],
+    "fans_brand": 1,
+    "purchase_url": null
+  },
+  "message": "0",
+  "ttl": 1
+}
