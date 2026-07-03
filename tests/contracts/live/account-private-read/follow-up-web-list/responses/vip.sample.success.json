@@ -1,0 +1,73 @@
+{
+  "code": 0,
+  "data": {
+    "count": 1,
+    "list": [
+      {
+        "area": 4,
+        "area_name": "sample-parent-area",
+        "area_v2_id": 86,
+        "area_v2_name": "sample-area",
+        "area_v2_parent_id": 2,
+        "area_v2_parent_name": "sample-category",
+        "broadcast_type": 0,
+        "cover_from_user": "https://example.invalid/cover.jpg",
+        "face": "https://example.invalid/face.jpg",
+        "hidden_till": "0000-00-00 00:00:00",
+        "is_encrypt": false,
+        "keyframe": "https://example.invalid/keyframe.jpg",
+        "link": "https://live.bilibili.com/100001?broadcast_type=0",
+        "liveTime": 1783050986,
+        "live_status": 1,
+        "live_time": 15448,
+        "lock_till": "0000-00-00 00:00:00",
+        "nickname": "sample-anchor",
+        "online": 1,
+        "room_id": 100001,
+        "roomid": 100001,
+        "roomname": "sample live",
+        "short_id": 0,
+        "tag_name": "",
+        "tags": "",
+        "title": "sample live",
+        "uid": 100002,
+        "uname": "sample-anchor"
+      }
+    ],
+    "not_living_num": 0,
+    "rooms": [
+      {
+        "area": 4,
+        "area_name": "sample-parent-area",
+        "area_v2_id": 86,
+        "area_v2_name": "sample-area",
+        "area_v2_parent_id": 2,
+        "area_v2_parent_name": "sample-category",
+        "broadcast_type": 0,
+        "cover_from_user": "https://example.invalid/cover.jpg",
+        "face": "https://example.invalid/face.jpg",
+        "hidden_till": "0000-00-00 00:00:00",
+        "is_encrypt": false,
+        "keyframe": "https://example.invalid/keyframe.jpg",
+        "link": "https://live.bilibili.com/100001?broadcast_type=0",
+        "liveTime": 1783050986,
+        "live_status": 1,
+        "live_time": 15448,
+        "lock_till": "0000-00-00 00:00:00",
+        "nickname": "sample-anchor",
+        "online": 1,
+        "room_id": 100001,
+        "roomid": 100001,
+        "roomname": "sample live",
+        "short_id": 0,
+        "tag_name": "",
+        "tags": "",
+        "title": "sample live",
+        "uid": 100002,
+        "uname": "sample-anchor"
+      }
+    ]
+  },
+  "message": "0",
+  "ttl": 1
+}

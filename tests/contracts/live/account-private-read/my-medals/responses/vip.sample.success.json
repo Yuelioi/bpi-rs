@@ -1,0 +1,35 @@
+{
+  "code": 0,
+  "data": {
+    "count": 1,
+    "items": [
+      {
+        "can_deleted": true,
+        "day_limit": 20000,
+        "guard_level": 0,
+        "guard_medal_title": "inactive",
+        "intimacy": 21,
+        "is_lighted": 0,
+        "level": 7,
+        "medal_color_border": 12632256,
+        "medal_color_end": 12632256,
+        "medal_color_start": 12632256,
+        "medal_id": 1000001,
+        "medal_name": "sample",
+        "next_intimacy": 26,
+        "roomid": 100001,
+        "status": 0,
+        "target_id": 100002,
+        "target_name": "sample-anchor",
+        "today_feed": 0,
+        "uname": "sample-anchor"
+      }
+    ],
+    "page_info": {
+      "cur_page": 1,
+      "total_page": 1
+    }
+  },
+  "message": "0",
+  "ttl": 1
+}

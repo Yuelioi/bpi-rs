@@ -1,0 +1,73 @@
+{
+  "name": "live.follow_up_list",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/xlive/web-ucenter/user/following",
+    "query": {
+      "page": "1",
+      "page_size": "2",
+      "ignoreRecord": "1",
+      "hit_ab": "true"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "authenticated fixture redacts followed account, cover, face, and room identity"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": -101,
+        "fixture": "responses/anonymous.requires_login.json",
+        "fixture_kind": "probe_error_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "FollowUpLiveData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "FollowUpLiveData"
+      }
+    }
+  ]
+}

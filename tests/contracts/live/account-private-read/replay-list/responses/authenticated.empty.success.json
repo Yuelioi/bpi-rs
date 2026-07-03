@@ -1,0 +1,16 @@
+{
+  "code": 0,
+  "data": {
+    "archive_flag": true,
+    "can_edit": 1,
+    "can_upload": false,
+    "has_third_platform_live": false,
+    "pagination": {
+      "page": 1,
+      "page_size": 2
+    },
+    "replay_info": null
+  },
+  "message": "0",
+  "ttl": 1
+}

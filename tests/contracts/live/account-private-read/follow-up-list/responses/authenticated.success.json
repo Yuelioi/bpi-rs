@@ -1,0 +1,43 @@
+{
+  "code": 0,
+  "data": {
+    "count": 1,
+    "list": [
+      {
+        "area_id": 86,
+        "area_name": "",
+        "area_name_v2": "sample-area",
+        "area_value": "",
+        "clipnum": 0,
+        "face": "https://example.invalid/face.jpg",
+        "fans_num": 0,
+        "is_attention": 1,
+        "live_status": 1,
+        "parent_area_id": 2,
+        "recent_record_id": "",
+        "recent_record_id_v2": "",
+        "record_live_time": 0,
+        "record_num": 0,
+        "record_num_v2": 0,
+        "room_cover": "https://example.invalid/cover.jpg",
+        "room_news": "",
+        "roomid": 100001,
+        "switch": true,
+        "tags": "",
+        "text_small": "1",
+        "title": "sample live",
+        "uid": 100002,
+        "uname": "sample-anchor",
+        "watch_icon": "https://example.invalid/watch.png"
+      }
+    ],
+    "live_count": 1,
+    "never_lived_count": 0,
+    "never_lived_faces": [],
+    "pageSize": 2,
+    "title": "followed live",
+    "totalPage": 1
+  },
+  "message": "0",
+  "ttl": 1
+}
