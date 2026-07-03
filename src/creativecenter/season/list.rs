@@ -5,6 +5,7 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+use super::SeasonListParams;
 use super::models::{Season, Section};
 
 /// 合集列表返回结构
@@ -97,31 +98,16 @@ impl BpiClient {
     /// # 参数
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `pn` | u32 | 页码，默认 1 |
-    /// | `ps` | u32 | 每页数量，默认 30 |
-    /// | `order` | `Option<&str>` | 排序方式：ctime 或 mtime |
-    /// | `sort` | `Option<&str>` | 升降序：asc 或 desc |
+    /// | `params` | [`SeasonListParams`] | 合集列表分页和排序参数 |
     ///
     /// # 文档
     /// [获取合集列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/list.md#获取合集列表)
     pub async fn season_list(
         &self,
-        pn: u32,
-        ps: u32,
-        order: Option<&str>,
-        sort: Option<&str>,
+        params: SeasonListParams,
     ) -> Result<BpiResponse<SeasonListData>, BpiError> {
-        let mut query: Vec<(&str, String)> = vec![("pn", pn.to_string()), ("ps", ps.to_string())];
-
-        if let Some(order_val) = order {
-            query.push(("order", order_val.to_string()));
-        }
-        if let Some(sort_val) = sort {
-            query.push(("sort", sort_val.to_string()));
-        }
-
         self.get("https://member.bilibili.com/x2/creative/web/seasons")
-            .query(&query)
+            .query(&params.query_pairs())
             .send_bpi("获取合集列表")
             .await
     }
@@ -130,15 +116,16 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::creativecenter::season::{SeasonListOrder, SeasonListSort};
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_season_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi
-            .season_list(1, 10, Some("ctime"), Some("desc"))
-            .await?
-            .into_data()?;
+        let params = SeasonListParams::new(1, 10)?
+            .with_order(SeasonListOrder::CreatedAt)
+            .with_sort(SeasonListSort::Desc);
+        let data = bpi.season_list(params).await?.into_data()?;
 
         tracing::info!("共 {} 个合集", data.total);
         for s in data.seasons {

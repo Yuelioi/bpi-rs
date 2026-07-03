@@ -1,0 +1,31 @@
+{
+  "code": 0,
+  "data": {
+    "SeasonUpfrom": 0,
+    "captcha_token": "",
+    "cover": "https://example.invalid/redacted.jpg",
+    "ctime": 1733436235,
+    "desc": "",
+    "ep_num": 1,
+    "forbid": 1,
+    "has_charging_pay": 0,
+    "has_pugv_pay": 0,
+    "id": 1,
+    "isAct": 0,
+    "isEnd": 0,
+    "is_opened": 1,
+    "is_pay": 0,
+    "mid": 1,
+    "mtime": 1761452242,
+    "no_section": 1,
+    "partState": 0,
+    "protocol_id": "",
+    "rejectReason": "",
+    "season_price": 0,
+    "signState": 0,
+    "state": 0,
+    "title": "<redacted>"
+  },
+  "message": "0",
+  "ttl": 1
+}

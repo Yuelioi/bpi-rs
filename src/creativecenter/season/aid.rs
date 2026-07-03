@@ -9,7 +9,7 @@ use super::SeasonByAidParams;
 
 /// 合集信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SeasonInfoData {
+pub struct SeasonByAidData {
     /// 合集 ID
     pub id: u64,
     /// 合集标题
@@ -105,7 +105,7 @@ impl BpiClient {
     pub async fn season_by_aid(
         &self,
         params: SeasonByAidParams,
-    ) -> Result<BpiResponse<SeasonInfoData>, BpiError> {
+    ) -> Result<BpiResponse<SeasonByAidData>, BpiError> {
         self.get("https://member.bilibili.com/x2/creative/web/season/aid")
             .query(&params.query_pairs())
             .send_bpi("根据 aid 查询合集")

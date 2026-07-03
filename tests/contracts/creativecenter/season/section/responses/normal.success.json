@@ -1,0 +1,50 @@
+{
+  "code": 0,
+  "data": {
+    "episodes": [
+      {
+        "aid": 1,
+        "aid_owner": false,
+        "archiveState": 0,
+        "archiveTitle": "<redacted>",
+        "bvid": "BV1xx411c7xx",
+        "charging_pay": 0,
+        "cid": 1,
+        "cover": "",
+        "id": 1,
+        "is_free": 0,
+        "limited_free": false,
+        "member_first": 0,
+        "order": 1,
+        "pugv_pay": 0,
+        "rejectReason": "",
+        "seasonId": 1,
+        "sectionId": 1,
+        "state": 0,
+        "title": "<redacted>",
+        "videoTitle": "<redacted>"
+      }
+    ],
+    "section": {
+      "Episodes": null,
+      "captcha_token": "",
+      "cover": "https://example.invalid/redacted.jpg",
+      "ctime": 0,
+      "epCount": 1,
+      "has_charging_pay": 0,
+      "has_pugv_pay": 0,
+      "id": 0,
+      "mtime": 0,
+      "order": 0,
+      "partState": 0,
+      "rejectReason": "",
+      "seasonId": 0,
+      "show": 0,
+      "state": 0,
+      "title": "",
+      "type": 0
+    }
+  },
+  "message": "0",
+  "ttl": 1
+}

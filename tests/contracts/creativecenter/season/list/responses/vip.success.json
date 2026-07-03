@@ -1,0 +1,110 @@
+{
+  "code": 0,
+  "data": {
+    "play_type": 1,
+    "seasons": [
+      {
+        "checkin": {
+          "season_status": 1,
+          "status": 0,
+          "status_reason": ""
+        },
+        "course": null,
+        "part_episodes": [
+          {
+            "aid": 1,
+            "aid_owner": false,
+            "archiveState": 0,
+            "archiveTitle": "",
+            "bvid": "BV1xx411c7xx",
+            "charging_pay": 0,
+            "cid": 1,
+            "cover": "https://example.invalid/redacted.jpg",
+            "id": 1,
+            "is_free": 0,
+            "limited_free": false,
+            "member_first": 0,
+            "order": 1,
+            "pugv_pay": 0,
+            "rejectReason": "",
+            "seasonId": 1,
+            "sectionId": 1,
+            "state": 0,
+            "title": "<redacted>",
+            "videoTitle": ""
+          }
+        ],
+        "season": {
+          "SeasonUpfrom": 0,
+          "captcha_token": "",
+          "cover": "https://example.invalid/redacted.jpg",
+          "ctime": 1733436235,
+          "desc": "",
+          "ep_num": 1,
+          "forbid": 1,
+          "has_charging_pay": 0,
+          "has_pugv_pay": 0,
+          "id": 1,
+          "isAct": 0,
+          "isEnd": 0,
+          "is_opened": 1,
+          "is_pay": 0,
+          "mid": 1,
+          "mtime": 1761452242,
+          "no_section": 1,
+          "partState": 0,
+          "protocol_id": "",
+          "rejectReason": "",
+          "season_price": 0,
+          "signState": 0,
+          "state": 0,
+          "title": "<redacted>"
+        },
+        "seasonStat": {
+          "coin": 0,
+          "danmaku": 0,
+          "fav": 0,
+          "hisRank": 0,
+          "like": 0,
+          "nowRank": 0,
+          "reply": 0,
+          "share": 0,
+          "subscription": 0,
+          "view": 0,
+          "vt": 0
+        },
+        "sections": {
+          "sections": [
+            {
+              "Episodes": null,
+              "captcha_token": "",
+              "cover": "https://example.invalid/redacted.jpg",
+              "ctime": 1733436235,
+              "epCount": 1,
+              "has_charging_pay": 0,
+              "has_pugv_pay": 0,
+              "id": 1,
+              "mtime": 1761452032,
+              "order": 1,
+              "partState": 0,
+              "rejectReason": "",
+              "seasonId": 1,
+              "show": 0,
+              "state": 0,
+              "title": "<redacted>",
+              "type": 1
+            }
+          ]
+        }
+      }
+    ],
+    "sort_mode": "default",
+    "tip": {
+      "title": "",
+      "url": ""
+    },
+    "total": 1
+  },
+  "message": "0",
+  "ttl": 1
+}
