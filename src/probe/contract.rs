@@ -33,6 +33,7 @@ pub struct ContractRequest {
     pub headers: BTreeMap<String, String>,
     pub auth: ContractAuth,
     pub body: Option<serde_json::Value>,
+    pub form: Option<BTreeMap<String, String>>,
     pub response_decoding: ResponseDecoding,
 }
 
@@ -259,6 +260,8 @@ struct RawContractRequest {
     #[serde(default)]
     body: Option<serde_json::Value>,
     #[serde(default)]
+    form: Option<BTreeMap<String, String>>,
+    #[serde(default)]
     response_decoding: RawResponseDecoding,
 }
 
@@ -268,6 +271,12 @@ impl TryFrom<RawApiContract> for ApiContract {
     fn try_from(raw: RawApiContract) -> Result<Self, Self::Error> {
         let method = parse_method(&raw.request.method)?;
         let url = parse_url(raw.request.url)?;
+        if raw.request.body.is_some() && raw.request.form.is_some() {
+            return Err(BpiError::invalid_parameter(
+                "request",
+                "body and form cannot both be set",
+            ));
+        }
 
         Ok(Self {
             name: raw.name,
@@ -279,6 +288,7 @@ impl TryFrom<RawApiContract> for ApiContract {
                 headers: raw.request.headers,
                 auth: raw.request.auth,
                 body: raw.request.body,
+                form: raw.request.form,
                 response_decoding: raw.request.response_decoding.into(),
             },
             expect: raw.expect,
@@ -560,6 +570,59 @@ mod tests {
         assert!(contract.request.auth.requires_cookie());
         assert!(contract.request.auth.requires_csrf());
         Ok(())
+    }
+
+    #[test]
+    fn contract_deserializes_form_body() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "misc.b23tv.anonymous",
+                "request": {
+                    "method": "POST",
+                    "url": "https://api.biliapi.net/x/share/click",
+                    "form": {
+                        "platform": "unix",
+                        "share_channel": "COPY",
+                        "oid": "10001"
+                    }
+                }
+            }"#,
+        )?;
+
+        let form = contract
+            .request
+            .form
+            .as_ref()
+            .ok_or_else(|| BpiError::unsupported_response("missing form"))?;
+
+        assert_eq!(form.get("platform").map(String::as_str), Some("unix"));
+        assert_eq!(form.get("oid").map(String::as_str), Some("10001"));
+        assert!(contract.request.body.is_none());
+        Ok(())
+    }
+
+    #[test]
+    fn contract_rejects_json_body_and_form_together() {
+        let err = ApiContract::from_slice(
+            br#"{
+                "name": "bad",
+                "request": {
+                    "method": "POST",
+                    "url": "https://api.bilibili.com/x/test",
+                    "body": { "csrf": "${csrf}" },
+                    "form": { "csrf": "${csrf}" }
+                }
+            }"#,
+        )
+        .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "request",
+                ..
+            }
+        ));
     }
 
     #[test]

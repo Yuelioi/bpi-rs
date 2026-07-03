@@ -113,6 +113,11 @@ async fn build_request(client: &BpiClient, contract: &ApiContract) -> BpiResult<
         request = request.json(&body);
     }
 
+    if let Some(form) = contract.request.form.as_ref() {
+        let form = render_string_map(form, &variables)?;
+        request = request.form(&form);
+    }
+
     Ok(request)
 }
 
@@ -225,17 +230,90 @@ fn capture_request(request: &RequestBuilder) -> BpiResult<CapturedRequest> {
         url: request.url().to_string(),
         headers: collect_headers(request.headers()),
         query,
-        body: captured_body(request.body()),
+        body: captured_body(request.body(), request.headers()),
     })
 }
 
-fn captured_body(body: Option<&reqwest::Body>) -> Option<serde_json::Value> {
+fn captured_body(
+    body: Option<&reqwest::Body>,
+    headers: &reqwest::header::HeaderMap,
+) -> Option<serde_json::Value> {
     let bytes = body?.as_bytes()?;
-    serde_json::from_slice(bytes).ok().or_else(|| {
-        std::str::from_utf8(bytes)
-            .ok()
-            .map(|body| serde_json::Value::String(body.to_string()))
-    })
+    if let Ok(value) = serde_json::from_slice(bytes) {
+        return Some(value);
+    }
+
+    let body = std::str::from_utf8(bytes).ok()?;
+    if is_form_urlencoded(headers) {
+        return Some(parse_urlencoded_form(body));
+    }
+
+    Some(serde_json::Value::String(body.to_string()))
+}
+
+fn is_form_urlencoded(headers: &reqwest::header::HeaderMap) -> bool {
+    headers
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|value| value.to_str().ok())
+        .map(|value| {
+            value
+                .to_ascii_lowercase()
+                .starts_with("application/x-www-form-urlencoded")
+        })
+        .unwrap_or(false)
+}
+
+fn parse_urlencoded_form(body: &str) -> serde_json::Value {
+    let mut output = serde_json::Map::new();
+    for pair in body.split('&').filter(|pair| !pair.is_empty()) {
+        let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
+        output.insert(
+            decode_form_component(key),
+            serde_json::Value::String(decode_form_component(value)),
+        );
+    }
+    serde_json::Value::Object(output)
+}
+
+fn decode_form_component(value: &str) -> String {
+    let bytes = value.as_bytes();
+    let mut output = Vec::with_capacity(bytes.len());
+    let mut index = 0;
+
+    while index < bytes.len() {
+        match bytes[index] {
+            b'+' => {
+                output.push(b' ');
+                index += 1;
+            }
+            b'%' if index + 2 < bytes.len() => {
+                if let (Some(hi), Some(lo)) =
+                    (hex_value(bytes[index + 1]), hex_value(bytes[index + 2]))
+                {
+                    output.push((hi << 4) | lo);
+                    index += 3;
+                } else {
+                    output.push(bytes[index]);
+                    index += 1;
+                }
+            }
+            byte => {
+                output.push(byte);
+                index += 1;
+            }
+        }
+    }
+
+    String::from_utf8(output).unwrap_or_else(|_| value.to_string())
+}
+
+fn hex_value(byte: u8) -> Option<u8> {
+    match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'a'..=b'f' => Some(byte - b'a' + 10),
+        b'A'..=b'F' => Some(byte - b'A' + 10),
+        _ => None,
+    }
 }
 
 fn collect_headers(headers: &reqwest::header::HeaderMap) -> BTreeMap<String, String> {
@@ -381,6 +459,41 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn captured_request_records_form_body() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "misc.b23tv.anonymous",
+                "request": {
+                    "method": "POST",
+                    "url": "https://api.biliapi.net/x/share/click",
+                    "form": {
+                        "platform": "unix",
+                        "share_channel": "COPY",
+                        "share_id": "main.ugc-video-detail.0.0.pv",
+                        "share_mode": "4",
+                        "oid": "10001",
+                        "buvid": "qwq",
+                        "build": "6114514"
+                    }
+                }
+            }"#,
+        )?;
+        let client = BpiClient::new()?;
+        let request = build_request(&client, &contract).await?;
+        let captured = capture_request(&request)?;
+
+        let body = captured.body.expect("form body should be captured");
+        assert_eq!(body["platform"], "unix");
+        assert_eq!(body["share_channel"], "COPY");
+        assert_eq!(body["share_id"], "main.ugc-video-detail.0.0.pv");
+        assert_eq!(body["share_mode"], "4");
+        assert_eq!(body["oid"], "10001");
+        assert_eq!(body["buvid"], "qwq");
+        assert_eq!(body["build"], "6114514");
+        Ok(())
+    }
+
+    #[tokio::test]
     async fn build_request_injects_profile_csrf_into_json_body() -> Result<(), BpiError> {
         let contract = ApiContract::from_slice(
             br#"{
@@ -398,6 +511,56 @@ mod tests {
                         "timestamp": 1700000000000,
                         "traceId": 1700000000000,
                         "version": "1.0"
+                    }
+                }
+            }"#,
+        )?;
+        let config = RawProbeConfig {
+            probe: ProbeAccountConfig {
+                normal: Some(ProbeAccountProfile {
+                    bili_jct: "normal-csrf".to_string(),
+                    dede_user_id: "43".to_string(),
+                    dede_user_id_ckmd5: "ck-normal".to_string(),
+                    sessdata: "session-normal".to_string(),
+                    buvid3: "buvid-normal".to_string(),
+                }),
+                vip: None,
+            },
+            ..RawProbeConfig::default()
+        };
+        let client = client_for_contract(&contract, &config)?;
+        let request = build_request(&client, &contract).await?;
+        let captured = capture_request(&request)?;
+
+        assert_eq!(
+            captured
+                .body
+                .as_ref()
+                .and_then(|body| body["csrf"].as_str()),
+            Some("normal-csrf")
+        );
+        assert_eq!(
+            captured.sanitized().body.as_ref().map(|body| &body["csrf"]),
+            Some(&serde_json::Value::String("<redacted>".to_string()))
+        );
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn build_request_injects_profile_csrf_into_form_body() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "form.csrf.normal",
+                "request": {
+                    "method": "POST",
+                    "url": "https://api.bilibili.com/x/test",
+                    "auth": {
+                        "profile": "normal",
+                        "requires": ["cookie", "csrf"]
+                    },
+                    "form": {
+                        "csrf": "${csrf}",
+                        "keep": "value"
                     }
                 }
             }"#,
