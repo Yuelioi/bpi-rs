@@ -41,11 +41,22 @@ impl TryFrom<RawEndpointContract> for EndpointContract {
             "expect": {}
         }))?;
 
-        Ok(Self {
+        let contract = Self {
             name: request_contract.name,
             request: request_contract.request,
             cases: raw.cases,
-        })
+        };
+        contract.validate_response_errors()?;
+        Ok(contract)
+    }
+}
+
+impl EndpointContract {
+    fn validate_response_errors(&self) -> BpiResult<()> {
+        for case in &self.cases {
+            case.response.validate_error_label()?;
+        }
+        Ok(())
     }
 }
 
@@ -75,6 +86,64 @@ pub struct EndpointResponse {
     pub rust_model: Option<String>,
     #[serde(default)]
     pub error: Option<String>,
+}
+
+const STABLE_SEMANTIC_ERROR_LABELS: &[&str] = &[
+    "requires_login",
+    "requires_vip",
+    "risk_control",
+    "permission_denied",
+    "business_error",
+];
+
+const DOMAIN_ERROR_LABELS: &[&str] = &[
+    "missing_model_fields",
+    "not_admin",
+    "not_found",
+    "not_note_owner",
+    "not_owner",
+    "wbi_risk_control",
+];
+
+impl EndpointResponse {
+    fn validate_error_label(&self) -> BpiResult<()> {
+        let Some(label) = self.error.as_deref() else {
+            return Ok(());
+        };
+
+        if !is_allowed_error_label(label) {
+            return Err(invalid_error_label());
+        }
+
+        if STABLE_SEMANTIC_ERROR_LABELS.contains(&label)
+            && let Some(observed) = self.observed_semantic_error()
+            && observed != label
+        {
+            return Err(invalid_error_label());
+        }
+
+        Ok(())
+    }
+
+    fn observed_semantic_error(&self) -> Option<&'static str> {
+        self.api_code
+            .and_then(|code| BpiError::from_code(code).semantic_error())
+            .or_else(|| {
+                self.http_status
+                    .and_then(|status| BpiError::http(status).semantic_error())
+            })
+    }
+}
+
+fn is_allowed_error_label(label: &str) -> bool {
+    STABLE_SEMANTIC_ERROR_LABELS.contains(&label) || DOMAIN_ERROR_LABELS.contains(&label)
+}
+
+fn invalid_error_label() -> BpiError {
+    BpiError::invalid_parameter(
+        "response.error",
+        "response error label must be a supported stable semantic or domain-specific label",
+    )
 }
 
 #[cfg(all(test, feature = "login"))]
@@ -162,5 +231,68 @@ mod tests {
         assert_eq!(response.api_code, None);
         assert_eq!(response.api_code_text.as_deref(), Some("unauthenticated"));
         Ok(())
+    }
+
+    #[test]
+    fn endpoint_contract_rejects_error_label_that_disagrees_with_observed_api_code() {
+        let err = EndpointContract::from_slice(
+            br#"{
+                "name": "login.vip_info",
+                "request": {
+                    "method": "GET",
+                    "url": "https://api.bilibili.com/x/vip/web/user/info"
+                },
+                "cases": [
+                    {
+                        "name": "anonymous",
+                        "response": {
+                            "http_status": 200,
+                            "api_code": -101,
+                            "error": "risk_control"
+                        }
+                    }
+                ]
+            }"#,
+        )
+        .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "response.error",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn endpoint_contract_rejects_unknown_error_label() {
+        let err = EndpointContract::from_slice(
+            br#"{
+                "name": "login.vip_info",
+                "request": {
+                    "method": "GET",
+                    "url": "https://api.bilibili.com/x/vip/web/user/info"
+                },
+                "cases": [
+                    {
+                        "name": "anonymous",
+                        "response": {
+                            "http_status": 401,
+                            "error": "login_required"
+                        }
+                    }
+                ]
+            }"#,
+        )
+        .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "response.error",
+                ..
+            }
+        ));
     }
 }

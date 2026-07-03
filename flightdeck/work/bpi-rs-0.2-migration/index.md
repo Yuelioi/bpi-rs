@@ -56,12 +56,13 @@ Done:
 - Covered `clientinfo/ip`, `login/vip-info`, `login/read-info`, and `login/qr` in the accepted contract shape.
 
 Current:
-- Continue future module batches using the endpoint fixture shape from commit `6383119`.
-- Use the local status board to select and execute the next module batch.
+- Shared-core foundation work is active after endpoint contract batches. The latest small batch validates endpoint contract response error labels against stable `BpiError` semantics while preserving existing domain-specific labels.
+- Use the local status board to select and execute the next shared-core batch.
 
 Verified:
 - After commit `6383119`, `cargo fmt --check`, `cargo check --all-features`, and `cargo test --all-features --lib` passed.
 - `cargo test --all-features --lib`: 358 passed, 0 failed, 302 ignored.
+- For `shared-core/contract-error-label-validation`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, `cargo test --all-features --lib --quiet`, and `git diff --check` passed.
 
 ## Local-only Constraints
 
