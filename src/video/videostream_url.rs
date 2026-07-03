@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use super::params::VideoPlayUrlParams;
 
+const PLAY_URL_ENDPOINT: &str = "https://api.bilibili.com/x/player/wbi/playurl";
+
 // --- 视频流URL相关数据结构体 ---
 
 /// DASH 流信息
@@ -120,7 +122,7 @@ impl BpiClient {
     ) -> Result<BpiResponse<PlayUrlResponseData>, BpiError> {
         let params = self.get_wbi_sign2(params.query_pairs()).await?;
 
-        self.get("https://api.bilibili.com/x/player/wbi/playurl")
+        self.get(PLAY_URL_ENDPOINT)
             .with_bilibili_headers()
             .query(&params)
             .send_bpi("获取视频流地址")
@@ -134,10 +136,19 @@ impl BpiClient {
 mod tests {
     use super::*;
     use crate::ids::{Aid, Cid};
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 113898824998659;
     const TEST_CID: u64 = 28104724389;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/video/playurl/play-url/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -172,6 +183,114 @@ mod tests {
         assert!(data.dash.is_some());
         assert_eq!(data.quality, 120);
 
+        Ok(())
+    }
+
+    #[test]
+    fn video_play_url_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params = VideoPlayUrlParams::from_bvid("BV1xx411c7mD".parse()?, Cid::new(62131)?)
+            .quality(32)
+            .format_flags(16)
+            .format_version(0);
+
+        assert_eq!(contract.name, "video.play_url");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), PLAY_URL_ENDPOINT);
+        assert!(contract.request.auth.requires_wbi());
+        assert_eq!(
+            contract.request.query.get("cid").map(String::as_str),
+            Some("62131")
+        );
+        assert_eq!(
+            contract.request.query.get("bvid").map(String::as_str),
+            Some("BV1xx411c7mD")
+        );
+        assert_eq!(
+            contract.request.query.get("qn").map(String::as_str),
+            Some("32")
+        );
+        assert_eq!(
+            contract.request.query.get("fnval").map(String::as_str),
+            Some("16")
+        );
+        assert_eq!(
+            contract.request.query.get("fnver").map(String::as_str),
+            Some("0")
+        );
+        assert_eq!(
+            contract.request.query.get("platform").map(String::as_str),
+            Some("pc")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("cid", "62131".to_string()),
+                ("bvid", "BV1xx411c7mD".to_string()),
+                ("qn", "32".to_string()),
+                ("fnval", "16".to_string()),
+                ("fnver", "0".to_string()),
+                ("platform", "pc".to_string()),
+            ]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert!(
+            contract
+                .cases
+                .iter()
+                .all(|case| case.response.api_code == Some(0))
+        );
+        assert!(
+            contract
+                .cases
+                .iter()
+                .all(|case| case.response.rust_model.as_deref() == Some("PlayUrlResponseData"))
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn video_play_url_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<PlayUrlResponseData>::from_slice(include_bytes!(
+            "../../tests/contracts/video/playurl/play-url/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.quality, 32);
+        assert_eq!(payload.format, "flv480");
+        assert_eq!(
+            payload
+                .dash
+                .as_ref()
+                .and_then(|dash| dash.video.first())
+                .map(|track| track.base_url.as_str()),
+            Some("https://example.invalid/bilibili/playurl/redacted.m4s")
+        );
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/video/playurl/play-url/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn video_play_url_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<PlayUrlResponseData>>(body)?.into_payload()?;
+
+            assert_eq!(payload.quality, 32);
+            assert!(payload.dash.is_some());
+        }
         Ok(())
     }
 }
