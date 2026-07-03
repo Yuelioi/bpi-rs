@@ -5,6 +5,11 @@ use serde_json::Value;
 // 以下结构体为API文档中未完全列出的部分，根据描述进行了推断和简化。
 // 如果您有完整的文档，请替换这些结构体。
 
+const REPOST_DETAIL_URL: &str =
+    "https://api.vc.bilibili.com/dynamic_repost/v1/dynamic_repost/repost_detail";
+const SPEC_ITEM_LIKES_URL: &str =
+    "https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/spec_item_likes";
+
 /// 动态转发列表中的转发项
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct RepostItem {
@@ -263,13 +268,16 @@ impl BpiClient {
     /// | ---- | ---- | ---- |
     /// | `dynamic_id` | &str | 动态 ID |
     /// | `offset` | `Option<&str>` | 偏移量 |
+    #[deprecated(
+        note = "observed HTTP 404 text/html from vc.bilibili.com on 2026-07-03; use dynamic detail APIs instead"
+    )]
     pub async fn dynamic_repost_detail(
         &self,
         dynamic_id: &str,
         offset: Option<&str>,
     ) -> Result<BpiResponse<RepostDetailResponseData>, BpiError> {
         let mut req = self
-            .get("https://api.vc.bilibili.com/dynamic_repost/v1/dynamic_repost/repost_detail")
+            .get(REPOST_DETAIL_URL)
             .query(&[("dynamic_id", dynamic_id)]);
 
         if let Some(o) = offset {
@@ -297,6 +305,9 @@ impl BpiClient {
     /// | `dynamic_id` | u64 | 动态 ID |
     /// | `pn` | `Option<u64>` | 页码，默认 1 |
     /// | `ps` | `Option<u64>` | 页大小，默认 20 |
+    #[deprecated(
+        note = "observed HTTP 404 text/html from vc.bilibili.com on 2026-07-03; use dynamic detail APIs instead"
+    )]
     pub async fn dynamic_spec_item_likes(
         &self,
         dynamic_id: u64,
@@ -306,13 +317,11 @@ impl BpiClient {
         let pn_val = pn.unwrap_or(1);
         let ps_val = ps.unwrap_or(20);
 
-        let req = self
-            .get("https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/spec_item_likes")
-            .query(&[
-                ("dynamic_id", &dynamic_id.to_string()),
-                ("pn", &pn_val.to_string()),
-                ("ps", &ps_val.to_string()),
-            ]);
+        let req = self.get(SPEC_ITEM_LIKES_URL).query(&[
+            ("dynamic_id", &dynamic_id.to_string()),
+            ("pn", &pn_val.to_string()),
+            ("ps", &ps_val.to_string()),
+        ]);
 
         req.send_bpi("获取动态点赞列表").await
     }
@@ -331,19 +340,42 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tracing::info;
+    use crate::BpiResult;
 
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_get_repost_detail() -> Result<(), BpiError> {
-        let bpi = BpiClient::new().expect("client should build");
-        // 替换为有效的动态ID进行测试
-        let dynamic_id = "1099138163191840776";
-        let resp = bpi.dynamic_repost_detail(dynamic_id, None).await?;
-        let data = resp.into_data()?;
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!(
+            "target/bpi-probe-runs/dynamic/basic-info-readonly/{endpoint}/{profile}.response.json"
+        );
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value.get("response")?.get("body").cloned()
+    }
 
-        info!("动态转发列表测试结果: {:?}", data);
-        assert!(!data.items.iter().len() > 0);
+    #[test]
+    fn dynamic_basic_info_legacy_endpoint_urls_match_probe_drafts() {
+        assert_eq!(
+            REPOST_DETAIL_URL,
+            "https://api.vc.bilibili.com/dynamic_repost/v1/dynamic_repost/repost_detail"
+        );
+        assert_eq!(
+            SPEC_ITEM_LIKES_URL,
+            "https://api.vc.bilibili.com/dynamic_like/v1/dynamic_like/spec_item_likes"
+        );
+    }
+
+    #[test]
+    fn dynamic_basic_info_local_probe_outputs_record_http_404_when_present() -> BpiResult<()> {
+        for endpoint in ["repost-detail", "spec-item-likes"] {
+            for profile in ["anonymous", "normal", "vip"] {
+                let Some(body) = local_probe_body(endpoint, profile) else {
+                    continue;
+                };
+
+                assert_eq!(body["kind"], "binary");
+                assert_eq!(body["content_type"], "text/html");
+                assert_eq!(body["encoding"], "base64");
+            }
+        }
 
         Ok(())
     }
