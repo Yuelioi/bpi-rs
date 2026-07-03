@@ -1,5 +1,4 @@
-use crate::request::BilibiliRequest;
-use crate::{BpiClient, BpiResult};
+use crate::{BilibiliRequest, BpiClient, BpiResult};
 
 use super::model::{
     UserAlbumCount, UserBangumiFollowList, UserBatchCard, UserBatchInfo, UserCardProfile,
@@ -126,9 +125,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(CARD_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<UserCardProfile>("user.card")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.card")
+            .await
     }
 
     /// Fetches compact public card information for one or more users.
@@ -136,9 +134,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(CARDS_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<Vec<UserBatchCard>>("user.cards")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.cards")
+            .await
     }
 
     /// Fetches detailed public batch information for one or more users.
@@ -146,9 +143,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(INFOS_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<Vec<UserBatchInfo>>("user.infos")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.infos")
+            .await
     }
 
     /// Fetches public album submission counters for a user.
@@ -156,9 +152,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(ALBUM_COUNT_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<UserAlbumCount>("user.album_count")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.album_count")
+            .await
     }
 
     /// Fetches followed bangumi or cinema seasons for a public user.
@@ -170,9 +165,8 @@ impl<'a> UserClient<'a> {
             .get(BANGUMI_FOLLOW_LIST_ENDPOINT)
             .with_bilibili_headers()
             .query(&params.query_pairs())
-            .send_bpi::<UserBangumiFollowList>("user.bangumi_follow_list")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.bangumi_follow_list")
+            .await
     }
 
     /// Fetches users followed by a public member.
@@ -181,9 +175,8 @@ impl<'a> UserClient<'a> {
             .get(FOLLOWINGS_ENDPOINT)
             .with_bilibili_headers()
             .query(&params.query_pairs())
-            .send_bpi::<UserFollowings>("user.followings")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.followings")
+            .await
     }
 
     /// Fetches users following a public member.
@@ -192,9 +185,8 @@ impl<'a> UserClient<'a> {
             .get(FOLLOWERS_ENDPOINT)
             .with_bilibili_headers()
             .query(&params.query_pairs())
-            .send_bpi::<UserFollowers>("user.followers")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.followers")
+            .await
     }
 
     /// Fetches follow groups for the current authenticated session.
@@ -202,9 +194,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(FOLLOW_TAGS_ENDPOINT)
             .with_bilibili_headers()
-            .send_bpi::<Vec<UserFollowTag>>("user.follow_tags")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.follow_tags")
+            .await
     }
 
     /// Fetches a public fan-medal wall for a user.
@@ -213,9 +204,8 @@ impl<'a> UserClient<'a> {
             .get(MEDAL_WALL_ENDPOINT)
             .with_bilibili_headers()
             .query(&params.query_pairs())
-            .send_bpi::<UserMedalWall>("user.medal_wall")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.medal_wall")
+            .await
     }
 
     /// Looks up member IDs by public display names.
@@ -223,9 +213,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(NAME_TO_UID_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<UserNameToUid>("user.name_to_uid")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.name_to_uid")
+            .await
     }
 
     /// Fetches public relation counts for a user.
@@ -236,9 +225,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(RELATION_STAT_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<UserRelationStat>("user.relation_stat")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.relation_stat")
+            .await
     }
 
     /// Fetches public space navigation counters for a user.
@@ -246,9 +234,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(NAV_STAT_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<UserNavStat>("user.nav_stat")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.nav_stat")
+            .await
     }
 
     /// Fetches public creator statistics for a user.
@@ -256,9 +243,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(UP_STAT_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<UserUpStat>("user.up_stat")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.up_stat")
+            .await
     }
 
     /// Fetches public user space information.
@@ -268,9 +254,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(SPACE_INFO_ENDPOINT)
             .query(&signed_params)
-            .send_bpi::<UserSpaceProfile>("user.space_info")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.space_info")
+            .await
     }
 
     /// Fetches the public space notice for a user.
@@ -278,9 +263,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(SPACE_NOTICE_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<UserSpaceNotice>("user.space_notice")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.space_notice")
+            .await
     }
 
     /// Fetches videos uploaded to a user's public space.
@@ -293,9 +277,8 @@ impl<'a> UserClient<'a> {
         self.client
             .get(UPLOADED_VIDEOS_ENDPOINT)
             .query(&signed_params)
-            .send_bpi::<UserUploadedVideos>("user.uploaded_videos")
-            .await?
-            .into_data()
+            .send_bpi_payload("user.uploaded_videos")
+            .await
     }
 }
 
@@ -1034,5 +1017,15 @@ mod tests {
         }
 
         Ok(())
+    }
+
+    #[test]
+    fn user_client_methods_use_payload_request_helpers() {
+        let source = include_str!("client.rs");
+        let payload_helper = concat!(".send_", "bpi_payload");
+        let legacy_envelope_helper = concat!(".send_", "bpi::<");
+
+        assert!(source.matches(payload_helper).count() >= 16);
+        assert!(!source.contains(legacy_envelope_helper));
     }
 }

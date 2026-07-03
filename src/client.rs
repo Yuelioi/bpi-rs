@@ -1012,6 +1012,16 @@ mod tests {
         Ok(())
     }
 
+    #[cfg(feature = "user")]
+    #[test]
+    fn user_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _user = client.user();
+
+        Ok(())
+    }
+
     #[cfg(feature = "video_ranking")]
     #[test]
     fn video_ranking_domain_client_can_be_created() -> Result<(), BpiError> {
