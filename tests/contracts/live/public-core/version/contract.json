@@ -1,0 +1,70 @@
+{
+  "name": "live.version",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/xlive/app-blink/v1/liveVersionInfo/getHomePageLiveVersion",
+    "query": {
+      "system_version": "2"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "public client version fixture keeps public version metadata"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "PcLiveVersionData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "PcLiveVersionData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "PcLiveVersionData"
+      }
+    }
+  ]
+}

@@ -146,6 +146,15 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/live/public-core/room-info/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -155,6 +164,63 @@ mod tests {
 
         let data = result.data.unwrap();
         assert_eq!(data.room_id, 23174842);
+        Ok(())
+    }
+
+    #[test]
+    fn live_room_info_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "live.room_info");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.live.bilibili.com/room/v1/Room/get_info"
+        );
+        assert_eq!(
+            contract.request.query.get("room_id").map(String::as_str),
+            Some("23174842")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("RoomInfoData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn live_room_info_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<RoomInfoData>::from_slice(include_bytes!(
+            "../../tests/contracts/live/public-core/room-info/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.room_id, 23174842);
+        assert_eq!(payload.live_status, 1);
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/live/public-core/room-info/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn live_room_info_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body(profile) {
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<RoomInfoData>>(body)?.into_payload()?;
+                assert_eq!(payload.room_id, 23174842);
+            }
+        }
         Ok(())
     }
 }

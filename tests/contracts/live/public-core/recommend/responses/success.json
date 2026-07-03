@@ -1,0 +1,58 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "recommend_room_list": [
+      {
+        "head_box": {},
+        "area_v2_id": 1,
+        "area_v2_parent_id": 1,
+        "area_v2_name": "<redacted>",
+        "area_v2_parent_name": "<redacted>",
+        "broadcast_type": 0,
+        "cover": "https://example.invalid/cover.jpg",
+        "link": "https://example.invalid/live/1",
+        "online": 1,
+        "pendant_Info": {},
+        "roomid": 1,
+        "title": "<redacted>",
+        "uname": "<redacted>",
+        "face": "https://example.invalid/face.jpg",
+        "verify": {},
+        "uid": 1,
+        "keyframe": "https://example.invalid/keyframe.jpg",
+        "is_auto_play": 0,
+        "head_box_type": 0,
+        "flag": 0,
+        "session_id": "<redacted>",
+        "show_callback": "https://example.invalid/show",
+        "click_callback": "https://example.invalid/click",
+        "special_id": 0,
+        "watched_show": {
+          "switch": true,
+          "num": 1,
+          "text_small": "<redacted>",
+          "text_large": "<redacted>",
+          "icon": "https://example.invalid/icon.png",
+          "icon_location": 0,
+          "icon_web": "https://example.invalid/icon-web.png"
+        },
+        "is_nft": 0,
+        "nft_dmark": "",
+        "is_ad": false,
+        "ad_transparent_content": null,
+        "show_ad_icon": false,
+        "status": true,
+        "followers": 1,
+        "cover_source": 0,
+        "group_id": 0,
+        "is_ai": false,
+        "live_key": "<redacted>",
+        "sub_session_key": "<redacted>",
+        "trackid": "<redacted>"
+      }
+    ],
+    "top_room_id": 0
+  }
+}

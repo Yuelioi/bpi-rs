@@ -1,0 +1,27 @@
+{
+  "code": 0,
+  "message": "success",
+  "ttl": 1,
+  "data": [
+    {
+      "id": 1,
+      "name": "<redacted>",
+      "list": [
+        {
+          "id": "1",
+          "parent_id": "1",
+          "old_area_id": "1",
+          "name": "<redacted>",
+          "act_id": "0",
+          "pk_status": "0",
+          "hot_status": 1,
+          "lock_status": "0",
+          "pic": "https://example.invalid/area.png",
+          "parent_name": "<redacted>",
+          "area_type": 0,
+          "complex_area_name": "<redacted>"
+        }
+      ]
+    }
+  ]
+}

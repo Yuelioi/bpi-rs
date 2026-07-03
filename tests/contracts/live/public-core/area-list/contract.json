@@ -1,0 +1,68 @@
+{
+  "name": "live.area_list",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/room/v1/Area/getList",
+    "query": {},
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "public area taxonomy fixture is trimmed to one parent and one child"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "Vec<LiveParentArea>"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "Vec<LiveParentArea>"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "Vec<LiveParentArea>"
+      }
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "code": 0,
+  "message": "ok",
+  "ttl": 1,
+  "data": {
+    "uid": 1,
+    "room_id": 23174842,
+    "short_id": 0,
+    "attention": 1,
+    "online": 1,
+    "is_portrait": false,
+    "description": "<redacted>",
+    "live_status": 1,
+    "area_id": 1,
+    "parent_area_id": 1,
+    "parent_area_name": "<redacted>",
+    "old_area_id": 1,
+    "background": "https://example.invalid/background.jpg",
+    "title": "<redacted>",
+    "user_cover": "https://example.invalid/cover.jpg",
+    "keyframe": "https://example.invalid/keyframe.jpg",
+    "live_time": "2026-01-01 00:00:00",
+    "tags": "<redacted>",
+    "room_silent_type": "",
+    "room_silent_level": 0,
+    "room_silent_second": 0,
+    "area_name": "<redacted>",
+    "hot_words": [
+      "<redacted>"
+    ],
+    "hot_words_status": 1,
+    "new_pendants": {
+      "frame": {
+        "name": "",
+        "value": "",
+        "position": 0,
+        "desc": "",
+        "area": 0,
+        "area_old": 0,
+        "bg_color": "",
+        "bg_pic": "",
+        "use_old_area": false
+      },
+      "mobile_frame": null,
+      "badge": {
+        "name": "",
+        "position": 0,
+        "value": "",
+        "desc": ""
+      },
+      "mobile_badge": null
+    },
+    "pk_status": 0,
+    "pk_id": 0,
+    "allow_change_area_time": 0,
+    "allow_upload_cover_time": 0,
+    "studio_info": null
+  }
+}

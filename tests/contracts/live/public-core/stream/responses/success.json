@@ -1,0 +1,27 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "current_quality": 10000,
+    "accept_quality": [
+      "10000"
+    ],
+    "current_qn": 10000,
+    "quality_description": [
+      {
+        "qn": 10000,
+        "desc": "原画"
+      }
+    ],
+    "durl": [
+      {
+        "url": "https://example.invalid/live.flv",
+        "order": 1,
+        "stream_type": 0,
+        "p2p_type": 0,
+        "length": 0
+      }
+    ]
+  }
+}

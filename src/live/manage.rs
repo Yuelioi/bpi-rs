@@ -256,7 +256,16 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
+
+    fn version_contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/live/public-core/version/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -357,6 +366,66 @@ mod tests {
 
         info!("PC直播姬版本号: {}", data.curr_version);
 
+        Ok(())
+    }
+
+    #[test]
+    fn live_version_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = version_contract()?;
+
+        assert_eq!(contract.name, "live.version");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.live.bilibili.com/xlive/app-blink/v1/liveVersionInfo/getHomePageLiveVersion"
+        );
+        assert_eq!(
+            contract
+                .request
+                .query
+                .get("system_version")
+                .map(String::as_str),
+            Some("2")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("PcLiveVersionData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn live_version_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<PcLiveVersionData>::from_slice(include_bytes!(
+            "../../tests/contracts/live/public-core/version/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.curr_version, "7.61.0.10694");
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/live/public-core/version/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn live_version_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body(profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<PcLiveVersionData>>(body)?
+                    .into_payload()?;
+                assert!(!payload.curr_version.is_empty());
+            }
+        }
         Ok(())
     }
 }
