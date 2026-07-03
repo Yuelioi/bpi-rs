@@ -28,7 +28,16 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/user/relation-read/follow-tags/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -42,6 +51,46 @@ mod tests {
         let data = resp.into_data()?;
 
         info!("关注分组列表: {:?}", data);
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_follow_tags_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "user.follow_tags");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/relation/tags"
+        );
+        assert!(contract.request.query.is_empty());
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("requires_login")
+        );
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("Vec<UserFollowTag>")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_follow_tags_fixtures_parse_promoted_contract_models() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../../tests/contracts/user/relation-read/follow-tags/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let tags = ApiEnvelope::<Vec<FollowTag>>::from_slice(include_bytes!(
+            "../../../tests/contracts/user/relation-read/follow-tags/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(tags.len(), 2);
+        assert_eq!(tags[0].tagid, -10);
         Ok(())
     }
 }

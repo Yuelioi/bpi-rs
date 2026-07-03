@@ -181,15 +181,12 @@ impl<'de> Deserialize<'de> for Vip {
                     }
                 }
 
-                // 检查必需字段
                 let vip_type = vip_type.ok_or_else(|| de::Error::missing_field("vip_type"))?;
                 let vip_status =
                     vip_status.ok_or_else(|| de::Error::missing_field("vip_status"))?;
-                let vip_due_date =
-                    vip_due_date.ok_or_else(|| de::Error::missing_field("vip_due_date"))?;
-                let label = label.ok_or_else(|| de::Error::missing_field("label"))?;
-                let nickname_color =
-                    nickname_color.ok_or_else(|| de::Error::missing_field("nickname_color"))?;
+                let vip_due_date = vip_due_date.unwrap_or_default();
+                let label = label.unwrap_or_default();
+                let nickname_color = nickname_color.unwrap_or_default();
 
                 Ok(Vip {
                     vip_type,
@@ -324,5 +321,22 @@ mod tests {
         assert_eq!(label.text_color, "");
         assert_eq!(label.bg_style, 1);
         assert_eq!(label.bg_color, "");
+    }
+
+    #[test]
+    fn vip_deserializes_compact_relation_payload() {
+        let vip: Vip = serde_json::from_str(
+            r#"{
+                "vipType": 0,
+                "vipStatus": 0
+            }"#,
+        )
+        .expect("relation-list vip payload should parse");
+
+        assert_eq!(vip.vip_type, 0);
+        assert_eq!(vip.vip_status, 0);
+        assert_eq!(vip.vip_due_date, 0);
+        assert_eq!(vip.nickname_color, "");
+        assert_eq!(vip.label.text, "");
     }
 }

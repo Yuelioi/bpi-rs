@@ -17,8 +17,9 @@ pub struct OfficialVerify {
 }
 
 /// 大会员标签
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct VipLabel {
+    #[serde(default)]
     pub path: String,
 }
 
@@ -27,21 +28,29 @@ pub struct VipLabel {
 pub struct VipInfo {
     /// 会员类型，0: 无, 1: 月度大会员, 2: 年度以上大会员
     #[serde(rename = "vipType")]
+    #[serde(default)]
     pub vip_type: u8,
     /// 会员到期时间，毫秒级时间戳
     #[serde(rename = "vipDueDate")]
+    #[serde(default)]
     pub vip_due_date: u64,
     #[serde(rename = "dueRemark")]
+    #[serde(default)]
     pub due_remark: String,
     #[serde(rename = "accessStatus")]
+    #[serde(default)]
     pub access_status: u8,
     /// 大会员状态，0: 无, 1: 有
     #[serde(rename = "vipStatus")]
+    #[serde(default)]
     pub vip_status: u8,
     #[serde(rename = "vipStatusWarn")]
+    #[serde(default)]
     pub vip_status_warn: String,
     #[serde(rename = "themeType")]
+    #[serde(default)]
     pub theme_type: u8,
+    #[serde(default)]
     pub label: VipLabel,
 }
 
@@ -139,9 +148,18 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     const TEST_VMID: u64 = 293793435;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/user/relation-read/followings/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -160,6 +178,57 @@ mod tests {
         assert!(!data.list.is_empty());
         assert_eq!(data.list.len(), 50);
 
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_followings_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "user.followings");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/relation/followings"
+        );
+        assert_eq!(
+            contract.request.query.get("vmid").map(String::as_str),
+            Some("2")
+        );
+        assert_eq!(
+            contract.request.query.get("order_type").map(String::as_str),
+            Some("attention")
+        );
+        assert_eq!(
+            contract.request.query.get("ps").map(String::as_str),
+            Some("20")
+        );
+        assert_eq!(
+            contract.request.query.get("pn").map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("requires_login")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_followings_fixtures_parse_promoted_contract_models() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../../tests/contracts/user/relation-read/followings/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let followings = ApiEnvelope::<FollowingListResponseData>::from_slice(include_bytes!(
+            "../../../tests/contracts/user/relation-read/followings/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(followings.list.len(), 1);
+        assert_eq!(followings.total, 1);
         Ok(())
     }
 }

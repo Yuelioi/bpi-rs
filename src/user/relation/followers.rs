@@ -112,9 +112,18 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     const TEST_VMID: u64 = 4279370;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/user/relation-read/followers/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -135,6 +144,53 @@ mod tests {
         assert!(!data.offset.is_empty());
         assert!(data.total > 0);
 
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_followers_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "user.followers");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/relation/fans"
+        );
+        assert_eq!(
+            contract.request.query.get("vmid").map(String::as_str),
+            Some("2")
+        );
+        assert_eq!(
+            contract.request.query.get("ps").map(String::as_str),
+            Some("20")
+        );
+        assert_eq!(
+            contract.request.query.get("pn").map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("wbi_risk_control")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_followers_fixtures_parse_promoted_contract_models() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../../tests/contracts/user/relation-read/followers/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert_eq!(err.code(), Some(-352));
+
+        let followers = ApiEnvelope::<FansListResponseData>::from_slice(include_bytes!(
+            "../../../tests/contracts/user/relation-read/followers/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(followers.list.len(), 1);
+        assert_eq!(followers.total, 1);
         Ok(())
     }
 }
