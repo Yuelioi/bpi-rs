@@ -4,6 +4,7 @@ pub mod all;
 pub mod banner;
 pub mod basic_info;
 pub mod card_info;
+pub mod client;
 pub mod content;
 pub mod detail;
 pub mod dynamic_enum;
@@ -17,6 +18,7 @@ pub mod topic;
 mod module;
 mod serde_utils;
 
+pub use client::DynamicClient;
 pub use params::{
     DynamicAllParams, DynamicCardDetailParams, DynamicCheckNewParams, DynamicDetailParams,
     DynamicForwardItemParams, DynamicForwardsParams, DynamicLiveUsersParams,

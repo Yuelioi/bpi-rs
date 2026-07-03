@@ -23,6 +23,8 @@ use crate::clientinfo::ClientInfoClient;
 use crate::comment::CommentClient;
 #[cfg(feature = "creativecenter")]
 use crate::creativecenter::CreativeCenterClient;
+#[cfg(feature = "dynamic")]
+use crate::dynamic::DynamicClient;
 #[cfg(feature = "electric")]
 use crate::electric::ElectricClient;
 #[cfg(feature = "fav")]
@@ -448,6 +450,12 @@ impl BpiClient {
     #[cfg(feature = "creativecenter")]
     pub fn creativecenter(&self) -> CreativeCenterClient<'_> {
         CreativeCenterClient::new(self)
+    }
+
+    /// Creates a dynamic domain client.
+    #[cfg(feature = "dynamic")]
+    pub fn dynamic(&self) -> DynamicClient<'_> {
+        DynamicClient::new(self)
     }
 
     /// Creates an electric charging domain client.
@@ -954,6 +962,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _note = client.note();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "dynamic")]
+    #[test]
+    fn dynamic_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _dynamic = client.dynamic();
 
         Ok(())
     }
