@@ -23,6 +23,7 @@ Do not resume the old committed shape `tests/contracts/<domain>/<endpoint>/<prof
 
 - Use `goal.md`, `api-upgrade-protocol.md`, and `migration-status.md` to choose the next module batch.
 - Default to a real endpoint contract batch with Probe evidence unless a non-Probe shared-core/domain-client bridge is explicitly selected and recorded as such.
+- The latest endpoint-candidate audit found no new safe read batch to promote. Before running more Probe work, identify either a newly implemented/read-safe endpoint not covered by existing contracts, a valid current `manga/download-read` flow/chapter/handshake, or an explicitly enabled gated/mutating batch.
 - For each batch, follow `api-upgrade-protocol.md`.
 - Update `migration-status.md` after each batch, but do not commit it.
 
@@ -39,6 +40,7 @@ Do not resume the old committed shape `tests/contracts/<domain>/<endpoint>/<prof
 
 - plans/ — when implementation planning begins.
 - plans/manga-download-read-probe-block.md — before retrying manga download/read contracts.
+- plans/remaining-endpoint-contract-audit.md — before claiming another safe Probe read batch remains or before selecting non-Probe bridge work.
 
 ## Progress
 
@@ -58,11 +60,12 @@ Done:
 - Covered `clientinfo/ip`, `login/vip-info`, `login/read-info`, and `login/qr` in the accepted contract shape.
 - Completed `electric/private-read-remark-detail-flow`: anonymous direct Probe preserves `requires_login`, normal/vip Probe flows extract a private `remark_id` from `remark-list` at runtime, and promoted contracts/fixtures avoid committing literal private ids or message content.
 - Rechecked `manga/download-read` with additional normal/vip `ComicDetail`, `epId`, and alternate public sample `GetImageIndex` Probe trials; all returned HTTP 200/API `code = 99`, so the batch remains Probe-blocked with no promoted contract. Details are in `plans/manga-download-read-probe-block.md`.
+- Audited remaining endpoint candidates against source request calls, promoted `tests/contracts/**/contract.json`, and `migration-status.md`; no new safe Probe read batch was found. Details are in `plans/remaining-endpoint-contract-audit.md`.
 
 Current:
 - Shared-core/domain bridge work has a completed `clientinfo/module-client-bridge` example after endpoint contract batches.
-- Goal-mode continuation now defaults back to Probe-backed endpoint contract batches unless a non-Probe bridge batch is explicitly selected and recorded. Do not repeat completed examples such as `video/info-read`, `login/read-info`, or `clientinfo/ip`.
-- Use the local status board to select the next incomplete module or cohesive submodule batch. Remaining normal endpoint work appears to be gated, mutating, or Probe-blocked; `manga/download-read` is currently blocked by repeated `code = 99` Probe results. Do not force a non-Probe bridge unless it is explicitly selected and recorded as such.
+- Goal-mode continuation defaults to Probe-backed endpoint contract batches unless a non-Probe bridge batch is explicitly selected and recorded. Do not repeat completed examples such as `video/info-read`, `login/read-info`, or `clientinfo/ip`.
+- Remaining normal endpoint work is currently gated, mutating/flow-sensitive, deprecated/documented exception, wrapper-only, static/local helper, or Probe-blocked. `manga/download-read` remains blocked by repeated `code = 99` Probe results. Do not force a non-Probe bridge unless it is explicitly selected and recorded as such.
 
 Verified:
 - After commit `6383119`, `cargo fmt --check`, `cargo check --all-features`, and `cargo test --all-features --lib` passed.
@@ -72,6 +75,7 @@ Verified:
 - For `clientinfo/module-client-bridge`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, `cargo test --all-features --lib --quiet`, and `git diff --check` passed.
 - For `electric/private-read-remark-detail-flow`, RED `cargo test --all-features --lib electric --quiet` failed on missing promoted contract/fixture files; after promotion, `cargo test --all-features --lib probe --quiet`, `cargo test --all-features --lib electric --quiet`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, `cargo test --all-features --lib --quiet`, and `git diff --check` passed.
 - For `manga/download-read-probe-block`, additional real Probe attempts were run under `target/bpi-probe-runs/manga/download-read/...`; all returned API `code = 99`, no contracts were promoted, and `git diff --check` passed for the tracked notes.
+- For `remaining-endpoint-contract-audit`, source/request-call inventory plus promoted contract and status-board review found no new safe read endpoint batch to run. `git diff --check` passed for the tracked docs update; cargo gates were not run because no Rust source or contract files changed.
 
 ## Local-only Constraints
 

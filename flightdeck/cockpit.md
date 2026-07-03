@@ -8,6 +8,6 @@ Focus: `work/bpi-rs-0.2-migration/` — staged 0.2 redesign for a high-quality R
 
 ## Next
 
-- Choose the next incomplete module or cohesive submodule from `flightdeck/work/bpi-rs-0.2-migration/migration-status.md`. For normal endpoint migration, follow `api-upgrade-protocol.md`: draft under `target`, run Probe, promote reviewed `contract.json` plus sanitized fixtures, then update Rust/tests. Safe read batches are mostly complete; `manga/download-read` is Probe-blocked by repeated API `code = 99` results, so check the local board before selecting gated, mutating, Probe-blocked, or explicitly non-Probe bridge work.
+- Choose the next incomplete module or cohesive submodule from `flightdeck/work/bpi-rs-0.2-migration/migration-status.md`. For normal endpoint migration, follow `api-upgrade-protocol.md`: draft under `target`, run Probe, promote reviewed `contract.json` plus sanitized fixtures, then update Rust/tests. A remaining endpoint-candidate audit found no new safe read batch; `manga/download-read` is Probe-blocked by repeated API `code = 99` results. Before continuing, identify a new safe read endpoint, a valid manga download flow/chapter/handshake, an explicitly enabled gated/mutating batch, or explicitly record non-Probe bridge work.
 
 ## Open questions
