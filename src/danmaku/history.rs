@@ -31,7 +31,7 @@ impl DanmakuHistoryDatesParams {
         Ok(self)
     }
 
-    fn query_pairs(&self) -> [(&'static str, String); 3] {
+    pub(crate) fn query_pairs(&self) -> [(&'static str, String); 3] {
         [
             ("type", self.typ.to_string()),
             ("oid", self.oid.to_string()),

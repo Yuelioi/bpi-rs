@@ -83,7 +83,7 @@ impl DanmakuSegmentParams {
         Ok(self)
     }
 
-    fn query_pairs(&self) -> Vec<(String, String)> {
+    pub(crate) fn query_pairs(&self) -> Vec<(String, String)> {
         let mut q = vec![
             ("type".to_string(), self.typ.to_string()),
             ("oid".to_string(), self.oid.to_string()),
@@ -138,7 +138,7 @@ impl DanmakuWebViewParams {
         Ok(self)
     }
 
-    fn query_pairs(&self) -> Vec<(String, String)> {
+    pub(crate) fn query_pairs(&self) -> Vec<(String, String)> {
         let mut q = vec![
             ("type".to_string(), self.typ.to_string()),
             ("oid".to_string(), self.oid.to_string()),
@@ -168,7 +168,7 @@ impl DanmakuHistoryBytesParams {
         Ok(Self { typ, oid, date })
     }
 
-    fn query_pairs(&self) -> Vec<(String, String)> {
+    pub(crate) fn query_pairs(&self) -> Vec<(String, String)> {
         vec![
             ("type".to_string(), self.typ.to_string()),
             ("oid".to_string(), self.oid.to_string()),

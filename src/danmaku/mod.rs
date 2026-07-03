@@ -1,6 +1,7 @@
 //! 弹幕
 
 pub mod action;
+pub mod client;
 pub mod danmaku_xml;
 pub mod history;
 
@@ -9,6 +10,7 @@ pub mod thumbup;
 pub mod web;
 
 pub use action::{DanmakuAdvStateParams, DanmakuSendParams};
+pub use client::DanmakuClient;
 pub use danmaku_xml::DanmakuXmlListParams;
 pub use history::DanmakuHistoryDatesParams;
 pub use snapshot::DanmakuSnapshotParams;

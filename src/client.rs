@@ -23,6 +23,8 @@ use crate::clientinfo::ClientInfoClient;
 use crate::comment::CommentClient;
 #[cfg(feature = "creativecenter")]
 use crate::creativecenter::CreativeCenterClient;
+#[cfg(feature = "danmaku")]
+use crate::danmaku::DanmakuClient;
 #[cfg(feature = "dynamic")]
 use crate::dynamic::DynamicClient;
 #[cfg(feature = "electric")]
@@ -450,6 +452,12 @@ impl BpiClient {
     #[cfg(feature = "creativecenter")]
     pub fn creativecenter(&self) -> CreativeCenterClient<'_> {
         CreativeCenterClient::new(self)
+    }
+
+    /// Creates a danmaku domain client.
+    #[cfg(feature = "danmaku")]
+    pub fn danmaku(&self) -> DanmakuClient<'_> {
+        DanmakuClient::new(self)
     }
 
     /// Creates a dynamic domain client.
@@ -972,6 +980,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _dynamic = client.dynamic();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "danmaku")]
+    #[test]
+    fn danmaku_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _danmaku = client.danmaku();
 
         Ok(())
     }

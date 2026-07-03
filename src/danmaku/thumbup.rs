@@ -45,7 +45,7 @@ impl DanmakuThumbupStatsParams {
         Ok(Self { oid, ids })
     }
 
-    fn query_pairs(&self) -> [(&'static str, String); 2] {
+    pub(crate) fn query_pairs(&self) -> [(&'static str, String); 2] {
         let ids = self
             .ids
             .iter()

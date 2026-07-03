@@ -293,7 +293,7 @@ impl DanmakuAdvStateParams {
         Self { cid }
     }
 
-    fn query_pairs(&self) -> [(&'static str, String); 2] {
+    pub(crate) fn query_pairs(&self) -> [(&'static str, String); 2] {
         [("cid", self.cid.to_string()), ("mode", "sp".to_string())]
     }
 }
