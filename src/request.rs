@@ -1,8 +1,4 @@
-use crate::{
-    BpiError,
-    response::{ApiEnvelope, BpiResponse},
-    transport::ReqwestTransport,
-};
+use crate::{BpiError, response::BpiResponse, transport::ReqwestTransport};
 use reqwest::RequestBuilder;
 use serde::de::DeserializeOwned;
 use tokio::time::Instant;
@@ -66,26 +62,25 @@ impl BilibiliRequest for RequestBuilder {
     where
         T: DeserializeOwned,
     {
-        // 开始计时
         let start = Instant::now();
-        // 请求拿到响应 bytes
-        let bytes = self
-            .log_url(operation_name)
-            .send_request(operation_name)
-            .await?;
+        let response =
+            ReqwestTransport::send_request_builder(self.log_url(operation_name), operation_name)
+                .await?;
 
-        let result =
-            match ApiEnvelope::<T>::from_slice(&bytes).and_then(ApiEnvelope::ensure_success) {
-                Ok(envelope) => envelope.into_legacy_response(),
-                Err(err) => {
-                    if let BpiError::Decode { source } = &err {
-                        log_decode_error(operation_name, &bytes, source);
-                    } else {
-                        tracing::error!("{} API错误: {}", operation_name, err);
-                    }
-                    return Err(err);
+        let result = match response
+            .decode_api_envelope::<T>()
+            .and_then(|decoded| decoded.envelope.ensure_success())
+        {
+            Ok(envelope) => envelope.into_legacy_response(),
+            Err(err) => {
+                if let BpiError::Decode { source } = &err {
+                    log_decode_error(operation_name, &response.body, source);
+                } else {
+                    tracing::error!("{} API错误: {}", operation_name, err);
                 }
-            };
+                return Err(err);
+            }
+        };
 
         let duration = start.elapsed();
         tracing::info!("{} 请求成功，耗时: {:.2?}", operation_name, duration);
