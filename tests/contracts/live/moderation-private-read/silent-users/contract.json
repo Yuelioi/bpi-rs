@@ -1,0 +1,79 @@
+{
+  "name": "live.silent_users",
+  "request": {
+    "method": "POST",
+    "url": "https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/GetSilentUserList",
+    "query": {},
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {
+      "referer": "https://live.bilibili.com/3818081"
+    },
+    "auth": {
+      "requires": []
+    },
+    "form": {
+      "room_id": "3818081",
+      "pn": "1",
+      "ps": "10",
+      "csrf_token": "${csrf}",
+      "csrf": "${csrf}"
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "authenticated success is an empty moderation list; non-admin/error fixtures contain no account identity"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": -101,
+        "fixture": "responses/anonymous.requires_login.json",
+        "fixture_kind": "probe_error_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie",
+          "csrf"
+        ]
+      },
+      "response": {
+        "api_code": 100004,
+        "fixture": "responses/normal.not_admin.json",
+        "fixture_kind": "probe_error_body",
+        "error": "not_admin"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie",
+          "csrf"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.empty.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "SilentUserListData"
+      }
+    }
+  ]
+}

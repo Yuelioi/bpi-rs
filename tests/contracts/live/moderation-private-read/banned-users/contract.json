@@ -1,0 +1,82 @@
+{
+  "name": "live.banned_users",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/GetBlackList",
+    "query": {
+      "anchor_id": "4279370",
+      "pn": "1",
+      "ps": "10",
+      "mobi_app": "android",
+      "platform": "android",
+      "spmid": "444.8.0.0",
+      "csrf_token": "${csrf}",
+      "csrf": "${csrf}",
+      "visit_id": ""
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {
+      "referer": "https://live.bilibili.com/3818081"
+    },
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "vip sample fixture redacts blocked user identity and operator identity; raw account/private data remains under target only"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": -101,
+        "fixture": "responses/anonymous.requires_login.json",
+        "fixture_kind": "probe_error_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie",
+          "csrf"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/normal.empty.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "BannedUserListData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie",
+          "csrf"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.sample.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "BannedUserListData"
+      }
+    }
+  ]
+}

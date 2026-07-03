@@ -1,0 +1,10 @@
+{
+  "code": 100004,
+  "data": {
+    "data": [],
+    "total": 0,
+    "total_page": 0
+  },
+  "message": "不是管理员",
+  "ttl": 1
+}

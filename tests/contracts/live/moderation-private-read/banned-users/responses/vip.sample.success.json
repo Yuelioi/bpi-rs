@@ -1,0 +1,22 @@
+{
+  "code": 0,
+  "data": {
+    "data": [
+      {
+        "admin_level": 0,
+        "face": "",
+        "is_anchor": true,
+        "is_mystery": false,
+        "mtime": "2026-01-01 00:00:00",
+        "name": "<redacted-user>",
+        "operator_name": "<redacted-operator>",
+        "uid": 1000000000000001
+      }
+    ],
+    "pn": 1,
+    "ps": 10,
+    "total": 1
+  },
+  "message": "0",
+  "ttl": 1
+}
