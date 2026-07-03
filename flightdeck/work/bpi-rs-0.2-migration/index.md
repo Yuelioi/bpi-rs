@@ -62,9 +62,10 @@ Done:
 - Rechecked `manga/download-read` with additional normal/vip `ComicDetail`, `epId`, and alternate public sample `GetImageIndex` Probe trials; all returned HTTP 200/API `code = 99`, so the batch remains Probe-blocked with no promoted contract. Details are in `plans/manga-download-read-probe-block.md`.
 - Audited remaining endpoint candidates against source request calls, promoted `tests/contracts/**/contract.json`, and `migration-status.md`; no new safe Probe read batch was found. Details are in `plans/remaining-endpoint-contract-audit.md`.
 - Completed explicit non-Probe `web_widget/module-client-bridge`: `BpiClient::web_widget()` now exposes a `WebWidgetClient` with payload-returning `region_banner`, `header_page`, and `online` methods backed by already promoted `web_widget` contracts. No Probe run or contract promotion was expected for this bridge batch.
+- Completed explicit non-Probe `activity/module-client-bridge`: `BpiClient::activity()` now exposes an `ActivityClient` with payload-returning `info`, `list`, and `list_default` methods backed by already promoted `activity` contracts. No Probe run or contract promotion was expected for this bridge batch.
 
 Current:
-- Shared-core/domain bridge work has completed `clientinfo/module-client-bridge` and `web_widget/module-client-bridge` examples after endpoint contract batches.
+- Shared-core/domain bridge work has completed `clientinfo/module-client-bridge`, `web_widget/module-client-bridge`, and `activity/module-client-bridge` examples after endpoint contract batches.
 - Goal-mode continuation defaults to Probe-backed endpoint contract batches unless a non-Probe bridge batch is explicitly selected and recorded. Do not repeat completed examples such as `video/info-read`, `login/read-info`, or `clientinfo/ip`.
 - Remaining normal endpoint work is currently gated, mutating/flow-sensitive, deprecated/documented exception, wrapper-only, static/local helper, or Probe-blocked. `manga/download-read` remains blocked by repeated `code = 99` Probe results. Do not force a non-Probe bridge unless it is explicitly selected and recorded as such.
 
@@ -78,6 +79,7 @@ Verified:
 - For `manga/download-read-probe-block`, additional real Probe attempts were run under `target/bpi-probe-runs/manga/download-read/...`; all returned API `code = 99`, no contracts were promoted, and `git diff --check` passed for the tracked notes.
 - For `remaining-endpoint-contract-audit`, source/request-call inventory plus promoted contract and status-board review found no new safe read endpoint batch to run. `git diff --check` passed for the tracked docs update; cargo gates were not run because no Rust source or contract files changed.
 - For `web_widget/module-client-bridge`, RED `cargo test --all-features --lib web_widget_domain_client_can_be_created --quiet` first failed because `BpiClient::web_widget()` did not exist. After implementation, `cargo test --all-features --lib web_widget --quiet`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, and `cargo test --all-features --lib --quiet` passed.
+- For `activity/module-client-bridge`, RED `cargo test --all-features --lib activity_domain_client_can_be_created --quiet` first failed because `BpiClient::activity()` did not exist; RED `cargo test --all-features --lib activity_client --quiet` then failed because the `ActivityClient` endpoint and payload methods did not exist. After implementation, `cargo test --all-features --lib activity --quiet`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, `cargo test --all-features --lib --quiet`, and `git diff --check` passed.
 
 ## Local-only Constraints
 

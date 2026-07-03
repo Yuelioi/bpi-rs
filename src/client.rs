@@ -6,6 +6,8 @@ use reqwest::header::{COOKIE, HeaderValue, ORIGIN, REFERER, USER_AGENT};
 use reqwest::{Client, RequestBuilder, Url};
 
 use crate::BpiError;
+#[cfg(feature = "activity")]
+use crate::activity::ActivityClient;
 use crate::auth::Account;
 #[cfg(feature = "clientinfo")]
 use crate::clientinfo::ClientInfoClient;
@@ -364,6 +366,12 @@ impl BpiClient {
 }
 
 impl BpiClient {
+    /// Creates an activity domain client.
+    #[cfg(feature = "activity")]
+    pub fn activity(&self) -> ActivityClient<'_> {
+        ActivityClient::new(self)
+    }
+
     /// Creates a client info domain client.
     #[cfg(feature = "clientinfo")]
     pub fn clientinfo(&self) -> ClientInfoClient<'_> {
@@ -632,6 +640,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _web_widget = client.web_widget();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "activity")]
+    #[test]
+    fn activity_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _activity = client.activity();
 
         Ok(())
     }
