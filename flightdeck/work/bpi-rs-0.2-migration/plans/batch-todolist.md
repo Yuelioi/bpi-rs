@@ -31,10 +31,10 @@
 ## Current Working State
 
 - Branch: `feat/bpi-rs-0.2-migration`
-- Last committed batch: `bd51459 feat(video): add module client bridge`
-- Dirty file at plan creation: `src/video/client.rs`
-- Dirty change purpose: RED test scaffold for `video/collection-player-client-bridge`
-- Current intended batch: `video/collection-player-client-bridge`
+- Last committed batch: `061931f feat(video): add collection player client bridge`
+- Dirty files at Batch 2 selection: `flightdeck/cockpit.md`, `flightdeck/work/bpi-rs-0.2-migration/goal.md`, and `flightdeck/work/bpi-rs-0.2-migration/index.md`
+- Dirty change purpose: goal-mode/cockpit routing updates requested by the user before starting the next batch.
+- Current intended batch: `live/remaining-read-client-bridge`
 
 ## Batch 1: `video/collection-player-client-bridge`
 
@@ -435,3 +435,119 @@ These require explicit gating such as `BPI_MUTATING_TEST=1` and must not be sele
 - The plan avoids repeating completed `video/info-read`; it targets collection/player read contracts that are already promoted but not yet bridged through `VideoClient`.
 - The plan uses one commit for the whole batch.
 - `migration-status.md` stays local-only and ignored.
+
+## Batch 2: `live/remaining-read-client-bridge`
+
+**Type:** Explicit non-Probe domain-client bridge batch.
+
+**Status:** Implemented and verified in the working tree; commit pending.
+
+**Why this batch:** `shared-core/module-client-coverage-audit` inventory found that `LiveClient` exposes only the already completed public-core live contracts, while promoted live read contracts also exist for gift, room interaction, account-private, guard, moderation-private, and telemetry read batches. These are already proven by promoted contracts and fixture/model tests; no new Probe run is expected.
+
+**Promoted contracts reused:**
+
+```text
+tests/contracts/live/gift-read/gift-types/contract.json
+tests/contracts/live/gift-read/room-gift-list/contract.json
+tests/contracts/live/gift-read/blind-gift-info/contract.json
+tests/contracts/live/room-interaction-read/danmu-info/contract.json
+tests/contracts/live/room-interaction-read/emoticons/contract.json
+tests/contracts/live/room-interaction-read/lottery-info/contract.json
+tests/contracts/live/account-private-read/my-medals/contract.json
+tests/contracts/live/account-private-read/follow-up-list/contract.json
+tests/contracts/live/account-private-read/follow-up-web-list/contract.json
+tests/contracts/live/account-private-read/replay-list/contract.json
+tests/contracts/live/guard-read/guard-list/contract.json
+tests/contracts/live/moderation-private-read/silent-users/contract.json
+tests/contracts/live/moderation-private-read/banned-users/contract.json
+tests/contracts/live/moderation-private-read/shield-keywords/contract.json
+tests/contracts/live/telemetry-read/heartbeat/contract.json
+```
+
+**Excluded:**
+
+```text
+src/live/manage.rs create/update/start/stop/update-room-news mutations
+src/live/danmaku.rs live_send_danmu
+src/live/silent_user_manage.rs add/delete silent-user, banned-user, and shield-keyword mutations
+src/live/report.rs live_web_heart_beat remains read/telemetry only; no report mutation is included
+src/live/message_stream.rs and other non-contracted helper/stub files
+```
+
+### Public methods to add to `LiveClient`
+
+```rust
+pub async fn gift_types(&self) -> BpiResult<Vec<GiftTypeItem>>;
+pub async fn room_gift_list(
+    &self,
+    room_id: i64,
+    area_parent_id: Option<i32>,
+    area_id: Option<i32>,
+) -> BpiResult<RoomGiftData>;
+pub async fn blind_gift_info(&self, gift_id: i64) -> BpiResult<BlindGiftData>;
+pub async fn danmu_info(&self, room_id: u64, info_type: u8) -> BpiResult<LiveDanmuInfoData>;
+pub async fn emoticons(&self, room_id: i64, platform: &str) -> BpiResult<EmoticonData>;
+pub async fn lottery_info(&self, room_id: i64) -> BpiResult<LotteryInfoData>;
+pub async fn my_medals(&self, page: i32, page_size: i32) -> BpiResult<MyMedalsData>;
+pub async fn follow_up_list(
+    &self,
+    page: Option<i32>,
+    page_size: Option<i32>,
+    ignore_record: Option<i32>,
+    hit_ab: Option<bool>,
+) -> BpiResult<FollowUpLiveData>;
+pub async fn follow_up_web_list(&self, hit_ab: Option<bool>) -> BpiResult<LiveWebListData>;
+pub async fn replay_list(&self, page: Option<i32>, page_size: Option<i32>) -> BpiResult<ReplayListData>;
+pub async fn guard_list(
+    &self,
+    room_id: i64,
+    ruid: i64,
+    page: Option<i32>,
+    page_size: Option<i32>,
+    typ: Option<i32>,
+) -> BpiResult<GuardListData>;
+pub async fn silent_users(&self, params: LiveSilentUserListParams) -> BpiResult<SilentUserListData>;
+pub async fn banned_users(&self, params: LiveBannedUserListParams) -> BpiResult<BannedUserListData>;
+pub async fn shield_keywords(&self, params: LiveShieldKeywordListParams) -> BpiResult<ShieldKeywordListData>;
+pub async fn web_heart_beat(&self, params: LiveWebHeartBeatParams) -> BpiResult<HeartBeatData>;
+```
+
+### Verification Plan
+
+Run RED before implementation:
+
+```powershell
+cargo test --all-features --lib live::client::tests::live_client_exposes_remaining_read_methods --quiet
+```
+
+Focused GREEN checks:
+
+```powershell
+cargo test --all-features --lib live::client --quiet
+cargo test --all-features --lib live --quiet
+```
+
+Full gates:
+
+```powershell
+cargo fmt --check
+git diff --check
+cargo clippy --all-targets --all-features --locked -- -D warnings
+cargo check --all-features
+cargo test --all-features --lib --quiet
+```
+
+Observed verification:
+
+```text
+RED: cargo test --all-features --lib live::client::tests::live_client_exposes_remaining_read_methods --quiet
+     failed with 15 missing LiveClient methods.
+GREEN: cargo test --all-features --lib live::client::tests::live_client_exposes_remaining_read_methods --quiet
+       passed: 1 passed.
+Focused: cargo test --all-features --lib live::client --quiet
+         passed: 3 passed.
+Focused: cargo test --all-features --lib live --quiet
+         passed: 62 passed, 0 failed, 35 ignored.
+Full: cargo fmt --check; git diff --check; cargo clippy --all-targets --all-features --locked -- -D warnings; cargo check --all-features; cargo test --all-features --lib --quiet
+      all exited 0; lib tests passed with 929 passed, 0 failed, 292 ignored.
+```

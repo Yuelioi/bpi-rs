@@ -136,7 +136,7 @@ impl LiveSilentUserListParams {
         Ok(self)
     }
 
-    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
         vec![
             ("room_id", self.room_id.to_string()),
             ("pn", self.page.to_string()),
@@ -173,7 +173,7 @@ impl LiveBannedUserListParams {
         Ok(self)
     }
 
-    fn query_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+    pub(crate) fn query_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
         vec![
             ("anchor_id", self.anchor_id.to_string()),
             ("pn", self.page.to_string()),
@@ -198,7 +198,7 @@ impl LiveShieldKeywordListParams {
         Self { room_id }
     }
 
-    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
         vec![
             ("room_id", self.room_id.to_string()),
             ("spmid", "444.8.0.0".to_string()),

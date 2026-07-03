@@ -43,7 +43,7 @@ impl LiveWebHeartBeatParams {
         Ok(self)
     }
 
-    fn query_pairs(&self) -> Vec<(&'static str, String)> {
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
         let heart_beat_data = format!("{}|{}|1|0", self.next_interval, self.room_id);
         vec![
             ("hb", general_purpose::STANDARD.encode(heart_beat_data)),

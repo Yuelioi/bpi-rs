@@ -1,8 +1,22 @@
+use crate::live::danmaku::LiveDanmuInfoData;
+use crate::live::emoticons::EmoticonData;
+use crate::live::follow_up_live::{FollowUpLiveData, LiveWebListData};
+use crate::live::gift::{BlindGiftData, RoomGiftData};
+use crate::live::guard::GuardListData;
 use crate::live::info::RoomInfoData;
 use crate::live::live_area::LiveParentArea;
+use crate::live::live_bill::GiftTypeItem;
+use crate::live::live_replay::ReplayListData;
 use crate::live::live_stream::LiveStreamData;
 use crate::live::manage::PcLiveVersionData;
 use crate::live::recommend::RecommendData;
+use crate::live::redpocket::LotteryInfoData;
+use crate::live::report::{HeartBeatData, LiveWebHeartBeatParams};
+use crate::live::silent_user_manage::{
+    BannedUserListData, LiveBannedUserListParams, LiveShieldKeywordListParams,
+    LiveSilentUserListParams, ShieldKeywordListData, SilentUserListData,
+};
+use crate::live::user::MyMedalsData;
 use crate::{BilibiliRequest, BpiClient, BpiResult};
 
 const AREA_LIST_ENDPOINT: &str = "https://api.live.bilibili.com/room/v1/Area/getList";
@@ -12,6 +26,35 @@ const RECOMMEND_ENDPOINT: &str =
     "https://api.live.bilibili.com/xlive/web-interface/v1/webMain/getMoreRecList";
 const VERSION_ENDPOINT: &str =
     "https://api.live.bilibili.com/xlive/app-blink/v1/liveVersionInfo/getHomePageLiveVersion";
+const GIFT_TYPES_ENDPOINT: &str = "https://api.live.bilibili.com/gift/v1/master/getGiftTypes";
+const ROOM_GIFT_LIST_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/web-room/v1/giftPanel/roomGiftList";
+const BLIND_GIFT_INFO_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/general-interface/v1/blindFirstWin/getInfo";
+const DANMU_INFO_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo";
+const EMOTICONS_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/web-ucenter/v2/emoticon/GetEmoticons";
+const LOTTERY_INFO_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/lottery-interface/v1/lottery/getLotteryInfoWeb";
+const MY_MEDALS_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/app-ucenter/v1/user/GetMyMedals";
+const FOLLOW_UP_LIST_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/web-ucenter/user/following";
+const FOLLOW_UP_WEB_LIST_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/web-ucenter/v1/xfetter/GetWebList";
+const REPLAY_LIST_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/app-blink/v1/anchorVideo/AnchorGetReplayList";
+const GUARD_LIST_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topListNew";
+const SILENT_USERS_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/GetSilentUserList";
+const BANNED_USERS_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/GetBlackList";
+const SHIELD_KEYWORDS_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/GetShieldKeywordList";
+const WEB_HEART_BEAT_ENDPOINT: &str =
+    "https://live-trace.bilibili.com/xlive/rdata-interface/v1/heartbeat/webHeartBeat";
 
 /// Live API client.
 #[derive(Clone, Copy)]
@@ -115,17 +158,291 @@ impl<'a> LiveClient<'a> {
             .send_bpi_payload("live.version")
             .await
     }
+
+    /// Fetches the authenticated live gift type list.
+    pub async fn gift_types(&self) -> BpiResult<Vec<GiftTypeItem>> {
+        self.client
+            .get(GIFT_TYPES_ENDPOINT)
+            .with_bilibili_headers()
+            .send_bpi_payload("live.gift_types")
+            .await
+    }
+
+    /// Fetches the gift panel for a live room.
+    pub async fn room_gift_list(
+        &self,
+        room_id: i64,
+        area_parent_id: Option<i32>,
+        area_id: Option<i32>,
+    ) -> BpiResult<RoomGiftData> {
+        let mut query = vec![
+            ("room_id", room_id.to_string()),
+            ("platform", "web".to_string()),
+        ];
+
+        if let Some(area_parent_id) = area_parent_id {
+            query.push(("area_parent_id", area_parent_id.to_string()));
+        }
+
+        if let Some(area_id) = area_id {
+            query.push(("area_id", area_id.to_string()));
+        }
+
+        self.client
+            .get(ROOM_GIFT_LIST_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&query)
+            .send_bpi_payload("live.room_gift_list")
+            .await
+    }
+
+    /// Fetches blind gift probability details.
+    pub async fn blind_gift_info(&self, gift_id: i64) -> BpiResult<BlindGiftData> {
+        self.client
+            .get(BLIND_GIFT_INFO_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&[("gift_id", gift_id.to_string())])
+            .send_bpi_payload("live.blind_gift_info")
+            .await
+    }
+
+    /// Fetches live WebSocket danmu token and host information.
+    pub async fn danmu_info(&self, room_id: u64, info_type: u8) -> BpiResult<LiveDanmuInfoData> {
+        let query = self
+            .client
+            .get_wbi_sign2(vec![
+                ("id", room_id.to_string()),
+                ("type", info_type.to_string()),
+            ])
+            .await?;
+
+        self.client
+            .get(DANMU_INFO_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&query)
+            .send_bpi_payload("live.danmu_info")
+            .await
+    }
+
+    /// Fetches live room emoticon packages.
+    pub async fn emoticons(&self, room_id: i64, platform: &str) -> BpiResult<EmoticonData> {
+        self.client
+            .get(EMOTICONS_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&[
+                ("room_id", room_id.to_string()),
+                ("platform", platform.to_string()),
+            ])
+            .send_bpi_payload("live.emoticons")
+            .await
+    }
+
+    /// Fetches live room lottery information.
+    pub async fn lottery_info(&self, room_id: i64) -> BpiResult<LotteryInfoData> {
+        let query = self
+            .client
+            .get_wbi_sign2(vec![("roomid", room_id.to_string())])
+            .await?;
+
+        self.client
+            .get(LOTTERY_INFO_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&query)
+            .send_bpi_payload("live.lottery_info")
+            .await
+    }
+
+    /// Fetches the current account's live fan medals.
+    pub async fn my_medals(&self, page: i32, page_size: i32) -> BpiResult<MyMedalsData> {
+        self.client
+            .get(MY_MEDALS_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&[
+                ("page", page.to_string()),
+                ("page_size", page_size.to_string()),
+            ])
+            .send_bpi_payload("live.my_medals")
+            .await
+    }
+
+    /// Fetches followed streamers and their live status.
+    pub async fn follow_up_list(
+        &self,
+        page: Option<i32>,
+        page_size: Option<i32>,
+        ignore_record: Option<i32>,
+        hit_ab: Option<bool>,
+    ) -> BpiResult<FollowUpLiveData> {
+        let mut query = Vec::new();
+
+        if let Some(page) = page {
+            query.push(("page", page.to_string()));
+        }
+        if let Some(page_size) = page_size {
+            query.push(("page_size", page_size.to_string()));
+        }
+        if let Some(ignore_record) = ignore_record {
+            query.push(("ignoreRecord", ignore_record.to_string()));
+        }
+        if let Some(hit_ab) = hit_ab {
+            query.push(("hit_ab", hit_ab.to_string()));
+        }
+
+        self.client
+            .get(FOLLOW_UP_LIST_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&query)
+            .send_bpi_payload("live.follow_up_list")
+            .await
+    }
+
+    /// Fetches followed streamers that are currently live.
+    pub async fn follow_up_web_list(&self, hit_ab: Option<bool>) -> BpiResult<LiveWebListData> {
+        let mut query = Vec::new();
+
+        if let Some(hit_ab) = hit_ab {
+            query.push(("hit_ab", hit_ab.to_string()));
+        }
+
+        self.client
+            .get(FOLLOW_UP_WEB_LIST_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&query)
+            .send_bpi_payload("live.follow_up_web_list")
+            .await
+    }
+
+    /// Fetches the current account's live replay list.
+    pub async fn replay_list(
+        &self,
+        page: Option<i32>,
+        page_size: Option<i32>,
+    ) -> BpiResult<ReplayListData> {
+        let mut query = Vec::new();
+
+        if let Some(page) = page {
+            query.push(("page", page.to_string()));
+        }
+        if let Some(page_size) = page_size {
+            query.push(("page_size", page_size.to_string()));
+        }
+
+        self.client
+            .get(REPLAY_LIST_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&query)
+            .send_bpi_payload("live.replay_list")
+            .await
+    }
+
+    /// Fetches live guard members for a room.
+    pub async fn guard_list(
+        &self,
+        room_id: i64,
+        ruid: i64,
+        page: Option<i32>,
+        page_size: Option<i32>,
+        typ: Option<i32>,
+    ) -> BpiResult<GuardListData> {
+        let query = [
+            ("roomid", room_id.to_string()),
+            ("ruid", ruid.to_string()),
+            ("page", page.unwrap_or(1).to_string()),
+            ("page_size", page_size.unwrap_or(20).to_string()),
+            ("typ", typ.unwrap_or(5).to_string()),
+        ];
+
+        self.client
+            .get(GUARD_LIST_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&query)
+            .send_bpi_payload("live.guard_list")
+            .await
+    }
+
+    /// Fetches silent users for a live room.
+    pub async fn silent_users(
+        &self,
+        params: LiveSilentUserListParams,
+    ) -> BpiResult<SilentUserListData> {
+        let csrf = self.client.csrf().unwrap_or_default();
+        let form = params.form_pairs(&csrf);
+
+        self.client
+            .post(SILENT_USERS_ENDPOINT)
+            .with_bilibili_headers()
+            .form(&form)
+            .send_bpi_payload("live.silent_users")
+            .await
+    }
+
+    /// Fetches banned users for a live anchor.
+    pub async fn banned_users(
+        &self,
+        params: LiveBannedUserListParams,
+    ) -> BpiResult<BannedUserListData> {
+        let csrf = self.client.csrf().unwrap_or_default();
+        let query = params.query_pairs(&csrf);
+
+        self.client
+            .get(BANNED_USERS_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&query)
+            .send_bpi_payload("live.banned_users")
+            .await
+    }
+
+    /// Fetches shield keywords for a live room.
+    pub async fn shield_keywords(
+        &self,
+        params: LiveShieldKeywordListParams,
+    ) -> BpiResult<ShieldKeywordListData> {
+        let csrf = self.client.csrf().unwrap_or_default();
+        let form = params.form_pairs(&csrf);
+
+        self.client
+            .post(SHIELD_KEYWORDS_ENDPOINT)
+            .with_bilibili_headers()
+            .form(&form)
+            .send_bpi_payload("live.shield_keywords")
+            .await
+    }
+
+    /// Sends a web heartbeat for live telemetry.
+    pub async fn web_heart_beat(&self, params: LiveWebHeartBeatParams) -> BpiResult<HeartBeatData> {
+        self.client
+            .get(WEB_HEART_BEAT_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&params.query_pairs())
+            .send_bpi_payload("live.web_heart_beat")
+            .await
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use std::future::Future;
 
+    use crate::ids::{Mid, RoomId};
+    use crate::live::danmaku::LiveDanmuInfoData;
+    use crate::live::emoticons::EmoticonData;
+    use crate::live::follow_up_live::{FollowUpLiveData, LiveWebListData};
+    use crate::live::gift::{BlindGiftData, RoomGiftData};
+    use crate::live::guard::GuardListData;
     use crate::live::info::RoomInfoData;
     use crate::live::live_area::LiveParentArea;
+    use crate::live::live_bill::GiftTypeItem;
+    use crate::live::live_replay::ReplayListData;
     use crate::live::live_stream::LiveStreamData;
     use crate::live::manage::PcLiveVersionData;
     use crate::live::recommend::RecommendData;
+    use crate::live::redpocket::LotteryInfoData;
+    use crate::live::report::{HeartBeatData, LiveWebHeartBeatParams};
+    use crate::live::silent_user_manage::{
+        BannedUserListData, LiveBannedUserListParams, LiveShieldKeywordListParams,
+        LiveSilentUserListParams, ShieldKeywordListData, SilentUserListData,
+    };
+    use crate::live::user::MyMedalsData;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
     use crate::{BpiClient, BpiError, BpiResult};
@@ -157,6 +474,96 @@ mod tests {
     fn assert_version_future<F>(_future: F)
     where
         F: Future<Output = BpiResult<PcLiveVersionData>>,
+    {
+    }
+
+    fn assert_gift_types_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<Vec<GiftTypeItem>>>,
+    {
+    }
+
+    fn assert_room_gift_list_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<RoomGiftData>>,
+    {
+    }
+
+    fn assert_blind_gift_info_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<BlindGiftData>>,
+    {
+    }
+
+    fn assert_danmu_info_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<LiveDanmuInfoData>>,
+    {
+    }
+
+    fn assert_emoticons_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<EmoticonData>>,
+    {
+    }
+
+    fn assert_lottery_info_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<LotteryInfoData>>,
+    {
+    }
+
+    fn assert_my_medals_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<MyMedalsData>>,
+    {
+    }
+
+    fn assert_follow_up_list_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<FollowUpLiveData>>,
+    {
+    }
+
+    fn assert_follow_up_web_list_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<LiveWebListData>>,
+    {
+    }
+
+    fn assert_replay_list_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<ReplayListData>>,
+    {
+    }
+
+    fn assert_guard_list_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<GuardListData>>,
+    {
+    }
+
+    fn assert_silent_users_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<SilentUserListData>>,
+    {
+    }
+
+    fn assert_banned_users_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<BannedUserListData>>,
+    {
+    }
+
+    fn assert_shield_keywords_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<ShieldKeywordListData>>,
+    {
+    }
+
+    fn assert_web_heart_beat_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<HeartBeatData>>,
     {
     }
 
@@ -198,6 +605,45 @@ mod tests {
         assert_stream_future(live.stream(14_073_662, Some("web"), None, Some(10_000)));
         assert_recommend_future(live.recommend());
         assert_version_future(live.version());
+        Ok(())
+    }
+
+    #[test]
+    fn live_client_exposes_remaining_read_methods() -> BpiResult<()> {
+        let client = BpiClient::new()?;
+        let live = client.live();
+
+        assert_gift_types_future(live.gift_types());
+        assert_room_gift_list_future(live.room_gift_list(23_174_842, None, None));
+        assert_blind_gift_info_future(live.blind_gift_info(32_251));
+        assert_danmu_info_future(live.danmu_info(21_733_448, 0));
+        assert_emoticons_future(live.emoticons(14_047, "pc"));
+        assert_lottery_info_future(live.lottery_info(23_174_842));
+        assert_my_medals_future(live.my_medals(1, 10));
+        assert_follow_up_list_future(live.follow_up_list(Some(1), Some(2), Some(1), Some(true)));
+        assert_follow_up_web_list_future(live.follow_up_web_list(Some(false)));
+        assert_replay_list_future(live.replay_list(Some(1), Some(2)));
+        assert_guard_list_future(live.guard_list(23_174_842, 504_140_200, None, None, None));
+        assert_silent_users_future(
+            live.silent_users(
+                LiveSilentUserListParams::new(RoomId::new(3_818_081)?).page_size(10)?,
+            ),
+        );
+        assert_banned_users_future(
+            live.banned_users(LiveBannedUserListParams::new(Mid::new(4_279_370)?).page_size(10)?),
+        );
+        assert_shield_keywords_future(
+            live.shield_keywords(LiveShieldKeywordListParams::new(RoomId::new(3_818_081)?)),
+        );
+        assert_web_heart_beat_future(live.web_heart_beat(LiveWebHeartBeatParams::new(23_174_842)?));
+
+        let source = include_str!("client.rs");
+        let payload_helper = concat!(".send_", "bpi_payload");
+        assert!(
+            source.matches(payload_helper).count() >= 20,
+            "LiveClient should use payload helpers for public-core and remaining promoted read methods"
+        );
+
         Ok(())
     }
 
