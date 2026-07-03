@@ -22,6 +22,7 @@ pub struct HeaderData {
     /// 分层信息，一个套在字符串里的 JSON 对象
     pub split_layer: String,
 
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub split_layer_obj: Option<SplitLayer>,
 }
 
@@ -127,7 +128,16 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/web_widget/header-page/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -138,5 +148,82 @@ mod tests {
             .await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
+    }
+
+    #[test]
+    fn web_widget_header_page_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "web_widget.header_page");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/web-show/page/header"
+        );
+        assert_eq!(
+            contract
+                .request
+                .query
+                .get("resource_id")
+                .map(String::as_str),
+            Some("142")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("HeaderData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn web_widget_header_page_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/web_widget/header-page/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/web_widget/header-page/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/web_widget/header-page/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let mut payload = ApiEnvelope::<HeaderData>::from_slice(bytes)?.into_payload()?;
+
+            assert!(payload.split_layer_obj.is_none());
+            payload.parse_split_layer()?;
+            assert!(payload.split_layer_obj.is_some());
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/web_widget/public/header-page/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn web_widget_header_page_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let mut payload =
+                serde_json::from_value::<ApiEnvelope<HeaderData>>(body)?.into_payload()?;
+
+            payload.parse_split_layer()?;
+            assert!(payload.split_layer_obj.is_some());
+        }
+        Ok(())
     }
 }

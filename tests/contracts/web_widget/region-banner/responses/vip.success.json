@@ -1,0 +1,30 @@
+{
+  "code": 0,
+  "data": {
+    "region_banner_list": [
+      {
+        "image": "http://i0.hdslb.com/bfs/app/657bfc32b365f83f4ed902f8116c94df5c857a84.jpg",
+        "rid": 1005,
+        "sub_title": "",
+        "title": "护肤的尽头是适乐肤",
+        "url": "https://www.bilibili.com/blackboard/era/beNWkgpC0CClp9gs.html"
+      },
+      {
+        "image": "http://i0.hdslb.com/bfs/app/92e140391226be0bad6ce798d7fc7727d02fc1ed.png",
+        "rid": 1005,
+        "sub_title": "",
+        "title": "投稿安利动画，赢现金大奖！",
+        "url": "https://www.bilibili.com/blackboard/era/LQ0BtHjMyiLSL8Zd.html"
+      },
+      {
+        "image": "http://i0.hdslb.com/bfs/app/fe8832acba3be0979a2e73a67c260d832ce57428.png",
+        "rid": 1005,
+        "sub_title": "",
+        "title": "BW限时副本开启，投稿漫展、线下内容赢高额奖金！",
+        "url": "https://www.bilibili.com/blackboard/era/2MZEanGhPF9xDOUD.html"
+      }
+    ]
+  },
+  "message": "OK",
+  "ttl": 1
+}

@@ -45,9 +45,18 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
     use crate::video::video_zone_v2::{Douga, VideoPartitionV2};
+    use crate::{ApiEnvelope, BpiResult};
 
     use tracing::info;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/web_widget/region-banner/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -64,5 +73,78 @@ mod tests {
 
         let data = resp.unwrap().data.unwrap();
         info!("分区轮播图: {:?}", data);
+    }
+
+    #[test]
+    fn web_widget_region_banner_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let partition = VideoPartitionV2::Douga(Douga::Douga);
+
+        assert_eq!(contract.name, "web_widget.region_banner");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/web-show/region/banner"
+        );
+        assert_eq!(
+            contract.request.query.get("region_id").map(String::as_str),
+            Some(partition.tid().to_string().as_str())
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("RegionBannerData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn web_widget_region_banner_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/web_widget/region-banner/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/web_widget/region-banner/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/web_widget/region-banner/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<RegionBannerData>::from_slice(bytes)?.into_payload()?;
+
+            assert!(!payload.region_banner_list.is_empty());
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!(
+            "target/bpi-probe-runs/web_widget/public/region-banner/{profile}.response.json"
+        );
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn web_widget_region_banner_model_matches_local_probe_outputs_when_available() -> BpiResult<()>
+    {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<RegionBannerData>>(body)?.into_payload()?;
+
+            assert!(!payload.region_banner_list.is_empty());
+        }
+        Ok(())
     }
 }
