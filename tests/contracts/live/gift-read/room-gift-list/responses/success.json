@@ -1,0 +1,28 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "gift_config": null,
+    "gift_data": {
+      "bag_tab_disable": 0,
+      "combo_interval_time": 200,
+      "discount_gift_list": null,
+      "lottery_gift_config": null,
+      "max_send_gift": 5000,
+      "naming_gift": null,
+      "pay_limit_icon": "",
+      "privilege": {
+        "buy_guard_btn": "",
+        "is_expired": 0,
+        "privilege_type": 0
+      },
+      "red_dot": [],
+      "room_gift_list": null,
+      "special_show_gift": null,
+      "special_tag": [],
+      "tab_list": null
+    },
+    "global_config": null
+  }
+}

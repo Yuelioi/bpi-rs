@@ -1,0 +1,20 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "blind_gift_name": "<redacted>",
+    "blind_price": 15000,
+    "gifts": [
+      {
+        "chance": "0.04%",
+        "gift_id": 1,
+        "gift_img": "https://example.invalid/gift.png",
+        "gift_name": "<redacted>",
+        "is_win_gift": 1,
+        "price": 2233000
+      }
+    ],
+    "note_text": "<redacted>"
+  }
+}
