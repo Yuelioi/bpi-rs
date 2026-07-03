@@ -16,5 +16,5 @@ pub mod videostream_url;
 
 pub use params::{
     BangumiDetailId, BangumiDetailParams, BangumiInfoParams, BangumiSectionsParams,
-    BangumiTimelineParams,
+    BangumiTimelineParams, BangumiVideoStreamId, BangumiVideoStreamParams,
 };

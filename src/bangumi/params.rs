@@ -1,4 +1,5 @@
-use crate::ids::{EpisodeId, MediaId, SeasonId};
+use crate::ids::{Cid, EpisodeId, MediaId, SeasonId};
+use crate::models::{Fnval, VideoQuality};
 use crate::{BpiError, BpiResult};
 
 use super::timeline::BangumiTimelineType;
@@ -70,6 +71,76 @@ impl BangumiSectionsParams {
 
     pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
         vec![("season_id", self.season_id.to_string())]
+    }
+}
+
+/// Identifies a bangumi play URL request by episode ID or content ID.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BangumiVideoStreamId {
+    Episode(EpisodeId),
+    Content(Cid),
+}
+
+/// Parameters for `/pgc/player/web/playurl`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BangumiVideoStreamParams {
+    id: BangumiVideoStreamId,
+    quality: Option<VideoQuality>,
+    fnval: Option<Fnval>,
+}
+
+impl BangumiVideoStreamParams {
+    pub fn from_episode_id(episode_id: EpisodeId) -> Self {
+        Self {
+            id: BangumiVideoStreamId::Episode(episode_id),
+            quality: None,
+            fnval: None,
+        }
+    }
+
+    pub fn from_cid(cid: Cid) -> Self {
+        Self {
+            id: BangumiVideoStreamId::Content(cid),
+            quality: None,
+            fnval: None,
+        }
+    }
+
+    pub fn with_quality(mut self, quality: VideoQuality) -> Self {
+        self.quality = Some(quality);
+        self
+    }
+
+    pub fn with_fnval(mut self, fnval: Fnval) -> Self {
+        self.fnval = Some(fnval);
+        self
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut params = vec![("fnver", "0".to_string())];
+
+        if self.fnval.is_some_and(|fnval| fnval.is_fourk()) {
+            params.push(("fourk", "1".to_string()));
+        }
+
+        match self.id {
+            BangumiVideoStreamId::Episode(episode_id) => {
+                params.push(("ep_id", episode_id.to_string()));
+            }
+            BangumiVideoStreamId::Content(cid) => {
+                params.push(("cid", cid.to_string()));
+            }
+        }
+
+        if let Some(quality) = self.quality {
+            params.push(("qn", quality.as_u32().to_string()));
+        }
+
+        if let Some(fnval) = self.fnval {
+            params.push(("fnval", fnval.bits().to_string()));
+        }
+
+        params
     }
 }
 
@@ -151,6 +222,43 @@ mod tests {
         assert_eq!(
             params.query_pairs(),
             vec![("season_id", "1172".to_string())]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_video_stream_params_serializes_episode_id() -> BpiResult<()> {
+        let params = BangumiVideoStreamParams::from_episode_id(EpisodeId::new(21_265)?)
+            .with_quality(VideoQuality::P480)
+            .with_fnval(Fnval::DASH);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("fnver", "0".to_string()),
+                ("ep_id", "21265".to_string()),
+                ("qn", "32".to_string()),
+                ("fnval", "16".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_video_stream_params_serializes_cid_and_fourk_flag() -> BpiResult<()> {
+        let params = BangumiVideoStreamParams::from_cid(Cid::new(91_549_662)?)
+            .with_quality(VideoQuality::P4K)
+            .with_fnval(Fnval::DASH | Fnval::FOURK);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("fnver", "0".to_string()),
+                ("fourk", "1".to_string()),
+                ("cid", "91549662".to_string()),
+                ("qn", "120".to_string()),
+                ("fnval", "144".to_string()),
+            ]
         );
         Ok(())
     }

@@ -1,0 +1,73 @@
+{
+  "name": "bangumi.playurl",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/pgc/player/web/playurl",
+    "query": {
+      "fnver": "0",
+      "ep_id": "21265",
+      "qn": "32",
+      "fnval": "16"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "playback URLs and their account/time-bound query strings redacted from real Probe bodies"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/anonymous.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "BangumiVideoStreamData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "BangumiVideoStreamData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "BangumiVideoStreamData"
+      }
+    }
+  ]
+}

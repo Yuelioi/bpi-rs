@@ -1,6 +1,8 @@
 //! 视频流URL
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/videostream_url.md)
+use crate::bangumi::BangumiVideoStreamParams;
+use crate::ids::{Cid, EpisodeId};
 use crate::models::{Fnval, VideoQuality};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
@@ -54,41 +56,11 @@ impl BpiClient {
     /// [获取番剧视频流URL](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/videostream_url.md#获取番剧视频流url)
     pub async fn bangumi_video_stream(
         &self,
-        ep_id: Option<u64>,
-        cid: Option<u64>,
-        qn: Option<VideoQuality>,
-        fnval: Option<Fnval>,
+        params: BangumiVideoStreamParams,
     ) -> Result<BpiResponse<BangumiVideoStreamData>, BpiError> {
-        // 验证参数
-        if ep_id.is_none() && cid.is_none() {
-            return Err(BpiError::InvalidParameter {
-                field: "ep_id/cid",
-                message: "ep_id和cid必须提供其中一个",
-            });
-        }
-
-        let mut params = vec![("fnver", "0".to_string())];
-
-        if fnval.is_some_and(|f| f.is_fourk()) {
-            params.push(("fourk", "1".to_string()));
-        }
-
-        if let Some(ep) = ep_id {
-            params.push(("ep_id", ep.to_string()));
-        }
-        if let Some(c) = cid {
-            params.push(("cid", c.to_string()));
-        }
-        if let Some(q) = qn {
-            params.push(("qn", q.as_u32().to_string()));
-        }
-        if let Some(fv) = fnval {
-            params.push(("fnval", fv.bits().to_string()));
-        }
-
         self.get("https://api.bilibili.com/pgc/player/web/playurl")
             .with_bilibili_headers()
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("获取番剧视频流URL")
             .await
     }
@@ -110,8 +82,15 @@ impl BpiClient {
         qn: Option<VideoQuality>,
         fnval: Option<Fnval>,
     ) -> Result<BpiResponse<BangumiVideoStreamData>, BpiError> {
-        self.bangumi_video_stream(Some(ep_id), None, qn, fnval)
-            .await
+        let mut params = BangumiVideoStreamParams::from_episode_id(EpisodeId::new(ep_id)?);
+        if let Some(quality) = qn {
+            params = params.with_quality(quality);
+        }
+        if let Some(fnval) = fnval {
+            params = params.with_fnval(fnval);
+        }
+
+        self.bangumi_video_stream(params).await
     }
 
     /// 获取番剧视频流 URL
@@ -131,16 +110,33 @@ impl BpiClient {
         qn: Option<VideoQuality>,
         fnval: Option<Fnval>,
     ) -> Result<BpiResponse<BangumiVideoStreamData>, BpiError> {
-        self.bangumi_video_stream(None, Some(cid), qn, fnval).await
+        let mut params = BangumiVideoStreamParams::from_cid(Cid::new(cid)?);
+        if let Some(quality) = qn {
+            params = params.with_quality(quality);
+        }
+        if let Some(fnval) = fnval {
+            params = params.with_fnval(fnval);
+        }
+
+        self.bangumi_video_stream(params).await
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
 
-    const TEST_EP_ID: u64 = 10001; // epid
-    const TEST_CID: u64 = 772096113;
+    const TEST_EP_ID: u64 = 21265; // epid
+    const TEST_CID: u64 = 91549662;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/bangumi/playurl/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -191,19 +187,120 @@ mod tests {
         Ok(())
     }
 
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_bangumi_video_stream_url_no_params() {
+    #[test]
+    fn bangumi_video_stream_by_epid_rejects_zero_episode_id() {
+        let runtime = tokio::runtime::Runtime::new().expect("runtime should build");
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.bangumi_video_stream(None, None, None, None).await;
-        assert!(result.is_err());
-        let error = result.unwrap_err();
-        match error {
-            BpiError::InvalidParameter { field, message } => {
-                assert_eq!(field, "ep_id/cid");
-                assert_eq!(message, "ep_id和cid必须提供其中一个");
-            }
-            _ => panic!("Expected InvalidParameter error"),
+
+        let result =
+            runtime.block_on(async { bpi.bangumi_video_stream_by_epid(0, None, None).await });
+
+        assert!(matches!(
+            result.unwrap_err(),
+            BpiError::InvalidParameter { field: "ep_id", .. }
+        ));
+    }
+
+    #[test]
+    fn bangumi_playurl_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params = BangumiVideoStreamParams::from_episode_id(EpisodeId::new(TEST_EP_ID)?)
+            .with_quality(VideoQuality::P480)
+            .with_fnval(Fnval::DASH);
+
+        assert_eq!(contract.name, "bangumi.playurl");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/pgc/player/web/playurl"
+        );
+        assert_eq!(
+            contract.request.query.get("fnver").map(String::as_str),
+            Some("0")
+        );
+        assert_eq!(
+            contract.request.query.get("ep_id").map(String::as_str),
+            Some("21265")
+        );
+        assert_eq!(
+            contract.request.query.get("qn").map(String::as_str),
+            Some("32")
+        );
+        assert_eq!(
+            contract.request.query.get("fnval").map(String::as_str),
+            Some("16")
+        );
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("fnver", "0".to_string()),
+                ("ep_id", "21265".to_string()),
+                ("qn", "32".to_string()),
+                ("fnval", "16".to_string()),
+            ]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("BangumiVideoStreamData")
+        );
+        assert_eq!(
+            contract.cases[0].response.fixture_kind.as_deref(),
+            Some("sanitized_probe_body")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn bangumi_playurl_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/bangumi/playurl/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!("../../tests/contracts/bangumi/playurl/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/bangumi/playurl/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload =
+                ApiEnvelope::<BangumiVideoStreamData>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.base.quality, VideoQuality::P480.as_u32());
+            assert!(payload.base.supports_dash());
+            assert_eq!(
+                payload
+                    .base
+                    .best_video()
+                    .map(|track| track.base_url.as_str()),
+                Some("https://example.invalid/bilibili/playurl/redacted.m4s")
+            );
         }
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/bangumi/playurl/playurl/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn bangumi_playurl_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload = serde_json::from_value::<ApiEnvelope<BangumiVideoStreamData>>(body)?
+                .into_payload()?;
+
+            assert_eq!(payload.base.quality, VideoQuality::P480.as_u32());
+            assert!(payload.base.supports_dash());
+        }
+        Ok(())
     }
 }
