@@ -1,0 +1,17 @@
+{
+  "code": 0,
+  "data": {
+    "1932011031958944000": {
+      "gray_release_control": {
+        "show_dm_reply": false
+      },
+      "id_str": "1932011031958944000",
+      "likes": 1,
+      "reply_count": 0,
+      "show_threshold": 10,
+      "user_like": 1
+    }
+  },
+  "message": "OK",
+  "ttl": 1
+}

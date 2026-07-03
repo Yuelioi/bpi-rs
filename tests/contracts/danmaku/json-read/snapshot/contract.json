@@ -1,0 +1,68 @@
+{
+  "name": "danmaku.snapshot",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/v2/dm/ajax",
+    "query": {
+      "aid": "BV1fK4y1t741"
+    },
+    "required_headers": [
+      "user-agent"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "danmaku JSON read response bodies promoted from real Probe output; account headers kept only in local Probe output"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/anonymous.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "Vec<String>"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "Vec<String>"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "Vec<String>"
+      }
+    }
+  ]
+}

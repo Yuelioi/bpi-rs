@@ -1,0 +1,9 @@
+{
+  "code": 0,
+  "data": {
+    "accept": true,
+    "coins": 2
+  },
+  "message": "OK",
+  "ttl": 1
+}

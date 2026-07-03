@@ -8,6 +8,8 @@ pub mod snapshot;
 pub mod thumbup;
 pub mod web;
 
-pub use action::DanmakuSendParams;
+pub use action::{DanmakuAdvStateParams, DanmakuSendParams};
+pub use history::DanmakuHistoryDatesParams;
 pub use snapshot::DanmakuSnapshotParams;
+pub use thumbup::DanmakuThumbupStatsParams;
 pub use web::DanmakuSegmentParams;

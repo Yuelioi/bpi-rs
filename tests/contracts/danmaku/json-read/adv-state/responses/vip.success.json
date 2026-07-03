@@ -1,0 +1,11 @@
+{
+  "code": 0,
+  "data": {
+    "accept": true,
+    "coins": 2,
+    "confirm": 1,
+    "hasBuy": true
+  },
+  "message": "OK",
+  "ttl": 1
+}

@@ -276,9 +276,26 @@ impl BpiClient {
 #[serde(rename_all = "camelCase")]
 pub struct DanmakuAdvState {
     pub coins: u8,
+    #[serde(default)]
     pub confirm: u8,
     pub accept: bool,
+    #[serde(default)]
     pub has_buy: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DanmakuAdvStateParams {
+    cid: Cid,
+}
+
+impl DanmakuAdvStateParams {
+    pub fn new(cid: Cid) -> Self {
+        Self { cid }
+    }
+
+    fn query_pairs(&self) -> [(&'static str, String); 2] {
+        [("cid", self.cid.to_string()), ("mode", "sp".to_string())]
+    }
 }
 
 impl BpiClient {
@@ -290,13 +307,15 @@ impl BpiClient {
     ///
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
-    /// | `cid` | u64 | 视频 cid |
+    /// | `params` | [`DanmakuAdvStateParams`] | 视频 cid |
     pub async fn danmaku_adv_state(
         &self,
-        cid: u64,
+        params: DanmakuAdvStateParams,
     ) -> Result<BpiResponse<DanmakuAdvState>, BpiError> {
+        let query = params.query_pairs();
+
         self.get("https://api.bilibili.com/x/dm/adv/state")
-            .query(&[("cid", cid.to_string()), ("mode", "sp".to_string())])
+            .query(&query)
             .send_bpi("检测高级弹幕发送权限")
             .await
     }
@@ -472,7 +491,26 @@ impl BpiClient {
 mod tests {
     use super::*;
     use crate::ids::{Aid, Bvid, Cid};
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::response::ApiEnvelope;
+    use std::collections::BTreeMap;
     use tracing::info;
+
+    const TEST_CID: u64 = 413195701;
+
+    fn adv_state_contract() -> Result<EndpointContract, BpiError> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/danmaku/json-read/adv-state/contract.json"
+        ))
+    }
+
+    fn query_map(params: [(&'static str, String); 2]) -> BTreeMap<String, String> {
+        params
+            .into_iter()
+            .map(|(key, value)| (key.to_string(), value))
+            .collect()
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -513,7 +551,8 @@ mod tests {
     async fn test_danmaku_get_adv_state() {
         let bpi = BpiClient::new().expect("client should build");
 
-        let resp = bpi.danmaku_adv_state(413195701).await;
+        let params = DanmakuAdvStateParams::new(Cid::new(TEST_CID).expect("cid is valid"));
+        let resp = bpi.danmaku_adv_state(params).await;
         info!("{:#?}", resp);
         assert!(resp.is_ok());
     }
@@ -615,5 +654,65 @@ mod tests {
             err,
             BpiError::InvalidParameter { field: "msg", .. }
         ));
+    }
+
+    #[test]
+    fn danmaku_adv_state_params_serializes_query() -> Result<(), BpiError> {
+        let params = DanmakuAdvStateParams::new(Cid::new(TEST_CID)?);
+
+        assert_eq!(
+            params.query_pairs(),
+            [("cid", TEST_CID.to_string()), ("mode", "sp".to_string())]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_adv_state_contract_matches_endpoint_request() -> Result<(), BpiError> {
+        let contract = adv_state_contract()?;
+        let params = DanmakuAdvStateParams::new(Cid::new(TEST_CID)?);
+
+        assert_eq!(contract.name, "danmaku.adv.state");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/dm/adv/state"
+        );
+        assert_eq!(query_map(params.query_pairs()), contract.request.query);
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_adv_state_response_fixtures_parse_declared_model() -> Result<(), BpiError> {
+        let normal = ApiEnvelope::<DanmakuAdvState>::from_slice(include_bytes!(
+            "../../tests/contracts/danmaku/json-read/adv-state/responses/normal.success.json"
+        ))?
+        .into_payload()?;
+        assert!(normal.accept);
+        assert_eq!(normal.coins, 2);
+        assert_eq!(normal.confirm, 0);
+        assert!(!normal.has_buy);
+
+        let vip = ApiEnvelope::<DanmakuAdvState>::from_slice(include_bytes!(
+            "../../tests/contracts/danmaku/json-read/adv-state/responses/vip.success.json"
+        ))?
+        .into_payload()?;
+        assert!(vip.accept);
+        assert_eq!(vip.coins, 2);
+        assert_eq!(vip.confirm, 1);
+        assert!(vip.has_buy);
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_adv_state_anonymous_fixture_records_login_error() -> Result<(), BpiError> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/danmaku/json-read/adv-state/responses/anonymous.requires_login.json"
+        ))
+        .and_then(ApiEnvelope::ensure_success)
+        .unwrap_err();
+
+        assert!(err.requires_login());
+        Ok(())
     }
 }
