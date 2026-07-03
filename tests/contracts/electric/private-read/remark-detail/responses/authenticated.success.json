@@ -1,0 +1,23 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "aid": 1,
+    "aname": "<redacted>",
+    "avator": "",
+    "bvid": "BV0000000000",
+    "ctime": 1659095775000,
+    "elec_num": 1,
+    "id": 1,
+    "mid": 1,
+    "msg": "<redacted>",
+    "reply_avator": "",
+    "reply_mid": 1,
+    "reply_msg": "",
+    "reply_name": "<redacted>",
+    "reply_time": 0,
+    "state": 0,
+    "uname": "<redacted>"
+  }
+}

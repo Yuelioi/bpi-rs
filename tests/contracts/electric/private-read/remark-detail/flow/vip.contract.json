@@ -1,0 +1,71 @@
+{
+  "name": "electric.remark_detail.vip.flow",
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "extracts a private remark id from the current account at runtime; no literal id is committed"
+  },
+  "steps": [
+    {
+      "name": "remark-list",
+      "contract": {
+        "name": "electric.remark_list.vip",
+        "request": {
+          "method": "GET",
+          "url": "https://member.bilibili.com/x/web/elec/remark/list",
+          "query": {
+            "pn": "1",
+            "ps": "10"
+          },
+          "required_headers": [
+            "user-agent",
+            "referer",
+            "origin",
+            "cookie"
+          ],
+          "headers": {},
+          "auth": {
+            "profile": "vip",
+            "requires": [
+              "cookie"
+            ]
+          }
+        },
+        "expect": {
+          "api_code": 0
+        }
+      },
+      "extract": {
+        "remark_id": "/response/body/data/list/0/id"
+      }
+    },
+    {
+      "name": "remark-detail",
+      "contract": {
+        "name": "electric.remark_detail.vip",
+        "request": {
+          "method": "GET",
+          "url": "https://member.bilibili.com/x/web/elec/remark/detail",
+          "query": {
+            "id": "${remark_id}"
+          },
+          "required_headers": [
+            "user-agent",
+            "referer",
+            "origin",
+            "cookie"
+          ],
+          "headers": {},
+          "auth": {
+            "profile": "vip",
+            "requires": [
+              "cookie"
+            ]
+          }
+        },
+        "expect": {
+          "api_code": 0
+        }
+      }
+    }
+  ]
+}
