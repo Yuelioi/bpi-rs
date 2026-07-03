@@ -8,11 +8,13 @@ pub mod action;
 pub mod articles;
 pub mod card;
 pub mod category;
+mod client;
 pub mod info;
 mod models;
 pub mod params;
 pub mod view;
 
+pub use client::ArticleClient;
 pub use params::{
     ArticleArticlesInfoParams, ArticleCardsParams, ArticleInfoParams, ArticleViewParams,
 };

@@ -8,6 +8,8 @@ use reqwest::{Client, RequestBuilder, Url};
 use crate::BpiError;
 #[cfg(feature = "activity")]
 use crate::activity::ActivityClient;
+#[cfg(feature = "article")]
+use crate::article::ArticleClient;
 use crate::auth::Account;
 #[cfg(feature = "clientinfo")]
 use crate::clientinfo::ClientInfoClient;
@@ -388,6 +390,12 @@ impl BpiClient {
         ActivityClient::new(self)
     }
 
+    /// Creates an article domain client.
+    #[cfg(feature = "article")]
+    pub fn article(&self) -> ArticleClient<'_> {
+        ArticleClient::new(self)
+    }
+
     /// Creates a client info domain client.
     #[cfg(feature = "clientinfo")]
     pub fn clientinfo(&self) -> ClientInfoClient<'_> {
@@ -714,6 +722,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _activity = client.activity();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "article")]
+    #[test]
+    fn article_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _article = client.article();
 
         Ok(())
     }
