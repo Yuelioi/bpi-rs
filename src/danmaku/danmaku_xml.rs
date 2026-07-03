@@ -2,10 +2,10 @@
 //!
 //! [文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
 
-use crate::{BpiClient, BpiError};
+use crate::ids::Cid;
+use crate::{BpiClient, BpiError, BpiResult};
 use flate2::read::DeflateDecoder;
 use quick_xml::de::from_str;
-use reqwest::Client;
 use std::io::Read;
 
 use serde::{Deserialize, Serialize};
@@ -41,8 +41,8 @@ impl Danmaku {
     /// 解析 p 属性并返回 DanmakuMeta
     pub fn parse_p(&mut self) -> Result<(), BpiError> {
         let parts: Vec<&str> = self.p_value.split(',').collect();
-        if parts.len() < 8 {
-            return Err(BpiError::parse("解析xml失败 弹幕参数不足8"));
+        if parts.len() < 9 {
+            return Err(BpiError::parse("解析xml失败 弹幕参数不足9"));
         }
 
         let time: f32 = parts[0].parse().unwrap_or(0.0);
@@ -85,6 +85,25 @@ pub struct DanmakuXml {
     pub danmakus: Vec<Danmaku>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DanmakuXmlListParams {
+    cid: Cid,
+}
+
+impl DanmakuXmlListParams {
+    pub fn new(cid: Cid) -> Self {
+        Self { cid }
+    }
+
+    pub fn query_pairs(&self) -> [(&'static str, String); 1] {
+        [("oid", self.cid.to_string())]
+    }
+
+    pub fn comment_xml_url(&self) -> String {
+        format!("https://comment.bilibili.com/{}.xml", self.cid)
+    }
+}
+
 impl BpiClient {
     /// 获取实时弹幕（接口1）
     ///
@@ -96,34 +115,18 @@ impl BpiClient {
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `oid` | i64 | 视频 oid/cid |
-    pub async fn danmaku_xml_list_so(&self, oid: i64) -> Result<DanmakuXml, BpiError> {
-        let client = Client::builder()
-            .gzip(false)
-            .brotli(false)
-            .deflate(false) // 禁用自动解压
-            .build()?;
-
-        let bytes = client
-            .get("https://api.bilibili.com/x/v1/dm/list.so")
-            // .header(ACCEPT, "application/xml, text/xml, */*")
-            .query(&[("oid", oid.to_string())])
+    pub async fn danmaku_xml_list_so(
+        &self,
+        params: DanmakuXmlListParams,
+    ) -> Result<DanmakuXml, BpiError> {
+        let response = self
+            .get_without_response_decoding("https://api.bilibili.com/x/v1/dm/list.so")?
+            .query(&params.query_pairs())
             .send()
-            .await
-            .map_err(BpiError::from)?
-            .bytes()
-            .await
-            .map_err(|e| BpiError::network(format!("获取响应体失败: {}", e)))?;
+            .await?;
+        let bytes = response.bytes().await?;
 
-        let mut d = DeflateDecoder::new(&bytes[..]);
-        let mut xml = String::new();
-        d.read_to_string(&mut xml)
-            .map_err(|_| BpiError::parse("读取xml失败"))?;
-
-        let mut parsed: DanmakuXml = from_str(&xml).map_err(|_| BpiError::parse("解析xml失败"))?;
-
-        parsed.danmakus.iter_mut().try_for_each(|dm| dm.parse_p())?;
-
-        Ok(parsed)
+        parse_deflate_danmaku_xml(&bytes)
     }
 
     /// 获取实时弹幕（接口2）
@@ -137,35 +140,98 @@ impl BpiClient {
     /// | 名称 | 类型 | 说明 |
     /// | ---- | ---- | ---- |
     /// | `cid` | i64 | 视频 cid |
-    pub async fn danmaku_xml_list(&self, cid: i64) -> Result<DanmakuXml, BpiError> {
-        let url = format!("https://comment.bilibili.com/{}.xml", cid);
+    pub async fn danmaku_xml_list(
+        &self,
+        params: DanmakuXmlListParams,
+    ) -> Result<DanmakuXml, BpiError> {
+        let response = self
+            .get_without_response_decoding(&params.comment_xml_url())?
+            .send()
+            .await?;
+        let bytes = response.bytes().await?;
 
-        let client = Client::builder()
-            .gzip(false)
-            .brotli(false)
-            .deflate(false) // 禁用自动解压
-            .build()?;
-
-        let bytes = client.get(url).send().await?.bytes().await?;
-
-        let mut d = DeflateDecoder::new(&bytes[..]);
-        let mut xml = String::new();
-        d.read_to_string(&mut xml)
-            .map_err(|_| BpiError::parse("读取xml失败"))?;
-
-        let mut parsed: DanmakuXml = from_str(&xml).map_err(|_| BpiError::parse("解析xml失败"))?;
-
-        parsed.danmakus.iter_mut().try_for_each(|dm| dm.parse_p())?;
-
-        Ok(parsed)
+        parse_deflate_danmaku_xml(&bytes)
     }
+}
+
+pub(crate) fn parse_deflate_danmaku_xml(bytes: &[u8]) -> BpiResult<DanmakuXml> {
+    let mut decoder = DeflateDecoder::new(bytes);
+    let mut xml = String::new();
+    decoder
+        .read_to_string(&mut xml)
+        .map_err(|_| BpiError::parse("读取xml失败"))?;
+
+    parse_danmaku_xml(&xml)
+}
+
+fn parse_danmaku_xml(xml: &str) -> BpiResult<DanmakuXml> {
+    let mut parsed: DanmakuXml = from_str(xml).map_err(|_| BpiError::parse("解析xml失败"))?;
+    parsed.danmakus.iter_mut().try_for_each(Danmaku::parse_p)?;
+    Ok(parsed)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::{HttpMethod, ResponseDecoding};
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{BpiError, BpiResult};
+    use base64::{Engine as _, engine::general_purpose};
+    use serde::Deserialize;
+    use std::collections::BTreeMap;
     use tokio::time::Instant;
     use tracing::info;
+
+    const TEST_CID: u64 = 16546;
+
+    #[derive(Debug, Deserialize)]
+    struct BinaryFixture {
+        body_base64: String,
+        content_type: Option<String>,
+        encoding: String,
+        kind: String,
+        length: usize,
+    }
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "list-so" => {
+                include_bytes!("../../tests/contracts/danmaku/xml-read/list-so/contract.json")
+                    .as_slice()
+            }
+            "comment-xml" => {
+                include_bytes!("../../tests/contracts/danmaku/xml-read/comment-xml/contract.json")
+                    .as_slice()
+            }
+            _ => unreachable!("unknown danmaku xml contract endpoint"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
+
+    fn query_map<I>(params: I) -> BTreeMap<String, String>
+    where
+        I: IntoIterator<Item = (&'static str, String)>,
+    {
+        params
+            .into_iter()
+            .map(|(key, value)| (key.to_string(), value))
+            .collect()
+    }
+
+    fn fixture_xml(bytes: &[u8]) -> BpiResult<DanmakuXml> {
+        let fixture: BinaryFixture = serde_json::from_slice(bytes)?;
+        assert_eq!(fixture.kind, "binary");
+        assert_eq!(fixture.encoding, "base64");
+        assert_eq!(fixture.content_type.as_deref(), Some("text/xml"));
+
+        let body = general_purpose::STANDARD
+            .decode(fixture.body_base64)
+            .map_err(|err| BpiError::parse(format!("base64 decode failed: {err}")))?;
+        assert_eq!(body.len(), fixture.length);
+
+        parse_deflate_danmaku_xml(&body)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -173,7 +239,9 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         let start = Instant::now();
 
-        let data = bpi.danmaku_xml_list_so(16546).await?;
+        let data = bpi
+            .danmaku_xml_list_so(DanmakuXmlListParams::new(Cid::new(TEST_CID)?))
+            .await?;
         let duration = start.elapsed();
 
         info!(
@@ -190,7 +258,9 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         let start = Instant::now();
 
-        let data = bpi.danmaku_xml_list(16546).await?;
+        let data = bpi
+            .danmaku_xml_list(DanmakuXmlListParams::new(Cid::new(TEST_CID)?))
+            .await?;
         let duration = start.elapsed();
 
         info!(
@@ -199,6 +269,98 @@ mod tests {
             data.danmakus.len()
         );
 
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_xml_list_rejects_incomplete_metadata() {
+        let mut danmaku = Danmaku {
+            content: "bad".to_string(),
+            p_value: "1,1,25,16777215,0,0,hash,1".to_string(),
+            meta: None,
+        };
+
+        let err = danmaku.parse_p().unwrap_err();
+        assert!(matches!(
+            err,
+            BpiError::Decode { .. } | BpiError::Parse { .. }
+        ));
+    }
+
+    #[test]
+    fn danmaku_xml_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let params = DanmakuXmlListParams::new(Cid::new(TEST_CID)?);
+
+        let list_so = contract("list-so")?;
+        assert_eq!(list_so.name, "danmaku.xml.list_so");
+        assert_eq!(list_so.request.method, HttpMethod::Get);
+        assert_eq!(
+            list_so.request.url.as_str(),
+            "https://api.bilibili.com/x/v1/dm/list.so"
+        );
+        assert_eq!(query_map(params.query_pairs()), list_so.request.query);
+        assert_eq!(
+            list_so.request.response_decoding,
+            ResponseDecoding::Disabled
+        );
+
+        let comment_xml = contract("comment-xml")?;
+        assert_eq!(comment_xml.name, "danmaku.xml.comment_xml");
+        assert_eq!(comment_xml.request.method, HttpMethod::Get);
+        assert_eq!(
+            comment_xml.request.url.as_str(),
+            params.comment_xml_url().as_str()
+        );
+        assert!(comment_xml.request.query.is_empty());
+        assert_eq!(
+            comment_xml.request.response_decoding,
+            ResponseDecoding::Disabled
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_xml_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!("../../tests/contracts/danmaku/xml-read/list-so/responses/success.json")
+                .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/xml-read/comment-xml/responses/success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = fixture_xml(bytes)?;
+            assert_eq!(payload.chatid, TEST_CID.to_string());
+            assert_eq!(payload.danmakus.len(), 307);
+            assert!(payload.danmakus[0].meta.is_some());
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/danmaku/xml-read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn danmaku_xml_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for endpoint in ["list-so", "comment-xml"] {
+            for profile in ["anonymous", "normal", "vip"] {
+                let Some(body) = local_probe_body(endpoint, profile) else {
+                    continue;
+                };
+                let bytes = serde_json::to_vec(&body)?;
+                let payload = fixture_xml(&bytes)?;
+                assert_eq!(payload.chatid, TEST_CID.to_string());
+                assert!(!payload.danmakus.is_empty());
+            }
+        }
         Ok(())
     }
 }

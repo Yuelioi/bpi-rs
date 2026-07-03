@@ -1,0 +1,67 @@
+{
+  "name": "danmaku.xml.comment_xml",
+  "request": {
+    "method": "GET",
+    "url": "https://comment.bilibili.com/16546.xml",
+    "query": {},
+    "required_headers": [
+      "user-agent"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    },
+    "response_decoding": "disabled"
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "compressed XML fixture contains public danmaku content; response_decoding disabled is required to preserve raw deflate bytes"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "http_status": 200,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_binary_body",
+        "rust_model": "DanmakuXml"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_binary_body",
+        "rust_model": "DanmakuXml"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_binary_body",
+        "rust_model": "DanmakuXml"
+      }
+    }
+  ]
+}
