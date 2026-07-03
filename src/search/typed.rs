@@ -197,7 +197,195 @@ mod tests {
         SearchBiliUserParams, SearchLiveRoomParams, SearchLiveUserParams, SearchMovieParams,
         SearchOrder, SearchVideoParams, UserType,
     };
+    use crate::{
+        ApiEnvelope, BpiResult,
+        probe::{contract::HttpMethod, endpoint_contract::EndpointContract},
+    };
+    use serde::de::DeserializeOwned;
     use tracing::info;
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes: &[u8] = match endpoint {
+            "article" => include_bytes!("../../tests/contracts/search/read/article/contract.json"),
+            "bangumi" => include_bytes!("../../tests/contracts/search/read/bangumi/contract.json"),
+            "bili-user" => {
+                include_bytes!("../../tests/contracts/search/read/bili-user/contract.json")
+            }
+            "live" => include_bytes!("../../tests/contracts/search/read/live/contract.json"),
+            "live-room" => {
+                include_bytes!("../../tests/contracts/search/read/live-room/contract.json")
+            }
+            "live-user" => {
+                include_bytes!("../../tests/contracts/search/read/live-user/contract.json")
+            }
+            "movie" => include_bytes!("../../tests/contracts/search/read/movie/contract.json"),
+            "video" => include_bytes!("../../tests/contracts/search/read/video/contract.json"),
+            _ => {
+                return Err(BpiError::invalid_parameter(
+                    "endpoint",
+                    "unknown search typed contract",
+                ));
+            }
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
+
+    fn fixture_payload<T>(bytes: &[u8]) -> BpiResult<SearchData<T>>
+    where
+        T: DeserializeOwned,
+    {
+        ApiEnvelope::<SearchData<T>>::from_slice(bytes)?.into_payload()
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/search/read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    fn parse_local_probe_outputs<T>(endpoint: &str) -> BpiResult<()>
+    where
+        T: DeserializeOwned,
+    {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(endpoint, profile) else {
+                continue;
+            };
+
+            let _payload =
+                serde_json::from_value::<ApiEnvelope<SearchData<T>>>(body)?.into_payload()?;
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn typed_search_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let expectations = [
+            (
+                "article",
+                "search.article",
+                "article",
+                "SearchData<Vec<Article>>",
+            ),
+            (
+                "bangumi",
+                "search.bangumi",
+                "media_bangumi",
+                "SearchData<Vec<Bangumi>>",
+            ),
+            (
+                "bili-user",
+                "search.bili_user",
+                "bili_user",
+                "SearchData<Vec<BiliUser>>",
+            ),
+            ("live", "search.live", "live", "SearchData<LiveData>"),
+            (
+                "live-room",
+                "search.live_room",
+                "live_room",
+                "SearchData<Vec<LiveRoom>>",
+            ),
+            (
+                "live-user",
+                "search.live_user",
+                "live_user",
+                "SearchData<Vec<LiveUser>>",
+            ),
+            (
+                "movie",
+                "search.movie",
+                "media_ft",
+                "SearchData<Vec<Movie>>",
+            ),
+            ("video", "search.video", "video", "SearchData<Vec<Video>>"),
+        ];
+
+        for (endpoint, name, search_type, rust_model) in expectations {
+            let contract = contract(endpoint)?;
+
+            assert_eq!(contract.name, name);
+            assert_eq!(contract.request.method, HttpMethod::Get);
+            assert_eq!(
+                contract.request.url.as_str(),
+                "https://api.bilibili.com/x/web-interface/wbi/search/type"
+            );
+            assert_eq!(
+                contract
+                    .request
+                    .query
+                    .get("search_type")
+                    .map(String::as_str),
+                Some(search_type)
+            );
+            assert!(contract.request.auth.requires_wbi());
+            assert_eq!(contract.cases.len(), 3);
+            for case in &contract.cases {
+                assert_eq!(case.response.http_status, Some(200));
+                assert_eq!(case.response.api_code, Some(0));
+                assert_eq!(case.response.rust_model.as_deref(), Some(rust_model));
+            }
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn typed_search_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let article = fixture_payload::<Vec<Article>>(include_bytes!(
+            "../../tests/contracts/search/read/article/responses/success.json"
+        ))?;
+        let bangumi = fixture_payload::<Vec<Bangumi>>(include_bytes!(
+            "../../tests/contracts/search/read/bangumi/responses/success.json"
+        ))?;
+        let bili_user = fixture_payload::<Vec<BiliUser>>(include_bytes!(
+            "../../tests/contracts/search/read/bili-user/responses/success.json"
+        ))?;
+        let live = fixture_payload::<LiveData>(include_bytes!(
+            "../../tests/contracts/search/read/live/responses/success.json"
+        ))?;
+        let live_room = fixture_payload::<Vec<LiveRoom>>(include_bytes!(
+            "../../tests/contracts/search/read/live-room/responses/success.json"
+        ))?;
+        let live_user = fixture_payload::<Vec<LiveUser>>(include_bytes!(
+            "../../tests/contracts/search/read/live-user/responses/success.json"
+        ))?;
+        let movie = fixture_payload::<Vec<Movie>>(include_bytes!(
+            "../../tests/contracts/search/read/movie/responses/success.json"
+        ))?;
+        let video = fixture_payload::<Vec<Video>>(include_bytes!(
+            "../../tests/contracts/search/read/video/responses/success.json"
+        ))?;
+
+        assert!(article.result.unwrap_or_default().is_empty());
+        assert!(bangumi.result.unwrap_or_default().is_empty());
+        assert!(bili_user.result.unwrap_or_default().is_empty());
+        assert!(live.result.is_some());
+        assert!(live_room.result.unwrap_or_default().is_empty());
+        assert!(live_user.result.unwrap_or_default().is_empty());
+        assert!(movie.result.unwrap_or_default().is_empty());
+        assert!(video.result.unwrap_or_default().is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn typed_search_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        parse_local_probe_outputs::<Vec<Article>>("article")?;
+        parse_local_probe_outputs::<Vec<Bangumi>>("bangumi")?;
+        parse_local_probe_outputs::<Vec<BiliUser>>("bili-user")?;
+        parse_local_probe_outputs::<LiveData>("live")?;
+        parse_local_probe_outputs::<Vec<LiveRoom>>("live-room")?;
+        parse_local_probe_outputs::<Vec<LiveUser>>("live-user")?;
+        parse_local_probe_outputs::<Vec<Movie>>("movie")?;
+        parse_local_probe_outputs::<Vec<Video>>("video")?;
+        Ok(())
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]

@@ -1,0 +1,67 @@
+{
+  "name": "search.bangumi",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/wbi/search/type",
+    "query": {
+      "search_type": "media_bangumi",
+      "keyword": "天气之子",
+      "page": "1"
+    },
+    "required_headers": ["user-agent", "referer", "origin"],
+    "headers": {},
+    "auth": {
+      "requires": ["wbi"]
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixture minimizes public search results; full raw probe output is ignored under target/bpi-probe-runs/search/read/bangumi"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": ["wbi"]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SearchData<Vec<Bangumi>>"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": ["wbi", "cookie"]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SearchData<Vec<Bangumi>>"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": ["wbi", "cookie"]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SearchData<Vec<Bangumi>>"
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "seid": "sanitized-search-read",
+    "page": 1,
+    "pagesize": 20,
+    "numResults": 0,
+    "numPages": 0,
+    "result": []
+  }
+}

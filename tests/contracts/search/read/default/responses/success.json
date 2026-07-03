@@ -1,0 +1,15 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "seid": "sanitized-search-read",
+    "id": 1,
+    "type": 0,
+    "show_name": "sanitized keyword",
+    "name": null,
+    "goto_type": 1,
+    "goto_value": "1",
+    "url": "https://www.bilibili.com/video/BV1xx411c7mD"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "seid": "sanitized-search-read",
+    "page": 1,
+    "pagesize": 20,
+    "numResults": 0,
+    "numPages": 0,
+    "result": {
+      "live_room": [],
+      "live_user": []
+    },
+    "pageinfo": {
+      "live_room": {
+        "total": 0,
+        "numResults": 0,
+        "pages": 0,
+        "numPages": 0
+      },
+      "live_user": {
+        "total": 0,
+        "numResults": 0,
+        "pages": 0,
+        "numPages": 0
+      }
+    }
+  }
+}

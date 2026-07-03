@@ -62,7 +62,27 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{
+        ApiEnvelope, BpiResult,
+        probe::{contract::HttpMethod, endpoint_contract::EndpointContract},
+    };
     use tracing::info;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/search/read/suggest/contract.json"
+        ))
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/search/read/suggest/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
 
     #[test]
     fn search_suggest_params_serializes_term_query() -> Result<(), BpiError> {
@@ -91,6 +111,54 @@ mod tests {
             err,
             BpiError::InvalidParameter { field: "term", .. }
         ));
+    }
+
+    #[test]
+    fn search_suggest_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "search.suggest");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://s.search.bilibili.com/main/suggest"
+        );
+        assert_eq!(
+            contract.request.query.get("term").map(String::as_str),
+            Some("rust")
+        );
+        assert!(!contract.request.auth.requires_wbi());
+        for case in &contract.cases {
+            assert_eq!(case.response.http_status, Some(200));
+            assert_eq!(case.response.api_code, Some(0));
+            assert_eq!(case.response.rust_model.as_deref(), Some("SearchSuggest"));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn search_suggest_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<SearchSuggest>::from_slice(include_bytes!(
+            "../../tests/contracts/search/read/suggest/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.tag.unwrap_or_default().len(), 1);
+        Ok(())
+    }
+
+    #[test]
+    fn search_suggest_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+
+            let payload =
+                serde_json::from_value::<ApiEnvelope<SearchSuggest>>(body)?.into_payload()?;
+            assert!(payload.tag.is_some());
+        }
+        Ok(())
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]

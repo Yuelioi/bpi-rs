@@ -1,0 +1,69 @@
+{
+  "name": "search.bili_user",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/wbi/search/type",
+    "query": {
+      "search_type": "bili_user",
+      "keyword": "老番茄",
+      "order_sort": "0",
+      "user_type": "0",
+      "page": "1"
+    },
+    "required_headers": ["user-agent", "referer", "origin"],
+    "headers": {},
+    "auth": {
+      "requires": ["wbi"]
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixture minimizes public search results; full raw probe output is ignored under target/bpi-probe-runs/search/read/bili-user"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": ["wbi"]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SearchData<Vec<BiliUser>>"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": ["wbi", "cookie"]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SearchData<Vec<BiliUser>>"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": ["wbi", "cookie"]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SearchData<Vec<BiliUser>>"
+      }
+    }
+  ]
+}
