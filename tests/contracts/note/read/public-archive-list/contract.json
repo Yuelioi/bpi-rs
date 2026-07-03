@@ -1,0 +1,57 @@
+{
+  "name": "note.public_archive_list",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/note/publish/list/archive",
+    "query": {
+      "oid": "338677252",
+      "oid_type": "0",
+      "pn": "1",
+      "ps": "10"
+    },
+    "required_headers": ["user-agent", "referer", "origin"],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "selected public archive returned closed public-note state with no note items"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": { "requires": [] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/closed.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "PublicNoteListArchiveData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": { "profile": "normal", "requires": ["cookie"] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/closed.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "PublicNoteListArchiveData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": { "profile": "vip", "requires": ["cookie"] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/closed.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "PublicNoteListArchiveData"
+      }
+    }
+  ]
+}

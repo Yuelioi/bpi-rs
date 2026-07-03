@@ -1,0 +1,11 @@
+{
+  "code": 0,
+  "data": {
+    "list": null,
+    "message": "当前视频下公开笔记功能已关闭",
+    "page": null,
+    "show_public_note": false
+  },
+  "message": "OK",
+  "ttl": 1
+}

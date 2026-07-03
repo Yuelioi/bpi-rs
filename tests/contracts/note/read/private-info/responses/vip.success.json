@@ -1,0 +1,25 @@
+{
+  "code": 0,
+  "data": {
+    "arc": {
+      "desc": "",
+      "oid": 676931260,
+      "oid_type": 0,
+      "pic": "https://example.invalid/archive.jpg",
+      "status": 0,
+      "title": "sanitized video title"
+    },
+    "audit_status": 0,
+    "cid_count": 0,
+    "content": "[{\"insert\":\"sanitized private note content\\n\"}]",
+    "forbid_note_entrance": false,
+    "pub_reason": "",
+    "pub_status": 0,
+    "pub_version": 0,
+    "summary": "sanitized private summary",
+    "tags": [],
+    "title": "sanitized private note title"
+  },
+  "message": "OK",
+  "ttl": 1
+}

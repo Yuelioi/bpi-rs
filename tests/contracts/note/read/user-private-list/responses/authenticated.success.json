@@ -1,0 +1,36 @@
+{
+  "code": 0,
+  "data": {
+    "list": [
+      {
+        "arc": {
+          "aid": 1,
+          "bvid": "BV0000000000",
+          "desc": "sanitized archive description",
+          "oid": 1,
+          "oid_type": 0,
+          "pic": "https://example.invalid/archive.jpg",
+          "status": 0
+        },
+        "audit_status": 0,
+        "forbid_note_entrance": false,
+        "has_like": false,
+        "likes": 0,
+        "message": "updated at sanitized time",
+        "mtime": "2026-01-01 00:00",
+        "note_id": 1,
+        "note_id_str": "1",
+        "summary": "sanitized private summary",
+        "title": "sanitized private note title",
+        "web_url": "https://example.invalid/note"
+      }
+    ],
+    "page": {
+      "num": 1,
+      "size": 10,
+      "total": 1
+    }
+  },
+  "message": "OK",
+  "ttl": 1
+}

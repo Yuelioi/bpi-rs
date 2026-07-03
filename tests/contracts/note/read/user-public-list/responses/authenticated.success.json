@@ -1,0 +1,12 @@
+{
+  "code": 0,
+  "data": {
+    "page": {
+      "num": 1,
+      "size": 10,
+      "total": 0
+    }
+  },
+  "message": "OK",
+  "ttl": 1
+}

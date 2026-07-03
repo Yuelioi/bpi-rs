@@ -1,0 +1,55 @@
+{
+  "name": "note.user_public_list",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/note/publish/list/user",
+    "query": {
+      "pn": "1",
+      "ps": "10"
+    },
+    "required_headers": ["user-agent", "referer", "origin"],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "success fixture keeps only empty account public-note pagination"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": { "requires": [] },
+      "response": {
+        "http_status": 200,
+        "fixture": "responses/anonymous.requires_login.binary.json",
+        "fixture_kind": "binary_probe_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": { "profile": "normal", "requires": ["cookie"] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "PublicNoteListUserData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": { "profile": "vip", "requires": ["cookie"] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "PublicNoteListUserData"
+      }
+    }
+  ]
+}

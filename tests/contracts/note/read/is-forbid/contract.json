@@ -1,0 +1,54 @@
+{
+  "name": "note.is_forbid",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/note/is_forbid",
+    "query": {
+      "aid": "338677252"
+    },
+    "required_headers": ["user-agent", "referer", "origin"],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "public video note-forbid flag only"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": { "requires": [] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "NoteIsForbidData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": { "profile": "normal", "requires": ["cookie"] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "NoteIsForbidData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": { "profile": "vip", "requires": ["cookie"] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "NoteIsForbidData"
+      }
+    }
+  ]
+}

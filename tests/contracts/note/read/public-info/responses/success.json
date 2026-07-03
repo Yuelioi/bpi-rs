@@ -1,0 +1,32 @@
+{
+  "code": 0,
+  "data": {
+    "arc": {
+      "desc": "",
+      "oid": 338677252,
+      "oid_type": 0,
+      "pic": "https://example.invalid/archive.jpg",
+      "status": 0,
+      "title": "sanitized video title"
+    },
+    "author": {
+      "face": "https://example.invalid/face.jpg",
+      "level": 5,
+      "mid": 1,
+      "name": "sanitized author",
+      "pendant": {},
+      "vip_info": {}
+    },
+    "cid_count": 0,
+    "content": "[{\"insert\":\"sanitized public note content\\n\"}]",
+    "cvid": 15160286,
+    "forbid_note_entrance": false,
+    "note_id": 1,
+    "pub_status": 2,
+    "summary": "sanitized summary",
+    "tags": [],
+    "title": "sanitized public note title"
+  },
+  "message": "OK",
+  "ttl": 1
+}

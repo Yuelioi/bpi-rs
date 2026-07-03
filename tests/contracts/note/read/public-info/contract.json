@@ -1,0 +1,54 @@
+{
+  "name": "note.public_info",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/note/publish/info",
+    "query": {
+      "cvid": "15160286"
+    },
+    "required_headers": ["user-agent", "referer", "origin"],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixture redacts public note content, author, avatar, and media URLs"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": { "requires": [] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "PublicNoteInfoData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": { "profile": "normal", "requires": ["cookie"] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "PublicNoteInfoData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": { "profile": "vip", "requires": ["cookie"] },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "PublicNoteInfoData"
+      }
+    }
+  ]
+}

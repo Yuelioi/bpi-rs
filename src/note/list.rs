@@ -195,10 +195,43 @@ mod tests {
         NoteArchiveListParams, NotePublicArchiveListParams, NoteUserPrivateListParams,
         NoteUserPublicListParams,
     };
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+    use base64::{Engine as _, engine::general_purpose};
     use tracing::info;
 
     const TEST_PRIVATE_AID: u64 = 676_931_260;
     const TEST_PUBLIC_AID: u64 = 338_677_252;
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "archive-list" => {
+                include_bytes!("../../tests/contracts/note/read/archive-list/contract.json")
+                    .as_slice()
+            }
+            "user-private-list" => {
+                include_bytes!("../../tests/contracts/note/read/user-private-list/contract.json")
+                    .as_slice()
+            }
+            "public-archive-list" => {
+                include_bytes!("../../tests/contracts/note/read/public-archive-list/contract.json")
+                    .as_slice()
+            }
+            "user-public-list" => {
+                include_bytes!("../../tests/contracts/note/read/user-public-list/contract.json")
+                    .as_slice()
+            }
+            _ => {
+                return Err(BpiError::invalid_parameter(
+                    "endpoint",
+                    "unknown note list contract",
+                ));
+            }
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -332,6 +365,195 @@ mod tests {
                 ("ps", "10".to_string()),
             ]
         );
+        Ok(())
+    }
+
+    #[test]
+    fn note_list_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let archive_list = contract("archive-list")?;
+        assert_eq!(archive_list.name, "note.archive_list");
+        assert_eq!(archive_list.request.method, HttpMethod::Get);
+        assert_eq!(
+            archive_list.request.url.as_str(),
+            "https://api.bilibili.com/x/note/list/archive"
+        );
+        assert_eq!(
+            archive_list.request.query.get("oid").map(String::as_str),
+            Some("676931260")
+        );
+        assert_eq!(archive_list.cases[0].response.api_code, Some(-101));
+        assert_eq!(
+            archive_list.cases[1].response.rust_model.as_deref(),
+            Some("NoteListArchiveData")
+        );
+
+        let user_private = contract("user-private-list")?;
+        assert_eq!(user_private.name, "note.user_private_list");
+        assert_eq!(
+            user_private.request.url.as_str(),
+            "https://api.bilibili.com/x/note/list"
+        );
+        assert_eq!(
+            user_private.request.query.get("pn").map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            user_private.cases[1].response.rust_model.as_deref(),
+            Some("PrivateNoteListData")
+        );
+
+        let public_archive = contract("public-archive-list")?;
+        assert_eq!(public_archive.name, "note.public_archive_list");
+        assert_eq!(
+            public_archive.request.url.as_str(),
+            "https://api.bilibili.com/x/note/publish/list/archive"
+        );
+        assert_eq!(
+            public_archive.cases[0].response.rust_model.as_deref(),
+            Some("PublicNoteListArchiveData")
+        );
+
+        let user_public = contract("user-public-list")?;
+        assert_eq!(user_public.name, "note.user_public_list");
+        assert_eq!(
+            user_public.request.url.as_str(),
+            "https://api.bilibili.com/x/note/publish/list/user"
+        );
+        assert_eq!(user_public.cases[0].response.http_status, Some(200));
+        assert_eq!(
+            user_public.cases[0].response.error.as_deref(),
+            Some("requires_login")
+        );
+        assert_eq!(
+            user_public.cases[1].response.rust_model.as_deref(),
+            Some("PublicNoteListUserData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn note_list_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/note/read/archive-list/responses/anonymous.requires_login.json"
+        ))
+        .and_then(ApiEnvelope::ensure_success)
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let archive = ApiEnvelope::<NoteListArchiveData>::from_slice(include_bytes!(
+            "../../tests/contracts/note/read/archive-list/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(
+            archive
+                .note_ids
+                .as_ref()
+                .and_then(|note_ids| note_ids.first())
+                .map(String::as_str),
+            Some("1")
+        );
+
+        let private_list = ApiEnvelope::<PrivateNoteListData>::from_slice(include_bytes!(
+            "../../tests/contracts/note/read/user-private-list/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(
+            private_list
+                .list
+                .as_ref()
+                .and_then(|items| items.first())
+                .map(|item| item.title.as_str()),
+            Some("sanitized private note title")
+        );
+
+        let public_archive = ApiEnvelope::<PublicNoteListArchiveData>::from_slice(include_bytes!(
+            "../../tests/contracts/note/read/public-archive-list/responses/closed.success.json"
+        ))?
+        .into_payload()?;
+        assert!(!public_archive.show_public_note);
+
+        let binary: serde_json::Value = serde_json::from_slice(include_bytes!(
+            "../../tests/contracts/note/read/user-public-list/responses/anonymous.requires_login.binary.json"
+        ))?;
+        assert_eq!(binary["kind"], "binary");
+        let decoded = general_purpose::STANDARD
+            .decode(
+                binary["body_base64"]
+                    .as_str()
+                    .ok_or_else(|| BpiError::unsupported_response("missing binary body"))?,
+            )
+            .map_err(|err| BpiError::parse(err.to_string()))?;
+        let decoded_text =
+            String::from_utf8(decoded).map_err(|err| BpiError::parse(err.to_string()))?;
+        assert!(decoded_text.contains("\"code\":-101"));
+
+        let public_user = ApiEnvelope::<PublicNoteListUserData>::from_slice(include_bytes!(
+            "../../tests/contracts/note/read/user-public-list/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(public_user.page.as_ref().map(|page| page.total), Some(0));
+        assert!(public_user.list.is_none());
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/note/read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn note_list_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body("archive-list", profile) else {
+                continue;
+            };
+            if profile == "anonymous" {
+                let err = serde_json::from_value::<ApiEnvelope<serde_json::Value>>(body)?
+                    .ensure_success()
+                    .unwrap_err();
+                assert!(err.requires_login());
+                continue;
+            }
+            serde_json::from_value::<ApiEnvelope<NoteListArchiveData>>(body)?.into_payload()?;
+        }
+
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body("user-private-list", profile) else {
+                continue;
+            };
+            if profile == "anonymous" {
+                let err = serde_json::from_value::<ApiEnvelope<serde_json::Value>>(body)?
+                    .ensure_success()
+                    .unwrap_err();
+                assert!(err.requires_login());
+                continue;
+            }
+            serde_json::from_value::<ApiEnvelope<PrivateNoteListData>>(body)?.into_payload()?;
+        }
+
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body("public-archive-list", profile) else {
+                continue;
+            };
+            serde_json::from_value::<ApiEnvelope<PublicNoteListArchiveData>>(body)?
+                .into_payload()?;
+        }
+
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body("user-public-list", profile) else {
+                continue;
+            };
+            if profile == "anonymous" {
+                assert_eq!(body["kind"], "binary");
+                continue;
+            }
+            serde_json::from_value::<ApiEnvelope<PublicNoteListUserData>>(body)?.into_payload()?;
+        }
         Ok(())
     }
 }
