@@ -1,0 +1,19 @@
+{
+  "code": 0,
+  "errno": 0,
+  "msg": "SUCCESS",
+  "showMsg": "",
+  "success": true,
+  "data": {
+    "mid": 1000001,
+    "totalBp": 0.0,
+    "defaultBp": 0.0,
+    "iosBp": 0.0,
+    "couponBalance": 0.0,
+    "availableBp": 0.0,
+    "unavailableBp": 0.0,
+    "unavailableReason": "",
+    "tip": "sanitized wallet tip",
+    "needShowClassBalance": 1
+  }
+}
