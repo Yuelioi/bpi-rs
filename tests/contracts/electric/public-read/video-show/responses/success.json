@@ -1,0 +1,56 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "av_count": 0,
+    "cnt_priv_type": 0,
+    "count": 0,
+    "display_num": 0,
+    "list": [
+      {
+        "avatar": "https://example.invalid/bilibili/face/video-charge-user.png",
+        "message": "",
+        "mid": 53456,
+        "msg_deleted": 0,
+        "pay_mid": 1,
+        "rank": 1,
+        "trend_type": 0,
+        "uname": "fixture_video_charge_user",
+        "vip_info": {
+          "vipDueMsec": 0,
+          "vipStatus": 0,
+          "vipType": 0
+        }
+      }
+    ],
+    "show_info": {
+      "high_level": {
+        "button_text": "",
+        "intro": "",
+        "jump_url": {
+          "paywall_link": "",
+          "previewbar_link": "",
+          "up_link": ""
+        },
+        "new": false,
+        "open": false,
+        "privilege_type": 0,
+        "qa_detail_link": "",
+        "question_text": "",
+        "show_button": false,
+        "sub_title": "",
+        "title": ""
+      },
+      "icon": "https://example.invalid/bilibili/electric/icon.png",
+      "jump_url": "https://member.bilibili.com/mall/upower-pay?mid=53456&prePage=video&oid=204774719",
+      "jump_url_web": "https://member.bilibili.com/mall/upower-pay?mid=53456&prePage=video",
+      "show": true,
+      "state": 2,
+      "title": "充电",
+      "with_qa_id": 0
+    },
+    "special_day": 0,
+    "total_count": 48159
+  }
+}

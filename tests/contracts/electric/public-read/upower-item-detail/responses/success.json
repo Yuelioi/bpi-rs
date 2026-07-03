@@ -1,0 +1,48 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "elec_reply_state": 1,
+    "item": {
+      "intro_video_aid": "",
+      "welcomes": "fixture welcome text"
+    },
+    "only_contain_medal": false,
+    "privilege_type": 0,
+    "upower_level": 2,
+    "upower_rank": {
+      "list": [
+        {
+          "avatar": "https://example.invalid/bilibili/face/upower-rank-user.png",
+          "mid": 1,
+          "nickname": "fixture_upower_rank_user",
+          "rank": 1
+        }
+      ],
+      "total": 8261,
+      "total_desc": "8000+"
+    },
+    "upower_right_count": {
+      "10": 3,
+      "100": 5
+    },
+    "user_card": {
+      "avatar": "https://example.invalid/bilibili/face/upower-up.png",
+      "nickname": "fixture_up"
+    },
+    "voucher_state": {
+      "activity": "",
+      "common_time": 0,
+      "high_level_time": 0,
+      "specify_level": 0,
+      "specify_up": 0,
+      "user_voucher_state": 0,
+      "validate_level": 0,
+      "validate_price": 0,
+      "vip_action": 0,
+      "voucher_name": "",
+      "voucher_order_id": ""
+    }
+  }
+}

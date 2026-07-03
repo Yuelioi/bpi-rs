@@ -421,7 +421,26 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "upower-item-detail" => include_bytes!(
+                "../../tests/contracts/electric/public-read/upower-item-detail/contract.json"
+            )
+            .as_slice(),
+            "upower-member-rank" => include_bytes!(
+                "../../tests/contracts/electric/public-read/upower-member-rank/contract.json"
+            )
+            .as_slice(),
+            _ => unreachable!("unknown electric public-read contract endpoint"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -497,5 +516,110 @@ mod tests {
                 info!("排名第一的用户: {}", first_rank.nickname);
             }
         }
+    }
+
+    #[test]
+    fn electric_upower_item_detail_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("upower-item-detail")?;
+
+        assert_eq!(contract.name, "electric.upower_item_detail");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/upower/item/detail"
+        );
+        assert_eq!(
+            contract.request.query.get("up_mid").map(String::as_str),
+            Some("1265680561")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("UpowerItemDetail")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn electric_upower_member_rank_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("upower-member-rank")?;
+
+        assert_eq!(contract.name, "electric.upower_member_rank");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/upower/up/member/rank/v2"
+        );
+        assert_eq!(
+            contract.request.query.get("up_mid").map(String::as_str),
+            Some("1265680561")
+        );
+        assert_eq!(
+            contract.request.query.get("pn").map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            contract.request.query.get("ps").map(String::as_str),
+            Some("10")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("MemberRankData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn electric_monthly_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let item_detail = ApiEnvelope::<UpowerItemDetail>::from_slice(include_bytes!(
+            "../../tests/contracts/electric/public-read/upower-item-detail/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(item_detail.upower_rank.list.len(), 1);
+        assert_eq!(item_detail.upower_right_count.counts["100"], 5);
+
+        let anonymous_rank = ApiEnvelope::<MemberRankData>::from_slice(include_bytes!(
+            "../../tests/contracts/electric/public-read/upower-member-rank/responses/anonymous.success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(anonymous_rank.user_info.mid, 0);
+
+        let authenticated_rank = ApiEnvelope::<MemberRankData>::from_slice(include_bytes!(
+            "../../tests/contracts/electric/public-read/upower-member-rank/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(authenticated_rank.user_info.mid, 1);
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!(
+            "target/bpi-probe-runs/electric/public-read/{endpoint}/{profile}.response.json"
+        );
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn electric_monthly_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("upower-item-detail", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<UpowerItemDetail>>(body)?
+                    .into_payload()?;
+                assert!(payload.upower_rank.total >= payload.upower_rank.list.len() as u64);
+            }
+
+            if let Some(body) = local_probe_body("upower-member-rank", profile) {
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<MemberRankData>>(body)?.into_payload()?;
+                assert!(payload.member_total >= payload.rank_info.len() as u64);
+            }
+        }
+        Ok(())
     }
 }

@@ -1,0 +1,28 @@
+{
+  "code": 0,
+  "message": "",
+  "ttl": 0,
+  "data": {
+    "count": 12577,
+    "list": [
+      {
+        "avatar": "https://example.invalid/bilibili/face/public-charge-user.png",
+        "message": "",
+        "message_hidden": 0,
+        "mid": 53456,
+        "pay_mid": 1,
+        "rank": 1,
+        "trend_type": 0,
+        "uname": "fixture_charge_user",
+        "vip_info": {
+          "vipDueMsec": 0,
+          "vipStatus": 0,
+          "vipType": 0
+        }
+      }
+    ],
+    "special_day": 0,
+    "total": 48159,
+    "total_count": 48159
+  }
+}

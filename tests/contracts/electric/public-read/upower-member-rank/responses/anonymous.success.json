@@ -1,0 +1,52 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "is_charge": false,
+    "level_info": [
+      {
+        "member_total": 1472,
+        "name": "fixture high tier",
+        "price": 1800,
+        "privilege_type": 100
+      }
+    ],
+    "member_total": 8261,
+    "privilege_type": 100,
+    "rank_info": [
+      {
+        "avatar": "https://example.invalid/bilibili/face/member-rank-user.png",
+        "day": 1085,
+        "expire_at": 0,
+        "mid": 1,
+        "nickname": "fixture_member_rank_user",
+        "rank": 1,
+        "remain_days": 0
+      }
+    ],
+    "tabs": [
+      100,
+      10
+    ],
+    "up_info": {
+      "avatar": "https://example.invalid/bilibili/face/upower-up.png",
+      "mid": 1265680561,
+      "nickname": "fixture_up",
+      "title": "fixture official title",
+      "type": 0,
+      "upower_num_show": 1,
+      "upower_rank_show": 1,
+      "upower_state": 3
+    },
+    "user_info": {
+      "avatar": "",
+      "day": 0,
+      "expire_at": 0,
+      "mid": 0,
+      "nickname": "",
+      "rank": 0,
+      "remain_days": 0
+    }
+  }
+}

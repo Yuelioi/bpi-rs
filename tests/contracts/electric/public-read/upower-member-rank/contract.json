@@ -1,0 +1,72 @@
+{
+  "name": "electric.upower_member_rank",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/upower/up/member/rank/v2",
+    "query": {
+      "up_mid": "1265680561",
+      "pn": "1",
+      "ps": "10"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "authenticated fixture sanitizes account-derived user_info"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/anonymous.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "MemberRankData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "MemberRankData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "MemberRankData"
+      }
+    }
+  ]
+}
