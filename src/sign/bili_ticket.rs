@@ -24,6 +24,10 @@ pub fn hexsign(key: &str, timestamp: u64) -> BpiResult<String> {
     Ok(hex::encode(mac.finalize().into_bytes()))
 }
 
+pub fn ticket_hexsign(timestamp: u64) -> BpiResult<String> {
+    hexsign(HMAC_KEY, timestamp)
+}
+
 pub fn ticket_request_params(timestamp: u64, csrf: &str) -> BpiResult<Vec<(String, String)>> {
     if csrf.trim().is_empty() {
         return Err(BpiError::invalid_parameter("csrf", "csrf cannot be blank"));
@@ -55,6 +59,15 @@ mod tests {
     }
 
     #[test]
+    fn ticket_hexsign_uses_web_ticket_hmac_key() -> Result<(), BpiError> {
+        assert_eq!(
+            ticket_hexsign(1_234_567_890)?,
+            "a7da9d971f117aa2b439c4b6cc46c7afbba8ade9f3ca959578af1bcfb37ebd2f"
+        );
+        Ok(())
+    }
+
+    #[test]
     fn hexsign_rejects_empty_key() {
         let err = hexsign("", 1_234_567_890).unwrap_err();
 
@@ -72,10 +85,7 @@ mod tests {
             params,
             vec![
                 ("key_id".to_string(), "ec02".to_string()),
-                (
-                    "hexsign".to_string(),
-                    "a7da9d971f117aa2b439c4b6cc46c7afbba8ade9f3ca959578af1bcfb37ebd2f".to_string()
-                ),
+                ("hexsign".to_string(), ticket_hexsign(1_234_567_890)?),
                 ("context[ts]".to_string(), "1234567890".to_string()),
                 ("csrf".to_string(), "csrf-token".to_string()),
             ]

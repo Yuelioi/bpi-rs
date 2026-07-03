@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use base64::{Engine as _, engine::general_purpose};
 use reqwest::RequestBuilder;
@@ -7,6 +8,7 @@ use crate::probe::account::RawProbeConfig;
 use crate::probe::contract::{
     ApiContract, CapturedRequest, HttpMethod, ProbeResponse, ProbeResult, ResponseDecoding,
 };
+use crate::sign::bili_ticket::ticket_hexsign;
 use crate::{BpiClient, BpiError, BpiResult};
 
 pub async fn execute_contract(
@@ -118,11 +120,29 @@ fn template_variables(
     client: &BpiClient,
     contract: &ApiContract,
 ) -> BpiResult<BTreeMap<String, String>> {
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|error| BpiError::network(format!("failed to get unix timestamp: {error}")))?
+        .as_secs();
+    template_variables_at_timestamp(client, contract, timestamp)
+}
+
+fn template_variables_at_timestamp(
+    client: &BpiClient,
+    contract: &ApiContract,
+    timestamp: u64,
+) -> BpiResult<BTreeMap<String, String>> {
     let mut variables = BTreeMap::new();
+    let timestamp_text = timestamp.to_string();
 
     if contract.request.auth.requires_csrf() {
         variables.insert("csrf".to_string(), client.csrf()?);
     }
+    variables.insert("unix_ts".to_string(), timestamp_text);
+    variables.insert(
+        "bili_ticket_hexsign".to_string(),
+        ticket_hexsign(timestamp)?,
+    );
 
     Ok(variables)
 }
@@ -410,6 +430,52 @@ mod tests {
         assert_eq!(
             captured.sanitized().body.as_ref().map(|body| &body["csrf"]),
             Some(&serde_json::Value::String("<redacted>".to_string()))
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn template_variables_include_bili_ticket_timestamp_and_hexsign() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "misc.bili_ticket.normal",
+                "request": {
+                    "method": "POST",
+                    "url": "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket",
+                    "auth": {
+                        "profile": "normal",
+                        "requires": ["cookie", "csrf"]
+                    },
+                    "query": {
+                        "key_id": "ec02",
+                        "hexsign": "${bili_ticket_hexsign}",
+                        "context[ts]": "${unix_ts}",
+                        "csrf": "${csrf}"
+                    }
+                }
+            }"#,
+        )?;
+        let config = RawProbeConfig {
+            probe: ProbeAccountConfig {
+                normal: Some(ProbeAccountProfile {
+                    bili_jct: "normal-csrf".to_string(),
+                    dede_user_id: "43".to_string(),
+                    dede_user_id_ckmd5: "ck-normal".to_string(),
+                    sessdata: "session-normal".to_string(),
+                    buvid3: "buvid-normal".to_string(),
+                }),
+                vip: None,
+            },
+            ..RawProbeConfig::default()
+        };
+        let client = client_for_contract(&contract, &config)?;
+        let variables = template_variables_at_timestamp(&client, &contract, 1_234_567_890)?;
+
+        assert_eq!(variables["csrf"], "normal-csrf");
+        assert_eq!(variables["unix_ts"], "1234567890");
+        assert_eq!(
+            variables["bili_ticket_hexsign"],
+            "a7da9d971f117aa2b439c4b6cc46c7afbba8ade9f3ca959578af1bcfb37ebd2f"
         );
         Ok(())
     }
