@@ -15,6 +15,8 @@ use crate::auth::Account;
 use crate::clientinfo::ClientInfoClient;
 #[cfg(feature = "comment")]
 use crate::comment::CommentClient;
+#[cfg(feature = "fav")]
+use crate::fav::FavClient;
 #[cfg(feature = "historytoview")]
 use crate::historytoview::HistoryToViewClient;
 #[cfg(feature = "login")]
@@ -408,6 +410,12 @@ impl BpiClient {
         CommentClient::new(self)
     }
 
+    /// Creates a favorite domain client.
+    #[cfg(feature = "fav")]
+    pub fn fav(&self) -> FavClient<'_> {
+        FavClient::new(self)
+    }
+
     /// Creates a history and to-view domain client.
     #[cfg(feature = "historytoview")]
     pub fn historytoview(&self) -> HistoryToViewClient<'_> {
@@ -792,6 +800,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _comment = client.comment();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "fav")]
+    #[test]
+    fn fav_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _fav = client.fav();
 
         Ok(())
     }

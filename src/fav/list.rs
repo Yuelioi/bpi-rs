@@ -180,7 +180,7 @@ impl FavListDetailParams {
         Ok(self)
     }
 
-    fn query_pairs(&self) -> Vec<(&'static str, String)> {
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
         let mut params = vec![
             ("media_id", self.media_id.to_string()),
             ("ps", self.ps.to_string()),
