@@ -1,0 +1,27 @@
+{
+  "code": 0,
+  "data": {
+    "has_more": true,
+    "items": [
+      {
+        "author": {
+          "face": "<redacted-face-url>",
+          "mid": "1",
+          "name": "<redacted-author>"
+        },
+        "cover": "<redacted-cover-url>",
+        "id_str": "1007589071270182945",
+        "pub_time": "2024年12月06日",
+        "rid": "113602455409683",
+        "title": "<redacted-title>",
+        "type": 8,
+        "visible": true
+      }
+    ],
+    "offset": "<redacted-offset>",
+    "update_baseline": "<redacted-update-baseline>",
+    "update_num": "0"
+  },
+  "message": "0",
+  "ttl": 1
+}

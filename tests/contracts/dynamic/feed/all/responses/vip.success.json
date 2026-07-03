@@ -1,0 +1,32 @@
+{
+  "code": 0,
+  "data": {
+    "has_more": true,
+    "items": [
+      {
+        "basic": {
+          "comment_id_str": "116853795985324",
+          "comment_type": 1,
+          "like_icon": {
+            "action_url": "https://i0.hdslb.com/bfs/garb/item/7335b2a048a335f8705e1c6cdec6c5c65db7cc8e.bin",
+            "end_url": "",
+            "id": "35577",
+            "start_url": ""
+          },
+          "rid_str": "116853795985324",
+          "is_only_fans": false,
+          "jump_url": ""
+        },
+        "id_str": "1220669580004818948",
+        "modules": {},
+        "type": "DYNAMIC_TYPE_AV",
+        "visible": true
+      }
+    ],
+    "offset": "<redacted-offset>",
+    "update_baseline": "<redacted-update-baseline>",
+    "update_num": "2"
+  },
+  "message": "0",
+  "ttl": 1
+}

@@ -15,6 +15,7 @@ pub mod space;
 pub mod topic;
 
 mod module;
+mod serde_utils;
 
 pub use params::{
     DynamicAllParams, DynamicCardDetailParams, DynamicCheckNewParams, DynamicDetailParams,

@@ -1,0 +1,20 @@
+{
+  "code": 0,
+  "data": {
+    "banners": [
+      {
+        "banner_id": 20,
+        "end_time": 2056204800,
+        "img_url": "https://i0.hdslb.com/bfs/vc/9c699f2acbcad00197e92c401b835d2c6aba8a55.png",
+        "link": "https://www.bilibili.com/blackboard/activity-5zJxM3spoS.html",
+        "platform": 1,
+        "position": "web动态",
+        "start_time": 1582862523,
+        "title": "点击进入",
+        "weight": 1
+      }
+    ]
+  },
+  "message": "OK",
+  "ttl": 1
+}
