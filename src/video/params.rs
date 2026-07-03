@@ -31,10 +31,101 @@ impl VideoViewParams {
     }
 
     pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
-        match &self.id {
-            VideoId::Aid(aid) => vec![("aid", aid.to_string())],
-            VideoId::Bvid(bvid) => vec![("bvid", bvid.to_string())],
+        video_id_query_pairs(&self.id)
+    }
+}
+
+/// Parameters for `/x/web-interface/view/detail`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoDetailParams {
+    id: VideoId,
+    need_elec: Option<u8>,
+}
+
+impl VideoDetailParams {
+    /// Creates detail parameters from a validated AV ID.
+    pub fn from_aid(aid: Aid) -> Self {
+        Self::new(VideoId::Aid(aid))
+    }
+
+    /// Creates detail parameters from a validated BV ID.
+    pub fn from_bvid(bvid: Bvid) -> Self {
+        Self::new(VideoId::Bvid(bvid))
+    }
+
+    fn new(id: VideoId) -> Self {
+        Self {
+            id,
+            need_elec: None,
         }
+    }
+
+    /// Controls whether the detail endpoint should include electric charging data.
+    pub fn need_elec(mut self, need_elec: bool) -> Self {
+        self.need_elec = Some(u8::from(need_elec));
+        self
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut params = video_id_query_pairs(&self.id);
+
+        if let Some(need_elec) = self.need_elec {
+            params.push(("need_elec", need_elec.to_string()));
+        }
+
+        params
+    }
+}
+
+/// Parameters for `/x/player/pagelist`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoPageListParams {
+    id: VideoId,
+}
+
+impl VideoPageListParams {
+    /// Creates page-list parameters from a validated AV ID.
+    pub fn from_aid(aid: Aid) -> Self {
+        Self {
+            id: VideoId::Aid(aid),
+        }
+    }
+
+    /// Creates page-list parameters from a validated BV ID.
+    pub fn from_bvid(bvid: Bvid) -> Self {
+        Self {
+            id: VideoId::Bvid(bvid),
+        }
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        video_id_query_pairs(&self.id)
+    }
+}
+
+/// Parameters for `/x/web-interface/archive/desc`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoDescParams {
+    id: VideoId,
+}
+
+impl VideoDescParams {
+    /// Creates description parameters from a validated AV ID.
+    pub fn from_aid(aid: Aid) -> Self {
+        Self {
+            id: VideoId::Aid(aid),
+        }
+    }
+
+    /// Creates description parameters from a validated BV ID.
+    pub fn from_bvid(bvid: Bvid) -> Self {
+        Self {
+            id: VideoId::Bvid(bvid),
+        }
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        video_id_query_pairs(&self.id)
     }
 }
 
@@ -150,6 +241,13 @@ impl VideoPlayUrlParams {
     }
 }
 
+fn video_id_query_pairs(id: &VideoId) -> Vec<(&'static str, String)> {
+    match id {
+        VideoId::Aid(aid) => vec![("aid", aid.to_string())],
+        VideoId::Bvid(bvid) => vec![("bvid", bvid.to_string())],
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -172,6 +270,39 @@ mod tests {
         let params = VideoViewParams::from_aid(Aid::new(170001)?);
 
         assert_eq!(params.query_pairs(), vec![("aid", "170001".to_string())]);
+        Ok(())
+    }
+
+    #[test]
+    fn video_detail_params_serializes_bvid_query_with_electric_flag() -> Result<(), BpiError> {
+        let params = VideoDetailParams::from_bvid("BV1xx411c7mD".parse()?).need_elec(false);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("bvid", "BV1xx411c7mD".to_string()),
+                ("need_elec", "0".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn video_page_list_params_serializes_aid_query() -> Result<(), BpiError> {
+        let params = VideoPageListParams::from_aid(Aid::new(170001)?);
+
+        assert_eq!(params.query_pairs(), vec![("aid", "170001".to_string())]);
+        Ok(())
+    }
+
+    #[test]
+    fn video_desc_params_serializes_bvid_query() -> Result<(), BpiError> {
+        let params = VideoDescParams::from_bvid("BV1xx411c7mD".parse()?);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![("bvid", "BV1xx411c7mD".to_string())]
+        );
         Ok(())
     }
 

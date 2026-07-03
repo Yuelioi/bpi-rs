@@ -23,5 +23,8 @@ pub mod video_zone_v2;
 pub mod videostream_url;
 
 pub use client::VideoClient;
-pub use model::{VideoOwner, VideoPage, VideoStat, VideoView};
-pub use params::{VideoId, VideoPlayUrlParams, VideoViewParams};
+pub use model::{VideoDetail, VideoOwner, VideoPage, VideoRelated, VideoStat, VideoTag, VideoView};
+pub use params::{
+    VideoDescParams, VideoDetailParams, VideoId, VideoPageListParams, VideoPlayUrlParams,
+    VideoViewParams,
+};

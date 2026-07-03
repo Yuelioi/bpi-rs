@@ -39,7 +39,7 @@ impl BpiClient {
         aid: Option<u64>,
         bvid: Option<&str>,
     ) -> Result<BpiResponse<String>, BpiError> {
-        let mut builder = self.get("http://api.bilibili.com/x/web-interface/archive/desc");
+        let mut builder = self.get("https://api.bilibili.com/x/web-interface/archive/desc");
 
         if let Some(aid) = aid {
             builder = builder.query(&[("aid", aid.to_string())]);

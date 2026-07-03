@@ -1,0 +1,35 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "aid": 2,
+    "bvid": "BV1xx411c7mD",
+    "videos": 1,
+    "title": "sanitized video title",
+    "owner": {
+      "mid": 2,
+      "name": "sanitized owner",
+      "face": "https://i0.hdslb.com/bfs/face/sanitized.jpg"
+    },
+    "stat": {
+      "aid": 2,
+      "view": 5338065,
+      "danmaku": 127790,
+      "reply": 88497,
+      "favorite": 125741,
+      "coin": 39399,
+      "share": 21692,
+      "like": 271063
+    },
+    "cid": 62131,
+    "pages": [
+      {
+        "cid": 62131,
+        "page": 1,
+        "part": "",
+        "duration": 2055
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "video.detail",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/view/detail",
+    "query": {
+      "bvid": "BV1xx411c7mD",
+      "need_elec": "0"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixture keeps public video detail metadata only; full raw probe output is ignored under target/bpi-probe-runs/video/info-read/detail"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "VideoDetail"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "VideoDetail"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "VideoDetail"
+      }
+    }
+  ]
+}

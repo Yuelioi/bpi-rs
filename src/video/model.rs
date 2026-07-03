@@ -24,6 +24,26 @@ pub struct VideoView {
     pub pages: Vec<VideoPage>,
 }
 
+/// Payload returned by `/x/web-interface/view/detail`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VideoDetail {
+    /// Main video view payload.
+    #[serde(rename = "View")]
+    pub view: VideoView,
+    /// Tags associated with the video.
+    #[serde(default, rename = "Tags")]
+    pub tags: Vec<VideoTag>,
+    /// Related videos returned by Bilibili's recommendation surface.
+    #[serde(default, rename = "Related")]
+    pub related: Vec<VideoRelated>,
+    /// Uploader card and space data. Kept raw because this is a display-oriented payload.
+    #[serde(default, rename = "Card")]
+    pub card: Option<serde_json::Value>,
+    /// Reply preview data. Kept raw because it changes with comment surface experiments.
+    #[serde(default, rename = "Reply")]
+    pub reply: Option<serde_json::Value>,
+}
+
 /// Uploader information embedded in a video view payload.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VideoOwner {
@@ -71,4 +91,38 @@ pub struct VideoPage {
     pub part: String,
     /// Duration in seconds.
     pub duration: u64,
+}
+
+/// One video tag returned by the detail endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VideoTag {
+    /// Tag ID.
+    pub tag_id: u64,
+    /// Tag display name.
+    #[serde(default)]
+    pub tag_name: String,
+    /// Optional tag jump URL.
+    #[serde(default)]
+    pub jump_url: String,
+}
+
+/// Stable fields for a related video returned by the detail endpoint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VideoRelated {
+    /// AV numeric video ID.
+    pub aid: Aid,
+    /// BV string video ID.
+    pub bvid: Bvid,
+    /// Related video title.
+    #[serde(default)]
+    pub title: String,
+    /// Default content/page ID when Bilibili returns it.
+    #[serde(default)]
+    pub cid: Option<Cid>,
+    /// Uploader information when present.
+    #[serde(default)]
+    pub owner: Option<VideoOwner>,
+    /// Video statistics when present.
+    #[serde(default)]
+    pub stat: Option<VideoStat>,
 }

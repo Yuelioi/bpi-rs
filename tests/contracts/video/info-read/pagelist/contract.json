@@ -1,0 +1,73 @@
+{
+  "name": "video.pagelist",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/player/pagelist",
+    "query": {
+      "bvid": "BV1xx411c7mD"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixture keeps public page metadata only; full raw probe output is ignored under target/bpi-probe-runs/video/info-read/pagelist"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "Vec<VideoPage>"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "Vec<VideoPage>"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "Vec<VideoPage>"
+      }
+    }
+  ]
+}
