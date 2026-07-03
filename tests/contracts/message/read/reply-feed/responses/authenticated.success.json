@@ -1,0 +1,49 @@
+{
+  "code": 0,
+  "data": {
+    "cursor": {
+      "id": 1,
+      "is_end": false,
+      "time": 1700000000
+    },
+    "items": [
+      {
+        "counts": 1,
+        "id": 1,
+        "is_multi": 0,
+        "item": {
+          "at_details": [],
+          "business": "视频",
+          "business_id": 1,
+          "desc": "",
+          "hide_like_button": false,
+          "hide_reply_button": false,
+          "like_state": 0,
+          "native_uri": "bilibili://video/1",
+          "root_id": 0,
+          "root_reply_content": "",
+          "source_content": "sanitized source content",
+          "source_id": 1,
+          "subject_id": 1,
+          "target_id": 0,
+          "target_reply_content": "",
+          "title": "sanitized title",
+          "type": "video",
+          "uri": "https://example.invalid/video"
+        },
+        "reply_time": 1700000000,
+        "user": {
+          "avatar": "https://example.invalid/avatar.jpg",
+          "fans": 0,
+          "follow": false,
+          "mid": 1,
+          "mid_link": "",
+          "nickname": "sanitized user"
+        }
+      }
+    ],
+    "last_view_at": 0
+  },
+  "message": "OK",
+  "ttl": 1
+}

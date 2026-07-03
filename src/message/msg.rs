@@ -7,13 +7,14 @@ use serde::{Deserialize, Serialize};
 /// 未读消息数
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct UnreadCountData {
-    pub coin: u32,       // 未读投币数
-    pub danmu: u32,      // 未读弹幕数
-    pub favorite: u32,   // 未读收藏数
-    pub recv_like: u32,  // 未读收到喜欢数
+    pub coin: u32, // 未读投币数
+    #[serde(default)]
+    pub danmu: u32, // 未读弹幕数
+    pub favorite: u32, // 未读收藏数
+    pub recv_like: u32, // 未读收到喜欢数
     pub recv_reply: u32, // 未读回复
-    pub sys_msg: u32,    // 未读系统通知数
-    pub up: u32,         // 未读UP主助手信息数
+    pub sys_msg: u32, // 未读系统通知数
+    pub up: u32,   // 未读UP主助手信息数
 }
 
 /// "回复我的"信息
@@ -127,6 +128,30 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "unread-count" => {
+                include_bytes!("../../tests/contracts/message/read/unread-count/contract.json")
+                    .as_slice()
+            }
+            "reply-feed" => {
+                include_bytes!("../../tests/contracts/message/read/reply-feed/contract.json")
+                    .as_slice()
+            }
+            _ => {
+                return Err(BpiError::invalid_parameter(
+                    "endpoint",
+                    "unknown message contract",
+                ));
+            }
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -173,6 +198,173 @@ mod tests {
             );
         }
 
+        Ok(())
+    }
+
+    #[test]
+    fn message_unread_count_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("unread-count")?;
+
+        assert_eq!(contract.name, "message.unread_count");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.vc.bilibili.com/x/im/web/msgfeed/unread"
+        );
+        assert_eq!(
+            contract.request.query.get("build").map(String::as_str),
+            Some("0")
+        );
+        assert_eq!(
+            contract.request.query.get("mobi_app").map(String::as_str),
+            Some("web")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(contract.cases[0].response.api_code, Some(-101));
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("requires_login")
+        );
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("UnreadCountData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn message_reply_feed_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("reply-feed")?;
+
+        assert_eq!(contract.name, "message.reply_feed");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/msgfeed/reply"
+        );
+        assert_eq!(
+            contract.request.query.get("platform").map(String::as_str),
+            Some("web")
+        );
+        assert_eq!(
+            contract
+                .request
+                .query
+                .get("web_location")
+                .map(String::as_str),
+            Some("")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(contract.cases[0].response.api_code, Some(-101));
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("requires_login")
+        );
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("ReplyFeedData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn message_unread_count_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/message/read/unread-count/responses/anonymous.requires_login.json"
+        ))
+        .and_then(ApiEnvelope::ensure_success)
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let payload = ApiEnvelope::<UnreadCountData>::from_slice(include_bytes!(
+            "../../tests/contracts/message/read/unread-count/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.danmu, 0);
+        assert_eq!(payload.sys_msg, 1);
+        Ok(())
+    }
+
+    #[test]
+    fn message_reply_feed_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/message/read/reply-feed/responses/anonymous.requires_login.json"
+        ))
+        .and_then(ApiEnvelope::ensure_success)
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let payload = ApiEnvelope::<ReplyFeedData>::from_slice(include_bytes!(
+            "../../tests/contracts/message/read/reply-feed/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.items.len(), 1);
+        assert_eq!(payload.items[0].user.nickname, "sanitized user");
+        assert_eq!(payload.items[0].item.reply_type, "video");
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/message/read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn message_unread_count_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body("unread-count", profile) else {
+                continue;
+            };
+
+            if profile == "anonymous" {
+                let err = serde_json::from_value::<ApiEnvelope<serde_json::Value>>(body)?
+                    .ensure_success()
+                    .unwrap_err();
+                assert!(err.requires_login());
+                continue;
+            }
+
+            let payload =
+                serde_json::from_value::<ApiEnvelope<UnreadCountData>>(body)?.into_payload()?;
+            let _total_unread = payload.coin
+                + payload.danmu
+                + payload.favorite
+                + payload.recv_like
+                + payload.recv_reply
+                + payload.sys_msg
+                + payload.up;
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn message_reply_feed_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body("reply-feed", profile) else {
+                continue;
+            };
+
+            if profile == "anonymous" {
+                let err = serde_json::from_value::<ApiEnvelope<serde_json::Value>>(body)?
+                    .ensure_success()
+                    .unwrap_err();
+                assert!(err.requires_login());
+                continue;
+            }
+
+            let payload =
+                serde_json::from_value::<ApiEnvelope<ReplyFeedData>>(body)?.into_payload()?;
+            assert!(
+                payload.cursor.is_end || payload.cursor.id.is_some() || !payload.items.is_empty()
+            );
+        }
         Ok(())
     }
 }

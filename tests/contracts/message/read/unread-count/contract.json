@@ -1,0 +1,71 @@
+{
+  "name": "message.unread_count",
+  "request": {
+    "method": "GET",
+    "url": "https://api.vc.bilibili.com/x/im/web/msgfeed/unread",
+    "query": {
+      "build": "0",
+      "mobi_app": "web"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "success fixture keeps only aggregate unread counters"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": -101,
+        "fixture": "responses/anonymous.requires_login.json",
+        "fixture_kind": "probe_error_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "UnreadCountData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "UnreadCountData"
+      }
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "name": "message.single_unread",
+  "request": {
+    "method": "GET",
+    "url": "https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread",
+    "query": {
+      "build": "0",
+      "mobi_app": "web",
+      "show_dustbin": "0",
+      "show_unfollow_list": "0",
+      "unread_type": "0"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "success fixture keeps zeroed private-message unread counters"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": -101,
+        "fixture": "responses/anonymous.requires_login.json",
+        "fixture_kind": "probe_error_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SingleUnreadData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/authenticated.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SingleUnreadData"
+      }
+    }
+  ]
+}

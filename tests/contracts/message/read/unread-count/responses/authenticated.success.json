@@ -1,0 +1,13 @@
+{
+  "code": 0,
+  "data": {
+    "coin": 0,
+    "favorite": 0,
+    "recv_like": 0,
+    "recv_reply": 0,
+    "sys_msg": 1,
+    "up": 0
+  },
+  "message": "0",
+  "ttl": 1
+}
