@@ -21,6 +21,8 @@ use crate::login::LoginClient;
 use crate::message::MessageClient;
 #[cfg(feature = "misc")]
 use crate::misc::MiscClient;
+#[cfg(feature = "note")]
+use crate::note::NoteClient;
 #[cfg(feature = "opus")]
 use crate::opus::OpusClient;
 use crate::session::cookie::{format_cookie_pairs, parse_cookie_header as parse_cookie_pairs};
@@ -422,6 +424,12 @@ impl BpiClient {
         MessageClient::new(self)
     }
 
+    /// Creates a note domain client.
+    #[cfg(feature = "note")]
+    pub fn note(&self) -> NoteClient<'_> {
+        NoteClient::new(self)
+    }
+
     /// Creates an opus domain client.
     #[cfg(feature = "opus")]
     pub fn opus(&self) -> OpusClient<'_> {
@@ -776,6 +784,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _historytoview = client.historytoview();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "note")]
+    #[test]
+    fn note_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _note = client.note();
 
         Ok(())
     }
