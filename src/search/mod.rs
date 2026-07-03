@@ -1,5 +1,6 @@
 //! 搜索
 
+pub mod client;
 pub mod hot;
 
 mod result;
@@ -7,6 +8,8 @@ mod search_params;
 pub mod suggest;
 
 mod typed;
+
+pub use client::SearchClient;
 
 pub use search_params::{
     CategoryId, Duration, OrderSort, SearchArticleParams, SearchBangumiParams,

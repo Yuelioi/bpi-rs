@@ -33,6 +33,8 @@ use crate::misc::MiscClient;
 use crate::note::NoteClient;
 #[cfg(feature = "opus")]
 use crate::opus::OpusClient;
+#[cfg(feature = "search")]
+use crate::search::SearchClient;
 use crate::session::cookie::{format_cookie_pairs, parse_cookie_header as parse_cookie_pairs};
 use crate::sign::wbi::WbiKeyCache;
 #[cfg(feature = "user")]
@@ -470,6 +472,12 @@ impl BpiClient {
         OpusClient::new(self)
     }
 
+    /// Creates a search domain client.
+    #[cfg(feature = "search")]
+    pub fn search(&self) -> SearchClient<'_> {
+        SearchClient::new(self)
+    }
+
     /// Creates a video domain client.
     #[cfg(feature = "video")]
     pub fn video(&self) -> VideoClient<'_> {
@@ -874,6 +882,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _note = client.note();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "search")]
+    #[test]
+    fn search_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _search = client.search();
 
         Ok(())
     }
