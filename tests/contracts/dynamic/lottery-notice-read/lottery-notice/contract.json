@@ -1,0 +1,74 @@
+{
+  "name": "dynamic.lottery_notice",
+  "request": {
+    "method": "GET",
+    "url": "https://api.vc.bilibili.com/lottery_svr/v1/lottery_svr/lottery_notice",
+    "query": {
+      "business_id": "969916293954142214",
+      "business_type": "1",
+      "csrf": "${csrf}"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "winner identity, sender uid, prize text, face URLs, and redirect URLs sanitized before commit; raw Probe output remains under target"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "DynamicLotteryData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie",
+          "csrf"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "DynamicLotteryData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie",
+          "csrf"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "DynamicLotteryData"
+      }
+    }
+  ]
+}

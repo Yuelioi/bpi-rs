@@ -1,0 +1,51 @@
+{
+  "code": 0,
+  "data": {
+    "business_id": 969916293954142214,
+    "business_type": 1,
+    "first_prize": 1,
+    "first_prize_cmt": "<redacted-prize-text>",
+    "first_prize_pic": "",
+    "followed": false,
+    "has_charge_right": false,
+    "lottery_at_num": 0,
+    "lottery_detail_url": "",
+    "lottery_feed_limit": 1,
+    "lottery_id": 314834,
+    "lottery_result": {
+      "first_prize_result": [
+        {
+          "face": "<redacted-face-url>",
+          "hongbao_money": 0,
+          "name": "<redacted-user>",
+          "uid": 1
+        }
+      ]
+    },
+    "lottery_time": 1724860800,
+    "need_post": 0,
+    "participants": 9230,
+    "participated": false,
+    "prize_type_first": {
+      "type": 0,
+      "value": {
+        "count": 0,
+        "stype": 0
+      }
+    },
+    "reposted": false,
+    "second_prize": 0,
+    "second_prize_pic": "",
+    "sender_uid": 1,
+    "status": 2,
+    "third_prize": 0,
+    "third_prize_cmt": "",
+    "third_prize_pic": "",
+    "ts": 1783087830,
+    "upower_redirect_url": "",
+    "vip_batch_sign": "",
+    "vip_redirect_url": ""
+  },
+  "message": "",
+  "msg": ""
+}

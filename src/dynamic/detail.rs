@@ -99,16 +99,41 @@ pub struct DynamicReactionData {
 
 // --- 动态抽奖详情 API 结构体 ---
 
-/// 抽奖结果
+/// 抽奖中奖用户。
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct LotteryResultItem {
+pub struct LotteryWinner {
     pub uid: u64,
     pub name: String,
     pub face: String,
     pub hongbao_money: Option<f64>,
 }
 
-/// 动态抽奖详情响应数据
+/// 动态抽奖结果。
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct DynamicLotteryResult {
+    #[serde(default)]
+    pub first_prize_result: Vec<LotteryWinner>,
+    #[serde(default)]
+    pub second_prize_result: Vec<LotteryWinner>,
+    #[serde(default)]
+    pub third_prize_result: Vec<LotteryWinner>,
+}
+
+/// 动态抽奖奖品类型。
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct DynamicLotteryPrizeType {
+    #[serde(rename = "type")]
+    pub type_field: u8,
+    pub value: DynamicLotteryPrizeTypeValue,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct DynamicLotteryPrizeTypeValue {
+    pub count: u64,
+    pub stype: u8,
+}
+
+/// 动态抽奖详情响应数据。
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DynamicLotteryData {
     pub lottery_id: u64,
@@ -118,11 +143,32 @@ pub struct DynamicLotteryData {
     pub status: u8,
     pub lottery_time: u64,
     pub participants: u64,
+    pub first_prize: u32,
     pub first_prize_cmt: String,
+    pub first_prize_pic: String,
+    pub second_prize: u32,
+    #[serde(default)]
     pub second_prize_cmt: Option<String>,
+    pub second_prize_pic: String,
+    pub third_prize: u32,
+    #[serde(default)]
     pub third_prize_cmt: Option<String>,
-    pub lottery_result: Option<serde_json::Value>, // 使用 Value 以应对可选的嵌套对象
-                                                   // ... 其他字段
+    pub third_prize_pic: String,
+    pub lottery_result: Option<DynamicLotteryResult>,
+    pub followed: bool,
+    pub has_charge_right: bool,
+    pub lottery_at_num: u32,
+    pub lottery_detail_url: String,
+    pub lottery_feed_limit: u32,
+    pub need_post: u8,
+    pub participated: bool,
+    #[serde(default)]
+    pub prize_type_first: Option<DynamicLotteryPrizeType>,
+    pub reposted: bool,
+    pub ts: u64,
+    pub upower_redirect_url: String,
+    pub vip_batch_sign: String,
+    pub vip_redirect_url: String,
 }
 
 // --- 动态转发列表 API 结构体 ---
@@ -328,6 +374,10 @@ mod tests {
                 include_bytes!("../../tests/contracts/dynamic/detail/forward-item/contract.json")
                     .as_slice()
             }
+            "lottery-notice" => include_bytes!(
+                "../../tests/contracts/dynamic/lottery-notice-read/lottery-notice/contract.json"
+            )
+            .as_slice(),
             _ => unreachable!("unknown dynamic detail endpoint"),
         };
 
@@ -622,6 +672,21 @@ mod tests {
             forward_item.cases[0].response.error.as_deref(),
             Some("requires_login")
         );
+
+        let lottery_notice = contract("lottery-notice")?;
+        assert_eq!(lottery_notice.name, "dynamic.lottery_notice");
+        assert_eq!(
+            lottery_notice.request.url.as_str(),
+            "https://api.vc.bilibili.com/lottery_svr/v1/lottery_svr/lottery_notice"
+        );
+        assert_eq!(
+            lottery_notice.request.query,
+            query_map(
+                DynamicLotteryNoticeParams::new(parse_dynamic_id("969916293954142214")?)
+                    .query_pairs("${csrf}")
+            )
+        );
+        assert_eq!(lottery_notice.cases.len(), 3);
         Ok(())
     }
 
@@ -711,6 +776,19 @@ mod tests {
                 ApiEnvelope::<DynamicForwardInfoData>::from_slice(bytes)?.into_payload()?;
             assert_eq!(payload.item.id_str, "1110902525317349376");
         }
+
+        let payload = ApiEnvelope::<DynamicLotteryData>::from_slice(include_bytes!(
+            "../../tests/contracts/dynamic/lottery-notice-read/lottery-notice/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(payload.business_id, 969916293954142214);
+        assert_eq!(
+            payload
+                .lottery_result
+                .as_ref()
+                .map(|result| result.first_prize_result.len()),
+            Some(1)
+        );
         Ok(())
     }
 
@@ -727,9 +805,13 @@ mod tests {
     }
 
     fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
-        let path = format!(
-            "target/bpi-probe-runs/dynamic/detail-readonly/{endpoint}/{profile}.response.json"
-        );
+        let batch = if endpoint == "lottery-notice" {
+            "lottery-notice-read"
+        } else {
+            "detail-readonly"
+        };
+        let path =
+            format!("target/bpi-probe-runs/dynamic/{batch}/{endpoint}/{profile}.response.json");
         let bytes = std::fs::read(path).ok()?;
         let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
         value
@@ -777,6 +859,14 @@ mod tests {
                 let payload = serde_json::from_value::<ApiEnvelope<DynamicForwardInfoData>>(body)?
                     .into_payload()?;
                 assert_eq!(payload.item.id_str, "1110902525317349376");
+            }
+        }
+
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("lottery-notice", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<DynamicLotteryData>>(body)?
+                    .into_payload()?;
+                assert_eq!(payload.business_id, 969916293954142214);
             }
         }
         Ok(())
