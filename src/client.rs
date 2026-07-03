@@ -33,6 +33,8 @@ use crate::electric::ElectricClient;
 use crate::fav::FavClient;
 #[cfg(feature = "historytoview")]
 use crate::historytoview::HistoryToViewClient;
+#[cfg(feature = "live")]
+use crate::live::LiveClient;
 #[cfg(feature = "login")]
 use crate::login::LoginClient;
 #[cfg(feature = "manga")]
@@ -488,6 +490,12 @@ impl BpiClient {
     #[cfg(feature = "login")]
     pub fn login(&self) -> LoginClient<'_> {
         LoginClient::new(self)
+    }
+
+    /// Creates a live domain client.
+    #[cfg(feature = "live")]
+    pub fn live(&self) -> LiveClient<'_> {
+        LiveClient::new(self)
     }
 
     /// Creates a manga domain client.

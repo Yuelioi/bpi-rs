@@ -1,5 +1,6 @@
 //! 直播
 
+pub mod client;
 pub mod danmaku;
 pub mod emoticons;
 pub mod follow_up_live;
@@ -17,3 +18,5 @@ pub mod redpocket;
 pub mod report;
 pub mod silent_user_manage;
 pub mod user;
+
+pub use client::LiveClient;
