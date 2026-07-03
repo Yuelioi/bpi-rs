@@ -1,0 +1,146 @@
+{
+  "code": 0,
+  "data": {
+    "info": {
+      "achievement_icon_src": "",
+      "achievement_level": 1,
+      "anchor_guard_achieve_level": 0,
+      "buy_guard_icon_src": "https://example.invalid/buy-guard.png",
+      "color_end": "",
+      "color_start": "",
+      "ex_background_src": "https://example.invalid/background.png",
+      "now": 1,
+      "num": 2,
+      "page": 1,
+      "rule_doc_src": "",
+      "tab_color": [
+        "#4DDDDBD5",
+        "#26CFCBC0"
+      ],
+      "title_color": [
+        "#FFC9CCD0",
+        "#FF9499A0"
+      ]
+    },
+    "top3": [
+      {
+        "accompany": 10,
+        "rank": 1,
+        "ruid": 100001,
+        "score": 0,
+        "uinfo": {
+          "base": {
+            "face": "https://example.invalid/face-top.jpg",
+            "is_mystery": false,
+            "name": "sample-top-user",
+            "name_color": 0,
+            "name_color_str": "",
+            "official_info": {
+              "desc": "",
+              "role": 0,
+              "title": "",
+              "type": -1
+            },
+            "origin_info": {
+              "face": "https://example.invalid/face-top.jpg",
+              "name": "sample-top-user"
+            },
+            "risk_ctrl_info": null
+          },
+          "guard": {
+            "expired_str": "",
+            "level": 3
+          },
+          "guard_leader": null,
+          "medal": {
+            "color": 13081892,
+            "color_border": 6809855,
+            "color_end": 13081892,
+            "color_start": 13081892,
+            "guard_icon": "",
+            "guard_level": 3,
+            "honor_icon": "",
+            "id": 0,
+            "is_light": 1,
+            "level": 46,
+            "name": "sample-medal",
+            "ruid": 100001,
+            "score": 0,
+            "typ": 0,
+            "user_receive_count": 0,
+            "v2_medal_color_border": "#D47AFF",
+            "v2_medal_color_end": "#A773F199",
+            "v2_medal_color_level": "#A773F1E6",
+            "v2_medal_color_start": "#A773F199",
+            "v2_medal_color_text": "#FFFFFF"
+          },
+          "title": null,
+          "uhead_frame": null,
+          "uid": 100002,
+          "wealth": null
+        }
+      }
+    ],
+    "list": [
+      {
+        "accompany": 8,
+        "rank": 4,
+        "ruid": 100001,
+        "score": 0,
+        "uinfo": {
+          "base": {
+            "face": "https://example.invalid/face-list.jpg",
+            "is_mystery": false,
+            "name": "sample-list-user",
+            "name_color": 0,
+            "name_color_str": "",
+            "official_info": {
+              "desc": "",
+              "role": 0,
+              "title": "",
+              "type": -1
+            },
+            "origin_info": {
+              "face": "https://example.invalid/face-list.jpg",
+              "name": "sample-list-user"
+            },
+            "risk_ctrl_info": null
+          },
+          "guard": {
+            "expired_str": "",
+            "level": 3
+          },
+          "guard_leader": null,
+          "medal": {
+            "color": 12478086,
+            "color_border": 6809855,
+            "color_end": 12478086,
+            "color_start": 12478086,
+            "guard_icon": "",
+            "guard_level": 3,
+            "honor_icon": "",
+            "id": 0,
+            "is_light": 1,
+            "level": 35,
+            "name": "sample-medal",
+            "ruid": 100001,
+            "score": 0,
+            "typ": 0,
+            "user_receive_count": 0,
+            "v2_medal_color_border": "#58A1F8",
+            "v2_medal_color_end": "#4C7DFF99",
+            "v2_medal_color_level": "#4C7DFFE6",
+            "v2_medal_color_start": "#4C7DFF99",
+            "v2_medal_color_text": "#FFFFFF"
+          },
+          "title": null,
+          "uhead_frame": null,
+          "uid": 100003,
+          "wealth": null
+        }
+      }
+    ]
+  },
+  "message": "0",
+  "ttl": 1
+}

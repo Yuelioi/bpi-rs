@@ -222,6 +222,15 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/live/guard-read/guard-list/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -233,6 +242,87 @@ mod tests {
 
         let data = resp.data.unwrap();
         assert!(!data.list.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn live_guard_list_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+        let params: Vec<(&str, String)> = vec![
+            ("roomid", 23174842_i64.to_string()),
+            ("ruid", 504140200_i64.to_string()),
+            ("page", 1_i32.to_string()),
+            ("page_size", 20_i32.to_string()),
+            ("typ", 5_i32.to_string()),
+        ];
+
+        assert_eq!(contract.name, "live.guard_list");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topListNew"
+        );
+        assert_eq!(
+            contract.request.query.get("roomid").map(String::as_str),
+            Some("23174842")
+        );
+        assert_eq!(
+            contract.request.query.get("ruid").map(String::as_str),
+            Some("504140200")
+        );
+        assert_eq!(
+            params,
+            vec![
+                ("roomid", "23174842".to_string()),
+                ("ruid", "504140200".to_string()),
+                ("page", "1".to_string()),
+                ("page_size", "20".to_string()),
+                ("typ", "5".to_string()),
+            ]
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("GuardListData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn live_guard_list_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<GuardListData>::from_slice(include_bytes!(
+            "../../tests/contracts/live/guard-read/guard-list/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.info.now, 1);
+        assert_eq!(payload.top3.len(), 1);
+        assert_eq!(payload.list.len(), 1);
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/live/guard-read/guard-list/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn live_guard_list_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<GuardListData>>(body)?.into_payload()?;
+
+            assert!(!payload.list.is_empty() || !payload.top3.is_empty());
+        }
         Ok(())
     }
 }
