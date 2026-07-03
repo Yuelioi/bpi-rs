@@ -21,6 +21,8 @@ use crate::cheese::CheeseClient;
 use crate::clientinfo::ClientInfoClient;
 #[cfg(feature = "comment")]
 use crate::comment::CommentClient;
+#[cfg(feature = "creativecenter")]
+use crate::creativecenter::CreativeCenterClient;
 #[cfg(feature = "electric")]
 use crate::electric::ElectricClient;
 #[cfg(feature = "fav")]
@@ -440,6 +442,12 @@ impl BpiClient {
     #[cfg(feature = "comment")]
     pub fn comment(&self) -> CommentClient<'_> {
         CommentClient::new(self)
+    }
+
+    /// Creates a creative center domain client.
+    #[cfg(feature = "creativecenter")]
+    pub fn creativecenter(&self) -> CreativeCenterClient<'_> {
+        CreativeCenterClient::new(self)
     }
 
     /// Creates an electric charging domain client.
@@ -886,6 +894,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _comment = client.comment();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "creativecenter")]
+    #[test]
+    fn creativecenter_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _creativecenter = client.creativecenter();
 
         Ok(())
     }
