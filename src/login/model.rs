@@ -225,6 +225,10 @@ mod tests {
                     ApiEnvelope::<LoginTodayCoinExp>::from_slice(bytes)?.into_payload()?;
                 assert!(payload.value <= 50);
             }
+            "LoginDailyReward" => {
+                let payload = ApiEnvelope::<LoginDailyReward>::from_slice(bytes)?.into_payload()?;
+                assert!(payload.coins <= 50);
+            }
             "LoginVipInfo" => {
                 let payload = ApiEnvelope::<LoginVipInfo>::from_slice(bytes)?.into_payload()?;
                 assert!(payload.mid.get() > 0);
@@ -247,6 +251,14 @@ mod tests {
         ))?)?;
 
         for case in &contract.cases {
+            if case.response.fixture.is_none() {
+                assert!(
+                    case.response.error.is_some() || case.response.http_status.is_some(),
+                    "contract case without fixture must document observed error/status"
+                );
+                continue;
+            }
+
             let bytes = fixture_bytes(endpoint, case)?;
             if let Some(model) = &case.response.rust_model {
                 assert_fixture_matches_model(model, &bytes)?;
@@ -342,6 +354,7 @@ mod tests {
     fn login_contract_response_fixtures_parse_declared_models()
     -> Result<(), Box<dyn std::error::Error>> {
         assert_login_contract_fixtures_parse("vip-info")?;
+        assert_login_contract_fixtures_parse("daily-reward")?;
         for endpoint in READ_INFO_ENDPOINTS {
             assert_login_contract_fixtures_parse(endpoint)?;
         }

@@ -1,0 +1,15 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "coins": 0,
+    "email": true,
+    "identify_card": false,
+    "login": false,
+    "safe_question": true,
+    "share": false,
+    "tel": true,
+    "watch": false
+  }
+}

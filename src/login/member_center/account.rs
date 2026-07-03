@@ -2,83 +2,52 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/login/member_center.md)
 
+use crate::login::LoginAccountInfo;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
 
-/// Bilibili 账号信息
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AccountInfo {
-    /// 我的 mid（用户唯一 ID）
-    pub mid: u64,
+const ACCOUNT_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/member/web/account";
 
-    /// 我的昵称
-    pub uname: String,
-
-    /// 我的用户名（登录用的 ID，不一定和昵称相同）
-    pub userid: String,
-
-    /// 我的个性签名
-    pub sign: String,
-
-    /// 我的生日（格式：YYYY-MM-DD）
-    pub birthday: String,
-
-    /// 我的性别
-    /// 取值：
-    /// - `"男"`
-    /// - `"女"`
-    /// - `"保密"`
-    pub sex: String,
-
-    /// 是否未设置昵称
-    /// - `false`：已经设置过昵称
-    /// - `true` ：未设置过昵称
-    pub nick_free: bool,
-
-    /// 我的会员等级
-    /// 一般是字符串形式的数字，例如 `"0"`、`"6"`
-    pub rank: String,
-}
+/// Legacy member-center account info type.
+pub type AccountInfo = LoginAccountInfo;
 
 impl BpiClient {
     /// 获取我的账号信息
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login)
     pub async fn member_center_account_info(&self) -> Result<BpiResponse<AccountInfo>, BpiError> {
-        let result = self
-            .get("https://api.bilibili.com/x/member/web/account")
+        self.get(ACCOUNT_INFO_ENDPOINT)
             .send_bpi("获取我的信息")
-            .await?;
-
-        Ok(result)
+            .await
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ApiEnvelope;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
 
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_get_account_info() {
-        if std::env::var_os("BPI_LIVE_TEST").is_none() {
-            return;
-        }
+    #[test]
+    fn member_center_account_info_matches_login_account_contract() -> Result<(), BpiError> {
+        let contract = EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/login/account-info/contract.json"
+        ))?;
 
-        let bpi = BpiClient::new().expect("client should build");
+        assert_eq!(contract.name, "login.account_info");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), ACCOUNT_INFO_ENDPOINT);
+        Ok(())
+    }
 
-        match bpi.member_center_account_info().await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    let data = resp.data.unwrap();
-                    tracing::info!("获取账号成功: mid={}, uname={}", data.mid, data.uname);
-                } else {
-                    tracing::info!("请求失败: code={}, message={}", resp.code, resp.message);
-                }
-            }
-            Err(err) => {
-                panic!("请求出错: {}", err);
-            }
-        }
+    #[test]
+    fn member_center_account_info_fixture_parses_legacy_alias() -> Result<(), BpiError> {
+        let data = ApiEnvelope::<AccountInfo>::from_slice(include_bytes!(
+            "../../../tests/contracts/login/account-info/responses/normal.success.json"
+        ))?
+        .into_payload()?;
+
+        assert!(data.mid.get() > 0);
+        Ok(())
     }
 }

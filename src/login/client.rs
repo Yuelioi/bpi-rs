@@ -126,6 +126,8 @@ impl<'a> LoginClient<'a> {
 
 #[cfg(test)]
 mod tests {
+    use super::DAILY_REWARD_ENDPOINT;
+
     use crate::BpiClient;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
@@ -158,10 +160,14 @@ mod tests {
         ),
     ];
 
-    fn read_info_contract(endpoint: &str) -> Result<EndpointContract, Box<dyn std::error::Error>> {
+    fn endpoint_contract(endpoint: &str) -> Result<EndpointContract, Box<dyn std::error::Error>> {
         let path = format!("tests/contracts/login/{endpoint}/contract.json");
         let bytes = std::fs::read(path)?;
         Ok(EndpointContract::from_slice(&bytes)?)
+    }
+
+    fn read_info_contract(endpoint: &str) -> Result<EndpointContract, Box<dyn std::error::Error>> {
+        endpoint_contract(endpoint)
     }
 
     #[test]
@@ -299,6 +305,21 @@ mod tests {
             "https://api.bilibili.com/x/vip/web/user/info"
         );
         assert_eq!(contract.cases.len(), 3);
+        Ok(())
+    }
+
+    #[test]
+    fn login_daily_reward_contract_matches_endpoint_request()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let contract = endpoint_contract("daily-reward")?;
+
+        assert_eq!(contract.name, "login.daily_reward");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), DAILY_REWARD_ENDPOINT);
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(contract.cases[0].response.http_status, Some(412));
+        assert_eq!(contract.cases[1].response.api_code, Some(0));
+        assert_eq!(contract.cases[2].response.http_status, Some(412));
         Ok(())
     }
 }

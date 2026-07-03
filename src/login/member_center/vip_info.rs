@@ -2,43 +2,18 @@
 //!
 //! [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/member_center.html#查询大会员状态)
 
+use crate::login::LoginVipInfo;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use serde::{Deserialize, Serialize};
 
-/// 大会员信息体
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct VipInfo {
-    /// 我的mid
-    pub mid: u64,
-    /// 大会员类型
-    /// - 0：无
-    /// - 1：月度
-    /// - 2：年度
-    pub vip_type: u8,
-    /// 大会员状态
-    /// - 1：正常
-    /// - 2：IP频繁更换，服务被冻结
-    /// - 3：大会员账号风险过高，功能锁定
-    pub vip_status: u8,
-    /// 大会员到期时间（时间戳，毫秒）
-    pub vip_due_date: u64,
-    /// 是否已购买大会员
-    /// - 0：未购买
-    /// - 1：已购买
-    pub vip_pay_type: u8,
-    /// 作用尚不明确
-    pub theme_type: u8,
-}
+const VIP_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/vip/web/user/info";
+
+/// Legacy member-center VIP info type.
+pub type VipInfo = LoginVipInfo;
 
 impl BpiClient {
     /// 查询大会员状态
     pub async fn member_center_vip_info(&self) -> Result<BpiResponse<VipInfo>, BpiError> {
-        let result = self
-            .get("https://api.bilibili.com/x/vip/web/user/info")
-            .send_bpi("查询大会员状态")
-            .await?;
-
-        Ok(result)
+        self.get(VIP_INFO_ENDPOINT).send_bpi("查询大会员状态").await
     }
 
     pub async fn is_vip(&self) -> bool {
@@ -46,7 +21,7 @@ impl BpiClient {
             .await
             .ok()
             .and_then(|resp| resp.data)
-            .map(|data2| data2.vip_status == 1 && data2.vip_due_date > 0)
+            .map(LoginVipInfo::is_active)
             .unwrap_or(false)
     }
 }
@@ -54,51 +29,30 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tracing::info;
+    use crate::ApiEnvelope;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
 
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_get_vip_info() {
-        if std::env::var_os("BPI_LIVE_TEST").is_none() {
-            return;
-        }
+    #[test]
+    fn member_center_vip_info_matches_login_contract() -> Result<(), BpiError> {
+        let contract = EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/login/vip-info/contract.json"
+        ))?;
 
-        let bpi = BpiClient::new().expect("client should build");
-
-        match bpi.member_center_vip_info().await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    let data = resp.data.unwrap();
-                    info!(
-                        "mid: {}, vip_type: {}, vip_status: {}, vip_due_date: {}, vip_pay_type: {}, theme_type: {}",
-                        data.mid,
-                        data.vip_type,
-                        data.vip_status,
-                        data.vip_due_date,
-                        data.vip_pay_type,
-                        data.theme_type
-                    );
-                } else {
-                    info!("请求失败: code={}, message={}", resp.code, resp.message);
-                }
-            }
-            Err(err) => {
-                panic!("请求出错: {}", err);
-            }
-        }
+        assert_eq!(contract.name, "login.vip_info");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), VIP_INFO_ENDPOINT);
+        Ok(())
     }
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_is_vip() {
-        if std::env::var_os("BPI_LIVE_TEST").is_none() {
-            return;
-        }
 
-        let bpi = BpiClient::new().expect("client should build");
+    #[test]
+    fn member_center_vip_info_fixture_parses_legacy_alias() -> Result<(), BpiError> {
+        let info = ApiEnvelope::<VipInfo>::from_slice(include_bytes!(
+            "../../../tests/contracts/login/vip-info/responses/normal.success.json"
+        ))?
+        .into_payload()?;
 
-        match bpi.is_vip().await {
-            true => info!("是大会员"),
-            false => info!("不是大会员"),
-        }
+        assert!(!info.is_active());
+        Ok(())
     }
 }
