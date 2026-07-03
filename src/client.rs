@@ -11,6 +11,8 @@ use crate::activity::ActivityClient;
 #[cfg(feature = "article")]
 use crate::article::ArticleClient;
 use crate::auth::Account;
+#[cfg(feature = "bangumi")]
+use crate::bangumi::BangumiClient;
 #[cfg(feature = "cheese")]
 use crate::cheese::CheeseClient;
 #[cfg(feature = "clientinfo")]
@@ -400,6 +402,12 @@ impl BpiClient {
         ArticleClient::new(self)
     }
 
+    /// Creates a bangumi domain client.
+    #[cfg(feature = "bangumi")]
+    pub fn bangumi(&self) -> BangumiClient<'_> {
+        BangumiClient::new(self)
+    }
+
     /// Creates a cheese course domain client.
     #[cfg(feature = "cheese")]
     pub fn cheese(&self) -> CheeseClient<'_> {
@@ -748,6 +756,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _article = client.article();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "bangumi")]
+    #[test]
+    fn bangumi_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _bangumi = client.bangumi();
 
         Ok(())
     }

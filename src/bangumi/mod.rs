@@ -8,12 +8,14 @@
 //! * 媒体: [查看详情](https://www.bilibili.com/bangumi/media/md28220978)
 //! * 流: [查看详情](https://api.bilibili.com/pgc/player/web/playurl?qn=127&fnver=0&fnval=12240&fourk=&ep_id=65709)
 
+pub mod client;
 pub mod follow;
 pub mod info;
 pub mod params;
 pub mod timeline;
 pub mod videostream_url;
 
+pub use client::BangumiClient;
 pub use params::{
     BangumiDetailId, BangumiDetailParams, BangumiInfoParams, BangumiSectionsParams,
     BangumiTimelineParams, BangumiVideoStreamId, BangumiVideoStreamParams,
