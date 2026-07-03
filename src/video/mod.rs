@@ -30,7 +30,8 @@ pub use collection::{
 };
 pub use model::{VideoDetail, VideoOwner, VideoPage, VideoRelated, VideoStat, VideoTag, VideoView};
 pub use params::{
-    InteractiveVideoInfoParams, VideoAiSummaryParams, VideoDescParams, VideoDetailParams, VideoId,
-    VideoOnlineTotalParams, VideoPageListParams, VideoPlayUrlParams, VideoPlayerInfoParams,
-    VideoRelatedParams, VideoTagsParams, VideoViewParams,
+    InteractiveVideoInfoParams, VideoAiSummaryParams, VideoDescParams, VideoDetailParams,
+    VideoHomepageRecommendationsParams, VideoId, VideoOnlineTotalParams, VideoPageListParams,
+    VideoPlayUrlParams, VideoPlayerInfoParams, VideoRelatedParams, VideoTagsParams,
+    VideoViewParams,
 };

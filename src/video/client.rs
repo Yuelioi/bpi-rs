@@ -1,10 +1,28 @@
 use crate::request::BilibiliRequest;
 use crate::{BpiClient, BpiResult};
 
-use super::model::{VideoDetail, VideoPage, VideoView};
-use super::params::{
-    VideoDescParams, VideoDetailParams, VideoPageListParams, VideoPlayUrlParams, VideoViewParams,
+use super::collection::{
+    GetSeasonsArchivesData, GetSeasonsSeriesData, GetSeriesArchivesData, GetSeriesData,
+    HOME_SEASONS_SERIES_ENDPOINT, SEASONS_ARCHIVES_LIST_ENDPOINT, SEASONS_SERIES_LIST_ENDPOINT,
+    SERIES_ARCHIVES_ENDPOINT, SERIES_INFO_ENDPOINT, VideoCollectionHomeSeasonsSeriesParams,
+    VideoCollectionSeasonsArchivesParams, VideoCollectionSeasonsSeriesParams,
+    VideoCollectionSeriesArchivesParams, VideoCollectionSeriesInfoParams,
 };
+use super::interact_video::{INTERACTIVE_INFO_ENDPOINT, InteractiveVideoInfoResponseData};
+use super::model::{VideoDetail, VideoPage, VideoView};
+use super::online::{ONLINE_TOTAL_ENDPOINT, OnlineTotalResponseData};
+use super::params::{
+    InteractiveVideoInfoParams, VideoAiSummaryParams, VideoDescParams, VideoDetailParams,
+    VideoHomepageRecommendationsParams, VideoOnlineTotalParams, VideoPageListParams,
+    VideoPlayUrlParams, VideoPlayerInfoParams, VideoRelatedParams, VideoTagsParams,
+    VideoViewParams,
+};
+use super::player::{PLAYER_INFO_V2_ENDPOINT, PlayerInfoResponseData};
+use super::recommend::{
+    HOMEPAGE_RECOMMENDATIONS_ENDPOINT, RELATED_VIDEOS_ENDPOINT, RcmdFeedResponseData, RelatedVideo,
+};
+use super::summary::{AI_SUMMARY_ENDPOINT, AiSummaryResponseData};
+use super::tags::{TAGS_ENDPOINT, VideoTag};
 use super::videostream_url::{PLAY_URL_ENDPOINT, PlayUrlResponseData};
 
 const DESC_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/archive/desc";
@@ -90,6 +108,157 @@ impl<'a> VideoClient<'a> {
             .send_bpi_payload("video.play_url")
             .await
     }
+
+    /// Fetches the videos in a specific video season.
+    pub async fn seasons_archives_list(
+        &self,
+        params: VideoCollectionSeasonsArchivesParams,
+    ) -> BpiResult<GetSeasonsArchivesData> {
+        let params = self.client.get_wbi_sign2(params.query_pairs()).await?;
+
+        self.client
+            .get(SEASONS_ARCHIVES_LIST_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&params)
+            .send_bpi_payload("video.collection.seasons_archives_list")
+            .await
+    }
+
+    /// Fetches a user's home season and series lists.
+    pub async fn home_seasons_series(
+        &self,
+        params: VideoCollectionHomeSeasonsSeriesParams,
+    ) -> BpiResult<GetSeasonsSeriesData> {
+        let params = self.client.get_wbi_sign2(params.query_pairs()).await?;
+
+        self.client
+            .get(HOME_SEASONS_SERIES_ENDPOINT)
+            .query(&params)
+            .send_bpi_payload("video.collection.home_seasons_series")
+            .await
+    }
+
+    /// Fetches a user's season and series list with pagination.
+    pub async fn seasons_series_list(
+        &self,
+        params: VideoCollectionSeasonsSeriesParams,
+    ) -> BpiResult<GetSeasonsSeriesData> {
+        let params = self.client.get_wbi_sign2(params.query_pairs()).await?;
+
+        self.client
+            .get(SEASONS_SERIES_LIST_ENDPOINT)
+            .query(&params)
+            .send_bpi_payload("video.collection.seasons_series_list")
+            .await
+    }
+
+    /// Fetches metadata for a specific video series.
+    pub async fn series_info(
+        &self,
+        params: VideoCollectionSeriesInfoParams,
+    ) -> BpiResult<GetSeriesData> {
+        self.client
+            .get(SERIES_INFO_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi_payload("video.collection.series_info")
+            .await
+    }
+
+    /// Fetches videos in a specific video series.
+    pub async fn series_archives(
+        &self,
+        params: VideoCollectionSeriesArchivesParams,
+    ) -> BpiResult<GetSeriesArchivesData> {
+        self.client
+            .get(SERIES_ARCHIVES_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi_payload("video.collection.series_archives")
+            .await
+    }
+
+    /// Fetches the online viewer counters for a video page.
+    pub async fn online_total(
+        &self,
+        params: VideoOnlineTotalParams,
+    ) -> BpiResult<OnlineTotalResponseData> {
+        self.client
+            .get(ONLINE_TOTAL_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi_payload("video.online_total")
+            .await
+    }
+
+    /// Fetches web player metadata for a video page.
+    pub async fn player_info_v2(
+        &self,
+        params: VideoPlayerInfoParams,
+    ) -> BpiResult<PlayerInfoResponseData> {
+        let params = self.client.get_wbi_sign2(params.query_pairs()).await?;
+
+        self.client
+            .get(PLAYER_INFO_V2_ENDPOINT)
+            .query(&params)
+            .send_bpi_payload("video.player_info_v2")
+            .await
+    }
+
+    /// Fetches videos related to a video.
+    pub async fn related_videos(&self, params: VideoRelatedParams) -> BpiResult<Vec<RelatedVideo>> {
+        self.client
+            .get(RELATED_VIDEOS_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi_payload("video.related_videos")
+            .await
+    }
+
+    /// Fetches homepage video recommendations.
+    pub async fn homepage_recommendations(
+        &self,
+        params: VideoHomepageRecommendationsParams,
+    ) -> BpiResult<RcmdFeedResponseData> {
+        let params = self.client.get_wbi_sign2(params.query_pairs()).await?;
+
+        self.client
+            .get(HOMEPAGE_RECOMMENDATIONS_ENDPOINT)
+            .query(&params)
+            .send_bpi_payload("video.homepage_recommendations")
+            .await
+    }
+
+    /// Fetches the AI summary for a video.
+    pub async fn ai_summary(
+        &self,
+        params: VideoAiSummaryParams,
+    ) -> BpiResult<AiSummaryResponseData> {
+        let params = self.client.get_wbi_sign2(params.query_pairs()).await?;
+
+        self.client
+            .get(AI_SUMMARY_ENDPOINT)
+            .query(&params)
+            .send_bpi_payload("video.ai_summary")
+            .await
+    }
+
+    /// Fetches tags attached to a video.
+    pub async fn tags(&self, params: VideoTagsParams) -> BpiResult<Vec<VideoTag>> {
+        self.client
+            .get(TAGS_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi_payload("video.tags")
+            .await
+    }
+
+    /// Fetches metadata for an interactive video node.
+    pub async fn interactive_video_info(
+        &self,
+        params: InteractiveVideoInfoParams,
+    ) -> BpiResult<InteractiveVideoInfoResponseData> {
+        self.client
+            .get(INTERACTIVE_INFO_ENDPOINT)
+            .query(&params.query_pairs())
+            .send_bpi_payload("video.interactive_video_info")
+            .await
+    }
 }
 
 #[cfg(test)]
@@ -97,7 +266,16 @@ mod tests {
     use super::*;
     use crate::{
         ApiEnvelope, BpiClient, BpiError, BpiResult,
+        ids::{Aid, Cid, Mid, SeasonId},
         probe::{contract::HttpMethod, endpoint_contract::EndpointContract},
+        video::params::VideoHomepageRecommendationsParams,
+        video::{
+            InteractiveVideoInfoParams, VideoAiSummaryParams,
+            VideoCollectionHomeSeasonsSeriesParams, VideoCollectionSeasonsArchivesParams,
+            VideoCollectionSeasonsSeriesParams, VideoCollectionSeriesArchivesParams,
+            VideoCollectionSeriesInfoParams, VideoOnlineTotalParams, VideoPlayerInfoParams,
+            VideoRelatedParams, VideoTagsParams,
+        },
     };
     use serde::de::DeserializeOwned;
 
@@ -199,6 +377,69 @@ mod tests {
             !source.contains(legacy_flat_playurl),
             "VideoClient::play_url should be implemented as a payload-helper-backed domain method"
         );
+    }
+
+    #[test]
+    fn video_client_exposes_collection_and_player_read_methods() -> BpiResult<()> {
+        let client = BpiClient::new()?;
+        let video = client.video();
+
+        std::mem::drop(
+            video.seasons_archives_list(VideoCollectionSeasonsArchivesParams::new(
+                Mid::new(4279370)?,
+                SeasonId::new(4294056)?,
+            )),
+        );
+        std::mem::drop(
+            video.home_seasons_series(VideoCollectionHomeSeasonsSeriesParams::new(Mid::new(
+                4279370,
+            )?)),
+        );
+        std::mem::drop(
+            video.seasons_series_list(VideoCollectionSeasonsSeriesParams::new(Mid::new(4279370)?)),
+        );
+        std::mem::drop(video.series_info(VideoCollectionSeriesInfoParams::new(250285)?));
+        std::mem::drop(
+            video.series_archives(VideoCollectionSeriesArchivesParams::new(
+                Mid::new(4279370)?,
+                250285,
+            )?),
+        );
+        std::mem::drop(video.online_total(VideoOnlineTotalParams::from_bvid(
+            "BV1xx411c7mD".parse()?,
+            Cid::new(62131)?,
+        )));
+        std::mem::drop(video.player_info_v2(VideoPlayerInfoParams::from_bvid(
+            "BV1xx411c7mD".parse()?,
+            Cid::new(62131)?,
+        )));
+        std::mem::drop(
+            video.related_videos(VideoRelatedParams::from_bvid("BV1xx411c7mD".parse()?)),
+        );
+        std::mem::drop(video.homepage_recommendations(VideoHomepageRecommendationsParams::new()));
+        std::mem::drop(video.ai_summary(VideoAiSummaryParams::from_bvid(
+            "BV1xx411c7mD".parse()?,
+            Cid::new(62131)?,
+            928123,
+        )?));
+        std::mem::drop(
+            video.tags(VideoTagsParams::from_bvid("BV1xx411c7mD".parse()?).cid(Cid::new(62131)?)),
+        );
+        std::mem::drop(
+            video.interactive_video_info(InteractiveVideoInfoParams::from_aid(
+                Aid::new(114347430905959)?,
+                1273647,
+            )?),
+        );
+
+        let source = include_str!("client.rs");
+        let payload_helper = concat!(".send_", "bpi_payload");
+
+        assert!(
+            source.matches(payload_helper).count() >= 17,
+            "VideoClient should use payload helpers for info, playurl, collection, and player read methods"
+        );
+        Ok(())
     }
 
     #[test]

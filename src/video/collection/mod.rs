@@ -11,6 +11,10 @@ pub use info::{
     GetSeriesData, ItemsList, PageInfo, SeasonsArchivesMeta, SeasonsItem, SeasonsMeta, SeriesItem,
     SeriesMeta,
 };
+pub(crate) use info::{
+    HOME_SEASONS_SERIES_ENDPOINT, SEASONS_ARCHIVES_LIST_ENDPOINT, SEASONS_SERIES_LIST_ENDPOINT,
+    SERIES_ARCHIVES_ENDPOINT, SERIES_INFO_ENDPOINT,
+};
 pub use params::{
     CollectionArchiveSort, VideoCollectionHomeSeasonsSeriesParams,
     VideoCollectionSeasonsArchivesParams, VideoCollectionSeasonsSeriesParams,

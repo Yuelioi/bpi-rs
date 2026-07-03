@@ -10,14 +10,14 @@ use super::params::{
     VideoCollectionSeriesInfoParams,
 };
 
-const HOME_SEASONS_SERIES_ENDPOINT: &str =
+pub(crate) const HOME_SEASONS_SERIES_ENDPOINT: &str =
     "https://api.bilibili.com/x/polymer/web-space/home/seasons_series";
-const SEASONS_ARCHIVES_LIST_ENDPOINT: &str =
+pub(crate) const SEASONS_ARCHIVES_LIST_ENDPOINT: &str =
     "https://api.bilibili.com/x/polymer/web-space/seasons_archives_list";
-const SEASONS_SERIES_LIST_ENDPOINT: &str =
+pub(crate) const SEASONS_SERIES_LIST_ENDPOINT: &str =
     "https://api.bilibili.com/x/polymer/web-space/seasons_series_list";
-const SERIES_ARCHIVES_ENDPOINT: &str = "https://api.bilibili.com/x/series/archives";
-const SERIES_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/series/series";
+pub(crate) const SERIES_ARCHIVES_ENDPOINT: &str = "https://api.bilibili.com/x/series/archives";
+pub(crate) const SERIES_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/series/series";
 
 /// 稿件信息
 #[derive(Debug, Clone, Deserialize, Serialize)]

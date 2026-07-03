@@ -5,7 +5,7 @@ use super::params::VideoPlayerInfoParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
-const PLAYER_INFO_V2_ENDPOINT: &str = "https://api.bilibili.com/x/player/wbi/v2";
+pub(crate) const PLAYER_INFO_V2_ENDPOINT: &str = "https://api.bilibili.com/x/player/wbi/v2";
 
 // --- 响应数据结构体 ---
 

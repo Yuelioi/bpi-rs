@@ -5,7 +5,7 @@ use super::params::InteractiveVideoInfoParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
-const INTERACTIVE_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/stein/edgeinfo_v2";
+pub(crate) const INTERACTIVE_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/stein/edgeinfo_v2";
 
 // --- 响应数据结构体 ---
 

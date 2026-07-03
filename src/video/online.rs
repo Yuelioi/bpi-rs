@@ -5,7 +5,7 @@ use super::params::VideoOnlineTotalParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
-const ONLINE_TOTAL_ENDPOINT: &str = "https://api.bilibili.com/x/player/online/total";
+pub(crate) const ONLINE_TOTAL_ENDPOINT: &str = "https://api.bilibili.com/x/player/online/total";
 
 // --- 响应数据结构体 ---
 

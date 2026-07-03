@@ -5,9 +5,10 @@ use super::params::{VideoHomepageRecommendationsParams, VideoRelatedParams};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
-const HOMEPAGE_RECOMMENDATIONS_ENDPOINT: &str =
+pub(crate) const HOMEPAGE_RECOMMENDATIONS_ENDPOINT: &str =
     "https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd";
-const RELATED_VIDEOS_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/archive/related";
+pub(crate) const RELATED_VIDEOS_ENDPOINT: &str =
+    "https://api.bilibili.com/x/web-interface/archive/related";
 
 // --- 视频推荐相关数据结构体 ---
 

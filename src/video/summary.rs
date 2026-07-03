@@ -5,7 +5,8 @@ use super::params::VideoAiSummaryParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
-const AI_SUMMARY_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/view/conclusion/get";
+pub(crate) const AI_SUMMARY_ENDPOINT: &str =
+    "https://api.bilibili.com/x/web-interface/view/conclusion/get";
 
 // --- 响应数据结构体 ---
 

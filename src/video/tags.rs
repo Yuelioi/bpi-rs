@@ -5,7 +5,7 @@ use super::params::VideoTagsParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
-const TAGS_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/view/detail/tag";
+pub(crate) const TAGS_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/view/detail/tag";
 
 // --- 响应数据结构体 ---
 
