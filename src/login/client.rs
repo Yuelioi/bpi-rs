@@ -1,10 +1,13 @@
-use crate::request::BilibiliRequest;
-use crate::{BpiClient, BpiResult};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
 
+use super::login_action::captcha::{GeetestData, GenerateCaptcha};
+use super::login_action::qr::{CheckQrCodeStatusData, GenerateQrCodeData};
+use super::login_notice::{LoginLogData, LoginNoticeData};
 use super::model::{
     LoginAccountInfo, LoginCoinBalance, LoginDailyReward, LoginNav, LoginStats, LoginTodayCoinExp,
     LoginVipInfo,
 };
+use super::params::{LoginLogParams, LoginNoticeParams, LoginQrPollParams};
 
 const NAV_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/nav";
 const STAT_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/nav/stat";
@@ -13,6 +16,13 @@ const TODAY_COIN_EXP_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/
 const DAILY_REWARD_ENDPOINT: &str = "https://api.bilibili.com/x/member/web/exp/reward";
 const ACCOUNT_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/member/web/account";
 const VIP_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/vip/web/user/info";
+const NOTICE_ENDPOINT: &str = "https://api.bilibili.com/x/safecenter/login_notice";
+const LOG_ENDPOINT: &str = "https://api.bilibili.com/x/member/web/login/log";
+const CAPTCHA_GENERATE_ENDPOINT: &str = "https://passport.bilibili.com/x/passport-login/captcha";
+const CAPTCHA_SOURCE: &str = "main_web";
+const QR_GENERATE_ENDPOINT: &str =
+    "https://passport.bilibili.com/x/passport-login/web/qrcode/generate";
+const QR_POLL_ENDPOINT: &str = "https://passport.bilibili.com/x/passport-login/web/qrcode/poll";
 
 /// Login domain API client.
 #[derive(Clone, Copy)]
@@ -60,77 +70,177 @@ impl<'a> LoginClient<'a> {
         VIP_INFO_ENDPOINT
     }
 
+    #[cfg(test)]
+    pub(crate) fn notice_endpoint(&self) -> &'static str {
+        NOTICE_ENDPOINT
+    }
+
+    #[cfg(test)]
+    pub(crate) fn log_endpoint(&self) -> &'static str {
+        LOG_ENDPOINT
+    }
+
+    #[cfg(test)]
+    pub(crate) fn captcha_generate_endpoint(&self) -> &'static str {
+        CAPTCHA_GENERATE_ENDPOINT
+    }
+
+    #[cfg(test)]
+    pub(crate) fn qr_generate_endpoint(&self) -> &'static str {
+        QR_GENERATE_ENDPOINT
+    }
+
+    #[cfg(test)]
+    pub(crate) fn qr_poll_endpoint(&self) -> &'static str {
+        QR_POLL_ENDPOINT
+    }
+
     /// Fetches the current session's navigation/login state.
     pub async fn nav(&self) -> BpiResult<LoginNav> {
         self.client
             .get(NAV_ENDPOINT)
-            .send_bpi::<LoginNav>("login.nav")
-            .await?
-            .into_data()
+            .send_bpi_payload("login.nav")
+            .await
     }
 
     /// Fetches the current authenticated user's following, follower, and dynamic counts.
     pub async fn stat(&self) -> BpiResult<LoginStats> {
         self.client
             .get(STAT_ENDPOINT)
-            .send_bpi::<LoginStats>("login.stat")
-            .await?
-            .into_data()
+            .send_bpi_payload("login.stat")
+            .await
     }
 
     /// Fetches the current authenticated account's coin balance.
     pub async fn coin(&self) -> BpiResult<LoginCoinBalance> {
         self.client
             .get(COIN_ENDPOINT)
-            .send_bpi::<LoginCoinBalance>("login.coin")
-            .await?
-            .into_data()
+            .send_bpi_payload("login.coin")
+            .await
     }
 
     /// Fetches today's experience gained from coin operations.
     pub async fn today_coin_exp(&self) -> BpiResult<LoginTodayCoinExp> {
         self.client
             .get(TODAY_COIN_EXP_ENDPOINT)
-            .send_bpi::<LoginTodayCoinExp>("login.today_coin_exp")
-            .await?
-            .into_data()
+            .send_bpi_payload("login.today_coin_exp")
+            .await
     }
 
     /// Fetches the current authenticated account's daily reward completion state.
     pub async fn daily_reward(&self) -> BpiResult<LoginDailyReward> {
         self.client
             .get(DAILY_REWARD_ENDPOINT)
-            .send_bpi::<LoginDailyReward>("login.daily_reward")
-            .await?
-            .into_data()
+            .send_bpi_payload("login.daily_reward")
+            .await
     }
 
     /// Fetches the current authenticated account's profile.
     pub async fn account_info(&self) -> BpiResult<LoginAccountInfo> {
         self.client
             .get(ACCOUNT_INFO_ENDPOINT)
-            .send_bpi::<LoginAccountInfo>("login.account_info")
-            .await?
-            .into_data()
+            .send_bpi_payload("login.account_info")
+            .await
     }
 
     /// Fetches the current authenticated account's VIP state.
     pub async fn vip_info(&self) -> BpiResult<LoginVipInfo> {
         self.client
             .get(VIP_INFO_ENDPOINT)
-            .send_bpi::<LoginVipInfo>("login.vip_info")
-            .await?
-            .into_data()
+            .send_bpi_payload("login.vip_info")
+            .await
+    }
+
+    /// Fetches a specific login notice for an authenticated account.
+    pub async fn notice(&self, params: LoginNoticeParams) -> BpiResult<LoginNoticeData> {
+        self.client
+            .get(NOTICE_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&params.query_pairs())
+            .send_bpi_payload("login.notice")
+            .await
+    }
+
+    /// Fetches recent login log entries for an authenticated account.
+    pub async fn log(&self, params: LoginLogParams) -> BpiResult<LoginLogData> {
+        self.client
+            .get(LOG_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&params.query_pairs())
+            .send_bpi_payload("login.log")
+            .await
+    }
+
+    /// Generates a Geetest captcha challenge for login flows.
+    pub async fn generate_captcha(&self) -> BpiResult<GenerateCaptcha> {
+        let data: GeetestData = self
+            .client
+            .get(CAPTCHA_GENERATE_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&[("source", CAPTCHA_SOURCE)])
+            .send_bpi_payload("login.captcha_generate")
+            .await?;
+        let geetest = data.geetest;
+
+        Ok(GenerateCaptcha {
+            token: data.token,
+            gt: geetest.gt,
+            challenge: geetest.challenge,
+        })
+    }
+
+    /// Generates a QR login URL and temporary polling key.
+    pub async fn qr_generate(&self) -> BpiResult<GenerateQrCodeData> {
+        self.client
+            .get(QR_GENERATE_ENDPOINT)
+            .with_bilibili_headers()
+            .send_bpi_payload("login.qr_generate")
+            .await
+    }
+
+    /// Polls the QR login state.
+    pub async fn qr_poll(&self, params: LoginQrPollParams) -> BpiResult<CheckQrCodeStatusData> {
+        let response = self
+            .client
+            .get(QR_POLL_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&params.query_pairs())
+            .send()
+            .await?;
+
+        let cookies: Vec<(String, String)> = response
+            .cookies()
+            .map(|cookie| (cookie.name().to_string(), cookie.value().to_string()))
+            .collect();
+        let envelope: BpiResponse<CheckQrCodeStatusData> = response
+            .json()
+            .await
+            .map_err(|err| BpiError::parse(err.to_string()))?;
+        let mut data = envelope.into_data()?;
+
+        if data.code == 0 {
+            data.cookies = cookies;
+        }
+
+        Ok(data)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::future::Future;
+
     use super::DAILY_REWARD_ENDPOINT;
 
     use crate::BpiClient;
+    use crate::ids::Mid;
+    use crate::login::login_action::captcha::GenerateCaptcha;
+    use crate::login::login_action::qr::{CheckQrCodeStatusData, GenerateQrCodeData};
+    use crate::login::login_notice::{LoginLogData, LoginNoticeData};
+    use crate::login::{LoginLogParams, LoginNoticeParams, LoginQrPollParams};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{BpiError, BpiResult};
 
     const READ_INFO_CONTRACTS: &[(&str, &str, &str)] = &[
         (
@@ -168,6 +278,62 @@ mod tests {
 
     fn read_info_contract(endpoint: &str) -> Result<EndpointContract, Box<dyn std::error::Error>> {
         endpoint_contract(endpoint)
+    }
+
+    fn nested_contract(path: &str) -> Result<EndpointContract, BpiError> {
+        let bytes = match path {
+            "notice/login-notice" => {
+                include_bytes!("../../tests/contracts/login/notice/login-notice/contract.json")
+                    .as_slice()
+            }
+            "notice/login-log" => {
+                include_bytes!("../../tests/contracts/login/notice/login-log/contract.json")
+                    .as_slice()
+            }
+            "captcha/generate" => {
+                include_bytes!("../../tests/contracts/login/captcha/generate/contract.json")
+                    .as_slice()
+            }
+            "qr/generate" => {
+                include_bytes!("../../tests/contracts/login/qr/generate/contract.json").as_slice()
+            }
+            "qr/poll" => {
+                include_bytes!("../../tests/contracts/login/qr/poll/contract.json").as_slice()
+            }
+            _ => unreachable!("unknown login nested contract"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
+
+    fn assert_notice_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<LoginNoticeData>>,
+    {
+    }
+
+    fn assert_log_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<LoginLogData>>,
+    {
+    }
+
+    fn assert_captcha_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<GenerateCaptcha>>,
+    {
+    }
+
+    fn assert_qr_generate_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<GenerateQrCodeData>>,
+    {
+    }
+
+    fn assert_qr_poll_future<F>(_future: F)
+    where
+        F: Future<Output = BpiResult<CheckQrCodeStatusData>>,
+    {
     }
 
     #[test]
@@ -255,6 +421,19 @@ mod tests {
     }
 
     #[test]
+    fn login_safe_flow_client_methods_return_payload_futures() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+        let login = client.login();
+
+        assert_notice_future(login.notice(LoginNoticeParams::new(Mid::new(1_000_001)?)));
+        assert_log_future(login.log(LoginLogParams::new()));
+        assert_captcha_future(login.generate_captcha());
+        assert_qr_generate_future(login.qr_generate());
+        assert_qr_poll_future(login.qr_poll(LoginQrPollParams::new("sanitized-qrcode-key")?));
+        Ok(())
+    }
+
+    #[test]
     fn login_read_info_contracts_match_endpoint_requests() -> Result<(), Box<dyn std::error::Error>>
     {
         for (endpoint, name, url) in READ_INFO_CONTRACTS {
@@ -320,6 +499,40 @@ mod tests {
         assert_eq!(contract.cases[0].response.http_status, Some(412));
         assert_eq!(contract.cases[1].response.api_code, Some(0));
         assert_eq!(contract.cases[2].response.http_status, Some(412));
+        Ok(())
+    }
+
+    #[test]
+    fn login_safe_flow_contracts_match_module_client_endpoints() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+        let login = client.login();
+        let cases = [
+            (
+                "notice/login-notice",
+                "login.notice",
+                login.notice_endpoint(),
+            ),
+            ("notice/login-log", "login.log", login.log_endpoint()),
+            (
+                "captcha/generate",
+                "login.captcha_generate",
+                login.captcha_generate_endpoint(),
+            ),
+            (
+                "qr/generate",
+                "login.qr_generate",
+                login.qr_generate_endpoint(),
+            ),
+            ("qr/poll", "login.qr_poll", login.qr_poll_endpoint()),
+        ];
+
+        for (path, name, url) in cases {
+            let contract = nested_contract(path)?;
+
+            assert_eq!(contract.name, name);
+            assert_eq!(contract.request.method, HttpMethod::Get);
+            assert_eq!(contract.request.url.as_str(), url);
+        }
         Ok(())
     }
 }
