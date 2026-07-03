@@ -1,0 +1,41 @@
+{
+  "code": 0,
+  "data": {
+    "list": [
+      {
+        "author": "",
+        "catalog": 0,
+        "click": 0,
+        "creator": "",
+        "ctime": 0,
+        "dept": 0,
+        "desc": "",
+        "etime": 1785254399,
+        "h5_cover": "",
+        "h5_url": "",
+        "id": 2580,
+        "mold": 0,
+        "mtime": 0,
+        "name": "火影忍者手游直播生态激励",
+        "page_name": "火影忍者手游直播生态激励",
+        "pc_cover": "https://i0.hdslb.com/bfs/activity-plat/static/11545/11593/10994/3f6baec2c21f4fa6e0a34e79f1931308/aG2U1dFtTj.png",
+        "pc_url": "https://www.bilibili.com/blackboard/era/7q2eS8Gf3pQA5fDg.html",
+        "plat": 1,
+        "ptime": 0,
+        "rank": 0,
+        "reply_id": 0,
+        "series": 0,
+        "spm_id": "",
+        "state": 1,
+        "stime": 1782878400,
+        "tp_id": 0,
+        "type": 0
+      }
+    ],
+    "num": 1,
+    "size": 1,
+    "total": 4140
+  },
+  "message": "0",
+  "ttl": 1
+}

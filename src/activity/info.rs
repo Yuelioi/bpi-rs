@@ -99,6 +99,18 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    const TEST_ACTIVITY_ID: u64 = 4_017_552;
+    const TEST_ACTIVITY_BVID: &str = "BV1mKY4e8ELy";
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/activity/info/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -160,5 +172,74 @@ mod tests {
             err,
             BpiError::InvalidParameter { field: "sid", .. }
         ));
+    }
+
+    #[test]
+    fn activity_info_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "activity.info");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/activity/subject/info"
+        );
+        assert_eq!(
+            contract.request.query.get("sid").map(String::as_str),
+            Some("4017552")
+        );
+        assert_eq!(
+            contract.request.query.get("bvid").map(String::as_str),
+            Some(TEST_ACTIVITY_BVID)
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("ActivityInfoData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn activity_info_response_fixtures_parse_declared_model() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!("../../tests/contracts/activity/info/responses/anonymous.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/activity/info/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/activity/info/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<ActivityInfoData>::from_slice(bytes)?.into_payload()?;
+
+            assert_eq!(payload.id, TEST_ACTIVITY_ID);
+            assert!(payload.lid.is_some());
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/activity/public/info/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn activity_info_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<ActivityInfoData>>(body)?.into_payload()?;
+
+            assert_eq!(payload.id, TEST_ACTIVITY_ID);
+            assert!(payload.lid.is_some());
+        }
+        Ok(())
     }
 }

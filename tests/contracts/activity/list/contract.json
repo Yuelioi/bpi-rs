@@ -1,0 +1,74 @@
+{
+  "name": "activity.list",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/activity/page/list",
+    "query": {
+      "plat": "1,3",
+      "mold": "0",
+      "http": "3",
+      "pn": "1",
+      "ps": "1"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "public activity response body promoted without account headers"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/anonymous.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "ActivityListData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "ActivityListData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "ActivityListData"
+      }
+    }
+  ]
+}
