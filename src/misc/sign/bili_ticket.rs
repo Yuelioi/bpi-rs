@@ -10,8 +10,11 @@ use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+const BILI_TICKET_ENDPOINT: &str =
+    "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket";
+
 /// bili_ticket 响应数据
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TicketData {
     /// bili_ticket JWT 令牌
     pub ticket: String,
@@ -26,7 +29,7 @@ pub struct TicketData {
 }
 
 /// WBI 导航数据
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct NavData {
     /// img_key 值
     pub img: String,
@@ -40,7 +43,7 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/misc)
     pub async fn misc_sign_bili_ticket(&self) -> Result<BpiResponse<TicketData>, BpiError> {
-        let csrf = self.csrf()?;
+        let csrf = self.csrf().unwrap_or_default();
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|e| BpiError::network(format!("获取时间戳失败: {}", e)))?
@@ -48,7 +51,7 @@ impl BpiClient {
 
         let params = ticket_request_params(timestamp, csrf.as_str())?;
 
-        self.post("https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket")
+        self.post(BILI_TICKET_ENDPOINT)
             .query(&params)
             .send_bpi("生成bili_ticket")
             .await
@@ -65,15 +68,123 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ApiEnvelope;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
     use crate::sign::bili_ticket::hexsign;
 
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_hmac_sha256() -> Result<(), BpiError> {
+    fn local_bili_ticket_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/misc/sign/bili-ticket/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn hmac_sha256_returns_hex_digest() -> Result<(), BpiError> {
         let result = hexsign("XgwSnGZ1p", 1_234_567_890)?;
 
         assert_eq!(result.len(), 64);
         assert!(result.chars().all(|c| c.is_ascii_hexdigit()));
+        Ok(())
+    }
+
+    #[test]
+    fn bili_ticket_contract_matches_endpoint_request() -> Result<(), BpiError> {
+        let contract = EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/misc/sign/bili-ticket/contract.json"
+        ))?;
+
+        assert_eq!(contract.name, "misc.bili_ticket");
+        assert_eq!(contract.request.method, HttpMethod::Post);
+        assert_eq!(contract.request.url.as_str(), BILI_TICKET_ENDPOINT);
+        assert_eq!(
+            contract.request.query.get("key_id").map(String::as_str),
+            Some("ec02")
+        );
+        assert_eq!(
+            contract
+                .request
+                .query
+                .get("context[ts]")
+                .map(String::as_str),
+            Some("${unix_ts}")
+        );
+        assert_eq!(
+            contract.request.query.get("hexsign").map(String::as_str),
+            Some("${bili_ticket_hexsign}")
+        );
+        assert_eq!(
+            contract.request.query.get("csrf").map(String::as_str),
+            Some("${csrf}")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        Ok(())
+    }
+
+    #[test]
+    fn bili_ticket_contract_covers_guest_and_authenticated_profiles() -> Result<(), BpiError> {
+        let contract = EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/misc/sign/bili-ticket/contract.json"
+        ))?;
+
+        let anonymous = &contract.cases[0];
+        assert_eq!(anonymous.profile.as_deref(), Some("anonymous"));
+        assert!(!anonymous.auth.requires_cookie());
+        assert_eq!(anonymous.response.api_code, Some(0));
+
+        for case in &contract.cases[1..] {
+            assert!(matches!(case.name.as_str(), "normal" | "vip"));
+            assert!(case.auth.requires_cookie());
+            assert!(case.auth.requires_csrf());
+            assert_eq!(case.response.rust_model.as_deref(), Some("TicketData"));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn bili_ticket_response_fixture_parses_declared_model() -> Result<(), BpiError> {
+        let data = ApiEnvelope::<TicketData>::from_slice(include_bytes!(
+            "../../../tests/contracts/misc/sign/bili-ticket/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(data.ttl, 259_200);
+        assert_eq!(data.ticket.split('.').count(), 3);
+        assert!(data.nav.img.starts_with("https://"));
+        assert!(data.nav.sub.starts_with("https://"));
+        Ok(())
+    }
+
+    #[test]
+    fn bili_ticket_model_matches_local_probe_outputs_when_available() -> Result<(), BpiError> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_bili_ticket_probe_body(profile) else {
+                continue;
+            };
+
+            let data = serde_json::from_value::<ApiEnvelope<TicketData>>(body)?.into_payload()?;
+
+            assert_eq!(data.ttl, 259_200);
+            assert_eq!(data.ticket.split('.').count(), 3);
+            assert!(!data.nav.img.trim().is_empty());
+            assert!(!data.nav.sub.trim().is_empty());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn bili_ticket_client_can_build_guest_request_params() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        assert!(client.get_account().is_none());
+        assert!(client.csrf().is_err());
+        let params = ticket_request_params(1_234_567_890, "")?;
+
+        assert_eq!(params[3], ("csrf".to_string(), "".to_string()));
         Ok(())
     }
 

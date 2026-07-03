@@ -129,15 +129,14 @@ fn template_variables(
 
 fn template_variables_at_timestamp(
     client: &BpiClient,
-    contract: &ApiContract,
+    _contract: &ApiContract,
     timestamp: u64,
 ) -> BpiResult<BTreeMap<String, String>> {
     let mut variables = BTreeMap::new();
     let timestamp_text = timestamp.to_string();
+    let csrf = client.csrf().unwrap_or_default();
 
-    if contract.request.auth.requires_csrf() {
-        variables.insert("csrf".to_string(), client.csrf()?);
-    }
+    variables.insert("csrf".to_string(), csrf);
     variables.insert("unix_ts".to_string(), timestamp_text);
     variables.insert(
         "bili_ticket_hexsign".to_string(),
@@ -477,6 +476,30 @@ mod tests {
             variables["bili_ticket_hexsign"],
             "a7da9d971f117aa2b439c4b6cc46c7afbba8ade9f3ca959578af1bcfb37ebd2f"
         );
+        Ok(())
+    }
+
+    #[test]
+    fn template_variables_render_empty_guest_csrf() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "misc.bili_ticket.anonymous",
+                "request": {
+                    "method": "POST",
+                    "url": "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket",
+                    "query": {
+                        "csrf": "${csrf}"
+                    },
+                    "auth": {
+                        "requires": []
+                    }
+                }
+            }"#,
+        )?;
+        let client = client_for_contract(&contract, &RawProbeConfig::default())?;
+        let variables = template_variables_at_timestamp(&client, &contract, 1_234_567_890)?;
+
+        assert_eq!(variables["csrf"], "");
         Ok(())
     }
 

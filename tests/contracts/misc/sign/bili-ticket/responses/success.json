@@ -1,0 +1,15 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "ticket": "sanitized.header.sanitized-signature",
+    "created_at": 1700000000,
+    "ttl": 259200,
+    "context": {},
+    "nav": {
+      "img": "https://i0.hdslb.com/bfs/wbi/sanitized-img-key.png",
+      "sub": "https://i0.hdslb.com/bfs/wbi/sanitized-sub-key.png"
+    }
+  }
+}

@@ -29,10 +29,6 @@ pub fn ticket_hexsign(timestamp: u64) -> BpiResult<String> {
 }
 
 pub fn ticket_request_params(timestamp: u64, csrf: &str) -> BpiResult<Vec<(String, String)>> {
-    if csrf.trim().is_empty() {
-        return Err(BpiError::invalid_parameter("csrf", "csrf cannot be blank"));
-    }
-
     Ok(vec![
         ("key_id".to_string(), KEY_ID.to_string()),
         ("hexsign".to_string(), hexsign(HMAC_KEY, timestamp)?),
@@ -94,12 +90,10 @@ mod tests {
     }
 
     #[test]
-    fn ticket_request_params_reject_blank_csrf() {
-        let err = ticket_request_params(1_234_567_890, " ").unwrap_err();
+    fn ticket_request_params_allows_empty_csrf_for_guest_ticket() -> Result<(), BpiError> {
+        let params = ticket_request_params(1_234_567_890, "")?;
 
-        assert!(matches!(
-            err,
-            BpiError::InvalidParameter { field: "csrf", .. }
-        ));
+        assert_eq!(params[3], ("csrf".to_string(), "".to_string()));
+        Ok(())
     }
 }
