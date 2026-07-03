@@ -1,0 +1,25 @@
+{
+  "code": 0,
+  "data": {
+    "inc_coin": 0,
+    "inc_elec": 0,
+    "inc_fav": 0,
+    "inc_like": 0,
+    "inc_share": 0,
+    "incr_click": 0,
+    "incr_dm": 0,
+    "incr_fans": 0,
+    "incr_reply": 0,
+    "total_click": 0,
+    "total_coin": 0,
+    "total_dm": 0,
+    "total_elec": 0,
+    "total_fans": 0,
+    "total_fav": 0,
+    "total_like": 0,
+    "total_reply": 0,
+    "total_share": 0
+  },
+  "message": "0",
+  "ttl": 0
+}

@@ -1,0 +1,51 @@
+{
+  "code": 0,
+  "data": {
+    "period": {
+      "module_four": "<redacted>",
+      "module_one": "<redacted>",
+      "module_three": "<redacted>",
+      "module_two": "<redacted>"
+    },
+    "viewer_area": {
+      "fan": {
+        "<redacted>": 0
+      },
+      "not_fan": {
+        "<redacted>": 0
+      }
+    },
+    "viewer_base": {
+      "fan": {
+        "age_four": 0,
+        "age_one": 0,
+        "age_three": 0,
+        "age_two": 0,
+        "female": 0,
+        "male": 0,
+        "plat_android": 0,
+        "plat_h5": 0,
+        "plat_ios": 0,
+        "plat_other_app": 0,
+        "plat_out": 0,
+        "plat_pc": 0
+      },
+      "not_fan": {
+        "age_four": 0,
+        "age_one": 0,
+        "age_three": 0,
+        "age_two": 0,
+        "female": 0,
+        "male": 0,
+        "plat_android": 0,
+        "plat_h5": 0,
+        "plat_ios": 0,
+        "plat_other_app": 0,
+        "plat_out": 0,
+        "plat_pc": 0
+      }
+    }
+  },
+  "message": "0",
+  "ttl": 0
+}

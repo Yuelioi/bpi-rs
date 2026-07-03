@@ -1,0 +1,66 @@
+{
+  "name": "creativecenter.statistics.up_stat",
+  "request": {
+    "method": "GET",
+    "url": "https://member.bilibili.com/x/web/index/stat",
+    "query": {},
+    "required_headers": [
+      "user-agent"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "success fixtures are sanitized and trimmed from real Probe bodies; raw account-specific output remains under target"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": -101,
+        "fixture": "responses/anonymous.requires_login.json",
+        "fixture_kind": "probe_error_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "UpStatData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "UpStatData"
+      }
+    }
+  ]
+}

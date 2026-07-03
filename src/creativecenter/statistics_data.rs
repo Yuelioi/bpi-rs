@@ -103,7 +103,7 @@ pub struct ArchiveCompareItem {
     #[serde(rename = "is_only_self")]
     pub is_only_self: bool,
     #[serde(rename = "hour_stat")]
-    pub hour_stat: HourStat,
+    pub hour_stat: Option<HourStat>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -525,8 +525,7 @@ impl BpiClient {
     ///
     /// # 文档
     /// [获取播放来源占比](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取播放来源占比)
-    #[allow(dead_code)]
-    async fn up_play_source(&self) -> Result<BpiResponse<PlaySourceData>, BpiError> {
+    pub async fn up_play_source(&self) -> Result<BpiResponse<PlaySourceData>, BpiError> {
         self.get("https://member.bilibili.com/x/web/data/playsource")
             .with_bilibili_headers()
             .send_bpi("获取播放来源占比情况")
@@ -549,8 +548,57 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ApiEnvelope;
     use crate::creativecenter::{UpArticleTrendMetric, UpVideoTrendMetric};
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use std::collections::BTreeMap;
     use tracing::info;
+
+    fn contract(name: &str) -> Result<EndpointContract, BpiError> {
+        let bytes = match name {
+            "up-stat" => include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/up-stat/contract.json"
+            )
+            .as_slice(),
+            "archive-compare" => include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/archive-compare/contract.json"
+            )
+            .as_slice(),
+            "article-stat" => include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/article-stat/contract.json"
+            )
+            .as_slice(),
+            "video-trend" => include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/video-trend/contract.json"
+            )
+            .as_slice(),
+            "article-trend" => include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/article-trend/contract.json"
+            )
+            .as_slice(),
+            "play-source" => include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/play-source/contract.json"
+            )
+            .as_slice(),
+            "viewer-data" => include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/viewer-data/contract.json"
+            )
+            .as_slice(),
+            _ => unreachable!("unknown creativecenter statistics contract"),
+        };
+        EndpointContract::from_slice(bytes)
+    }
+
+    fn query_map<I>(params: I) -> BTreeMap<String, String>
+    where
+        I: IntoIterator<Item = (&'static str, String)>,
+    {
+        params
+            .into_iter()
+            .map(|(key, value)| (key.to_string(), value))
+            .collect()
+    }
 
     fn live_creativecenter_tests_enabled() -> bool {
         std::env::var_os("BPI_LIVE_TEST").is_some() && std::env::var_os("BPI_COOKIE").is_some()
@@ -634,6 +682,291 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         let data = bpi.up_viewer_data().await?.into_data()?;
         info!("播放分布情况: {:?}", data);
+        Ok(())
+    }
+
+    #[test]
+    fn creativecenter_statistics_contracts_match_endpoint_requests() -> Result<(), BpiError> {
+        let up_stat = contract("up-stat")?;
+        assert_eq!(up_stat.name, "creativecenter.statistics.up_stat");
+        assert_eq!(up_stat.request.method, HttpMethod::Get);
+        assert_eq!(
+            up_stat.request.url.as_str(),
+            "https://member.bilibili.com/x/web/index/stat"
+        );
+        assert!(up_stat.request.query.is_empty());
+
+        let archive_compare = contract("archive-compare")?;
+        let archive_compare_params = UpArchiveCompareParams::new().with_size(3)?;
+        assert_eq!(
+            archive_compare.name,
+            "creativecenter.statistics.archive_compare"
+        );
+        assert_eq!(
+            archive_compare.request.url.as_str(),
+            "https://member.bilibili.com/x/web/data/archive_diagnose/compare"
+        );
+        assert_eq!(
+            query_map(archive_compare_params.query_pairs()),
+            archive_compare.request.query
+        );
+
+        let article_stat = contract("article-stat")?;
+        assert_eq!(
+            article_stat.request.url.as_str(),
+            "https://member.bilibili.com/x/web/data/article"
+        );
+        assert!(article_stat.request.query.is_empty());
+
+        let video_trend = contract("video-trend")?;
+        let video_trend_params = UpVideoTrendParams::new(UpVideoTrendMetric::Play);
+        assert_eq!(
+            video_trend.request.url.as_str(),
+            "https://member.bilibili.com/x/web/data/pandect"
+        );
+        assert_eq!(
+            query_map(video_trend_params.query_pairs()),
+            video_trend.request.query
+        );
+
+        let article_trend = contract("article-trend")?;
+        let article_trend_params = UpArticleTrendParams::new(UpArticleTrendMetric::Read);
+        assert_eq!(
+            article_trend.request.url.as_str(),
+            "https://member.bilibili.com/x/web/data/article/thirty"
+        );
+        assert_eq!(
+            query_map(article_trend_params.query_pairs()),
+            article_trend.request.query
+        );
+
+        let play_source = contract("play-source")?;
+        assert_eq!(
+            play_source.request.url.as_str(),
+            "https://member.bilibili.com/x/web/data/playsource"
+        );
+        assert_eq!(
+            play_source
+                .request
+                .headers
+                .get("Origin")
+                .map(String::as_str),
+            Some("https://www.bilibili.com")
+        );
+
+        let viewer_data = contract("viewer-data")?;
+        assert_eq!(
+            viewer_data.request.url.as_str(),
+            "https://member.bilibili.com/x/web/data/base"
+        );
+        assert!(viewer_data.request.query.is_empty());
+
+        Ok(())
+    }
+
+    #[test]
+    fn creativecenter_statistics_response_fixtures_parse_declared_models() -> Result<(), BpiError> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/up-stat/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/up-stat/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<UpStatData>::from_slice(bytes)?.into_payload()?;
+            assert_eq!(payload.total_click, 0);
+        }
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/archive-compare/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/archive-compare/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<ArchiveCompareData>::from_slice(bytes)?.into_payload()?;
+            assert_eq!(payload.list.len(), 1);
+        }
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/article-stat/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/article-stat/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<UpArticleStatData>::from_slice(bytes)?.into_payload()?;
+            assert_eq!(payload.view, 0);
+        }
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/video-trend/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/video-trend/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload =
+                ApiEnvelope::<Vec<VideoTrendItem>>::from_slice(bytes)?.into_payload()?;
+            assert_eq!(payload.len(), 1);
+        }
+
+        let normal_article_trend = ApiEnvelope::<Vec<ArticleTrendItem>>::from_slice(include_bytes!(
+            "../../tests/contracts/creativecenter/statistics/article-trend/responses/normal.success.json"
+        ))?
+        .into_optional_payload()?;
+        assert!(normal_article_trend.is_none());
+
+        let vip_article_trend = ApiEnvelope::<Vec<ArticleTrendItem>>::from_slice(include_bytes!(
+            "../../tests/contracts/creativecenter/statistics/article-trend/responses/vip.success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(vip_article_trend.len(), 1);
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/play-source/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/play-source/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<PlaySourceData>::from_slice(bytes)?.into_optional_payload()?;
+            assert!(payload.is_none());
+        }
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/viewer-data/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/viewer-data/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<ViewerData>::from_slice(bytes)?.into_payload()?;
+            assert_eq!(payload.viewer_area.fan.get("<redacted>"), Some(&0));
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn creativecenter_statistics_error_fixtures_preserve_observed_api_errors()
+    -> Result<(), BpiError> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/up-stat/responses/anonymous.requires_login.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/archive-compare/responses/anonymous.requires_login.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/article-stat/responses/anonymous.requires_login.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/video-trend/responses/anonymous.requires_login.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/article-trend/responses/anonymous.requires_login.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/play-source/responses/anonymous.requires_login.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/creativecenter/statistics/viewer-data/responses/anonymous.requires_login.json"
+            )
+            .as_slice(),
+        ] {
+            let err = ApiEnvelope::<serde_json::Value>::from_slice(bytes)
+                .and_then(ApiEnvelope::ensure_success)
+                .unwrap_err();
+            assert!(err.requires_login());
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!(
+            "target/bpi-probe-runs/creativecenter/statistics-read/{endpoint}/{profile}.response.json"
+        );
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn creativecenter_statistics_models_match_local_probe_outputs_when_available()
+    -> Result<(), BpiError> {
+        for profile in ["normal", "vip"] {
+            if let Some(body) = local_probe_body("up-stat", profile) {
+                let _payload =
+                    serde_json::from_value::<ApiEnvelope<UpStatData>>(body)?.into_payload()?;
+            }
+
+            if let Some(body) = local_probe_body("archive-compare", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<ArchiveCompareData>>(body)?
+                    .into_payload()?;
+                assert!(!payload.list.is_empty());
+            }
+
+            if let Some(body) = local_probe_body("article-stat", profile) {
+                let _payload = serde_json::from_value::<ApiEnvelope<UpArticleStatData>>(body)?
+                    .into_payload()?;
+            }
+
+            if let Some(body) = local_probe_body("video-trend", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<Vec<VideoTrendItem>>>(body)?
+                    .into_payload()?;
+                assert!(!payload.is_empty());
+            }
+
+            if let Some(body) = local_probe_body("article-trend", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<Vec<ArticleTrendItem>>>(body)?
+                    .into_optional_payload()?;
+                if profile == "vip" {
+                    assert!(payload.as_ref().is_some_and(|items| !items.is_empty()));
+                } else {
+                    assert!(payload.is_none());
+                }
+            }
+
+            if let Some(body) = local_probe_body("play-source", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<PlaySourceData>>(body)?
+                    .into_optional_payload()?;
+                assert!(payload.is_none());
+            }
+
+            if let Some(body) = local_probe_body("viewer-data", profile) {
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<ViewerData>>(body)?.into_payload()?;
+                assert!(!payload.viewer_area.fan.is_empty());
+            }
+        }
         Ok(())
     }
 }
