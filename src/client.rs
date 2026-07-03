@@ -13,6 +13,8 @@ use crate::auth::Account;
 use crate::clientinfo::ClientInfoClient;
 #[cfg(feature = "login")]
 use crate::login::LoginClient;
+#[cfg(feature = "opus")]
+use crate::opus::OpusClient;
 use crate::session::cookie::{format_cookie_pairs, parse_cookie_header as parse_cookie_pairs};
 use crate::sign::wbi::WbiKeyCache;
 #[cfg(feature = "user")]
@@ -386,6 +388,12 @@ impl BpiClient {
         LoginClient::new(self)
     }
 
+    /// Creates an opus domain client.
+    #[cfg(feature = "opus")]
+    pub fn opus(&self) -> OpusClient<'_> {
+        OpusClient::new(self)
+    }
+
     /// Creates a video domain client.
     #[cfg(feature = "video")]
     pub fn video(&self) -> VideoClient<'_> {
@@ -668,6 +676,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _wallet = client.wallet();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "opus")]
+    #[test]
+    fn opus_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _opus = client.opus();
 
         Ok(())
     }
