@@ -39,6 +39,8 @@ use crate::sign::wbi::WbiKeyCache;
 use crate::user::UserClient;
 #[cfg(feature = "video")]
 use crate::video::VideoClient;
+#[cfg(feature = "video_ranking")]
+use crate::video_ranking::VideoRankingClient;
 #[cfg(feature = "vip")]
 use crate::vip::VipClient;
 #[cfg(feature = "wallet")]
@@ -474,6 +476,12 @@ impl BpiClient {
         VideoClient::new(self)
     }
 
+    /// Creates a video ranking domain client.
+    #[cfg(feature = "video_ranking")]
+    pub fn video_ranking(&self) -> VideoRankingClient<'_> {
+        VideoRankingClient::new(self)
+    }
+
     /// Creates a VIP domain client.
     #[cfg(feature = "vip")]
     pub fn vip(&self) -> VipClient<'_> {
@@ -866,6 +874,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _note = client.note();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "video_ranking")]
+    #[test]
+    fn video_ranking_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _video_ranking = client.video_ranking();
 
         Ok(())
     }

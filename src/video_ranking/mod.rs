@@ -17,11 +17,14 @@ pub(crate) const REGION_NEWLIST_RANK_ENDPOINT: &str =
 pub(crate) const REGION_TAG_DYNAMIC_ENDPOINT: &str =
     "https://api.bilibili.com/x/web-interface/dynamic/tag";
 
+pub mod client;
 pub mod dynamic;
 pub mod params;
 pub mod popular;
 pub mod precious_videos;
 pub mod ranking;
+
+pub use client::VideoRankingClient;
 
 pub use params::{
     PopularSeriesOneParams, VideoNewListRankOrder, VideoPopularListParams, VideoRankingListParams,
