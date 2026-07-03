@@ -44,14 +44,19 @@ pub struct Vip {
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct VipLabel {
     /// 会员类型文案（大会员/年度大会员/十年大会员/百年大会员/最强绿鲤鱼）
+    #[serde(default)]
     pub text: String,
     /// 会员标签（vip/annual_vip/ten_annual_vip/hundred_annual_vip/fools_day_hundred_annual_vip）
+    #[serde(default)]
     pub label_theme: String,
     /// 会员标签文本颜色
+    #[serde(default)]
     pub text_color: String,
     /// 样式
+    #[serde(default)]
     pub bg_style: u32,
     /// 会员标签背景颜色（颜色码，一般为#FB7299）
+    #[serde(default)]
     pub bg_color: String,
 }
 
@@ -302,5 +307,22 @@ mod tests {
         assert_eq!(vip.vip_due_date, 1813334400000);
         assert_eq!(vip.role, Some(3));
         assert_eq!(vip.mid, Some(4279370));
+    }
+
+    #[test]
+    fn vip_label_defaults_missing_display_fields() {
+        let label: VipLabel = serde_json::from_str(
+            r##"{
+                "bg_style": 1,
+                "text_color": ""
+            }"##,
+        )
+        .expect("vip label should tolerate omitted display fields");
+
+        assert_eq!(label.text, "");
+        assert_eq!(label.label_theme, "");
+        assert_eq!(label.text_color, "");
+        assert_eq!(label.bg_style, 1);
+        assert_eq!(label.bg_color, "");
     }
 }

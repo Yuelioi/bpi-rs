@@ -1,0 +1,28 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "user": {
+      "account": null,
+      "vip": null,
+      "tv": null,
+      "background_image_small": "",
+      "background_image_big": "",
+      "panel_title": "立即登录",
+      "vip_overdue_explain": "",
+      "tv_overdue_explain": "",
+      "account_exception_text": "",
+      "is_auto_renew": false,
+      "is_tv_auto_renew": false,
+      "surplus_seconds": 0,
+      "vip_keep_time": 0
+    },
+    "wallet": {
+      "coupon": 0,
+      "point": 0,
+      "privilege_received": false
+    },
+    "in_review": false
+  }
+}

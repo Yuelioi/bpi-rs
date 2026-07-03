@@ -1,0 +1,62 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "user": {
+      "account": {
+        "mid": 1000002,
+        "name": "sanitized-vip",
+        "sex": "保密",
+        "face": "",
+        "sign": "",
+        "rank": 10000,
+        "birthday": 0,
+        "is_fake_account": 0,
+        "is_deleted": 0,
+        "in_reg_audit": 0,
+        "is_senior_member": 0
+      },
+      "vip": {
+        "vip_type": 2,
+        "vip_status": 1,
+        "vip_due_date": 1893456000000,
+        "label": {
+          "text": "年度大会员",
+          "label_theme": "annual_vip",
+          "text_color": "#FFFFFF",
+          "bg_style": 1,
+          "bg_color": "#FB7299"
+        },
+        "nickname_color": "#FB7299",
+        "vip_pay_type": 0,
+        "is_tv_vip": false,
+        "tv_vip_status": 0,
+        "mid": 1000002,
+        "name": "sanitized-vip"
+      },
+      "tv": {
+        "type": 0,
+        "vip_pay_type": 0,
+        "status": 0,
+        "due_date": 0
+      },
+      "background_image_small": "",
+      "background_image_big": "",
+      "panel_title": "sanitized-vip",
+      "vip_overdue_explain": "大会员有效",
+      "tv_overdue_explain": "",
+      "account_exception_text": "",
+      "is_auto_renew": false,
+      "is_tv_auto_renew": false,
+      "surplus_seconds": 86400,
+      "vip_keep_time": 0
+    },
+    "wallet": {
+      "coupon": 0,
+      "point": 0,
+      "privilege_received": false
+    },
+    "in_review": false
+  }
+}

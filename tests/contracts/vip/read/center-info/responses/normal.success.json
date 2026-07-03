@@ -1,0 +1,62 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "user": {
+      "account": {
+        "mid": 1000001,
+        "name": "sanitized-normal",
+        "sex": "保密",
+        "face": "",
+        "sign": "",
+        "rank": 10000,
+        "birthday": -1,
+        "is_fake_account": 0,
+        "is_deleted": 0,
+        "in_reg_audit": 0,
+        "is_senior_member": 0
+      },
+      "vip": {
+        "vip_type": 1,
+        "vip_status": 0,
+        "vip_due_date": 0,
+        "label": {
+          "text": "",
+          "label_theme": "",
+          "text_color": "",
+          "bg_style": 1,
+          "bg_color": ""
+        },
+        "nickname_color": "",
+        "vip_pay_type": 0,
+        "is_tv_vip": false,
+        "tv_vip_status": 0,
+        "mid": 1000001,
+        "name": "sanitized-normal"
+      },
+      "tv": {
+        "type": 1,
+        "vip_pay_type": 0,
+        "status": 0,
+        "due_date": 0
+      },
+      "background_image_small": "",
+      "background_image_big": "",
+      "panel_title": "sanitized-normal",
+      "vip_overdue_explain": "",
+      "tv_overdue_explain": "",
+      "account_exception_text": "",
+      "is_auto_renew": false,
+      "is_tv_auto_renew": false,
+      "surplus_seconds": 0,
+      "vip_keep_time": 0
+    },
+    "wallet": {
+      "coupon": 0,
+      "point": 0,
+      "privilege_received": false
+    },
+    "in_review": false
+  }
+}

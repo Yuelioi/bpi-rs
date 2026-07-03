@@ -1,0 +1,73 @@
+{
+  "name": "vip.center_info",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/vip/web/vip_center/combine",
+    "query": {
+      "build": "0"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "private account fields, wallet values, avatar URLs, names, and signatures sanitized before commit; raw profile outputs remain ignored under target/bpi-probe-runs/vip/read/center-info"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/anonymous.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "VipCenterData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "VipCenterData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "VipCenterData"
+      }
+    }
+  ]
+}
