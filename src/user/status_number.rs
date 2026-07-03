@@ -190,6 +190,9 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     // 请在运行测试前设置环境变量 `BPI_COOKIE`，以包含 SESSDATA 等登录信息
@@ -263,6 +266,109 @@ mod tests {
         info!("相簿投稿数: {:?}", data);
         assert!(data.all_count > 0);
 
+        Ok(())
+    }
+
+    fn public_read_contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes: &[u8] = match endpoint {
+            "album-count" => {
+                include_bytes!("../../tests/contracts/user/public-read/album-count/contract.json")
+            }
+            "nav-stat" => {
+                include_bytes!("../../tests/contracts/user/public-read/nav-stat/contract.json")
+            }
+            "relation-stat" => {
+                include_bytes!("../../tests/contracts/user/public-read/relation-stat/contract.json")
+            }
+            "up-stat" => {
+                include_bytes!("../../tests/contracts/user/public-read/up-stat/contract.json")
+            }
+            _ => {
+                return Err(BpiError::invalid_parameter(
+                    "endpoint",
+                    "unknown user status contract",
+                ));
+            }
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
+
+    #[test]
+    fn legacy_user_status_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let relation = public_read_contract("relation-stat")?;
+        assert_eq!(relation.name, "user.relation_stat");
+        assert_eq!(relation.request.method, HttpMethod::Get);
+        assert_eq!(
+            relation.request.url.as_str(),
+            "https://api.bilibili.com/x/relation/stat"
+        );
+        assert_eq!(
+            relation.request.query.get("vmid").map(String::as_str),
+            Some("2")
+        );
+
+        let up_stat = public_read_contract("up-stat")?;
+        assert_eq!(up_stat.name, "user.up_stat");
+        assert_eq!(up_stat.request.method, HttpMethod::Get);
+        assert_eq!(
+            up_stat.request.url.as_str(),
+            "https://api.bilibili.com/x/space/upstat"
+        );
+        assert_eq!(
+            up_stat.request.query.get("mid").map(String::as_str),
+            Some("456664753")
+        );
+
+        let nav = public_read_contract("nav-stat")?;
+        assert_eq!(nav.name, "user.nav_stat");
+        assert_eq!(
+            nav.request.url.as_str(),
+            "https://api.bilibili.com/x/space/navnum"
+        );
+        assert_eq!(nav.request.query.get("mid").map(String::as_str), Some("2"));
+
+        let album = public_read_contract("album-count")?;
+        assert_eq!(album.name, "user.album_count");
+        assert_eq!(
+            album.request.url.as_str(),
+            "https://api.vc.bilibili.com/link_draw/v1/doc/upload_count"
+        );
+        assert_eq!(
+            album.request.query.get("uid").map(String::as_str),
+            Some("2")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_status_fixtures_parse_promoted_contract_models() -> BpiResult<()> {
+        let relation = ApiEnvelope::<RelationStatResponseData>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/relation-stat/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(relation.mid, 2);
+
+        let up_stat = ApiEnvelope::<UpstatResponseData>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/up-stat/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert!(up_stat.archive.view >= up_stat.article.view);
+
+        let nav = ApiEnvelope::<NavnumResponseData>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/nav-stat/responses/success.json"
+        ))?
+        .into_payload()?;
+        let _total_content = nav.video + nav.article + nav.album + nav.audio + nav.opus;
+
+        let album = ApiEnvelope::<AlbumCountResponseData>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/album-count/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(
+            album.all_count,
+            album.draw_count + album.photo_count + album.daily_count
+        );
         Ok(())
     }
 }

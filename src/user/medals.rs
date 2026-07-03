@@ -93,6 +93,9 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -106,6 +109,50 @@ mod tests {
         let resp = bpi.user_medal_wall(2).await?; // UID=2: 碧诗
         info!("粉丝勋章墙: {:?}", resp.data);
 
+        Ok(())
+    }
+
+    fn medal_wall_contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/medal-wall/contract.json"
+        ))
+    }
+
+    #[test]
+    fn legacy_user_medal_wall_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = medal_wall_contract()?;
+
+        assert_eq!(contract.name, "user.medal_wall");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall"
+        );
+        assert_eq!(
+            contract.request.query.get("target_id").map(String::as_str),
+            Some("2")
+        );
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("requires_login")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_medal_wall_fixture_parses_promoted_contract_model() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/medal-wall/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let wall = ApiEnvelope::<MedalWallData>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/medal-wall/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(wall.uid, 2);
         Ok(())
     }
 }

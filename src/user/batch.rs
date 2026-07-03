@@ -43,6 +43,9 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -59,6 +62,50 @@ mod tests {
         info!("用户名查 UID 返回: {:?}", data);
         assert!(!data.uid_list.is_empty());
 
+        Ok(())
+    }
+
+    fn name_to_uid_contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/name-to-uid/contract.json"
+        ))
+    }
+
+    #[test]
+    fn legacy_user_name_to_uid_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = name_to_uid_contract()?;
+
+        assert_eq!(contract.name, "user.name_to_uid");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/polymer/web-dynamic/v1/name-to-uid"
+        );
+        assert_eq!(
+            contract.request.query.get("names").map(String::as_str),
+            Some("LexBurner,某科学")
+        );
+        assert_eq!(
+            contract.cases[0].response.error.as_deref(),
+            Some("requires_login")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_name_to_uid_fixture_parses_promoted_contract_model() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/name-to-uid/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let data = ApiEnvelope::<NameToUidData>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/name-to-uid/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert!(!data.uid_list.is_empty());
         Ok(())
     }
 }

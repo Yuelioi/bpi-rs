@@ -301,6 +301,9 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     // 请在运行测试前设置环境变量 `BPI_COOKIE`，以包含 SESSDATA 等登录信息
@@ -379,6 +382,73 @@ mod tests {
         assert_eq!(data.ps, 15);
         assert!(!data.list.is_empty());
 
+        Ok(())
+    }
+
+    fn public_read_contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes: &[u8] = match endpoint {
+            "bangumi-follow-list" => include_bytes!(
+                "../../tests/contracts/user/public-read/bangumi-follow-list/contract.json"
+            ),
+            "space-notice" => {
+                include_bytes!("../../tests/contracts/user/public-read/space-notice/contract.json")
+            }
+            _ => {
+                return Err(BpiError::invalid_parameter(
+                    "endpoint",
+                    "unknown user space contract",
+                ));
+            }
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
+
+    #[test]
+    fn legacy_user_space_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let notice = public_read_contract("space-notice")?;
+        assert_eq!(notice.name, "user.space_notice");
+        assert_eq!(notice.request.method, HttpMethod::Get);
+        assert_eq!(
+            notice.request.url.as_str(),
+            "https://api.bilibili.com/x/space/notice"
+        );
+        assert_eq!(
+            notice.request.query.get("mid").map(String::as_str),
+            Some("2")
+        );
+
+        let bangumi = public_read_contract("bangumi-follow-list")?;
+        assert_eq!(bangumi.name, "user.bangumi_follow_list");
+        assert_eq!(
+            bangumi.request.url.as_str(),
+            "https://api.bilibili.com/x/space/bangumi/follow/list"
+        );
+        assert_eq!(
+            bangumi.request.query.get("vmid").map(String::as_str),
+            Some("4279370")
+        );
+        assert_eq!(
+            bangumi.request.query.get("type").map(String::as_str),
+            Some("1")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_space_fixtures_parse_promoted_contract_models() -> BpiResult<()> {
+        let notice = ApiEnvelope::<SpaceNoticeResponseData>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/space-notice/responses/success.json"
+        ))?
+        .into_payload()?;
+        let _notice_text = notice.0;
+
+        let follow_list =
+            ApiEnvelope::<BangumiFollowListResponseData>::from_slice(include_bytes!(
+                "../../tests/contracts/user/public-read/bangumi-follow-list/responses/success.json"
+            ))?
+            .into_payload()?;
+        assert_eq!(follow_list.pn, 1);
         Ok(())
     }
 }

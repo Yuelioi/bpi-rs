@@ -85,8 +85,11 @@ pub struct ContributedVideo {
 /// 投稿视频列表
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ContributedVideoList {
+    #[serde(default)]
     pub slist: Vec<serde_json::Value>,
+    #[serde(default)]
     pub tlist: serde_json::Value,
+    #[serde(default)]
     pub vlist: Vec<ContributedVideo>,
 }
 
@@ -113,9 +116,13 @@ pub struct ContributedVideosResponseData {
     /// 页面信息
     pub page: PageInfo,
     /// “播放全部”按钮
+    #[serde(default)]
     pub episodic_button: Option<EpisodicButton>,
+    #[serde(default)]
     pub is_risk: bool,
+    #[serde(default)]
     pub gaia_res_type: u8,
+    #[serde(default)]
     pub gaia_data: Option<serde_json::Value>,
 }
 
@@ -179,6 +186,9 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
     // 假设这是一个已知用户
@@ -223,6 +233,54 @@ mod tests {
         info!("用户投稿视频明细（关键词）: {:?}", data);
         assert!(data.page.count > 0);
 
+        Ok(())
+    }
+
+    fn uploaded_videos_contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/uploaded-videos/contract.json"
+        ))
+    }
+
+    #[test]
+    fn legacy_user_contributed_videos_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = uploaded_videos_contract()?;
+
+        assert_eq!(contract.name, "user.uploaded_videos");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/space/wbi/arc/search"
+        );
+        assert!(contract.request.auth.requires_wbi());
+        assert_eq!(
+            contract.request.query.get("mid").map(String::as_str),
+            Some("2")
+        );
+        assert_eq!(
+            contract.request.query.get("order").map(String::as_str),
+            Some("pubdate")
+        );
+        assert_eq!(
+            contract.request.query.get("pn").map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            contract.request.query.get("ps").map(String::as_str),
+            Some("30")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_user_contributed_videos_fixture_parses_promoted_contract_model() -> BpiResult<()> {
+        let videos = ApiEnvelope::<ContributedVideosResponseData>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/uploaded-videos/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(videos.page.pn, 1);
+        assert_eq!(videos.page.ps, 30);
         Ok(())
     }
 }
