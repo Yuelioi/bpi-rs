@@ -13,6 +13,8 @@ use crate::auth::Account;
 use crate::clientinfo::ClientInfoClient;
 #[cfg(feature = "login")]
 use crate::login::LoginClient;
+#[cfg(feature = "misc")]
+use crate::misc::MiscClient;
 #[cfg(feature = "opus")]
 use crate::opus::OpusClient;
 use crate::session::cookie::{format_cookie_pairs, parse_cookie_header as parse_cookie_pairs};
@@ -388,6 +390,12 @@ impl BpiClient {
         LoginClient::new(self)
     }
 
+    /// Creates a misc domain client.
+    #[cfg(feature = "misc")]
+    pub fn misc(&self) -> MiscClient<'_> {
+        MiscClient::new(self)
+    }
+
     /// Creates an opus domain client.
     #[cfg(feature = "opus")]
     pub fn opus(&self) -> OpusClient<'_> {
@@ -686,6 +694,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _opus = client.opus();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "misc")]
+    #[test]
+    fn misc_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _misc = client.misc();
 
         Ok(())
     }
