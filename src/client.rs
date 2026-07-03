@@ -19,6 +19,8 @@ use crate::sign::wbi::WbiKeyCache;
 use crate::user::UserClient;
 #[cfg(feature = "video")]
 use crate::video::VideoClient;
+#[cfg(feature = "wallet")]
+use crate::wallet::WalletClient;
 #[cfg(feature = "web_widget")]
 use crate::web_widget::WebWidgetClient;
 
@@ -390,6 +392,12 @@ impl BpiClient {
         VideoClient::new(self)
     }
 
+    /// Creates a wallet domain client.
+    #[cfg(feature = "wallet")]
+    pub fn wallet(&self) -> WalletClient<'_> {
+        WalletClient::new(self)
+    }
+
     /// Creates a user domain client.
     #[cfg(feature = "user")]
     pub fn user(&self) -> UserClient<'_> {
@@ -650,6 +658,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _activity = client.activity();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "wallet")]
+    #[test]
+    fn wallet_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _wallet = client.wallet();
 
         Ok(())
     }
