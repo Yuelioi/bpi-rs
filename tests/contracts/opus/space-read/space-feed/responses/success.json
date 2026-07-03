@@ -1,0 +1,34 @@
+{
+  "code": 0,
+  "data": {
+    "has_more": true,
+    "items": [
+      {
+        "content": "sanitized opus content",
+        "cover": {
+          "height": 720,
+          "url": "https://example.invalid/opus-cover.png",
+          "width": 1280
+        },
+        "jump_url": "//www.bilibili.com/opus/1",
+        "opus_id": "1",
+        "stat": {
+          "like": "104"
+        }
+      },
+      {
+        "content": "sanitized text-only opus content",
+        "jump_url": "//www.bilibili.com/opus/2",
+        "opus_id": "2",
+        "stat": {
+          "like": "0",
+          "view": "0"
+        }
+      }
+    ],
+    "offset": "2",
+    "update_num": 0
+  },
+  "message": "0",
+  "ttl": 1
+}

@@ -84,7 +84,16 @@ mod tests {
     use super::*;
     use crate::ids::Mid;
     use crate::opus::{OpusSpaceFeedKind, OpusSpaceFeedParams};
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/opus/space-read/space-feed/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -150,6 +159,84 @@ mod tests {
                 ..
             }
         ));
+        Ok(())
+    }
+
+    #[test]
+    fn opus_space_feed_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "opus.space_feed");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space"
+        );
+        assert_eq!(
+            contract.request.query.get("host_mid").map(String::as_str),
+            Some("4279370")
+        );
+        assert_eq!(
+            contract.request.query.get("page").map(String::as_str),
+            Some("0")
+        );
+        assert_eq!(
+            contract.request.query.get("type").map(String::as_str),
+            Some("all")
+        );
+        assert_eq!(
+            contract
+                .request
+                .query
+                .get("web_location")
+                .map(String::as_str),
+            Some("333.1387")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        for case in &contract.cases {
+            assert_eq!(case.response.api_code, Some(0));
+            assert_eq!(case.response.rust_model.as_deref(), Some("SpaceData"));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn opus_space_feed_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<SpaceData>::from_slice(include_bytes!(
+            "../../tests/contracts/opus/space-read/space-feed/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert!(payload.has_more);
+        assert_eq!(payload.items.len(), 2);
+        assert!(payload.items[0].cover.is_some());
+        assert!(payload.items[1].cover.is_none());
+        assert_eq!(payload.items[1].stat.view.as_deref(), Some("0"));
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/opus/space-read/space-feed/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn opus_space_feed_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload = serde_json::from_value::<ApiEnvelope<SpaceData>>(body)?.into_payload()?;
+
+            assert!(!payload.items.is_empty());
+            assert!(!payload.offset.is_empty());
+        }
         Ok(())
     }
 }

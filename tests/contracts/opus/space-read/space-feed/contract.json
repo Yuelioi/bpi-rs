@@ -1,0 +1,65 @@
+{
+  "name": "opus.space_feed",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space",
+    "query": {
+      "host_mid": "4279370",
+      "page": "0",
+      "type": "all",
+      "web_location": "333.1387"
+    },
+    "required_headers": ["user-agent", "referer", "origin"],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixture redacts opus content, media URLs, opus ids, and jump URLs"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SpaceData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": ["cookie"]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SpaceData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": ["cookie"]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "SpaceData"
+      }
+    }
+  ]
+}
