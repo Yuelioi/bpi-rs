@@ -69,9 +69,9 @@ impl BilibiliRequest for RequestBuilder {
 
         let result = match response
             .decode_api_envelope::<T>()
-            .and_then(|decoded| decoded.envelope.ensure_success())
+            .and_then(|decoded| decoded.into_legacy_response())
         {
-            Ok(envelope) => envelope.into_legacy_response(),
+            Ok(response) => response,
             Err(err) => {
                 if let BpiError::Decode { source } = &err {
                     log_decode_error(operation_name, &response.body, source);
