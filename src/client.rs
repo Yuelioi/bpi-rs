@@ -21,6 +21,8 @@ use crate::cheese::CheeseClient;
 use crate::clientinfo::ClientInfoClient;
 #[cfg(feature = "comment")]
 use crate::comment::CommentClient;
+#[cfg(feature = "electric")]
+use crate::electric::ElectricClient;
 #[cfg(feature = "fav")]
 use crate::fav::FavClient;
 #[cfg(feature = "historytoview")]
@@ -438,6 +440,12 @@ impl BpiClient {
     #[cfg(feature = "comment")]
     pub fn comment(&self) -> CommentClient<'_> {
         CommentClient::new(self)
+    }
+
+    /// Creates an electric charging domain client.
+    #[cfg(feature = "electric")]
+    pub fn electric(&self) -> ElectricClient<'_> {
+        ElectricClient::new(self)
     }
 
     /// Creates a favorite domain client.
@@ -878,6 +886,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _comment = client.comment();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "electric")]
+    #[test]
+    fn electric_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _electric = client.electric();
 
         Ok(())
     }
