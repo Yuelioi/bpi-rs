@@ -143,6 +143,30 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiError, BpiResult};
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "user-point" => {
+                include_bytes!("../../tests/contracts/manga/read-core/user-point/contract.json")
+                    .as_slice()
+            }
+            "point-products" => {
+                include_bytes!("../../tests/contracts/manga/read-core/point-products/contract.json")
+                    .as_slice()
+            }
+            _ => {
+                return Err(BpiError::invalid_parameter(
+                    "endpoint",
+                    "unknown manga point shop contract",
+                ));
+            }
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -164,6 +188,98 @@ mod tests {
         let data = resp.into_data()?;
 
         tracing::info!("User point: {}", data.point);
+        Ok(())
+    }
+
+    #[test]
+    fn manga_point_shop_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let user_point = contract("user-point")?;
+        let point_products = contract("point-products")?;
+
+        assert_eq!(user_point.name, "manga.user_point");
+        assert_eq!(user_point.request.method, HttpMethod::Post);
+        assert_eq!(
+            user_point.request.url.as_str(),
+            "https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/GetUserPoint"
+        );
+        assert_eq!(
+            user_point.cases[0].response.rust_model.as_deref(),
+            Some("UserPointData")
+        );
+
+        assert_eq!(point_products.name, "manga.point_products");
+        assert_eq!(point_products.request.method, HttpMethod::Post);
+        assert_eq!(
+            point_products.request.url.as_str(),
+            "https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/ListProduct"
+        );
+        assert_eq!(
+            point_products.cases[0].response.rust_model.as_deref(),
+            Some("Vec<Product>")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn manga_user_point_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<UserPointData>::from_slice(include_bytes!(
+            "../../tests/contracts/manga/read-core/user-point/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.point, "0");
+        Ok(())
+    }
+
+    #[test]
+    fn manga_point_products_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<Vec<Product>>::from_slice(include_bytes!(
+            "../../tests/contracts/manga/read-core/point-products/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.len(), 1);
+        assert_eq!(payload[0].id, 1938);
+        assert_eq!(payload[0].point, "0");
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/manga/read-core/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn manga_user_point_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body("user-point", profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<UserPointData>>(body)?.into_payload()?;
+
+            assert!(payload.point.parse::<i64>().is_ok());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn manga_point_products_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body("point-products", profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<Vec<Product>>>(body)?.into_payload()?;
+
+            assert!(!payload.is_empty());
+        }
         Ok(())
     }
 }

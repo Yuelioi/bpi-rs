@@ -1,0 +1,29 @@
+{
+  "code": 0,
+  "data": [
+    {
+      "act_type": 0,
+      "address_deadline": "0001-01-01T00:00:00Z",
+      "amount": 1000,
+      "comic_id": 0,
+      "cost": 200,
+      "deadline": "",
+      "discount": 0,
+      "exchange_limit": 0,
+      "has_exchanged": false,
+      "id": 1938,
+      "image": "https://example.invalid/product.png",
+      "limits": [],
+      "main_coupon_deadline": "0001-01-01T00:00:00Z",
+      "pendant_expire": 7,
+      "pendant_url": "",
+      "point": "0",
+      "product_type": 1,
+      "real_cost": 100,
+      "remain_amount": 0,
+      "title": "sample product",
+      "type": 7
+    }
+  ],
+  "msg": ""
+}

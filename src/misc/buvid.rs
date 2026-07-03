@@ -120,7 +120,7 @@ mod tests {
         );
         assert!(contract.request.query.is_empty());
         assert_eq!(contract.cases.len(), 3);
-        assert_eq!(contract.cases[0].response.api_code, 0);
+        assert_eq!(contract.cases[0].response.api_code, Some(0));
         assert_eq!(
             contract.cases[0].response.rust_model.as_deref(),
             Some("Buvid3Data")
@@ -140,7 +140,7 @@ mod tests {
         );
         assert!(contract.request.query.is_empty());
         assert_eq!(contract.cases.len(), 3);
-        assert_eq!(contract.cases[2].response.api_code, 0);
+        assert_eq!(contract.cases[2].response.api_code, Some(0));
         assert_eq!(
             contract.cases[2].response.rust_model.as_deref(),
             Some("BuvidData")

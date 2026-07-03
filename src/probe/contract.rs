@@ -108,6 +108,9 @@ impl CapturedRequest {
     pub fn sanitized(&self) -> Self {
         let mut output = self.clone();
         redact_headers(&mut output.headers);
+        if let Some(body) = &mut output.body {
+            redact_json_value(body);
+        }
         output
     }
 }
@@ -129,7 +132,7 @@ pub struct ProbeResult {
 impl ProbeResult {
     pub fn sanitized(&self) -> Self {
         let mut output = self.clone();
-        redact_headers(&mut output.request.headers);
+        output.request = output.request.sanitized();
         redact_headers(&mut output.response.headers);
         output
     }
@@ -191,6 +194,39 @@ fn redact_headers(headers: &mut BTreeMap<String, String>) {
         ) {
             *value = "<redacted>".to_string();
         }
+    }
+}
+
+fn redact_json_value(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::Object(map) => {
+            for (key, value) in map.iter_mut() {
+                let normalized = key.to_ascii_lowercase();
+                if matches!(
+                    normalized.as_str(),
+                    "sessdata"
+                        | "bili_jct"
+                        | "csrf"
+                        | "dedeuserid"
+                        | "dedeuserid__ckmd5"
+                        | "dede_user_id"
+                        | "dede_user_id_ckmd5"
+                        | "buvid3"
+                        | "authorization"
+                        | "cookie"
+                ) {
+                    *value = serde_json::Value::String("<redacted>".to_string());
+                } else {
+                    redact_json_value(value);
+                }
+            }
+        }
+        serde_json::Value::Array(items) => {
+            for item in items {
+                redact_json_value(item);
+            }
+        }
+        _ => {}
     }
 }
 
@@ -526,6 +562,37 @@ mod tests {
 
         assert_eq!(sanitized.request.headers["cookie"], "<redacted>");
         assert_eq!(sanitized.request.headers["user-agent"], "bpi-probe-test");
+        Ok(())
+    }
+
+    #[test]
+    fn probe_result_redacts_sensitive_request_body_fields() -> Result<(), BpiError> {
+        let result = ProbeResult {
+            contract: "manga.example.normal".to_string(),
+            request: CapturedRequest {
+                method: HttpMethod::Post,
+                url: "https://manga.bilibili.com/example".to_string(),
+                headers: Default::default(),
+                query: Default::default(),
+                body: Some(serde_json::json!({
+                    "pageNum": 1,
+                    "csrf": "secret",
+                    "nested": { "bili_jct": "secret" }
+                })),
+            },
+            response: ProbeResponse {
+                status: 200,
+                headers: Default::default(),
+                body: serde_json::json!({ "code": 0 }),
+            },
+        };
+
+        let sanitized = result.sanitized();
+        let body = sanitized.request.body.expect("body should remain present");
+
+        assert_eq!(body["pageNum"], 1);
+        assert_eq!(body["csrf"], "<redacted>");
+        assert_eq!(body["nested"]["bili_jct"], "<redacted>");
         Ok(())
     }
 }

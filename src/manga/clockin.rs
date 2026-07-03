@@ -111,6 +111,15 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/manga/read-core/clock-in-info/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -140,6 +149,63 @@ mod tests {
         assert_eq!(data.points.len(), 7); // 一周7天
         assert!(!data.point_infos.is_empty());
 
+        Ok(())
+    }
+
+    #[test]
+    fn manga_clock_in_info_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "manga.clock_in_info");
+        assert_eq!(contract.request.method, HttpMethod::Post);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://manga.bilibili.com/twirp/activity.v1.Activity/GetClockInInfo"
+        );
+        assert!(contract.request.query.is_empty());
+        assert_eq!(contract.cases.len(), 3);
+        for case in &contract.cases {
+            assert_eq!(case.response.api_code, Some(0));
+            assert_eq!(case.response.rust_model.as_deref(), Some("ClockInInfoData"));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn manga_clock_in_info_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<ClockInInfoData>::from_slice(include_bytes!(
+            "../../tests/contracts/manga/read-core/clock-in-info/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.points.len(), 7);
+        assert_eq!(payload.point_infos[0].point, 10);
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/manga/read-core/clock-in-info/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn manga_clock_in_info_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<ClockInInfoData>>(body)?.into_payload()?;
+
+            assert_eq!(payload.points.len(), 7);
+            assert!(!payload.point_infos.is_empty());
+        }
         Ok(())
     }
 }

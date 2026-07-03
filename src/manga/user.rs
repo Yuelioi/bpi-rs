@@ -99,6 +99,15 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/manga/read-core/coupons/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -109,6 +118,98 @@ mod tests {
 
         tracing::info!("{:#?}", result.data.unwrap());
 
+        Ok(())
+    }
+
+    #[test]
+    fn manga_coupons_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "manga.coupons");
+        assert_eq!(contract.request.method, HttpMethod::Post);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://manga.bilibili.com/twirp/user.v1.User/GetCoupons"
+        );
+
+        let body = contract
+            .request
+            .body
+            .as_ref()
+            .expect("contract should include json body");
+        assert_eq!(body["pageNum"], 1);
+        assert_eq!(body["pageSize"], 20);
+        assert_eq!(body["notExpired"], true);
+        assert_eq!(body["tabType"], 1);
+        assert_eq!(body["type"], 0);
+
+        let anonymous = &contract.cases[0].response;
+        assert_eq!(anonymous.http_status, Some(401));
+        assert_eq!(anonymous.api_code, None);
+        assert_eq!(anonymous.api_code_text.as_deref(), Some("unauthenticated"));
+        assert_eq!(anonymous.error.as_deref(), Some("requires_login"));
+
+        for case in &contract.cases[1..] {
+            assert_eq!(case.response.api_code, Some(0));
+            assert_eq!(case.response.rust_model.as_deref(), Some("CouponsData"));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn manga_coupons_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let anonymous: serde_json::Value = serde_json::from_slice(include_bytes!(
+            "../../tests/contracts/manga/read-core/coupons/responses/anonymous.requires_login.json"
+        ))?;
+        assert_eq!(anonymous["code"], "unauthenticated");
+        assert_eq!(anonymous["msg"], "need login");
+
+        let payload = ApiEnvelope::<CouponsData>::from_slice(include_bytes!(
+            "../../tests/contracts/manga/read-core/coupons/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.total_remain_amount, 0);
+        assert!(payload.user_coupons.is_empty());
+        assert_eq!(payload.coupon_info.remain_coupon, 0);
+        assert_eq!(payload.coupon_info.remain_silver, 0);
+        assert_eq!(payload.coupon_info.remain_shop_coupon, 0);
+        Ok(())
+    }
+
+    fn local_probe_response(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/manga/read-core/coupons/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        serde_json::from_slice(&bytes).ok()
+    }
+
+    #[test]
+    fn manga_coupons_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(value) = local_probe_response(profile) else {
+                continue;
+            };
+            let response = value
+                .get("response")
+                .ok_or_else(|| BpiError::unsupported_response("probe response missing response"))?;
+            let body = response
+                .get("body")
+                .cloned()
+                .ok_or_else(|| BpiError::unsupported_response("probe response missing body"))?;
+
+            if profile == "anonymous" {
+                assert_eq!(
+                    response.get("status").and_then(serde_json::Value::as_u64),
+                    Some(401)
+                );
+                assert_eq!(body["code"], "unauthenticated");
+                continue;
+            }
+
+            let payload =
+                serde_json::from_value::<ApiEnvelope<CouponsData>>(body)?.into_payload()?;
+            assert!(payload.total_remain_amount >= 0);
+        }
         Ok(())
     }
 }

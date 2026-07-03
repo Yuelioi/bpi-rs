@@ -61,7 +61,12 @@ pub struct EndpointCase {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EndpointResponse {
-    pub api_code: i32,
+    #[serde(default)]
+    pub http_status: Option<u16>,
+    #[serde(default)]
+    pub api_code: Option<i32>,
+    #[serde(default)]
+    pub api_code_text: Option<String>,
     #[serde(default)]
     pub fixture: Option<String>,
     #[serde(default)]
@@ -91,7 +96,7 @@ mod tests {
         );
         assert_eq!(contract.cases.len(), 3);
         assert_eq!(contract.cases[0].name, "anonymous");
-        assert_eq!(contract.cases[0].response.api_code, -101);
+        assert_eq!(contract.cases[0].response.api_code, Some(-101));
         assert_eq!(
             contract.cases[2].response.fixture.as_deref(),
             Some("responses/vip.success.json")
@@ -121,6 +126,41 @@ mod tests {
         .into_payload()?;
 
         assert!(payload.is_active());
+        Ok(())
+    }
+
+    #[test]
+    fn endpoint_contract_supports_non_numeric_api_code_response() -> Result<(), BpiError> {
+        let contract = EndpointContract::from_slice(
+            br#"{
+                "name": "manga.coupons",
+                "request": {
+                    "method": "POST",
+                    "url": "https://manga.bilibili.com/twirp/user.v1.User/GetCoupons",
+                    "auth": { "requires": [] }
+                },
+                "cases": [
+                    {
+                        "name": "anonymous",
+                        "profile": "anonymous",
+                        "auth": { "requires": [] },
+                        "response": {
+                            "http_status": 401,
+                            "api_code_text": "unauthenticated",
+                            "fixture": "responses/anonymous.requires_login.json",
+                            "fixture_kind": "probe_error_body",
+                            "error": "requires_login"
+                        }
+                    }
+                ]
+            }"#,
+        )?;
+
+        let response = &contract.cases[0].response;
+
+        assert_eq!(response.http_status, Some(401));
+        assert_eq!(response.api_code, None);
+        assert_eq!(response.api_code_text.as_deref(), Some("unauthenticated"));
         Ok(())
     }
 }

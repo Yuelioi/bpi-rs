@@ -65,7 +65,7 @@ mod tests {
         );
         assert!(contract.request.query.is_empty());
         assert_eq!(contract.cases.len(), 3);
-        assert_eq!(contract.cases[0].response.api_code, -401);
+        assert_eq!(contract.cases[0].response.api_code, Some(-401));
         assert_eq!(
             contract.cases[1].response.rust_model.as_deref(),
             Some("Vec<GiftTypeItem>")

@@ -259,9 +259,9 @@ mod tests {
             assert_eq!(contract.request.url.as_str(), *url);
             assert!(contract.request.query.is_empty());
             assert_eq!(contract.cases.len(), 3);
-            assert_eq!(contract.cases[0].response.api_code, -101);
-            assert_eq!(contract.cases[1].response.api_code, 0);
-            assert_eq!(contract.cases[2].response.api_code, 0);
+            assert_eq!(contract.cases[0].response.api_code, Some(-101));
+            assert_eq!(contract.cases[1].response.api_code, Some(0));
+            assert_eq!(contract.cases[2].response.api_code, Some(0));
         }
         Ok(())
     }
@@ -280,7 +280,7 @@ mod tests {
 
             assert_eq!(vip.profile.as_deref(), Some("vip"));
             assert!(vip.auth.requires_cookie());
-            assert_eq!(vip.response.api_code, 0);
+            assert_eq!(vip.response.api_code, Some(0));
         }
         Ok(())
     }

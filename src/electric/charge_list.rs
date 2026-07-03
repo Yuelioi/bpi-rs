@@ -488,7 +488,7 @@ mod tests {
             Some("10")
         );
         assert_eq!(contract.cases.len(), 3);
-        assert_eq!(contract.cases[0].response.api_code, 800501007);
+        assert_eq!(contract.cases[0].response.api_code, Some(800501007));
         assert_eq!(
             contract.cases[1].response.rust_model.as_deref(),
             Some("RechargeData")

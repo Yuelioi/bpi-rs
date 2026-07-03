@@ -140,7 +140,16 @@ fn capture_request(request: &RequestBuilder) -> BpiResult<CapturedRequest> {
         url: request.url().to_string(),
         headers: collect_headers(request.headers()),
         query,
-        body: None,
+        body: captured_body(request.body()),
+    })
+}
+
+fn captured_body(body: Option<&reqwest::Body>) -> Option<serde_json::Value> {
+    let bytes = body?.as_bytes()?;
+    serde_json::from_slice(bytes).ok().or_else(|| {
+        std::str::from_utf8(bytes)
+            .ok()
+            .map(|body| serde_json::Value::String(body.to_string()))
     })
 }
 
@@ -252,6 +261,37 @@ mod tests {
 
         let sanitized = captured.sanitized();
         assert_eq!(sanitized.headers["cookie"], "<redacted>");
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn captured_request_records_json_body() -> Result<(), BpiError> {
+        let contract = ApiContract::from_slice(
+            br#"{
+                "name": "manga.coupons.normal",
+                "request": {
+                    "method": "POST",
+                    "url": "https://manga.bilibili.com/twirp/user.v1.User/GetCoupons",
+                    "body": {
+                        "pageNum": 1,
+                        "pageSize": 20,
+                        "notExpired": true,
+                        "tabType": 1,
+                        "type": 0
+                    }
+                }
+            }"#,
+        )?;
+        let client = BpiClient::new()?;
+        let request = build_request(&client, &contract).await?;
+        let captured = capture_request(&request)?;
+
+        let body = captured.body.expect("json body should be captured");
+        assert_eq!(body["pageNum"], 1);
+        assert_eq!(body["pageSize"], 20);
+        assert_eq!(body["notExpired"], true);
+        assert_eq!(body["tabType"], 1);
+        assert_eq!(body["type"], 0);
         Ok(())
     }
 

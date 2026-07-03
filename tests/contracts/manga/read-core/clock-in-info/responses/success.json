@@ -1,0 +1,31 @@
+{
+  "code": 0,
+  "data": {
+    "breathe_icon": "https://example.invalid/breathe.svga",
+    "coupon_pic": "https://example.invalid/coupon.png",
+    "credit_icon": "https://example.invalid/credit.png",
+    "day_count": 0,
+    "new_credit_x_icon": "https://example.invalid/new-credit.png",
+    "point_infos": [
+      {
+        "is_activity": false,
+        "origin_point": 10,
+        "point": 10,
+        "title": "10 points"
+      }
+    ],
+    "points": [
+      10,
+      20,
+      20,
+      10,
+      10,
+      10,
+      30
+    ],
+    "sign_before_icon": "https://example.invalid/sign-before.png",
+    "sign_today_icon": "https://example.invalid/sign-today.png",
+    "status": 0
+  },
+  "msg": ""
+}

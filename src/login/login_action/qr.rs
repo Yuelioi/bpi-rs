@@ -117,7 +117,7 @@ mod tests {
         assert_eq!(contract.request.url.as_str(), QR_GENERATE_ENDPOINT);
         assert!(contract.request.query.is_empty());
         assert!(!contract.request.auth.requires_cookie());
-        assert_eq!(contract.cases[0].response.api_code, 0);
+        assert_eq!(contract.cases[0].response.api_code, Some(0));
         assert_eq!(
             contract.cases[0].response.rust_model.as_deref(),
             Some("GenerateQrCodeData")
@@ -139,7 +139,7 @@ mod tests {
             Some("${qrcode_key}")
         );
         assert!(!contract.request.auth.requires_cookie());
-        assert_eq!(contract.cases[0].response.api_code, 0);
+        assert_eq!(contract.cases[0].response.api_code, Some(0));
         Ok(())
     }
 

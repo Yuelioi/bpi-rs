@@ -96,6 +96,15 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/manga/read-core/season-info/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -110,6 +119,63 @@ mod tests {
 
         tracing::info!("{:#?}", data);
 
+        Ok(())
+    }
+
+    #[test]
+    fn manga_season_info_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "manga.season_info");
+        assert_eq!(contract.request.method, HttpMethod::Post);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://manga.bilibili.com/twirp/user.v1.Season/GetSeasonInfo"
+        );
+        assert!(contract.request.query.is_empty());
+        assert_eq!(contract.cases.len(), 3);
+        for case in &contract.cases {
+            assert_eq!(case.response.api_code, Some(0));
+            assert_eq!(case.response.rust_model.as_deref(), Some("SeasonInfoData"));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn manga_season_info_response_fixture_parses_declared_model() -> BpiResult<()> {
+        let payload = ApiEnvelope::<SeasonInfoData>::from_slice(include_bytes!(
+            "../../tests/contracts/manga/read-core/season-info/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(payload.season_id, "0");
+        assert!(!payload.current_time.is_empty());
+        Ok(())
+    }
+
+    fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/manga/read-core/season-info/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn manga_season_info_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_probe_body(profile) else {
+                continue;
+            };
+            let payload =
+                serde_json::from_value::<ApiEnvelope<SeasonInfoData>>(body)?.into_payload()?;
+
+            assert!(!payload.season_id.is_empty());
+            assert!(!payload.current_time.is_empty());
+        }
         Ok(())
     }
 }

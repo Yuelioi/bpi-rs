@@ -1,0 +1,18 @@
+{
+  "code": 0,
+  "data": {
+    "cover": "",
+    "current_time": "2026-07-03T16:30:49+08:00",
+    "end_time": "2026-07-18T16:30:49+08:00",
+    "rank": null,
+    "remain_amount": 0,
+    "season_id": "0",
+    "season_title": "",
+    "start_time": "2026-06-18T16:30:49+08:00",
+    "tasks": [],
+    "text": null,
+    "today_tasks": [],
+    "welfare": []
+  },
+  "msg": ""
+}

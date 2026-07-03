@@ -242,7 +242,7 @@ mod tests {
             Some("32251")
         );
         assert_eq!(contract.cases.len(), 3);
-        assert_eq!(contract.cases[0].response.api_code, -101);
+        assert_eq!(contract.cases[0].response.api_code, Some(-101));
         assert_eq!(
             contract.cases[1].response.rust_model.as_deref(),
             Some("BlindGiftData")

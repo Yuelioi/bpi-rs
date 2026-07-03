@@ -1,0 +1,13 @@
+{
+  "code": 0,
+  "data": {
+    "coupon_info": {
+      "remain_coupon": 0,
+      "remain_shop_coupon": 0,
+      "remain_silver": 0
+    },
+    "total_remain_amount": 0,
+    "user_coupons": []
+  },
+  "msg": ""
+}
