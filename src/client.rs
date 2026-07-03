@@ -17,6 +17,8 @@ use crate::sign::wbi::WbiKeyCache;
 use crate::user::UserClient;
 #[cfg(feature = "video")]
 use crate::video::VideoClient;
+#[cfg(feature = "web_widget")]
+use crate::web_widget::WebWidgetClient;
 
 const DEFAULT_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
     AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
@@ -386,6 +388,12 @@ impl BpiClient {
         UserClient::new(self)
     }
 
+    /// Creates a web widget domain client.
+    #[cfg(feature = "web_widget")]
+    pub fn web_widget(&self) -> WebWidgetClient<'_> {
+        WebWidgetClient::new(self)
+    }
+
     /// Creates a client from structured account configuration.
     pub fn from_config(config: &Account) -> Result<Self, BpiError> {
         Self::builder().account(config.clone()).build()
@@ -615,6 +623,16 @@ mod tests {
             first.wbi_keys_for_test("2026-07-02T10")?,
             second.wbi_keys_for_test("2026-07-02T10")?
         );
+        Ok(())
+    }
+
+    #[cfg(feature = "web_widget")]
+    #[test]
+    fn web_widget_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _web_widget = client.web_widget();
+
         Ok(())
     }
 }
