@@ -1,0 +1,20 @@
+{
+  "code": 0,
+  "data": {
+    "has_more": true,
+    "items": [
+      {
+        "action": "赞了",
+        "attend": 2,
+        "desc": "",
+        "face": "<redacted-face-url>",
+        "mid": "1",
+        "name": "<redacted-user>"
+      }
+    ],
+    "offset": "<redacted-offset>",
+    "total": 114
+  },
+  "message": "0",
+  "ttl": 1
+}

@@ -1,0 +1,25 @@
+{
+  "code": 0,
+  "data": {
+    "item": {
+      "basic": {
+        "comment_id_str": "362542728",
+        "comment_type": 11,
+        "like_icon": {
+          "action_url": "https://i0.hdslb.com/bfs/garb/item/7335b2a048a335f8705e1c6cdec6c5c65db7cc8e.bin",
+          "end_url": "",
+          "id": 35577,
+          "start_url": ""
+        },
+        "rid_str": "362542728",
+        "jump_url": "//www.bilibili.com/opus/1099138163191840776"
+      },
+      "id_str": "1099138163191840776",
+      "modules": {},
+      "type": "DYNAMIC_TYPE_DRAW",
+      "visible": true
+    }
+  },
+  "message": "0",
+  "ttl": 1
+}

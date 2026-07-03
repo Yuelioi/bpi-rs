@@ -299,10 +299,49 @@ mod tests {
         DynamicLotteryNoticeParams, DynamicPicsParams, DynamicReactionsParams,
     };
     use crate::ids::DynamicId;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+    use std::collections::BTreeMap;
     use tracing::info;
 
     fn parse_dynamic_id(value: &str) -> Result<DynamicId, BpiError> {
         value.parse()
+    }
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "detail" => include_bytes!("../../tests/contracts/dynamic/detail/detail/contract.json")
+                .as_slice(),
+            "reactions" => {
+                include_bytes!("../../tests/contracts/dynamic/detail/reactions/contract.json")
+                    .as_slice()
+            }
+            "forwards" => {
+                include_bytes!("../../tests/contracts/dynamic/detail/forwards/contract.json")
+                    .as_slice()
+            }
+            "pics" => {
+                include_bytes!("../../tests/contracts/dynamic/detail/pics/contract.json").as_slice()
+            }
+            "forward-item" => {
+                include_bytes!("../../tests/contracts/dynamic/detail/forward-item/contract.json")
+                    .as_slice()
+            }
+            _ => unreachable!("unknown dynamic detail endpoint"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
+
+    fn query_map<I>(query: I) -> BTreeMap<String, String>
+    where
+        I: IntoIterator<Item = (&'static str, String)>,
+    {
+        query
+            .into_iter()
+            .map(|(key, value)| (key.to_string(), value))
+            .collect()
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -509,6 +548,237 @@ mod tests {
                 ..
             }
         ));
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_detail_read_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let detail = contract("detail")?;
+        assert_eq!(detail.name, "dynamic.detail");
+        assert_eq!(detail.request.method, HttpMethod::Get);
+        assert_eq!(
+            detail.request.url.as_str(),
+            "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail"
+        );
+        assert_eq!(
+            detail.request.query,
+            query_map(
+                DynamicDetailParams::new(parse_dynamic_id("1099138163191840776")?).query_pairs()
+            )
+        );
+        assert_eq!(detail.cases.len(), 3);
+
+        let reactions = contract("reactions")?;
+        assert_eq!(reactions.name, "dynamic.detail_reaction");
+        assert_eq!(
+            reactions.request.url.as_str(),
+            "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/reaction"
+        );
+        assert_eq!(
+            reactions.request.query,
+            query_map(
+                DynamicReactionsParams::new(parse_dynamic_id("1099138163191840776")?).query_pairs()
+            )
+        );
+
+        let forwards = contract("forwards")?;
+        assert_eq!(forwards.name, "dynamic.detail_forward");
+        assert_eq!(
+            forwards.request.url.as_str(),
+            "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/forward"
+        );
+        assert_eq!(
+            forwards.request.query,
+            query_map(
+                DynamicForwardsParams::new(parse_dynamic_id("1099138163191840776")?).query_pairs()
+            )
+        );
+
+        let pics = contract("pics")?;
+        assert_eq!(pics.name, "dynamic.detail_pic");
+        assert_eq!(
+            pics.request.url.as_str(),
+            "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/pic"
+        );
+        assert_eq!(
+            pics.request.query,
+            query_map(
+                DynamicPicsParams::new(parse_dynamic_id("1099138163191840776")?).query_pairs()
+            )
+        );
+
+        let forward_item = contract("forward-item")?;
+        let forward_item_id = parse_dynamic_id("1110902525317349376")?;
+        assert_eq!(forward_item.name, "dynamic.detail_forward_item");
+        assert_eq!(
+            forward_item.request.url.as_str(),
+            "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/forward/item"
+        );
+        assert_eq!(
+            forward_item.request.query,
+            query_map(DynamicForwardItemParams::new(forward_item_id).query_pairs())
+        );
+        assert_eq!(
+            forward_item.cases[0].response.error.as_deref(),
+            Some("requires_login")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_detail_read_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/detail/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/detail/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/detail/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<DynamicDetailData>::from_slice(bytes)?.into_payload()?;
+            assert_eq!(payload.item.id_str, "1099138163191840776");
+        }
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/reactions/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/reactions/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/reactions/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<DynamicReactionData>::from_slice(bytes)?.into_payload()?;
+            let _ = payload.total;
+        }
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/forwards/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/forwards/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/forwards/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<DynamicForwardData>::from_slice(bytes)?.into_payload()?;
+            assert_eq!(payload.items.len(), 1);
+        }
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/pics/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/pics/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!("../../tests/contracts/dynamic/detail/pics/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<Vec<DynamicPic>>::from_slice(bytes)?.into_payload()?;
+            assert_eq!(payload.len(), 1);
+        }
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/forward-item/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/dynamic/detail/forward-item/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            let payload =
+                ApiEnvelope::<DynamicForwardInfoData>::from_slice(bytes)?.into_payload()?;
+            assert_eq!(payload.item.id_str, "1110902525317349376");
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn dynamic_forward_item_anonymous_fixture_records_login_error() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/dynamic/detail/forward-item/responses/anonymous.requires_login.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+
+        assert_eq!(err.code(), Some(-101));
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!(
+            "target/bpi-probe-runs/dynamic/detail-readonly/{endpoint}/{profile}.response.json"
+        );
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn dynamic_detail_read_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("detail", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<DynamicDetailData>>(body)?
+                    .into_payload()?;
+                assert_eq!(payload.item.id_str, "1099138163191840776");
+            }
+
+            if let Some(body) = local_probe_body("reactions", profile) {
+                let _ = serde_json::from_value::<ApiEnvelope<DynamicReactionData>>(body)?
+                    .into_payload()?;
+            }
+
+            if let Some(body) = local_probe_body("forwards", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<DynamicForwardData>>(body)?
+                    .into_payload()?;
+                assert!(!payload.items.is_empty());
+            }
+
+            if let Some(body) = local_probe_body("pics", profile) {
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<Vec<DynamicPic>>>(body)?.into_payload()?;
+                assert!(!payload.is_empty());
+            }
+        }
+
+        if let Some(body) = local_probe_body("forward-item", "anonymous") {
+            let err = serde_json::from_value::<ApiEnvelope<serde_json::Value>>(body)?
+                .ensure_success()
+                .unwrap_err();
+            assert_eq!(err.code(), Some(-101));
+        }
+
+        for profile in ["normal", "vip"] {
+            if let Some(body) = local_probe_body("forward-item", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<DynamicForwardInfoData>>(body)?
+                    .into_payload()?;
+                assert_eq!(payload.item.id_str, "1110902525317349376");
+            }
+        }
         Ok(())
     }
 }

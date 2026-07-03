@@ -1,0 +1,65 @@
+{
+  "code": 0,
+  "data": {
+    "has_more": true,
+    "items": [
+      {
+        "desc": {
+          "rich_text_nodes": [
+            {
+              "orig_text": "<redacted-text>",
+              "text": "<redacted-text>",
+              "type": "RICH_TEXT_NODE_TYPE_TEXT"
+            }
+          ],
+          "text": "<redacted-text>"
+        },
+        "id_str": "1130294160958423045",
+        "pub_time": "2025-11-01",
+        "user": {
+          "face": "<redacted-face-url>",
+          "face_nft": false,
+          "mid": 1,
+          "name": "<redacted-user>",
+          "official": {
+            "role": 0,
+            "title": "",
+            "desc": "",
+            "type": -1
+          },
+          "pendant": {
+            "pid": 0,
+            "name": "",
+            "image": "",
+            "expire": 0,
+            "image_enhance": "",
+            "image_enhance_frame": "",
+            "n_pid": 0
+          },
+          "vip": {
+            "type": 0,
+            "status": 0,
+            "due_date": 0,
+            "label": {
+              "text": "",
+              "label_theme": "",
+              "text_color": "",
+              "bg_style": 0,
+              "bg_color": ""
+            },
+            "nickname_color": "",
+            "role": 0,
+            "tv_due_date": 0,
+            "tv_vip_pay_type": 0,
+            "tv_vip_status": 0,
+            "vip_pay_type": 0
+          }
+        }
+      }
+    ],
+    "offset": "<redacted-offset>",
+    "total": 12
+  },
+  "message": "0",
+  "ttl": 1
+}
