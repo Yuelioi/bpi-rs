@@ -1,0 +1,56 @@
+{
+  "code": 0,
+  "data": {
+    "assist": 0,
+    "blacklist": 0,
+    "config": {
+      "read_only": false,
+      "show_up_flag": false,
+      "showtopic": 0
+    },
+    "control": {
+      "answer_guide_android_url": "",
+      "answer_guide_icon_url": "",
+      "answer_guide_ios_url": "",
+      "answer_guide_text": "",
+      "bg_text": "",
+      "child_input_text": "",
+      "disable_jump_emote": false,
+      "empty_page": null,
+      "enable_charged": false,
+      "enable_cm_biz_helper": false,
+      "giveup_input_text": "",
+      "input_disable": false,
+      "preload_resources": null,
+      "root_input_text": "",
+      "screenshot_icon_state": 0,
+      "show_text": "",
+      "show_type": 0,
+      "upload_picture_icon_state": 0,
+      "web_selection": false
+    },
+    "folder": {
+      "has_folded": false,
+      "is_folded": false,
+      "rule": ""
+    },
+    "mode": 0,
+    "page": {
+      "acount": 0,
+      "count": 0,
+      "num": 0,
+      "size": 0
+    },
+    "replies": null,
+    "support_mode": null,
+    "top": null,
+    "upper": {
+      "mid": 0,
+      "top": null,
+      "vote": null
+    },
+    "vote": 0
+  },
+  "message": "OK",
+  "ttl": 1
+}

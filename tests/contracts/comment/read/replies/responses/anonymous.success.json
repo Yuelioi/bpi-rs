@@ -1,0 +1,532 @@
+{
+  "code": 0,
+  "data": {
+    "config": {
+      "read_only": false,
+      "show_up_flag": false,
+      "showtopic": 0
+    },
+    "control": {
+      "answer_guide_android_url": "https://www.bilibili.com/h5/newbie/entry?navhide=1&re_src=6",
+      "answer_guide_icon_url": "http://i0.hdslb.com/bfs/emote/96940d16602cacbbac796245b7bb99fa9b5c970c.png",
+      "answer_guide_ios_url": "https://www.bilibili.com/h5/newbie/entry?navhide=1&re_src=12",
+      "answer_guide_text": "需要升级成为lv2会员后才可以评论，先去答题转正吧！",
+      "bg_text": "",
+      "child_input_text": "新的风暴已经出现，你的妙评何时再现",
+      "disable_jump_emote": false,
+      "empty_page": null,
+      "enable_charged": false,
+      "enable_cm_biz_helper": false,
+      "giveup_input_text": "不发没关系，请继续友善哦~",
+      "input_disable": false,
+      "preload_resources": null,
+      "root_input_text": "新的风暴已经出现，你的妙评何时再现",
+      "screenshot_icon_state": 1,
+      "show_text": "",
+      "show_type": 1,
+      "upload_picture_icon_state": 1,
+      "web_selection": false
+    },
+    "page": {
+      "count": 1,
+      "num": 1,
+      "size": 5
+    },
+    "replies": [
+      {
+        "action": 0,
+        "assist": 0,
+        "attr": 0,
+        "content": {
+          "jump_url": {},
+          "max_line": 6,
+          "members": [],
+          "message": "考古测试"
+        },
+        "count": 0,
+        "ctime": 1756936889,
+        "dialog": 273662325057,
+        "dialog_str": "273662325057",
+        "dynamic_id_str": "0",
+        "fansgrade": 0,
+        "folder": {
+          "has_folded": false,
+          "is_folded": false,
+          "rule": ""
+        },
+        "invisible": false,
+        "like": 1,
+        "member": {
+          "avatar": "https://i2.hdslb.com/bfs/face/8d982553a85d0998186840e66e4841fc62006acd.jpg",
+          "avatar_item": {
+            "container_size": {
+              "height": 1.8,
+              "width": 1.8
+            },
+            "fallback_layers": {
+              "is_critical_group": true,
+              "layers": [
+                {
+                  "general_spec": {
+                    "pos_spec": {
+                      "axis_x": 0.9,
+                      "axis_y": 0.9,
+                      "coordinate_pos": 2
+                    },
+                    "render_spec": {
+                      "opacity": 1
+                    },
+                    "size_spec": {
+                      "height": 1,
+                      "width": 1
+                    }
+                  },
+                  "layer_config": {
+                    "is_critical": true,
+                    "layer_mask": {
+                      "general_spec": {
+                        "pos_spec": {
+                          "axis_x": 0.9,
+                          "axis_y": 0.9,
+                          "coordinate_pos": 2
+                        },
+                        "render_spec": {
+                          "opacity": 1
+                        },
+                        "size_spec": {
+                          "height": 1,
+                          "width": 1
+                        }
+                      },
+                      "mask_src": {
+                        "draw": {
+                          "color_config": {
+                            "day": {
+                              "argb": "#FF000000"
+                            }
+                          },
+                          "draw_type": 1,
+                          "fill_mode": 1
+                        },
+                        "src_type": 3
+                      }
+                    },
+                    "tags": {
+                      "AVATAR_LAYER": {}
+                    }
+                  },
+                  "resource": {
+                    "res_image": {
+                      "image_src": {
+                        "placeholder": 6,
+                        "remote": {
+                          "bfs_style": "widget-layer-avatar",
+                          "url": "https://i2.hdslb.com/bfs/face/8d982553a85d0998186840e66e4841fc62006acd.jpg"
+                        },
+                        "src_type": 1
+                      }
+                    },
+                    "res_type": 3
+                  },
+                  "visible": true
+                },
+                {
+                  "general_spec": {
+                    "pos_spec": {
+                      "axis_x": 1.0333333333333332,
+                      "axis_y": 1.0333333333333332,
+                      "coordinate_pos": 1
+                    },
+                    "render_spec": {
+                      "opacity": 1
+                    },
+                    "size_spec": {
+                      "height": 0.4,
+                      "width": 0.4
+                    }
+                  },
+                  "layer_config": {
+                    "tags": {
+                      "ICON_LAYER": {}
+                    }
+                  },
+                  "resource": {
+                    "res_native_draw": {
+                      "draw_src": {
+                        "draw": {
+                          "color_config": {
+                            "day": {
+                              "argb": "#FFFFFFFF"
+                            },
+                            "is_dark_mode_aware": true,
+                            "night": {
+                              "argb": "#FF17181A"
+                            }
+                          },
+                          "draw_type": 1,
+                          "fill_mode": 1
+                        },
+                        "src_type": 3
+                      }
+                    },
+                    "res_type": 5
+                  },
+                  "visible": true
+                },
+                {
+                  "general_spec": {
+                    "pos_spec": {
+                      "axis_x": 1.0666666666666669,
+                      "axis_y": 1.0666666666666669,
+                      "coordinate_pos": 1
+                    },
+                    "render_spec": {
+                      "opacity": 1
+                    },
+                    "size_spec": {
+                      "height": 0.3333333333333333,
+                      "width": 0.3333333333333333
+                    }
+                  },
+                  "layer_config": {
+                    "tags": {
+                      "ICON_LAYER": {}
+                    }
+                  },
+                  "resource": {
+                    "res_image": {
+                      "image_src": {
+                        "local": 1,
+                        "src_type": 2
+                      }
+                    },
+                    "res_type": 3
+                  },
+                  "visible": true
+                }
+              ]
+            },
+            "mid": "4279370"
+          },
+          "contract_desc": "",
+          "face_nft_new": 0,
+          "fans_detail": null,
+          "handle": "",
+          "is_contractor": false,
+          "is_senior_member": 0,
+          "level_info": {
+            "current_exp": 0,
+            "current_level": 6,
+            "current_min": 0,
+            "next_exp": 0
+          },
+          "mid": "4279370",
+          "nameplate": {
+            "condition": "所有自制视频总播放数>=100万，数据次日更新",
+            "image": "https://i1.hdslb.com/bfs/face/27a952195555e64508310e366b3e38bd4cd143fc.png",
+            "image_small": "https://i1.hdslb.com/bfs/face/0497be49e08357bf05bca56e33a0637a273a7610.png",
+            "level": "稀有勋章",
+            "name": "知名偶像",
+            "nid": 8
+          },
+          "nft_interaction": null,
+          "official_verify": {
+            "desc": "",
+            "type": -1
+          },
+          "pendant": {
+            "expire": 0,
+            "image": "",
+            "image_enhance": "",
+            "image_enhance_frame": "",
+            "n_pid": 0,
+            "name": "",
+            "pid": 0
+          },
+          "rank": "10000",
+          "senior": {},
+          "sex": "男",
+          "sign": "清雪醒孤月, 迟暮醉人离",
+          "uname": "月离离离离",
+          "user_sailing": {
+            "cardbg": null,
+            "cardbg_with_focus": null,
+            "pendant": null
+          },
+          "user_sailing_v2": {},
+          "vip": {
+            "accessStatus": 0,
+            "avatar_subscript": 1,
+            "dueRemark": "",
+            "label": {
+              "bg_color": "#FB7299",
+              "bg_style": 1,
+              "border_color": "",
+              "img_label_uri_hans": "",
+              "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/8d4f8bfc713826a5412a0a27eaaac4d6b9ede1d9.png",
+              "img_label_uri_hant": "",
+              "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png",
+              "img_label_uri_i18n": "",
+              "img_label_uri_i18n_static": "",
+              "label_goto": {
+                "mobile": "https://big.bilibili.com/mobile/index?navhide=1&from_spmid=vipicon",
+                "pc_web": "https://account.bilibili.com/big?from_spmid=vipicon"
+              },
+              "label_id": -22,
+              "label_theme": "annual_vip",
+              "label_type": 1,
+              "path": "http://i0.hdslb.com/bfs/vip/label_annual.png",
+              "text": "年度大会员",
+              "text_color": "#FFFFFF",
+              "use_img_label": true
+            },
+            "nickname_color": "#FB7299",
+            "themeType": 0,
+            "vipDueDate": 1813334400000,
+            "vipStatus": 1,
+            "vipStatusWarn": "",
+            "vipType": 2
+          }
+        },
+        "mid": 4279370,
+        "mid_str": "4279370",
+        "note_cvid_str": "0",
+        "oid": 23199,
+        "oid_str": "23199",
+        "parent": 2554491176,
+        "parent_str": "2554491176",
+        "rcount": 0,
+        "replies": null,
+        "reply_control": {
+          "max_line": 6,
+          "support_share": true,
+          "time_desc": "302天前发布",
+          "translation_switch": 1
+        },
+        "root": 2554491176,
+        "root_str": "2554491176",
+        "rpid": 273662325057,
+        "rpid_str": "273662325057",
+        "state": 0,
+        "track_info": "",
+        "type": 1,
+        "up_action": {
+          "like": false,
+          "reply": false
+        }
+      }
+    ],
+    "root": {
+      "action": 0,
+      "assist": 0,
+      "attr": 0,
+      "content": {
+        "jump_url": {},
+        "max_line": 6,
+        "members": [],
+        "message": "考古"
+      },
+      "count": 1,
+      "ctime": 1584624905,
+      "dialog": 0,
+      "dialog_str": "0",
+      "dynamic_id_str": "0",
+      "fansgrade": 0,
+      "folder": {
+        "has_folded": false,
+        "is_folded": false,
+        "rule": ""
+      },
+      "invisible": false,
+      "like": 2,
+      "member": {
+        "avatar": "https://i0.hdslb.com/bfs/face/member/noface.jpg",
+        "avatar_item": {
+          "container_size": {
+            "height": 1.8,
+            "width": 1.8
+          },
+          "fallback_layers": {
+            "is_critical_group": true,
+            "layers": [
+              {
+                "general_spec": {
+                  "pos_spec": {
+                    "axis_x": 0.9,
+                    "axis_y": 0.9,
+                    "coordinate_pos": 2
+                  },
+                  "render_spec": {
+                    "opacity": 1
+                  },
+                  "size_spec": {
+                    "height": 1,
+                    "width": 1
+                  }
+                },
+                "layer_config": {
+                  "is_critical": true,
+                  "layer_mask": {
+                    "general_spec": {
+                      "pos_spec": {
+                        "axis_x": 0.9,
+                        "axis_y": 0.9,
+                        "coordinate_pos": 2
+                      },
+                      "render_spec": {
+                        "opacity": 1
+                      },
+                      "size_spec": {
+                        "height": 1,
+                        "width": 1
+                      }
+                    },
+                    "mask_src": {
+                      "draw": {
+                        "color_config": {
+                          "day": {
+                            "argb": "#FF000000"
+                          }
+                        },
+                        "draw_type": 1,
+                        "fill_mode": 1
+                      },
+                      "src_type": 3
+                    }
+                  },
+                  "tags": {
+                    "AVATAR_LAYER": {}
+                  }
+                },
+                "resource": {
+                  "res_image": {
+                    "image_src": {
+                      "placeholder": 6,
+                      "remote": {
+                        "bfs_style": "widget-layer-avatar",
+                        "url": "https://i0.hdslb.com/bfs/face/member/noface.jpg"
+                      },
+                      "src_type": 1
+                    }
+                  },
+                  "res_type": 3
+                },
+                "visible": true
+              }
+            ]
+          },
+          "mid": "413693346"
+        },
+        "contract_desc": "",
+        "face_nft_new": 0,
+        "fans_detail": null,
+        "handle": "",
+        "is_contractor": false,
+        "is_senior_member": 0,
+        "level_info": {
+          "current_exp": 0,
+          "current_level": 0,
+          "current_min": 0,
+          "next_exp": 0
+        },
+        "mid": "413693346",
+        "nameplate": {
+          "condition": "转载视频投稿通过总数>=10，数据次日更新",
+          "image": "https://i1.hdslb.com/bfs/face/8478fb7c54026cd47f09daa493a1b1683113a90d.png",
+          "image_small": "https://i1.hdslb.com/bfs/face/50eef47c3a30a75659d3cc298cfb09031d1a2ce5.png",
+          "level": "普通勋章",
+          "name": "见习搬运工",
+          "nid": 7
+        },
+        "nft_interaction": null,
+        "official_verify": {
+          "desc": "",
+          "type": -1
+        },
+        "pendant": {
+          "expire": 0,
+          "image": "",
+          "image_enhance": "",
+          "image_enhance_frame": "",
+          "n_pid": 0,
+          "name": "",
+          "pid": 0
+        },
+        "rank": "5000",
+        "senior": {},
+        "sex": "保密",
+        "sign": "",
+        "uname": "账号已注销",
+        "user_sailing": {
+          "cardbg": null,
+          "cardbg_with_focus": null,
+          "pendant": null
+        },
+        "user_sailing_v2": {},
+        "vip": {
+          "accessStatus": 0,
+          "avatar_subscript": 0,
+          "dueRemark": "",
+          "label": {
+            "bg_color": "",
+            "bg_style": 0,
+            "border_color": "",
+            "img_label_uri_hans": "",
+            "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/d7b702ef65a976b20ed854cbd04cb9e27341bb79.png",
+            "img_label_uri_hant": "",
+            "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/KJunwh19T5.png",
+            "img_label_uri_i18n": "",
+            "img_label_uri_i18n_static": "",
+            "label_goto": null,
+            "label_id": 0,
+            "label_theme": "",
+            "label_type": 0,
+            "path": "",
+            "text": "",
+            "text_color": "",
+            "use_img_label": true
+          },
+          "nickname_color": "",
+          "themeType": 0,
+          "vipDueDate": 1652630400000,
+          "vipStatus": 0,
+          "vipStatusWarn": "",
+          "vipType": 1
+        }
+      },
+      "mid": 413693346,
+      "mid_str": "413693346",
+      "note_cvid_str": "0",
+      "oid": 23199,
+      "oid_str": "23199",
+      "parent": 0,
+      "parent_str": "0",
+      "rcount": 1,
+      "replies": null,
+      "reply_control": {
+        "max_line": 6,
+        "sub_reply_entry_text": "共1条回复",
+        "sub_reply_title_text": "相关回复共1条",
+        "support_share": true,
+        "time_desc": "2296天前发布",
+        "translation_switch": 1
+      },
+      "root": 0,
+      "root_str": "0",
+      "rpid": 2554491176,
+      "rpid_str": "2554491176",
+      "state": 0,
+      "track_info": "",
+      "type": 1,
+      "up_action": {
+        "like": false,
+        "reply": false
+      }
+    },
+    "upper": {
+      "mid": 14765
+    }
+  },
+  "message": "OK",
+  "ttl": 1
+}

@@ -2,7 +2,7 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
 use serde::{Deserialize, Serialize};
 
 use super::types::{
@@ -17,6 +17,234 @@ use super::types::{
 
 /// 通用的评论列表响应
 pub type CommentListResponse = BpiResponse<CommentListData>;
+
+/// Target comment area.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CommentTarget {
+    r#type: i32,
+    oid: i64,
+}
+
+impl CommentTarget {
+    pub fn new(r#type: i32, oid: i64) -> BpiResult<Self> {
+        if r#type <= 0 {
+            return Err(BpiError::invalid_parameter(
+                "type",
+                "value must be greater than zero",
+            ));
+        }
+        if oid <= 0 {
+            return Err(BpiError::invalid_parameter(
+                "oid",
+                "value must be greater than zero",
+            ));
+        }
+        Ok(Self { r#type, oid })
+    }
+
+    fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("type", self.r#type.to_string()),
+            ("oid", self.oid.to_string()),
+        ]
+    }
+}
+
+/// Sort order for `/x/v2/reply`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CommentSort {
+    Time,
+    Like,
+    Replies,
+}
+
+impl CommentSort {
+    fn as_i32(self) -> i32 {
+        match self {
+            Self::Time => 0,
+            Self::Like => 1,
+            Self::Replies => 2,
+        }
+    }
+}
+
+/// Parameters for `/x/v2/reply`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CommentListParams {
+    target: CommentTarget,
+    page: Option<u32>,
+    page_size: Option<u32>,
+    sort: Option<CommentSort>,
+    nohot: Option<bool>,
+}
+
+impl CommentListParams {
+    pub fn new(target: CommentTarget) -> Self {
+        Self {
+            target,
+            page: None,
+            page_size: None,
+            sort: None,
+            nohot: None,
+        }
+    }
+
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        self.page = Some(validate_positive("pn", page)?);
+        Ok(self)
+    }
+
+    pub fn with_page_size(mut self, page_size: u32) -> BpiResult<Self> {
+        let page_size = validate_positive("ps", page_size)?;
+        if page_size > 20 {
+            return Err(BpiError::invalid_parameter(
+                "ps",
+                "value must be less than or equal to 20",
+            ));
+        }
+        self.page_size = Some(page_size);
+        Ok(self)
+    }
+
+    pub fn with_sort(mut self, sort: CommentSort) -> Self {
+        self.sort = Some(sort);
+        self
+    }
+
+    pub fn without_hot(mut self, nohot: bool) -> Self {
+        self.nohot = Some(nohot);
+        self
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut params = self.target.query_pairs();
+        if let Some(page) = self.page {
+            params.push(("pn", page.to_string()));
+        }
+        if let Some(page_size) = self.page_size {
+            params.push(("ps", page_size.to_string()));
+        }
+        if let Some(sort) = self.sort {
+            params.push(("sort", sort.as_i32().to_string()));
+        }
+        if let Some(nohot) = self.nohot {
+            params.push(("nohot", i32::from(nohot).to_string()));
+        }
+        params
+    }
+}
+
+/// Parameters for `/x/v2/reply/reply`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CommentRepliesParams {
+    target: CommentTarget,
+    root: i64,
+    page: Option<u32>,
+    page_size: Option<u32>,
+}
+
+impl CommentRepliesParams {
+    pub fn new(target: CommentTarget, root: i64) -> BpiResult<Self> {
+        if root <= 0 {
+            return Err(BpiError::invalid_parameter(
+                "root",
+                "value must be greater than zero",
+            ));
+        }
+        Ok(Self {
+            target,
+            root,
+            page: None,
+            page_size: None,
+        })
+    }
+
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        self.page = Some(validate_positive("pn", page)?);
+        Ok(self)
+    }
+
+    pub fn with_page_size(mut self, page_size: u32) -> BpiResult<Self> {
+        self.page_size = Some(validate_positive("ps", page_size)?);
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut params = self.target.query_pairs();
+        params.push(("root", self.root.to_string()));
+        if let Some(page) = self.page {
+            params.push(("pn", page.to_string()));
+        }
+        if let Some(page_size) = self.page_size {
+            params.push(("ps", page_size.to_string()));
+        }
+        params
+    }
+}
+
+/// Parameters for `/x/v2/reply/hot`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CommentHotParams {
+    target: CommentTarget,
+    root: i64,
+    page: Option<u32>,
+    page_size: Option<u32>,
+}
+
+impl CommentHotParams {
+    pub fn new(target: CommentTarget, root: i64) -> BpiResult<Self> {
+        if root <= 0 {
+            return Err(BpiError::invalid_parameter(
+                "root",
+                "value must be greater than zero",
+            ));
+        }
+        Ok(Self {
+            target,
+            root,
+            page: None,
+            page_size: None,
+        })
+    }
+
+    pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
+        self.page = Some(validate_positive("pn", page)?);
+        Ok(self)
+    }
+
+    pub fn with_page_size(mut self, page_size: u32) -> BpiResult<Self> {
+        self.page_size = Some(validate_positive("ps", page_size)?);
+        Ok(self)
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut params = self.target.query_pairs();
+        params.push(("root", self.root.to_string()));
+        if let Some(page) = self.page {
+            params.push(("pn", page.to_string()));
+        }
+        if let Some(page_size) = self.page_size {
+            params.push(("ps", page_size.to_string()));
+        }
+        params
+    }
+}
+
+/// Parameters for `/x/v2/reply/count`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CommentCountParams {
+    target: CommentTarget,
+}
+
+impl CommentCountParams {
+    pub fn new(target: CommentTarget) -> Self {
+        Self { target }
+    }
+
+    pub(crate) fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        self.target.query_pairs()
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommentListData {
@@ -73,7 +301,17 @@ pub struct HotCommentPage {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CountData {
-    count: u64,
+    pub count: u64,
+}
+
+fn validate_positive(field: &'static str, value: u32) -> BpiResult<u32> {
+    if value == 0 {
+        return Err(BpiError::invalid_parameter(
+            field,
+            "value must be greater than zero",
+        ));
+    }
+    Ok(value)
 }
 
 impl BpiClient {
@@ -95,29 +333,10 @@ impl BpiClient {
     /// [获取评论主列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取评论主列表)
     pub async fn comment_list(
         &self,
-        r#type: i32,
-        oid: i64,
-        pn: Option<i32>,
-        ps: Option<i32>,
-        sort: Option<i32>,
-        nohot: Option<i32>,
+        params: CommentListParams,
     ) -> Result<CommentListResponse, BpiError> {
-        let mut params = vec![("type", r#type.to_string()), ("oid", oid.to_string())];
-        if let Some(pn) = pn {
-            params.push(("pn", pn.to_string()));
-        }
-        if let Some(ps) = ps {
-            params.push(("ps", ps.to_string()));
-        }
-        if let Some(sort) = sort {
-            params.push(("sort", sort.to_string()));
-        }
-        if let Some(nohot) = nohot {
-            params.push(("nohot", nohot.to_string()));
-        }
-
         self.get("https://api.bilibili.com/x/v2/reply")
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("获取评论主列表")
             .await
     }
@@ -139,26 +358,10 @@ impl BpiClient {
     /// [获取子评论列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取子评论列表)
     pub async fn comment_replies(
         &self,
-        r#type: i32,
-        oid: i64,
-        root: i64,
-        pn: Option<i32>,
-        ps: Option<i32>,
+        params: CommentRepliesParams,
     ) -> Result<CommentListResponse, BpiError> {
-        let mut params = vec![
-            ("type", r#type.to_string()),
-            ("oid", oid.to_string()),
-            ("root", root.to_string()),
-        ];
-        if let Some(pn) = pn {
-            params.push(("pn", pn.to_string()));
-        }
-        if let Some(ps) = ps {
-            params.push(("ps", ps.to_string()));
-        }
-
         self.get("https://api.bilibili.com/x/v2/reply/reply")
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("获取子评论列表")
             .await
     }
@@ -180,26 +383,10 @@ impl BpiClient {
     /// [获取热评列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取热评列表)
     pub async fn comment_hot(
         &self,
-        r#type: i32,
-        oid: i64,
-        root: i64,
-        pn: Option<i32>,
-        ps: Option<i32>,
+        params: CommentHotParams,
     ) -> Result<HotCommentResponse, BpiError> {
-        let mut params = vec![
-            ("type", r#type.to_string()),
-            ("oid", oid.to_string()),
-            ("root", root.to_string()),
-        ];
-        if let Some(pn) = pn {
-            params.push(("pn", pn.to_string()));
-        }
-        if let Some(ps) = ps {
-            params.push(("ps", ps.to_string()));
-        }
-
         self.get("https://api.bilibili.com/x/v2/reply/hot")
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("获取评论区热评列表")
             .await
     }
@@ -215,12 +402,10 @@ impl BpiClient {
     /// [获取评论总数](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取评论总数)
     pub async fn comment_count(
         &self,
-        r#type: i32,
-        oid: i64,
+        params: CommentCountParams,
     ) -> Result<BpiResponse<CountData>, BpiError> {
-        let params = [("type", r#type.to_string()), ("oid", oid.to_string())];
         self.get("https://api.bilibili.com/x/v2/reply/count")
-            .query(&params)
+            .query(&params.query_pairs())
             .send_bpi("获取评论区评论总数")
             .await
     }
@@ -229,11 +414,44 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ApiEnvelope;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use std::collections::BTreeMap;
     use tracing::info;
 
     const TEST_TYPE: i32 = 1;
     const TEST_OID: i64 = 23199;
     const TEST_ROOT_RPID: i64 = 2554491176;
+
+    fn target() -> BpiResult<CommentTarget> {
+        CommentTarget::new(TEST_TYPE, TEST_OID)
+    }
+
+    fn contract(name: &str) -> BpiResult<EndpointContract> {
+        let bytes = match name {
+            "list" => {
+                include_bytes!("../../tests/contracts/comment/read/list/contract.json").as_slice()
+            }
+            "replies" => include_bytes!("../../tests/contracts/comment/read/replies/contract.json")
+                .as_slice(),
+            "hot" => {
+                include_bytes!("../../tests/contracts/comment/read/hot/contract.json").as_slice()
+            }
+            "count" => {
+                include_bytes!("../../tests/contracts/comment/read/count/contract.json").as_slice()
+            }
+            _ => unreachable!("unknown comment read contract"),
+        };
+        EndpointContract::from_slice(bytes)
+    }
+
+    fn query_map(params: Vec<(&'static str, String)>) -> BTreeMap<String, String> {
+        params
+            .into_iter()
+            .map(|(key, value)| (key.to_string(), value))
+            .collect()
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -241,7 +459,13 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi
-            .comment_list(TEST_TYPE, TEST_OID, Some(1), Some(5), Some(0), Some(0))
+            .comment_list(
+                CommentListParams::new(CommentTarget::new(TEST_TYPE, TEST_OID)?)
+                    .with_page(1)?
+                    .with_page_size(5)?
+                    .with_sort(CommentSort::Time)
+                    .without_hot(false),
+            )
             .await?;
         let data = result.into_data()?;
         info!("总评论数: {}", data.replies.unwrap().len());
@@ -255,7 +479,14 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi
-            .comment_replies(TEST_TYPE, TEST_OID, TEST_ROOT_RPID, Some(1), Some(5))
+            .comment_replies(
+                CommentRepliesParams::new(
+                    CommentTarget::new(TEST_TYPE, TEST_OID)?,
+                    TEST_ROOT_RPID,
+                )?
+                .with_page(1)?
+                .with_page_size(5)?,
+            )
             .await?;
         let data = result.into_data()?;
         info!("总评论数: {}", data.replies.unwrap().len());
@@ -270,7 +501,11 @@ mod tests {
         let root_rpid = 654321;
 
         let result = bpi
-            .comment_hot(TEST_TYPE, TEST_OID, root_rpid, Some(1), Some(5))
+            .comment_hot(
+                CommentHotParams::new(CommentTarget::new(TEST_TYPE, TEST_OID)?, root_rpid)?
+                    .with_page(1)?
+                    .with_page_size(5)?,
+            )
             .await?;
         let data = result.into_data()?;
 
@@ -287,11 +522,264 @@ mod tests {
     async fn test_comment_count() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi.comment_count(TEST_TYPE, TEST_OID).await?;
+        let result = bpi
+            .comment_count(CommentCountParams::new(CommentTarget::new(
+                TEST_TYPE, TEST_OID,
+            )?))
+            .await?;
 
         let data = result.into_data()?;
         info!("评论总数: {}", data.count);
 
+        Ok(())
+    }
+
+    #[test]
+    fn comment_target_rejects_invalid_identifiers() {
+        let type_err = CommentTarget::new(0, TEST_OID).unwrap_err();
+        assert!(matches!(
+            type_err,
+            BpiError::InvalidParameter { field: "type", .. }
+        ));
+
+        let oid_err = CommentTarget::new(TEST_TYPE, 0).unwrap_err();
+        assert!(matches!(
+            oid_err,
+            BpiError::InvalidParameter { field: "oid", .. }
+        ));
+    }
+
+    #[test]
+    fn comment_list_params_serializes_query() -> BpiResult<()> {
+        let params = CommentListParams::new(target()?)
+            .with_page(1)?
+            .with_page_size(5)?
+            .with_sort(CommentSort::Time)
+            .without_hot(false);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("type", "1".to_string()),
+                ("oid", "23199".to_string()),
+                ("pn", "1".to_string()),
+                ("ps", "5".to_string()),
+                ("sort", "0".to_string()),
+                ("nohot", "0".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn comment_list_params_rejects_large_page_size() -> BpiResult<()> {
+        let err = CommentListParams::new(target()?)
+            .with_page_size(21)
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "ps", .. }
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn comment_replies_params_serializes_query() -> BpiResult<()> {
+        let params = CommentRepliesParams::new(target()?, TEST_ROOT_RPID)?
+            .with_page(1)?
+            .with_page_size(5)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("type", "1".to_string()),
+                ("oid", "23199".to_string()),
+                ("root", "2554491176".to_string()),
+                ("pn", "1".to_string()),
+                ("ps", "5".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn comment_hot_params_serializes_query() -> BpiResult<()> {
+        let params = CommentHotParams::new(target()?, TEST_ROOT_RPID)?
+            .with_page(1)?
+            .with_page_size(5)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("type", "1".to_string()),
+                ("oid", "23199".to_string()),
+                ("root", "2554491176".to_string()),
+                ("pn", "1".to_string()),
+                ("ps", "5".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn comment_count_params_serializes_query() -> BpiResult<()> {
+        let params = CommentCountParams::new(target()?);
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![("type", "1".to_string()), ("oid", "23199".to_string())]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn comment_read_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let list = contract("list")?;
+        let list_params = CommentListParams::new(target()?)
+            .with_page(1)?
+            .with_page_size(5)?
+            .with_sort(CommentSort::Time)
+            .without_hot(false);
+        assert_eq!(list.name, "comment.read.list");
+        assert_eq!(list.request.method, HttpMethod::Get);
+        assert_eq!(
+            list.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/reply"
+        );
+        assert_eq!(query_map(list_params.query_pairs()), list.request.query);
+
+        let replies = contract("replies")?;
+        let replies_params = CommentRepliesParams::new(target()?, TEST_ROOT_RPID)?
+            .with_page(1)?
+            .with_page_size(5)?;
+        assert_eq!(replies.name, "comment.read.replies");
+        assert_eq!(
+            replies.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/reply/reply"
+        );
+        assert_eq!(
+            query_map(replies_params.query_pairs()),
+            replies.request.query
+        );
+
+        let hot = contract("hot")?;
+        let hot_params = CommentHotParams::new(target()?, TEST_ROOT_RPID)?
+            .with_page(1)?
+            .with_page_size(5)?;
+        assert_eq!(hot.name, "comment.read.hot");
+        assert_eq!(
+            hot.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/reply/hot"
+        );
+        assert_eq!(query_map(hot_params.query_pairs()), hot.request.query);
+
+        let count = contract("count")?;
+        let count_params = CommentCountParams::new(target()?);
+        assert_eq!(count.name, "comment.read.count");
+        assert_eq!(
+            count.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/reply/count"
+        );
+        assert_eq!(query_map(count_params.query_pairs()), count.request.query);
+        Ok(())
+    }
+
+    #[test]
+    fn comment_read_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/comment/read/list/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!("../../tests/contracts/comment/read/list/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/comment/read/list/responses/vip.success.json")
+                .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/comment/read/replies/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/comment/read/replies/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!("../../tests/contracts/comment/read/replies/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<CommentListData>::from_slice(bytes)?.into_payload()?;
+            assert!(payload.page.is_some());
+        }
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/comment/read/count/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/comment/read/count/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!("../../tests/contracts/comment/read/count/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<CountData>::from_slice(bytes)?.into_payload()?;
+            assert_eq!(payload.count, 10);
+        }
+
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/comment/read/hot/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!("../../tests/contracts/comment/read/hot/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../tests/contracts/comment/read/hot/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload =
+                ApiEnvelope::<HotCommentData>::from_slice(bytes)?.into_optional_payload()?;
+            assert!(payload.is_none());
+        }
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/comment/read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn comment_read_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            for endpoint in ["list", "replies"] {
+                let Some(body) = local_probe_body(endpoint, profile) else {
+                    continue;
+                };
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<CommentListData>>(body)?.into_payload()?;
+                assert!(payload.page.is_some());
+            }
+
+            let Some(count_body) = local_probe_body("count", profile) else {
+                continue;
+            };
+            let count =
+                serde_json::from_value::<ApiEnvelope<CountData>>(count_body)?.into_payload()?;
+            assert_eq!(count.count, 10);
+
+            let Some(hot_body) = local_probe_body("hot", profile) else {
+                continue;
+            };
+            let hot = serde_json::from_value::<ApiEnvelope<HotCommentData>>(hot_body)?
+                .into_optional_payload()?;
+            assert!(hot.is_none());
+        }
         Ok(())
     }
 }
