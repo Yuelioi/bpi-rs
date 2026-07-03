@@ -1,0 +1,65 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "cursor": {
+      "business": "archive",
+      "max": 1,
+      "ps": 5,
+      "view_at": 1
+    },
+    "tab": [
+      {
+        "type": "all",
+        "name": "all"
+      },
+      {
+        "type": "archive",
+        "name": "archive"
+      },
+      {
+        "type": "live",
+        "name": "live"
+      }
+    ],
+    "list": [
+      {
+        "title": "<redacted>",
+        "badge": "",
+        "long_title": "",
+        "cover": "https://example.invalid/cover.jpg",
+        "covers": [
+          "https://example.invalid/cover.jpg"
+        ],
+        "uri": "https://example.invalid/history",
+        "history": {
+          "oid": 1,
+          "epid": 0,
+          "bvid": "BV0000000000",
+          "page": 1,
+          "cid": 1,
+          "part": "<redacted>",
+          "business": "archive",
+          "dt": 2
+        },
+        "videos": 1,
+        "author_name": "<redacted>",
+        "author_face": "https://example.invalid/face.jpg",
+        "author_mid": 1,
+        "view_at": 1,
+        "progress": 0,
+        "show_title": "<redacted>",
+        "duration": 1,
+        "current": "<redacted>",
+        "total": 1,
+        "new_desc": "",
+        "is_finish": 0,
+        "is_fav": 0,
+        "kid": 1,
+        "tag_name": "<redacted>",
+        "live_status": 0
+      }
+    ]
+  }
+}

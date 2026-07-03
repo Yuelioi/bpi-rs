@@ -61,6 +61,8 @@ pub struct HistoryDetail {
 pub struct HistoryListItem {
     /// 条目标题
     pub title: String,
+    /// 角标文案
+    pub badge: Option<String>,
     /// 条目副标题
     pub long_title: Option<String>,
     /// 条目封面图 URL，用于专栏以外的条目
@@ -214,7 +216,26 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "history-list" => include_bytes!(
+                "../../tests/contracts/historytoview/read/history-list/contract.json"
+            )
+            .as_slice(),
+            "history-shadow" => include_bytes!(
+                "../../tests/contracts/historytoview/read/history-shadow/contract.json"
+            )
+            .as_slice(),
+            _ => unreachable!("unknown historytoview history contract endpoint"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -266,5 +287,118 @@ mod tests {
             current_status, set_back_resp
         );
         assert!(set_back_resp.is_ok());
+    }
+
+    #[test]
+    fn history_list_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("history-list")?;
+
+        assert_eq!(contract.name, "historytoview.history_list");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/web-interface/history/cursor"
+        );
+        assert_eq!(
+            contract.request.query.get("ps").map(String::as_str),
+            Some("5")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(contract.cases[0].response.api_code, -101);
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("HistoryListData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn history_shadow_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("history-shadow")?;
+
+        assert_eq!(contract.name, "historytoview.history_shadow");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/history/shadow"
+        );
+        assert!(contract.request.query.is_empty());
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(contract.cases[0].response.api_code, -101);
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("bool")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn history_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/historytoview/read/history-list/responses/anonymous.requires_login.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let list = ApiEnvelope::<HistoryListData>::from_slice(include_bytes!(
+            "../../tests/contracts/historytoview/read/history-list/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(list.cursor.ps, 5);
+        assert_eq!(list.list.len(), 1);
+
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/historytoview/read/history-shadow/responses/anonymous.requires_login.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let shadow = ApiEnvelope::<bool>::from_slice(include_bytes!(
+            "../../tests/contracts/historytoview/read/history-shadow/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+        assert!(!shadow);
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/historytoview/read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn history_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("history-list", profile) {
+                let envelope = serde_json::from_value::<ApiEnvelope<HistoryListData>>(body)?;
+                if profile == "anonymous" {
+                    let err = envelope.ensure_success().unwrap_err();
+                    assert!(err.requires_login());
+                } else {
+                    let payload = envelope.into_payload()?;
+                    assert!(payload.cursor.ps > 0);
+                    assert!(payload.cursor.ps as usize >= payload.list.len());
+                }
+            }
+
+            if let Some(body) = local_probe_body("history-shadow", profile) {
+                let envelope = serde_json::from_value::<ApiEnvelope<bool>>(body)?;
+                if profile == "anonymous" {
+                    let err = envelope.ensure_success().unwrap_err();
+                    assert!(err.requires_login());
+                } else {
+                    let _ = envelope.into_payload()?;
+                }
+            }
+        }
+        Ok(())
     }
 }

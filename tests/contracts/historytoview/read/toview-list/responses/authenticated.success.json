@@ -1,0 +1,113 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "count": 1,
+    "list": [
+      {
+        "add_at": 1,
+        "aid": 1,
+        "arc_state": 0,
+        "bvid": "BV0000000000",
+        "c_source": "",
+        "card_type": 0,
+        "cid": 1,
+        "copyright": 2,
+        "count": 1,
+        "cover43": "",
+        "ctime": 1,
+        "desc": "<redacted>",
+        "dimension": {
+          "height": 1080,
+          "rotate": 0,
+          "width": 1920
+        },
+        "duration": 1,
+        "dynamic": "",
+        "enable_vt": 0,
+        "forbid_fav": false,
+        "forbid_sort": false,
+        "index_title": "",
+        "left_icon_type": 1,
+        "left_text": "<redacted>",
+        "long_title": "",
+        "owner": {
+          "face": "https://example.invalid/face.jpg",
+          "mid": 1,
+          "name": "<redacted>"
+        },
+        "page": {
+          "cid": 1,
+          "ctime": 1,
+          "dimension": {
+            "height": 1080,
+            "rotate": 0,
+            "width": 1920
+          },
+          "duration": 1,
+          "from": "vupload",
+          "page": 1,
+          "part": "<redacted>",
+          "vid": "",
+          "weblink": ""
+        },
+        "pgc_label": "",
+        "pic": "https://example.invalid/pic.jpg",
+        "pid_name_v2": "<redacted>",
+        "pid_v2": 1,
+        "progress": 0,
+        "pubdate": 1,
+        "right_icon_type": 3,
+        "right_text": "<redacted>",
+        "rights": {
+          "arc_pay": 0,
+          "autoplay": 1,
+          "bp": 0,
+          "download": 0,
+          "elec": 0,
+          "hd5": 0,
+          "is_cooperation": 0,
+          "movie": 0,
+          "no_background": 0,
+          "no_reprint": 0,
+          "pay": 0,
+          "pay_free_watch": 0,
+          "ugc_pay": 0,
+          "ugc_pay_preview": 0
+        },
+        "season_title": "",
+        "short_link_v2": "https://example.invalid/BV0000000000",
+        "show_up": true,
+        "stat": {
+          "aid": 1,
+          "coin": 1,
+          "danmaku": 1,
+          "dislike": 0,
+          "fav_g": 0,
+          "favorite": 1,
+          "his_rank": 0,
+          "like": 1,
+          "like_g": 0,
+          "now_rank": 0,
+          "reply": 1,
+          "share": 1,
+          "view": 1,
+          "vt": -1,
+          "vv": 1
+        },
+        "state": 0,
+        "tid": 1,
+        "tidv2": 1,
+        "title": "<redacted>",
+        "tname": "<redacted>",
+        "tnamev2": "<redacted>",
+        "translate_info": null,
+        "up_from_v2": 2,
+        "uri": "https://example.invalid/toview",
+        "videos": 1,
+        "view_text_1": "<redacted>"
+      }
+    ]
+  }
+}
