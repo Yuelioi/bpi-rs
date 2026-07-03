@@ -301,7 +301,88 @@ impl<'a> UserClient<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::BpiClient;
+    use super::*;
+    use crate::{
+        ApiEnvelope, BpiClient, BpiError, BpiResult,
+        probe::{contract::HttpMethod, endpoint_contract::EndpointContract},
+    };
+    use serde::de::DeserializeOwned;
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes: &[u8] = match endpoint {
+            "album-count" => {
+                include_bytes!("../../tests/contracts/user/public-read/album-count/contract.json")
+            }
+            "bangumi-follow-list" => include_bytes!(
+                "../../tests/contracts/user/public-read/bangumi-follow-list/contract.json"
+            ),
+            "card" => include_bytes!("../../tests/contracts/user/public-read/card/contract.json"),
+            "cards" => {
+                include_bytes!("../../tests/contracts/user/public-read/cards/contract.json")
+            }
+            "infos" => {
+                include_bytes!("../../tests/contracts/user/public-read/infos/contract.json")
+            }
+            "medal-wall" => {
+                include_bytes!("../../tests/contracts/user/public-read/medal-wall/contract.json")
+            }
+            "name-to-uid" => {
+                include_bytes!("../../tests/contracts/user/public-read/name-to-uid/contract.json")
+            }
+            "nav-stat" => {
+                include_bytes!("../../tests/contracts/user/public-read/nav-stat/contract.json")
+            }
+            "relation-stat" => {
+                include_bytes!("../../tests/contracts/user/public-read/relation-stat/contract.json")
+            }
+            "space-info" => {
+                include_bytes!("../../tests/contracts/user/public-read/space-info/contract.json")
+            }
+            "space-notice" => {
+                include_bytes!("../../tests/contracts/user/public-read/space-notice/contract.json")
+            }
+            "up-stat" => {
+                include_bytes!("../../tests/contracts/user/public-read/up-stat/contract.json")
+            }
+            "uploaded-videos" => include_bytes!(
+                "../../tests/contracts/user/public-read/uploaded-videos/contract.json"
+            ),
+            _ => {
+                return Err(BpiError::invalid_parameter(
+                    "endpoint",
+                    "unknown user public-read contract",
+                ));
+            }
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/user/public-read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    fn parse_local_probe_outputs<T>(endpoint: &str, profiles: &[&str]) -> BpiResult<()>
+    where
+        T: DeserializeOwned,
+    {
+        for profile in profiles {
+            let Some(body) = local_probe_body(endpoint, profile) else {
+                continue;
+            };
+
+            let _payload = serde_json::from_value::<ApiEnvelope<T>>(body)?.into_payload()?;
+        }
+
+        Ok(())
+    }
 
     #[test]
     fn user_client_borrows_root_client() -> Result<(), crate::BpiError> {
@@ -492,6 +573,271 @@ mod tests {
             user.name_to_uid_endpoint(),
             "https://api.bilibili.com/x/polymer/web-dynamic/v1/name-to-uid"
         );
+        Ok(())
+    }
+
+    #[test]
+    fn user_public_read_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let expectations = [
+            (
+                "album-count",
+                "user.album_count",
+                ALBUM_COUNT_ENDPOINT,
+                "UserAlbumCount",
+                false,
+            ),
+            (
+                "bangumi-follow-list",
+                "user.bangumi_follow_list",
+                BANGUMI_FOLLOW_LIST_ENDPOINT,
+                "UserBangumiFollowList",
+                false,
+            ),
+            ("card", "user.card", CARD_ENDPOINT, "UserCardProfile", false),
+            (
+                "cards",
+                "user.cards",
+                CARDS_ENDPOINT,
+                "Vec<UserBatchCard>",
+                false,
+            ),
+            (
+                "infos",
+                "user.infos",
+                INFOS_ENDPOINT,
+                "Vec<UserBatchInfo>",
+                false,
+            ),
+            (
+                "medal-wall",
+                "user.medal_wall",
+                MEDAL_WALL_ENDPOINT,
+                "UserMedalWall",
+                false,
+            ),
+            (
+                "name-to-uid",
+                "user.name_to_uid",
+                NAME_TO_UID_ENDPOINT,
+                "UserNameToUid",
+                false,
+            ),
+            (
+                "nav-stat",
+                "user.nav_stat",
+                NAV_STAT_ENDPOINT,
+                "UserNavStat",
+                false,
+            ),
+            (
+                "relation-stat",
+                "user.relation_stat",
+                RELATION_STAT_ENDPOINT,
+                "UserRelationStat",
+                false,
+            ),
+            (
+                "space-info",
+                "user.space_info",
+                SPACE_INFO_ENDPOINT,
+                "UserSpaceProfile",
+                true,
+            ),
+            (
+                "space-notice",
+                "user.space_notice",
+                SPACE_NOTICE_ENDPOINT,
+                "UserSpaceNotice",
+                false,
+            ),
+            (
+                "up-stat",
+                "user.up_stat",
+                UP_STAT_ENDPOINT,
+                "UserUpStat",
+                false,
+            ),
+            (
+                "uploaded-videos",
+                "user.uploaded_videos",
+                UPLOADED_VIDEOS_ENDPOINT,
+                "UserUploadedVideos",
+                true,
+            ),
+        ];
+
+        for (endpoint, name, url, rust_model, requires_wbi) in expectations {
+            let contract = contract(endpoint)?;
+
+            assert_eq!(contract.name, name);
+            assert_eq!(contract.request.method, HttpMethod::Get);
+            assert_eq!(contract.request.url.as_str(), url);
+            assert_eq!(contract.request.auth.requires_wbi(), requires_wbi);
+            assert_eq!(contract.cases.len(), 3);
+            assert!(
+                contract
+                    .cases
+                    .iter()
+                    .any(|case| case.response.rust_model.as_deref() == Some(rust_model)),
+                "{endpoint} should declare {rust_model} for at least one success case"
+            );
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn user_public_read_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let album_count = ApiEnvelope::<UserAlbumCount>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/album-count/responses/success.json"
+        ))?
+        .into_payload()?;
+        let bangumi_follow_list =
+            ApiEnvelope::<UserBangumiFollowList>::from_slice(include_bytes!(
+                "../../tests/contracts/user/public-read/bangumi-follow-list/responses/success.json"
+            ))?
+            .into_payload()?;
+        let card = ApiEnvelope::<UserCardProfile>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/card/responses/success.json"
+        ))?
+        .into_payload()?;
+        let cards = ApiEnvelope::<Vec<UserBatchCard>>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/cards/responses/success.json"
+        ))?
+        .into_payload()?;
+        let infos = ApiEnvelope::<Vec<UserBatchInfo>>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/infos/responses/success.json"
+        ))?
+        .into_payload()?;
+        let medal_wall = ApiEnvelope::<UserMedalWall>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/medal-wall/responses/success.json"
+        ))?
+        .into_payload()?;
+        let name_to_uid = ApiEnvelope::<UserNameToUid>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/name-to-uid/responses/success.json"
+        ))?
+        .into_payload()?;
+        let nav_stat = ApiEnvelope::<UserNavStat>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/nav-stat/responses/success.json"
+        ))?
+        .into_payload()?;
+        let relation_stat = ApiEnvelope::<UserRelationStat>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/relation-stat/responses/success.json"
+        ))?
+        .into_payload()?;
+        let space_info = ApiEnvelope::<UserSpaceProfile>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/space-info/responses/success.json"
+        ))?
+        .into_payload()?;
+        let space_notice = ApiEnvelope::<UserSpaceNotice>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/space-notice/responses/success.json"
+        ))?
+        .into_payload()?;
+        let up_stat = ApiEnvelope::<UserUpStat>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/up-stat/responses/success.json"
+        ))?
+        .into_payload()?;
+        let uploaded_videos = ApiEnvelope::<UserUploadedVideos>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/uploaded-videos/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        assert_eq!(album_count.all_count, 0);
+        assert!(bangumi_follow_list.items.is_empty());
+        assert_eq!(card.card.mid.get(), 2);
+        assert_eq!(cards.len(), 1);
+        assert_eq!(infos.len(), 1);
+        assert_eq!(medal_wall.uid.get(), 2);
+        assert_eq!(name_to_uid.uid_list.len(), 1);
+        assert_eq!(nav_stat.channel.master, 0);
+        assert_eq!(relation_stat.mid.get(), 2);
+        assert_eq!(space_info.mid.get(), 2);
+        assert_eq!(space_notice.content, "sanitized notice");
+        assert_eq!(up_stat.likes, 1);
+        assert!(uploaded_videos.list.videos.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn user_public_read_error_fixtures_preserve_observed_api_errors() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/user/public-read/cards/responses/anonymous.error.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/user/public-read/infos/responses/anonymous.error.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/user/public-read/medal-wall/responses/anonymous.error.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/user/public-read/name-to-uid/responses/anonymous.error.json"
+            )
+            .as_slice(),
+        ] {
+            let err = ApiEnvelope::<serde_json::Value>::from_slice(bytes)?
+                .ensure_success()
+                .unwrap_err();
+
+            assert!(err.requires_login());
+        }
+
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/space-info/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert_eq!(err.code(), Some(-352));
+
+        let anonymous_up_stat = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/user/public-read/up-stat/responses/anonymous.empty.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(anonymous_up_stat, serde_json::json!({}));
+
+        Ok(())
+    }
+
+    #[test]
+    fn user_public_read_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        parse_local_probe_outputs::<UserAlbumCount>(
+            "album-count",
+            &["anonymous", "normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<UserBangumiFollowList>(
+            "bangumi-follow-list",
+            &["anonymous", "normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<UserCardProfile>("card", &["anonymous", "normal", "vip"])?;
+        parse_local_probe_outputs::<Vec<UserBatchCard>>("cards", &["normal", "vip"])?;
+        parse_local_probe_outputs::<Vec<UserBatchInfo>>("infos", &["normal", "vip"])?;
+        parse_local_probe_outputs::<UserMedalWall>("medal-wall", &["normal", "vip"])?;
+        parse_local_probe_outputs::<UserNameToUid>("name-to-uid", &["normal", "vip"])?;
+        parse_local_probe_outputs::<UserNavStat>("nav-stat", &["anonymous", "normal", "vip"])?;
+        parse_local_probe_outputs::<UserRelationStat>(
+            "relation-stat",
+            &["anonymous", "normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<UserSpaceProfile>("space-info", &["normal", "vip"])?;
+        parse_local_probe_outputs::<UserSpaceNotice>(
+            "space-notice",
+            &["anonymous", "normal", "vip"],
+        )?;
+        parse_local_probe_outputs::<UserUpStat>("up-stat", &["normal", "vip"])?;
+        parse_local_probe_outputs::<UserUploadedVideos>(
+            "uploaded-videos",
+            &["anonymous", "normal", "vip"],
+        )?;
+
+        if let Some(body) = local_probe_body("up-stat", "anonymous") {
+            let payload =
+                serde_json::from_value::<ApiEnvelope<serde_json::Value>>(body)?.into_payload()?;
+            assert_eq!(payload, serde_json::json!({}));
+        }
+
         Ok(())
     }
 }

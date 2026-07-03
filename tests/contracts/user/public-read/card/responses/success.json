@@ -1,0 +1,20 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "card": {
+      "mid": "2",
+      "name": "sanitized user",
+      "face": "https://example.invalid/face.jpg",
+      "sign": "",
+      "fans": 0,
+      "attention": 0
+    },
+    "following": false,
+    "archive_count": 0,
+    "article_count": 0,
+    "follower": 0,
+    "like_num": 0
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "name": "user.space_info",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/space/wbi/acc/info",
+    "query": {
+      "mid": "2"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": [
+        "wbi"
+      ]
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "fixture minimizes public user data; full raw probe output is ignored under target/bpi-probe-runs/user/public-read/space-info"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": [
+          "wbi"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": -352,
+        "fixture": "responses/anonymous.error.json",
+        "fixture_kind": "probe_error_body",
+        "error": "wbi_risk_control"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "wbi",
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "UserSpaceProfile"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "wbi",
+          "cookie"
+        ]
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "UserSpaceProfile"
+      }
+    }
+  ]
+}

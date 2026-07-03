@@ -1,0 +1,26 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "video": 0,
+    "bangumi": 0,
+    "cinema": 0,
+    "channel": {
+      "master": 0,
+      "guest": 0
+    },
+    "favourite": {
+      "master": 0,
+      "guest": 0
+    },
+    "tag": 0,
+    "article": 0,
+    "playlist": 0,
+    "album": 0,
+    "audio": 0,
+    "pugv": 0,
+    "opus": 0,
+    "season_num": 0
+  }
+}

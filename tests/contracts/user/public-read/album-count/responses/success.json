@@ -1,0 +1,11 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "all_count": 0,
+    "draw_count": 0,
+    "photo_count": 0,
+    "daily_count": 0
+  }
+}

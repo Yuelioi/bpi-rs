@@ -1,0 +1,32 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": [
+    {
+      "mid": 2,
+      "name": "sanitized user",
+      "sign": "",
+      "rank": 0,
+      "level": 6,
+      "silence": 0,
+      "sex": "保密",
+      "face": "https://example.invalid/face.jpg",
+      "vip": {
+        "type": 0,
+        "status": 0,
+        "due_date": 0,
+        "vip_pay_type": 0,
+        "theme_type": 0
+      },
+      "official": {
+        "role": 0,
+        "title": "",
+        "desc": "",
+        "type": -1
+      },
+      "is_fake_account": 0,
+      "expert_info": null
+    }
+  ]
+}

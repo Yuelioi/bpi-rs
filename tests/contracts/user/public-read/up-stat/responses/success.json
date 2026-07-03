@@ -1,0 +1,14 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "archive": {
+      "view": 1
+    },
+    "article": {
+      "view": 1
+    },
+    "likes": 1
+  }
+}

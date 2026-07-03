@@ -1,0 +1,17 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "mid": 2,
+    "name": "sanitized user",
+    "sex": "保密",
+    "face": "https://example.invalid/face.jpg",
+    "sign": "",
+    "level": 6,
+    "silence": 0,
+    "coins": 0,
+    "fans_badge": false,
+    "is_followed": false
+  }
+}

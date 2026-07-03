@@ -1,0 +1,16 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": [
+    {
+      "mid": 2,
+      "name": "sanitized user",
+      "face": "https://example.invalid/face.jpg",
+      "sign": "",
+      "rank": 0,
+      "level": 6,
+      "silence": 0
+    }
+  ]
+}

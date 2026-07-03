@@ -1,0 +1,15 @@
+{
+  "code": 0,
+  "message": "0",
+  "ttl": 1,
+  "data": {
+    "list": [],
+    "count": 0,
+    "close_space_medal": 0,
+    "only_show_wearing": 0,
+    "name": "sanitized user",
+    "icon": "https://example.invalid/face.jpg",
+    "uid": 2,
+    "level": 6
+  }
+}
