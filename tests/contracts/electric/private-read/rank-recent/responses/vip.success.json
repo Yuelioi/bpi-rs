@@ -1,0 +1,22 @@
+{
+  "code": 0,
+  "message": "0",
+  "data": {
+    "list": [
+      {
+        "aid": 0,
+        "bvid": "",
+        "elec_num": 50.0,
+        "title": "",
+        "uname": "<redacted>",
+        "avatar": "https://example.invalid/avatar.jpg",
+        "ctime": "2020-01-01 00:00:00"
+      }
+    ],
+    "pager": {
+      "current": 1,
+      "size": 10,
+      "total": 1
+    }
+  }
+}

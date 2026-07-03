@@ -320,7 +320,15 @@ mod tests {
                 "../../tests/contracts/electric/public-read/video-show/contract.json"
             )
             .as_slice(),
-            _ => unreachable!("unknown electric public-read contract endpoint"),
+            "recharge-list" => include_bytes!(
+                "../../tests/contracts/electric/private-read/recharge-list/contract.json"
+            )
+            .as_slice(),
+            "rank-recent" => include_bytes!(
+                "../../tests/contracts/electric/private-read/rank-recent/contract.json"
+            )
+            .as_slice(),
+            _ => unreachable!("unknown electric charge-list contract endpoint"),
         };
 
         EndpointContract::from_slice(bytes)
@@ -454,6 +462,67 @@ mod tests {
     }
 
     #[test]
+    fn electric_recharge_list_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("recharge-list")?;
+
+        assert_eq!(contract.name, "electric.recharge_list");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://pay.bilibili.com/bk/brokerage/listForCustomerRechargeRecord"
+        );
+        assert_eq!(
+            contract.request.query.get("customerId").map(String::as_str),
+            Some("10026")
+        );
+        assert_eq!(
+            contract
+                .request
+                .query
+                .get("currentPage")
+                .map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            contract.request.query.get("pageSize").map(String::as_str),
+            Some("10")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(contract.cases[0].response.api_code, 800501007);
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("RechargeData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn electric_rank_recent_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("rank-recent")?;
+
+        assert_eq!(contract.name, "electric.rank_recent");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://member.bilibili.com/x/h5/elec/rank/recent"
+        );
+        assert_eq!(
+            contract.request.query.get("pn").map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            contract.request.query.get("ps").map(String::as_str),
+            Some("10")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("ElecRankData")
+        );
+        Ok(())
+    }
+
+    #[test]
     fn electric_charge_list_response_fixtures_parse_declared_models() -> BpiResult<()> {
         let month_up = ApiEnvelope::<ChargeMonthUpData>::from_slice(include_bytes!(
             "../../tests/contracts/electric/public-read/month-up-list/responses/success.json"
@@ -470,10 +539,45 @@ mod tests {
         Ok(())
     }
 
-    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
-        let path = format!(
-            "target/bpi-probe-runs/electric/public-read/{endpoint}/{profile}.response.json"
-        );
+    #[test]
+    fn electric_charge_list_private_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/electric/private-read/recharge-list/responses/anonymous.requires_login.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let recharge = ApiEnvelope::<RechargeData>::from_slice(include_bytes!(
+            "../../tests/contracts/electric/private-read/recharge-list/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(recharge.result.len(), 1);
+
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/electric/private-read/rank-recent/responses/anonymous.requires_login.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let normal_rank = ApiEnvelope::<ElecRankData>::from_slice(include_bytes!(
+            "../../tests/contracts/electric/private-read/rank-recent/responses/normal.success.json"
+        ))?
+        .into_payload()?;
+        assert!(normal_rank.list.is_empty());
+
+        let vip_rank = ApiEnvelope::<ElecRankData>::from_slice(include_bytes!(
+            "../../tests/contracts/electric/private-read/rank-recent/responses/vip.success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(vip_rank.list.len(), 1);
+        Ok(())
+    }
+
+    fn local_probe_body(batch: &str, endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path =
+            format!("target/bpi-probe-runs/electric/{batch}/{endpoint}/{profile}.response.json");
         let bytes = std::fs::read(path).ok()?;
         let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
         value
@@ -485,16 +589,45 @@ mod tests {
     #[test]
     fn electric_charge_list_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
         for profile in ["anonymous", "normal", "vip"] {
-            if let Some(body) = local_probe_body("month-up-list", profile) {
+            if let Some(body) = local_probe_body("public-read", "month-up-list", profile) {
                 let payload = serde_json::from_value::<ApiEnvelope<ChargeMonthUpData>>(body)?
                     .into_payload()?;
                 assert!(payload.total_count >= payload.count);
             }
 
-            if let Some(body) = local_probe_body("video-show", profile) {
+            if let Some(body) = local_probe_body("public-read", "video-show", profile) {
                 let payload = serde_json::from_value::<ApiEnvelope<VideoElecShowData>>(body)?
                     .into_payload()?;
                 assert!(payload.total_count >= payload.count);
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn electric_charge_list_private_models_match_local_probe_outputs_when_available()
+    -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("private-read", "recharge-list", profile) {
+                let envelope = serde_json::from_value::<ApiEnvelope<RechargeData>>(body)?;
+                if profile == "anonymous" {
+                    let err = envelope.ensure_success().unwrap_err();
+                    assert!(err.requires_login());
+                } else {
+                    let payload = envelope.into_payload()?;
+                    assert!(payload.page.total_count >= payload.result.len() as u64);
+                }
+            }
+
+            if let Some(body) = local_probe_body("private-read", "rank-recent", profile) {
+                let envelope = serde_json::from_value::<ApiEnvelope<ElecRankData>>(body)?;
+                if profile == "anonymous" {
+                    let err = envelope.ensure_success().unwrap_err();
+                    assert!(err.requires_login());
+                } else {
+                    let payload = envelope.into_payload()?;
+                    assert!(payload.pager.total >= payload.list.len() as u64);
+                }
             }
         }
         Ok(())

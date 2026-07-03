@@ -1,0 +1,48 @@
+{
+  "code": 0,
+  "message": "0",
+  "data": {
+    "days": 0,
+    "up_card": {
+      "mid": 1265680561,
+      "nickname": "<up>",
+      "official_title": "<redacted>",
+      "avatar": "https://example.invalid/up-avatar.jpg"
+    },
+    "user_card": {
+      "avatar": "https://example.invalid/user-avatar.jpg",
+      "nickname": "<redacted>"
+    },
+    "remain_days": -1,
+    "remain_less_1day": 0,
+    "upower_rank": {
+      "total": 1,
+      "total_desc": "1",
+      "list": [
+        {
+          "rank": 1,
+          "mid": 1,
+          "nickname": "<redacted>",
+          "avatar": "https://example.invalid/rank-avatar.jpg"
+        }
+      ]
+    },
+    "upower_icon": "",
+    "upower_right_count": 0,
+    "only_contain_medal": false,
+    "privilege_type": 0,
+    "challenge_info": {
+      "challenge_id": "",
+      "description": "",
+      "challenge_type": 0,
+      "remaining_days": 0,
+      "end_time": "",
+      "progress": 0,
+      "targets": [],
+      "state": 0,
+      "end_time_unix": 0,
+      "pub_dyn": 0,
+      "dyn_content": ""
+    }
+  }
+}

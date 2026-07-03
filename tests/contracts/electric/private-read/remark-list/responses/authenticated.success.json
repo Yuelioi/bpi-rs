@@ -1,0 +1,31 @@
+{
+  "code": 0,
+  "message": "0",
+  "data": {
+    "list": [
+      {
+        "aid": 0,
+        "bvid": "",
+        "id": 1,
+        "mid": 0,
+        "reply_mid": 0,
+        "elec_num": 0,
+        "state": 0,
+        "msg": "<redacted>",
+        "aname": "",
+        "uname": "",
+        "avator": "",
+        "reply_name": "",
+        "reply_avator": "",
+        "reply_msg": "",
+        "ctime": 1659095775000,
+        "reply_time": 0
+      }
+    ],
+    "pager": {
+      "current": 1,
+      "size": 10,
+      "total": 1
+    }
+  }
+}

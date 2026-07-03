@@ -216,7 +216,7 @@ impl BpiError {
 impl BpiError {
     /// 判断是否需要用户登录
     pub fn requires_login(&self) -> bool {
-        matches!(self.code(), Some(-101) | Some(-401))
+        matches!(self.code(), Some(-101) | Some(-401) | Some(800501007))
     }
 
     /// 判断是否为权限问题

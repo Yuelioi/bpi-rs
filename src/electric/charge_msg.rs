@@ -216,7 +216,16 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/electric/private-read/remark-list/contract.json"
+        ))
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -264,5 +273,77 @@ mod tests {
         let resp = bpi.electric_remark_reply(6507563, "测试回复").await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
+    }
+
+    #[test]
+    fn electric_remark_list_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "electric.remark_list");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://member.bilibili.com/x/web/elec/remark/list"
+        );
+        assert_eq!(
+            contract.request.query.get("pn").map(String::as_str),
+            Some("1")
+        );
+        assert_eq!(
+            contract.request.query.get("ps").map(String::as_str),
+            Some("10")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[1].response.rust_model.as_deref(),
+            Some("ElecRemarkList")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn electric_remark_list_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/electric/private-read/remark-list/responses/anonymous.requires_login.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
+
+        let list = ApiEnvelope::<ElecRemarkList>::from_slice(include_bytes!(
+            "../../tests/contracts/electric/private-read/remark-list/responses/authenticated.success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(list.list.len(), 1);
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!(
+            "target/bpi-probe-runs/electric/private-read/{endpoint}/{profile}.response.json"
+        );
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn electric_remark_list_model_matches_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("remark-list", profile) {
+                let envelope = serde_json::from_value::<ApiEnvelope<ElecRemarkList>>(body)?;
+                if profile == "anonymous" {
+                    let err = envelope.ensure_success().unwrap_err();
+                    assert!(err.requires_login());
+                } else {
+                    let payload = envelope.into_payload()?;
+                    assert!(payload.pager.total >= payload.list.len() as u64);
+                }
+            }
+        }
+        Ok(())
     }
 }

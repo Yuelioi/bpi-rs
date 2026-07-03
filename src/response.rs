@@ -5,24 +5,37 @@ use serde::{Deserialize, Deserializer, Serialize, de::DeserializeOwned};
 pub type BpiResult<T> = Result<T, BpiError>;
 
 /// Canonical Bilibili JSON envelope used by most web API endpoints.
-#[derive(Debug, Serialize, Clone, Deserialize)]
-#[serde(bound(deserialize = "T: Deserialize<'de>"))]
+#[derive(Debug, Serialize, Clone)]
 pub struct ApiEnvelope<T> {
     /// API return code. `0` means success.
-    #[serde(default)]
     pub code: i32,
 
     /// Payload returned by successful endpoints.
-    #[serde(default = "Option::default", alias = "result")]
     pub data: Option<T>,
 
     /// API message. Bilibili often returns `"0"` for success.
-    #[serde(default, deserialize_with = "deserialize_default_string")]
     pub message: String,
 
     /// Optional status flag returned by some endpoints.
-    #[serde(default)]
     pub status: bool,
+}
+
+impl<'de, T> Deserialize<'de> for ApiEnvelope<T>
+where
+    T: Deserialize<'de>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let raw = RawEnvelope::<T>::deserialize(deserializer)?;
+        Ok(Self {
+            code: raw.code.or(raw.errno).unwrap_or_default(),
+            data: raw.data,
+            message: raw.message.or(raw.msg).or(raw.show_msg).unwrap_or_default(),
+            status: raw.status,
+        })
+    }
 }
 
 impl<T> ApiEnvelope<T> {
@@ -68,29 +81,55 @@ impl<T> ApiEnvelope<T> {
     }
 }
 
-#[derive(Debug, Serialize, Clone, Deserialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct BpiResponse<T> {
     /// 返回值 0：成功
-    #[serde(default)]
     pub code: i32,
 
-    #[serde(alias = "result")]
     pub data: Option<T>,
 
     /// 错误信息，默认为0
-    #[serde(default, deserialize_with = "deserialize_default_string")]
     pub message: String,
 
     /// 状态, 部分接口需要
-    #[serde(default)]
     pub status: bool,
 }
 
-fn deserialize_default_string<'de, D>(deserializer: D) -> Result<String, D::Error>
+impl<'de, T> Deserialize<'de> for BpiResponse<T>
 where
-    D: Deserializer<'de>,
+    T: Deserialize<'de>,
 {
-    Ok(Option::<String>::deserialize(deserializer)?.unwrap_or_default())
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let raw = RawEnvelope::<T>::deserialize(deserializer)?;
+        Ok(Self {
+            code: raw.code.or(raw.errno).unwrap_or_default(),
+            data: raw.data,
+            message: raw.message.or(raw.msg).or(raw.show_msg).unwrap_or_default(),
+            status: raw.status,
+        })
+    }
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(bound(deserialize = "T: Deserialize<'de>"))]
+struct RawEnvelope<T> {
+    #[serde(default)]
+    code: Option<i32>,
+    #[serde(default)]
+    errno: Option<i32>,
+    #[serde(default, alias = "result")]
+    data: Option<T>,
+    #[serde(default)]
+    message: Option<String>,
+    #[serde(default)]
+    msg: Option<String>,
+    #[serde(default, rename = "showMsg")]
+    show_msg: Option<String>,
+    #[serde(default)]
+    status: bool,
 }
 
 impl<T> BpiResponse<T> {
@@ -175,6 +214,18 @@ mod tests {
 
         assert_eq!(payload.money, 0.0);
         Ok(())
+    }
+
+    #[test]
+    fn api_envelope_maps_errno_login_error() {
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(
+            br#"{ "errno": 800501007, "msg": "user not login", "showMsg": "user not login" }"#,
+        )
+        .and_then(ApiEnvelope::ensure_success)
+        .unwrap_err();
+
+        assert!(err.requires_login());
+        assert_eq!(err.code(), Some(800501007));
     }
 
     #[test]

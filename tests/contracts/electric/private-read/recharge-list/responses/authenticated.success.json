@@ -1,0 +1,23 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "page": {
+      "currentPage": 1,
+      "pageSize": 10,
+      "totalCount": 1,
+      "totalPage": 1
+    },
+    "result": [
+      {
+        "mid": 1,
+        "name": "<redacted>",
+        "avatar": "https://example.invalid/avatar.jpg",
+        "originalThirdCoin": 1.0,
+        "brokerage": 1.0,
+        "remark": "Web",
+        "ctime": "2026-01-01 00:00:00"
+      }
+    ]
+  }
+}
