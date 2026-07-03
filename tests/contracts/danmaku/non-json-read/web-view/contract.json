@@ -1,0 +1,69 @@
+{
+  "name": "danmaku.web.view",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/v2/dm/web/view",
+    "query": {
+      "type": "1",
+      "oid": "16546"
+    },
+    "required_headers": [
+      "user-agent"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "danmaku non-JSON read response bodies promoted from real Probe output; account headers kept only in local Probe output; large segment sample uses cid 16546 to keep committed fixtures reviewable"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/anonymous.success.json",
+        "fixture_kind": "probe_binary_body",
+        "rust_model": "bytes"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/normal.success.json",
+        "fixture_kind": "probe_binary_body",
+        "rust_model": "bytes"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "probe_binary_body",
+        "rust_model": "bytes"
+      }
+    }
+  ]
+}

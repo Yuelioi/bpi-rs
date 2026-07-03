@@ -107,6 +107,127 @@ impl DanmakuSegmentParams {
     }
 }
 
+/// Parameters for protobuf danmaku web-view metadata.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DanmakuWebViewParams {
+    typ: u8,
+    oid: u64,
+    pid: Option<u64>,
+}
+
+impl DanmakuWebViewParams {
+    pub fn new(typ: u8, oid: u64) -> BpiResult<Self> {
+        validate_danmaku_type(typ)?;
+        validate_oid(oid)?;
+
+        Ok(Self {
+            typ,
+            oid,
+            pid: None,
+        })
+    }
+
+    pub fn pid(mut self, pid: u64) -> BpiResult<Self> {
+        if pid == 0 {
+            return Err(BpiError::invalid_parameter(
+                "pid",
+                "archive id must be non-zero",
+            ));
+        }
+        self.pid = Some(pid);
+        Ok(self)
+    }
+
+    fn query_pairs(&self) -> Vec<(String, String)> {
+        let mut q = vec![
+            ("type".to_string(), self.typ.to_string()),
+            ("oid".to_string(), self.oid.to_string()),
+        ];
+        if let Some(pid) = self.pid {
+            q.push(("pid".to_string(), pid.to_string()));
+        }
+        q
+    }
+}
+
+/// Parameters for dated danmaku history byte endpoints.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DanmakuHistoryBytesParams {
+    typ: u8,
+    oid: u64,
+    date: String,
+}
+
+impl DanmakuHistoryBytesParams {
+    pub fn new(typ: u8, oid: u64, date: impl Into<String>) -> BpiResult<Self> {
+        validate_danmaku_type(typ)?;
+        validate_oid(oid)?;
+        let date = date.into();
+        validate_date(&date)?;
+
+        Ok(Self { typ, oid, date })
+    }
+
+    fn query_pairs(&self) -> Vec<(String, String)> {
+        vec![
+            ("type".to_string(), self.typ.to_string()),
+            ("oid".to_string(), self.oid.to_string()),
+            ("date".to_string(), self.date.clone()),
+        ]
+    }
+}
+
+fn validate_danmaku_type(typ: u8) -> BpiResult<()> {
+    if typ == 0 {
+        return Err(BpiError::invalid_parameter(
+            "type",
+            "danmaku type must be non-zero",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_oid(oid: u64) -> BpiResult<()> {
+    if oid == 0 {
+        return Err(BpiError::invalid_parameter(
+            "oid",
+            "danmaku oid must be non-zero",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_date(value: &str) -> BpiResult<()> {
+    let bytes = value.as_bytes();
+    let valid = bytes.len() == 10
+        && bytes[0..4].iter().all(u8::is_ascii_digit)
+        && bytes[4] == b'-'
+        && bytes[5..7].iter().all(u8::is_ascii_digit)
+        && bytes[7] == b'-'
+        && bytes[8..10].iter().all(u8::is_ascii_digit);
+    if !valid {
+        return Err(BpiError::invalid_parameter(
+            "date",
+            "date must use YYYY-MM-DD format",
+        ));
+    }
+
+    let month = value[5..7]
+        .parse::<u8>()
+        .map_err(|_| BpiError::invalid_parameter("date", "date must use YYYY-MM-DD format"))?;
+    let day = value[8..10]
+        .parse::<u8>()
+        .map_err(|_| BpiError::invalid_parameter("date", "date must use YYYY-MM-DD format"))?;
+    if !(1..=12).contains(&month) || !(1..=31).contains(&day) {
+        return Err(BpiError::invalid_parameter(
+            "date",
+            "date month/day is out of range",
+        ));
+    }
+
+    Ok(())
+}
+
 impl BpiClient {
     /// 获取实时弹幕分包（Web，`DmSegMobileReply` protobuf）
     ///
@@ -151,21 +272,13 @@ impl BpiClient {
     /// 文档注明需登录 Cookie（`SESSDATA`）方可拿到完整个人配置。
     pub async fn danmaku_web_view_proto(
         &self,
-        typ: u8,
-        oid: u64,
-        pid: Option<u64>,
+        params: DanmakuWebViewParams,
     ) -> Result<Bytes, BpiError> {
-        let mut q = vec![
-            ("type".to_string(), typ.to_string()),
-            ("oid".to_string(), oid.to_string()),
-        ];
-        if let Some(p) = pid {
-            q.push(("pid".to_string(), p.to_string()));
-        }
+        let query = params.query_pairs();
 
         self.get("https://api.bilibili.com/x/v2/dm/web/view")
             .with_bilibili_headers()
-            .query(&q)
+            .query(&query)
             .send_request("弹幕 web/view 元数据 protobuf")
             .await
     }
@@ -191,19 +304,13 @@ impl BpiClient {
     /// 需登录（历史弹幕）。
     pub async fn danmaku_web_history_seg_proto(
         &self,
-        typ: u8,
-        oid: u64,
-        date: &str,
+        params: DanmakuHistoryBytesParams,
     ) -> Result<Bytes, BpiError> {
-        let q = vec![
-            ("type".to_string(), typ.to_string()),
-            ("oid".to_string(), oid.to_string()),
-            ("date".to_string(), date.to_string()),
-        ];
+        let query = params.query_pairs();
 
         self.get("https://api.bilibili.com/x/v2/dm/web/history/seg.so")
             .with_bilibili_headers()
-            .query(&q)
+            .query(&query)
             .send_request("历史弹幕 web/history/seg.so")
             .await
     }
@@ -215,19 +322,13 @@ impl BpiClient {
     /// 需登录。响应一般为 deflate 压缩的 XML，与 `danmaku_xml` 模块解析格式一致。
     pub async fn danmaku_history_xml_bytes(
         &self,
-        typ: u8,
-        oid: u64,
-        date: &str,
+        params: DanmakuHistoryBytesParams,
     ) -> Result<Bytes, BpiError> {
-        let q = vec![
-            ("type".to_string(), typ.to_string()),
-            ("oid".to_string(), oid.to_string()),
-            ("date".to_string(), date.to_string()),
-        ];
+        let query = params.query_pairs();
 
         self.get("https://api.bilibili.com/x/v2/dm/history")
             .with_bilibili_headers()
-            .query(&q)
+            .query(&query)
             .send_request("历史弹幕 XML /dm/history")
             .await
     }
@@ -236,9 +337,69 @@ impl BpiClient {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use base64::{Engine as _, engine::general_purpose};
+    use serde::Deserialize;
+    use std::collections::BTreeMap;
 
-    // av 10001 772096113
-    const TEST_OID: u64 = 772096113;
+    const TEST_OID: u64 = 16546;
+    const TEST_DATE: &str = "2022-01-01";
+
+    #[derive(Debug, Deserialize)]
+    struct BinaryProbeBody {
+        kind: String,
+        encoding: String,
+        content_type: Option<String>,
+        length: usize,
+        body_base64: String,
+    }
+
+    fn contract(endpoint: &str) -> BpiResult<crate::probe::endpoint_contract::EndpointContract> {
+        let bytes = match endpoint {
+            "web-seg" => {
+                include_bytes!("../../tests/contracts/danmaku/non-json-read/web-seg/contract.json")
+                    .as_slice()
+            }
+            "web-seg-wbi" => include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-seg-wbi/contract.json"
+            )
+            .as_slice(),
+            "web-view" => {
+                include_bytes!("../../tests/contracts/danmaku/non-json-read/web-view/contract.json")
+                    .as_slice()
+            }
+            "mobile-seg" => include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/mobile-seg/contract.json"
+            )
+            .as_slice(),
+            "web-history-seg" => include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-history-seg/contract.json"
+            )
+            .as_slice(),
+            _ => unreachable!("unknown danmaku non-json contract"),
+        };
+        crate::probe::endpoint_contract::EndpointContract::from_slice(bytes)
+    }
+
+    fn query_map(params: Vec<(String, String)>) -> BTreeMap<String, String> {
+        params.into_iter().collect()
+    }
+
+    fn assert_binary_fixture(bytes: &[u8]) -> BpiResult<Vec<u8>> {
+        let body: BinaryProbeBody = serde_json::from_slice(bytes)?;
+        assert_eq!(body.kind, "binary");
+        assert_eq!(body.encoding, "base64");
+        assert_eq!(
+            body.content_type.as_deref(),
+            Some("application/octet-stream")
+        );
+
+        let decoded = general_purpose::STANDARD
+            .decode(body.body_base64)
+            .map_err(|err| BpiError::parse(err.to_string()))?;
+        assert_eq!(decoded.len(), body.length);
+        assert!(!decoded.is_empty());
+        Ok(decoded)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -270,7 +431,8 @@ pub mod tests {
     #[tokio::test]
     async fn test_danmaku_web_view_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi.danmaku_web_view_proto(1, TEST_OID, None).await?;
+        let params = DanmakuWebViewParams::new(1, TEST_OID)?;
+        let data = bpi.danmaku_web_view_proto(params).await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("web/view 响应字节数: {}", data.len());
@@ -339,5 +501,183 @@ pub mod tests {
                 ..
             }
         ));
+    }
+
+    #[test]
+    fn danmaku_web_view_params_serializes_query() -> Result<(), BpiError> {
+        let params = DanmakuWebViewParams::new(1, TEST_OID)?.pid(590635620)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("type".to_string(), "1".to_string()),
+                ("oid".to_string(), TEST_OID.to_string()),
+                ("pid".to_string(), "590635620".to_string())
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_history_bytes_params_serializes_query() -> Result<(), BpiError> {
+        let params = DanmakuHistoryBytesParams::new(1, TEST_OID, TEST_DATE)?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![
+                ("type".to_string(), "1".to_string()),
+                ("oid".to_string(), TEST_OID.to_string()),
+                ("date".to_string(), TEST_DATE.to_string())
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_history_bytes_params_rejects_invalid_date() -> Result<(), BpiError> {
+        let err = DanmakuHistoryBytesParams::new(1, TEST_OID, "2022-13-01").unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "date", .. }
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_non_json_contracts_match_endpoint_requests() -> BpiResult<()> {
+        let web_seg = contract("web-seg")?;
+        let segment_params = DanmakuSegmentParams::new(1, TEST_OID, 1)?;
+        assert_eq!(web_seg.name, "danmaku.web.seg");
+        assert_eq!(
+            web_seg.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/dm/web/seg.so"
+        );
+        assert_eq!(
+            query_map(segment_params.query_pairs()),
+            web_seg.request.query
+        );
+
+        let web_seg_wbi = contract("web-seg-wbi")?;
+        assert_eq!(web_seg_wbi.name, "danmaku.web.seg_wbi");
+        assert_eq!(
+            web_seg_wbi.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/dm/wbi/web/seg.so"
+        );
+        assert_eq!(
+            query_map(DanmakuSegmentParams::new(1, TEST_OID, 1)?.query_pairs()),
+            web_seg_wbi.request.query
+        );
+        assert!(web_seg_wbi.request.auth.requires_wbi());
+
+        let web_view = contract("web-view")?;
+        let view_params = DanmakuWebViewParams::new(1, TEST_OID)?;
+        assert_eq!(web_view.name, "danmaku.web.view");
+        assert_eq!(
+            web_view.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/dm/web/view"
+        );
+        assert_eq!(query_map(view_params.query_pairs()), web_view.request.query);
+
+        let mobile_seg = contract("mobile-seg")?;
+        assert_eq!(mobile_seg.name, "danmaku.mobile.seg");
+        assert_eq!(
+            mobile_seg.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/dm/list/seg.so"
+        );
+        assert_eq!(
+            query_map(DanmakuSegmentParams::new(1, TEST_OID, 1)?.query_pairs()),
+            mobile_seg.request.query
+        );
+
+        let history_seg = contract("web-history-seg")?;
+        let history_params = DanmakuHistoryBytesParams::new(1, TEST_OID, TEST_DATE)?;
+        assert_eq!(history_seg.name, "danmaku.web.history_seg");
+        assert_eq!(
+            history_seg.request.url.as_str(),
+            "https://api.bilibili.com/x/v2/dm/web/history/seg.so"
+        );
+        assert_eq!(
+            query_map(history_params.query_pairs()),
+            history_seg.request.query
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_non_json_response_fixtures_preserve_binary_bodies() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-seg/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-seg/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-seg/responses/vip.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-seg-wbi/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-seg-wbi/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-seg-wbi/responses/vip.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-view/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-view/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-view/responses/vip.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/mobile-seg/responses/anonymous.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/mobile-seg/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/mobile-seg/responses/vip.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-history-seg/responses/normal.success.json"
+            )
+            .as_slice(),
+            include_bytes!(
+                "../../tests/contracts/danmaku/non-json-read/web-history-seg/responses/vip.success.json"
+            )
+            .as_slice(),
+        ] {
+            assert_binary_fixture(bytes)?;
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn danmaku_web_history_seg_anonymous_fixture_records_login_error() -> BpiResult<()> {
+        let err = crate::response::ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../tests/contracts/danmaku/non-json-read/web-history-seg/responses/anonymous.requires_login.json"
+        ))
+        .and_then(crate::response::ApiEnvelope::ensure_success)
+        .unwrap_err();
+
+        assert!(err.requires_login());
+        Ok(())
     }
 }

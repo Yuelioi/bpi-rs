@@ -51,13 +51,13 @@ bangumi = []
 cheese = []
 clientinfo = []
 comment = []
-creativecenter = ["dep:base64"]
+creativecenter = []
 dynamic = ["reqwest/multipart"]
 danmaku = ["dep:quick-xml", "dep:flate2"]
 electric = []
 fav = []
 historytoview = []
-live = ["dep:base64"]
+live = []
 login = []
 manga = []
 message = ["dep:uuid"]
@@ -100,7 +100,7 @@ bytes = { version = "1.8" }
 
 md5 = { version = "0.8" } # wbi
 
-base64 = { version = "0.22", optional = true }
+base64 = { version = "0.22" }
 hmac = { version = "0.12", optional = true }
 sha2 = { version = "0.10", optional = true }
 hex = { version = "0.4", optional = true }

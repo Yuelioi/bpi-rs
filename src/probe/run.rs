@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use base64::{Engine as _, engine::general_purpose};
 use reqwest::RequestBuilder;
 
 use crate::probe::account::RawProbeConfig;
@@ -18,7 +19,12 @@ pub async fn execute_contract(
     let response = request.send().await?;
     let status = response.status().as_u16();
     let headers = collect_headers(response.headers());
-    let body = response_body(response).await?;
+    let content_type = response
+        .headers()
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|value| value.to_str().ok())
+        .map(str::to_owned);
+    let body = response_body(response, content_type).await?;
 
     let result = ProbeResult {
         contract: contract.name.clone(),
@@ -133,14 +139,25 @@ fn collect_headers(headers: &reqwest::header::HeaderMap) -> BTreeMap<String, Str
         .collect()
 }
 
-async fn response_body(response: reqwest::Response) -> BpiResult<serde_json::Value> {
+async fn response_body(
+    response: reqwest::Response,
+    content_type: Option<String>,
+) -> BpiResult<serde_json::Value> {
     let bytes = response.bytes().await?;
     match serde_json::from_slice(&bytes) {
         Ok(value) => Ok(value),
-        Err(_) => Ok(serde_json::Value::String(
-            String::from_utf8_lossy(&bytes).into_owned(),
-        )),
+        Err(_) => Ok(binary_response_body(&bytes, content_type)),
     }
+}
+
+fn binary_response_body(bytes: &[u8], content_type: Option<String>) -> serde_json::Value {
+    serde_json::json!({
+        "kind": "binary",
+        "encoding": "base64",
+        "content_type": content_type,
+        "length": bytes.len(),
+        "body_base64": general_purpose::STANDARD.encode(bytes),
+    })
 }
 
 #[cfg(test)]
@@ -255,6 +272,25 @@ mod tests {
         );
         assert!(captured.query.contains_key("wts"));
         assert!(captured.query.contains_key("w_rid"));
+        Ok(())
+    }
+
+    #[test]
+    fn non_json_response_body_records_lossless_base64() -> Result<(), BpiError> {
+        let bytes = b"\x00\x9fprotobuf";
+        let body = binary_response_body(bytes, Some("application/octet-stream".to_string()));
+
+        assert_eq!(body["kind"], "binary");
+        assert_eq!(body["encoding"], "base64");
+        assert_eq!(body["content_type"], "application/octet-stream");
+        assert_eq!(body["length"], bytes.len());
+        let encoded = body["body_base64"]
+            .as_str()
+            .ok_or_else(|| BpiError::unsupported_response("missing binary body"))?;
+        let decoded = general_purpose::STANDARD
+            .decode(encoded)
+            .map_err(|err| BpiError::parse(err.to_string()))?;
+        assert_eq!(decoded, bytes);
         Ok(())
     }
 }
