@@ -38,6 +38,7 @@ Do not resume the old committed shape `tests/contracts/<domain>/<endpoint>/<prof
 ## Read if
 
 - plans/ — when implementation planning begins.
+- plans/manga-download-read-probe-block.md — before retrying manga download/read contracts.
 
 ## Progress
 
@@ -56,11 +57,12 @@ Done:
 - Migrated existing pilot contracts to endpoint `contract.json` plus `responses/*.json` fixtures in commit `6383119`.
 - Covered `clientinfo/ip`, `login/vip-info`, `login/read-info`, and `login/qr` in the accepted contract shape.
 - Completed `electric/private-read-remark-detail-flow`: anonymous direct Probe preserves `requires_login`, normal/vip Probe flows extract a private `remark_id` from `remark-list` at runtime, and promoted contracts/fixtures avoid committing literal private ids or message content.
+- Rechecked `manga/download-read` with additional normal/vip `ComicDetail`, `epId`, and alternate public sample `GetImageIndex` Probe trials; all returned HTTP 200/API `code = 99`, so the batch remains Probe-blocked with no promoted contract. Details are in `plans/manga-download-read-probe-block.md`.
 
 Current:
 - Shared-core/domain bridge work has a completed `clientinfo/module-client-bridge` example after endpoint contract batches.
 - Goal-mode continuation now defaults back to Probe-backed endpoint contract batches unless a non-Probe bridge batch is explicitly selected and recorded. Do not repeat completed examples such as `video/info-read`, `login/read-info`, or `clientinfo/ip`.
-- Use the local status board to select the next incomplete module or cohesive submodule batch. Remaining normal endpoint work appears to be gated, mutating, or Probe-blocked; do not force a non-Probe bridge unless it is explicitly selected and recorded as such.
+- Use the local status board to select the next incomplete module or cohesive submodule batch. Remaining normal endpoint work appears to be gated, mutating, or Probe-blocked; `manga/download-read` is currently blocked by repeated `code = 99` Probe results. Do not force a non-Probe bridge unless it is explicitly selected and recorded as such.
 
 Verified:
 - After commit `6383119`, `cargo fmt --check`, `cargo check --all-features`, and `cargo test --all-features --lib` passed.
@@ -69,6 +71,7 @@ Verified:
 - For `shared-core/payload-request-helpers`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, `cargo test --all-features --lib --quiet`, and `git diff --check` passed.
 - For `clientinfo/module-client-bridge`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, `cargo test --all-features --lib --quiet`, and `git diff --check` passed.
 - For `electric/private-read-remark-detail-flow`, RED `cargo test --all-features --lib electric --quiet` failed on missing promoted contract/fixture files; after promotion, `cargo test --all-features --lib probe --quiet`, `cargo test --all-features --lib electric --quiet`, `cargo fmt --check`, `cargo clippy --all-targets --all-features --locked -- -D warnings`, `cargo check --all-features`, `cargo test --all-features --lib --quiet`, and `git diff --check` passed.
+- For `manga/download-read-probe-block`, additional real Probe attempts were run under `target/bpi-probe-runs/manga/download-read/...`; all returned API `code = 99`, no contracts were promoted, and `git diff --check` passed for the tracked notes.
 
 ## Local-only Constraints
 
