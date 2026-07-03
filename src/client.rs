@@ -27,6 +27,8 @@ use crate::fav::FavClient;
 use crate::historytoview::HistoryToViewClient;
 #[cfg(feature = "login")]
 use crate::login::LoginClient;
+#[cfg(feature = "manga")]
+use crate::manga::MangaClient;
 #[cfg(feature = "message")]
 use crate::message::MessageClient;
 #[cfg(feature = "misc")]
@@ -454,6 +456,12 @@ impl BpiClient {
     #[cfg(feature = "login")]
     pub fn login(&self) -> LoginClient<'_> {
         LoginClient::new(self)
+    }
+
+    /// Creates a manga domain client.
+    #[cfg(feature = "manga")]
+    pub fn manga(&self) -> MangaClient<'_> {
+        MangaClient::new(self)
     }
 
     /// Creates a misc domain client.
@@ -890,6 +898,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _historytoview = client.historytoview();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "manga")]
+    #[test]
+    fn manga_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _manga = client.manga();
 
         Ok(())
     }
