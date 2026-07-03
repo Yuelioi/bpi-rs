@@ -5,7 +5,7 @@ use super::model::{VideoDetail, VideoPage, VideoView};
 use super::params::{
     VideoDescParams, VideoDetailParams, VideoPageListParams, VideoPlayUrlParams, VideoViewParams,
 };
-use super::videostream_url::PlayUrlResponseData;
+use super::videostream_url::{PLAY_URL_ENDPOINT, PlayUrlResponseData};
 
 const DESC_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/archive/desc";
 const DETAIL_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/view/detail";
@@ -48,9 +48,8 @@ impl<'a> VideoClient<'a> {
         self.client
             .get(VIEW_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<VideoView>("video.view")
-            .await?
-            .into_data()
+            .send_bpi_payload("video.view")
+            .await
     }
 
     /// Fetches web video detail, including tags and related videos.
@@ -58,9 +57,8 @@ impl<'a> VideoClient<'a> {
         self.client
             .get(DETAIL_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<VideoDetail>("video.detail")
-            .await?
-            .into_data()
+            .send_bpi_payload("video.detail")
+            .await
     }
 
     /// Fetches the page/content IDs for a video.
@@ -68,9 +66,8 @@ impl<'a> VideoClient<'a> {
         self.client
             .get(PAGELIST_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<Vec<VideoPage>>("video.pagelist")
-            .await?
-            .into_data()
+            .send_bpi_payload("video.pagelist")
+            .await
     }
 
     /// Fetches the plain text video description.
@@ -78,14 +75,20 @@ impl<'a> VideoClient<'a> {
         self.client
             .get(DESC_ENDPOINT)
             .query(&params.query_pairs())
-            .send_bpi::<String>("video.desc")
-            .await?
-            .into_data()
+            .send_bpi_payload("video.desc")
+            .await
     }
 
     /// Fetches signed web playback URLs by AV ID or BV ID plus page/content ID.
     pub async fn play_url(&self, params: VideoPlayUrlParams) -> BpiResult<PlayUrlResponseData> {
-        self.client.video_playurl(params).await?.into_data()
+        let params = self.client.get_wbi_sign2(params.query_pairs()).await?;
+
+        self.client
+            .get(PLAY_URL_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&params)
+            .send_bpi_payload("video.play_url")
+            .await
     }
 }
 
@@ -175,6 +178,27 @@ mod tests {
             "https://api.bilibili.com/x/web-interface/archive/desc"
         );
         Ok(())
+    }
+
+    #[test]
+    fn video_client_methods_use_payload_request_helpers() {
+        let source = include_str!("client.rs");
+        let payload_helper = concat!(".send_", "bpi_payload");
+        let legacy_envelope_helper = concat!(".send_", "bpi::<");
+        let legacy_flat_playurl = concat!(".video_", "playurl(");
+
+        assert!(
+            source.matches(payload_helper).count() >= 5,
+            "VideoClient read methods should return decoded payloads directly"
+        );
+        assert!(
+            !source.contains(legacy_envelope_helper),
+            "VideoClient should not use legacy envelope-returning request helpers"
+        );
+        assert!(
+            !source.contains(legacy_flat_playurl),
+            "VideoClient::play_url should be implemented as a payload-helper-backed domain method"
+        );
     }
 
     #[test]

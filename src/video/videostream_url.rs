@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use super::params::VideoPlayUrlParams;
 
-const PLAY_URL_ENDPOINT: &str = "https://api.bilibili.com/x/player/wbi/playurl";
+pub(crate) const PLAY_URL_ENDPOINT: &str = "https://api.bilibili.com/x/player/wbi/playurl";
 
 // --- 视频流URL相关数据结构体 ---
 
