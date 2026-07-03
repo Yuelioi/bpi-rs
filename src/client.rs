@@ -25,6 +25,8 @@ use crate::sign::wbi::WbiKeyCache;
 use crate::user::UserClient;
 #[cfg(feature = "video")]
 use crate::video::VideoClient;
+#[cfg(feature = "vip")]
+use crate::vip::VipClient;
 #[cfg(feature = "wallet")]
 use crate::wallet::WalletClient;
 #[cfg(feature = "web_widget")]
@@ -416,6 +418,12 @@ impl BpiClient {
         VideoClient::new(self)
     }
 
+    /// Creates a VIP domain client.
+    #[cfg(feature = "vip")]
+    pub fn vip(&self) -> VipClient<'_> {
+        VipClient::new(self)
+    }
+
     /// Creates a wallet domain client.
     #[cfg(feature = "wallet")]
     pub fn wallet(&self) -> WalletClient<'_> {
@@ -722,6 +730,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _message = client.message();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "vip")]
+    #[test]
+    fn vip_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _vip = client.vip();
 
         Ok(())
     }

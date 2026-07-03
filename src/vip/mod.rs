@@ -2,10 +2,12 @@
 
 pub mod action;
 pub mod center;
+mod client;
 pub mod params;
 
 pub mod info;
 
+pub use client::VipClient;
 pub use params::VipCenterInfoParams;
 
 // 用不了
