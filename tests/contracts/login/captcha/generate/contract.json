@@ -1,0 +1,70 @@
+{
+  "name": "login.captcha_generate",
+  "request": {
+    "method": "GET",
+    "url": "https://passport.bilibili.com/x/passport-login/captcha",
+    "query": {
+      "source": "main_web"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "one-time captcha token, gt, and challenge sanitized before commit"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe",
+        "rust_model": "GeetestData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe",
+        "rust_model": "GeetestData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "sanitized_probe",
+        "rust_model": "GeetestData"
+      }
+    }
+  ]
+}

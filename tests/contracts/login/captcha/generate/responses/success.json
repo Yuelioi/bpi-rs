@@ -1,0 +1,16 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "type": "geetest",
+    "token": "sanitized-captcha-token",
+    "geetest": {
+      "challenge": "sanitized-geetest-challenge",
+      "gt": "sanitized-geetest-gt"
+    },
+    "tencent": {
+      "appid": ""
+    }
+  }
+}
