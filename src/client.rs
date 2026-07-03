@@ -13,6 +13,8 @@ use crate::auth::Account;
 use crate::clientinfo::ClientInfoClient;
 #[cfg(feature = "login")]
 use crate::login::LoginClient;
+#[cfg(feature = "message")]
+use crate::message::MessageClient;
 #[cfg(feature = "misc")]
 use crate::misc::MiscClient;
 #[cfg(feature = "opus")]
@@ -396,6 +398,12 @@ impl BpiClient {
         MiscClient::new(self)
     }
 
+    /// Creates a message domain client.
+    #[cfg(feature = "message")]
+    pub fn message(&self) -> MessageClient<'_> {
+        MessageClient::new(self)
+    }
+
     /// Creates an opus domain client.
     #[cfg(feature = "opus")]
     pub fn opus(&self) -> OpusClient<'_> {
@@ -704,6 +712,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _misc = client.misc();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "message")]
+    #[test]
+    fn message_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _message = client.message();
 
         Ok(())
     }
