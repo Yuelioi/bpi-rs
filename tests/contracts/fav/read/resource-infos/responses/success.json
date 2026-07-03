@@ -1,0 +1,33 @@
+{
+  "code": 0,
+  "message": "OK",
+  "data": [
+    {
+      "id": 371494037,
+      "type": 2,
+      "title": "<redacted>",
+      "cover": "https://example.invalid/media-cover.jpg",
+      "intro": "",
+      "page": 1,
+      "duration": 1,
+      "upper": {
+        "mid": 686127,
+        "name": "<redacted>",
+        "face": "https://example.invalid/upper-face.jpg"
+      },
+      "attr": 0,
+      "cnt_info": {
+        "collect": 0,
+        "play": 0,
+        "danmaku": 0
+      },
+      "link": "https://www.bilibili.com/video/BVxxxxxxxxxx",
+      "ctime": 0,
+      "pubtime": 0,
+      "fav_time": 0,
+      "bv_id": "BVxxxxxxxxxx",
+      "bvid": "BVxxxxxxxxxx",
+      "season": null
+    }
+  ]
+}

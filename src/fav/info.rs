@@ -235,7 +235,34 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
+
+    fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
+        let bytes = match endpoint {
+            "folder-info" => {
+                include_bytes!("../../tests/contracts/fav/read/folder-info/contract.json")
+                    .as_slice()
+            }
+            "created-list" => {
+                include_bytes!("../../tests/contracts/fav/read/created-list/contract.json")
+                    .as_slice()
+            }
+            "collected-list" => {
+                include_bytes!("../../tests/contracts/fav/read/collected-list/contract.json")
+                    .as_slice()
+            }
+            "resource-infos" => {
+                include_bytes!("../../tests/contracts/fav/read/resource-infos/contract.json")
+                    .as_slice()
+            }
+            _ => unreachable!("unknown fav info contract endpoint"),
+        };
+
+        EndpointContract::from_slice(bytes)
+    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -243,7 +270,7 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         // 替换为一个公开收藏夹的media_id
         let params = FavFolderInfoParams::new(
-            crate::ids::MediaId::new(3717139570).expect("fixture media id should be valid"),
+            crate::ids::MediaId::new(1052622027).expect("fixture media id should be valid"),
         );
         let resp = bpi.fav_folder_info(params).await;
 
@@ -265,7 +292,7 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let params = FavCreatedListParams::new(
-            crate::ids::Mid::new(4279370).expect("fixture mid should be valid"),
+            crate::ids::Mid::new(7792521).expect("fixture mid should be valid"),
         );
         let resp = bpi.fav_created_list(params).await;
 
@@ -286,7 +313,7 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let params = FavCollectedListParams::new(
-            crate::ids::Mid::new(4279370).expect("fixture mid should be valid"),
+            crate::ids::Mid::new(7792521).expect("fixture mid should be valid"),
         )
         .with_page(1)
         .expect("fixture page should be valid")
@@ -309,8 +336,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_fav_resource_infos() {
         let bpi = BpiClient::new().expect("client should build");
-        let params = FavResourceInfosParams::new("115087859779103:2")
-            .expect("fixture resources should be valid");
+        let params =
+            FavResourceInfosParams::new("371494037:2").expect("fixture resources should be valid");
         let resp = bpi.fav_resource_infos(params).await;
 
         info!("{:?}", resp);
@@ -322,5 +349,165 @@ mod tests {
             info!("retrieved {} resources", data.len());
             info!("first resource info: {:?}", data.first());
         }
+    }
+
+    #[test]
+    fn fav_folder_info_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("folder-info")?;
+
+        assert_eq!(contract.name, "fav.folder_info");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/v3/fav/folder/info"
+        );
+        assert_eq!(
+            contract.request.query.get("media_id").map(String::as_str),
+            Some("1052622027")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("FavFolderInfo")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn fav_created_list_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("created-list")?;
+
+        assert_eq!(contract.name, "fav.created_list");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/v3/fav/folder/created/list-all"
+        );
+        assert_eq!(
+            contract.request.query.get("up_mid").map(String::as_str),
+            Some("7792521")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("CreatedFolderListData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn fav_collected_list_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("collected-list")?;
+
+        assert_eq!(contract.name, "fav.collected_list");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/v3/fav/folder/collected/list"
+        );
+        assert_eq!(
+            contract.request.query.get("up_mid").map(String::as_str),
+            Some("7792521")
+        );
+        assert_eq!(
+            contract.request.query.get("platform").map(String::as_str),
+            Some("web")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("CollectedFolderListData")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn fav_resource_infos_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract("resource-infos")?;
+
+        assert_eq!(contract.name, "fav.resource_infos");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/v3/fav/resource/infos"
+        );
+        assert_eq!(
+            contract.request.query.get("resources").map(String::as_str),
+            Some("371494037:2")
+        );
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(
+            contract.cases[0].response.rust_model.as_deref(),
+            Some("Vec<ResourceInfoItem>")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn fav_info_response_fixtures_parse_declared_models() -> BpiResult<()> {
+        let folder = ApiEnvelope::<FavFolderInfo>::from_slice(include_bytes!(
+            "../../tests/contracts/fav/read/folder-info/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(folder.id, 1052622027);
+
+        let created = ApiEnvelope::<CreatedFolderListData>::from_slice(include_bytes!(
+            "../../tests/contracts/fav/read/created-list/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(created.list.len(), 1);
+
+        let collected = ApiEnvelope::<CollectedFolderListData>::from_slice(include_bytes!(
+            "../../tests/contracts/fav/read/collected-list/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert!(collected.list.is_empty());
+
+        let resources = ApiEnvelope::<Vec<ResourceInfoItem>>::from_slice(include_bytes!(
+            "../../tests/contracts/fav/read/resource-infos/responses/success.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(resources.len(), 1);
+        Ok(())
+    }
+
+    fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/fav/read/{endpoint}/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
+
+    #[test]
+    fn fav_info_models_match_local_probe_outputs_when_available() -> BpiResult<()> {
+        for profile in ["anonymous", "normal", "vip"] {
+            if let Some(body) = local_probe_body("folder-info", profile) {
+                let payload =
+                    serde_json::from_value::<ApiEnvelope<FavFolderInfo>>(body)?.into_payload()?;
+                assert_eq!(payload.id, 1052622027);
+            }
+
+            if let Some(body) = local_probe_body("created-list", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<CreatedFolderListData>>(body)?
+                    .into_payload()?;
+                assert!(payload.count >= payload.list.len() as u32);
+            }
+
+            if let Some(body) = local_probe_body("collected-list", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<CollectedFolderListData>>(body)?
+                    .into_payload()?;
+                assert!(payload.count >= payload.list.len() as u32);
+            }
+
+            if let Some(body) = local_probe_body("resource-infos", profile) {
+                let payload = serde_json::from_value::<ApiEnvelope<Vec<ResourceInfoItem>>>(body)?
+                    .into_payload()?;
+                assert!(!payload.is_empty());
+            }
+        }
+        Ok(())
     }
 }

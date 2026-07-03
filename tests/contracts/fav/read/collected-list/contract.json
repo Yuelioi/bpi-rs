@@ -1,0 +1,73 @@
+{
+  "name": "fav.collected_list",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/v3/fav/folder/collected/list",
+    "query": {
+      "up_mid": "7792521",
+      "pn": "1",
+      "ps": "20",
+      "platform": "web"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "public empty list fixture promoted without account headers"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "CollectedFolderListData"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "CollectedFolderListData"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "probe_body",
+        "rust_model": "CollectedFolderListData"
+      }
+    }
+  ]
+}

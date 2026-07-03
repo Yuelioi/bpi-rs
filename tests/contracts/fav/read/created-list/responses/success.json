@@ -1,0 +1,18 @@
+{
+  "code": 0,
+  "message": "OK",
+  "data": {
+    "count": 1,
+    "list": [
+      {
+        "id": 44233921,
+        "fid": 44233921,
+        "mid": 7792521,
+        "attr": 0,
+        "title": "<redacted>",
+        "fav_state": 0,
+        "media_count": 177
+      }
+    ]
+  }
+}

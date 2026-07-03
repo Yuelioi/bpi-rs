@@ -197,23 +197,23 @@ mod tests {
 
     #[test]
     fn fav_folder_info_params_serializes_media_id() -> BpiResult<()> {
-        let params = FavFolderInfoParams::new(MediaId::new(1572769770)?);
+        let params = FavFolderInfoParams::new(MediaId::new(1052622027)?);
 
         assert_eq!(
             params.query_pairs(),
-            vec![("media_id", "1572769770".to_string())]
+            vec![("media_id", "1052622027".to_string())]
         );
         Ok(())
     }
 
     #[test]
     fn fav_created_list_params_serializes_defaults() -> BpiResult<()> {
-        let params = FavCreatedListParams::new(Mid::new(4279370)?);
+        let params = FavCreatedListParams::new(Mid::new(7792521)?);
 
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("up_mid", "4279370".to_string()),
+                ("up_mid", "7792521".to_string()),
                 ("web_location", "333.1387".to_string())
             ]
         );
@@ -222,7 +222,7 @@ mod tests {
 
     #[test]
     fn fav_created_list_params_serializes_optional_filters() -> BpiResult<()> {
-        let params = FavCreatedListParams::new(Mid::new(4279370)?)
+        let params = FavCreatedListParams::new(Mid::new(7792521)?)
             .with_type(2)
             .with_resource_id(170001)?
             .with_web_location("333.999")?;
@@ -230,7 +230,7 @@ mod tests {
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("up_mid", "4279370".to_string()),
+                ("up_mid", "7792521".to_string()),
                 ("type", "2".to_string()),
                 ("rid", "170001".to_string()),
                 ("web_location", "333.999".to_string())
@@ -241,7 +241,7 @@ mod tests {
 
     #[test]
     fn fav_created_list_params_rejects_zero_resource_id() -> BpiResult<()> {
-        let err = FavCreatedListParams::new(Mid::new(4279370)?)
+        let err = FavCreatedListParams::new(Mid::new(7792521)?)
             .with_resource_id(0)
             .unwrap_err();
 
@@ -254,12 +254,12 @@ mod tests {
 
     #[test]
     fn fav_collected_list_params_serializes_defaults() -> BpiResult<()> {
-        let params = FavCollectedListParams::new(Mid::new(4279370)?);
+        let params = FavCollectedListParams::new(Mid::new(7792521)?);
 
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("up_mid", "4279370".to_string()),
+                ("up_mid", "7792521".to_string()),
                 ("pn", "1".to_string()),
                 ("ps", "20".to_string()),
                 ("platform", "web".to_string())
@@ -270,14 +270,14 @@ mod tests {
 
     #[test]
     fn fav_collected_list_params_serializes_pagination() -> BpiResult<()> {
-        let params = FavCollectedListParams::new(Mid::new(4279370)?)
+        let params = FavCollectedListParams::new(Mid::new(7792521)?)
             .with_page(2)?
             .with_page_size(30)?;
 
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("up_mid", "4279370".to_string()),
+                ("up_mid", "7792521".to_string()),
                 ("pn", "2".to_string()),
                 ("ps", "30".to_string()),
                 ("platform", "web".to_string())
@@ -288,7 +288,7 @@ mod tests {
 
     #[test]
     fn fav_collected_list_params_rejects_zero_page() -> BpiResult<()> {
-        let err = FavCollectedListParams::new(Mid::new(4279370)?)
+        let err = FavCollectedListParams::new(Mid::new(7792521)?)
             .with_page(0)
             .unwrap_err();
 
@@ -301,12 +301,12 @@ mod tests {
 
     #[test]
     fn fav_resource_infos_params_serializes_defaults() -> BpiResult<()> {
-        let params = FavResourceInfosParams::new("115087859779103:2")?;
+        let params = FavResourceInfosParams::new("371494037:2")?;
 
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("resources", "115087859779103:2".to_string()),
+                ("resources", "371494037:2".to_string()),
                 ("platform", "web".to_string())
             ]
         );
@@ -328,12 +328,12 @@ mod tests {
 
     #[test]
     fn fav_resource_ids_params_serializes_defaults() -> BpiResult<()> {
-        let params = FavResourceIdsParams::new(MediaId::new(1572769770)?);
+        let params = FavResourceIdsParams::new(MediaId::new(1052622027)?);
 
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("media_id", "1572769770".to_string()),
+                ("media_id", "1052622027".to_string()),
                 ("platform", "web".to_string())
             ]
         );

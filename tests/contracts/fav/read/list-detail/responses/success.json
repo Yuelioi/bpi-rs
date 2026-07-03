@@ -1,0 +1,69 @@
+{
+  "code": 0,
+  "message": "OK",
+  "data": {
+    "info": {
+      "id": 1052622027,
+      "fid": 1052622027,
+      "mid": 686127,
+      "attr": 0,
+      "title": "<redacted>",
+      "cover": "https://example.invalid/cover.jpg",
+      "upper": {
+        "mid": 686127,
+        "name": "<redacted>",
+        "face": "https://example.invalid/face.jpg",
+        "followed": false,
+        "vip_type": 0,
+        "vip_statue": 0
+      },
+      "cover_type": 0,
+      "cnt_info": {
+        "collect": 0,
+        "play": 0,
+        "thumb_up": 0,
+        "share": 0
+      },
+      "type": 11,
+      "intro": "",
+      "ctime": 0,
+      "mtime": 0,
+      "state": 0,
+      "fav_state": 0,
+      "like_state": 0,
+      "media_count": 28
+    },
+    "medias": [
+      {
+        "id": 371494037,
+        "type": 2,
+        "title": "<redacted>",
+        "cover": "https://example.invalid/media-cover.jpg",
+        "intro": "",
+        "page": 1,
+        "duration": 1,
+        "upper": {
+          "mid": 686127,
+          "name": "<redacted>",
+          "face": "https://example.invalid/upper-face.jpg"
+        },
+        "attr": 0,
+        "cnt_info": {
+          "collect": 0,
+          "play": 0,
+          "danmaku": 0,
+          "view_text_1": "0"
+        },
+        "link": "https://www.bilibili.com/video/BVxxxxxxxxxx",
+        "ctime": 0,
+        "pubtime": 0,
+        "fav_time": 0,
+        "bv_id": "BVxxxxxxxxxx",
+        "bvid": "BVxxxxxxxxxx",
+        "season": null
+      }
+    ],
+    "has_more": true,
+    "ttl": 1
+  }
+}

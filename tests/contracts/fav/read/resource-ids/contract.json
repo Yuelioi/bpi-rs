@@ -1,0 +1,71 @@
+{
+  "name": "fav.resource_ids",
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/v3/fav/resource/ids",
+    "query": {
+      "media_id": "1052622027",
+      "platform": "web"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": []
+    }
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "privacy": "public resource id fixture is trimmed from real Probe body"
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "Vec<FavResourceIdItem>"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "Vec<FavResourceIdItem>"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/success.json",
+        "fixture_kind": "trimmed_probe_body",
+        "rust_model": "Vec<FavResourceIdItem>"
+      }
+    }
+  ]
+}
