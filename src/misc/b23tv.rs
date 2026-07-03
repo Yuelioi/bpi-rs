@@ -7,8 +7,10 @@ use serde::{Deserialize, Serialize};
 
 use super::MiscB23ShortLinkParams;
 
+const B23_SHORT_LINK_ENDPOINT: &str = "https://api.biliapi.net/x/share/click";
+
 /// 生成 b23.tv 短链 - 响应数据
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ShortLinkData {
     /// 原始返回内容（标题 + 短链）
     pub content: String,
@@ -54,12 +56,10 @@ impl BpiClient {
         let form = params.form_pairs();
 
         let mut result: BpiResponse<ShortLinkData> = self
-            .post("https://api.biliapi.net/x/share/click")
+            .post(B23_SHORT_LINK_ENDPOINT)
             .form(&form)
             .send_bpi("生成短链")
             .await?;
-
-        // 额外解析出纯短链
 
         if let Some(data) = &mut result.data {
             data.extract();
@@ -72,29 +72,101 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ApiEnvelope;
     use crate::ids::Aid;
     use crate::misc::MiscB23ShortLinkParams;
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
 
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_generate_short_link() -> Result<(), BpiError> {
-        let bpi = BpiClient::new().expect("client should build");
-        let params = MiscB23ShortLinkParams::new(Aid::new(10001)?);
+    fn local_b23_short_link_probe_body(profile: &str) -> Option<serde_json::Value> {
+        let path = format!("target/bpi-probe-runs/misc/b23tv/short-link/{profile}.response.json");
+        let bytes = std::fs::read(path).ok()?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
+        value
+            .get("response")
+            .and_then(|response| response.get("body"))
+            .cloned()
+    }
 
-        match bpi.misc_b23_short_link(params).await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    let data = resp.data.unwrap();
-                    tracing::info!("原始内容: {}", data.content);
-                    tracing::info!("提取短链: {}", data.link);
-                    tracing::info!("提取标题: {}", data.title)
-                } else {
-                    tracing::info!("生成短链失败: code={}, message={}", resp.code, resp.message);
-                }
-            }
-            Err(err) => {
-                panic!("请求出错: {}", err);
-            }
+    #[test]
+    fn misc_b23_short_link_contract_matches_endpoint_request() -> Result<(), BpiError> {
+        let contract = EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/misc/b23tv/short-link/contract.json"
+        ))?;
+
+        assert_eq!(contract.name, "misc.b23tv.short_link");
+        assert_eq!(contract.request.method, HttpMethod::Post);
+        assert_eq!(contract.request.url.as_str(), B23_SHORT_LINK_ENDPOINT);
+        assert!(contract.request.query.is_empty());
+
+        let form = contract
+            .request
+            .form
+            .as_ref()
+            .ok_or_else(|| BpiError::unsupported_response("missing b23tv contract form"))?;
+        assert_eq!(form.get("platform").map(String::as_str), Some("unix"));
+        assert_eq!(form.get("share_channel").map(String::as_str), Some("COPY"));
+        assert_eq!(
+            form.get("share_id").map(String::as_str),
+            Some("main.ugc-video-detail.0.0.pv")
+        );
+        assert_eq!(form.get("share_mode").map(String::as_str), Some("4"));
+        assert_eq!(form.get("oid").map(String::as_str), Some("10001"));
+        assert_eq!(form.get("buvid").map(String::as_str), Some("qwq"));
+        assert_eq!(form.get("build").map(String::as_str), Some("6114514"));
+        assert_eq!(contract.cases.len(), 3);
+        Ok(())
+    }
+
+    #[test]
+    fn misc_b23_short_link_contract_covers_profiles() -> Result<(), BpiError> {
+        let contract = EndpointContract::from_slice(include_bytes!(
+            "../../tests/contracts/misc/b23tv/short-link/contract.json"
+        ))?;
+
+        let anonymous = &contract.cases[0];
+        assert_eq!(anonymous.profile.as_deref(), Some("anonymous"));
+        assert!(!anonymous.auth.requires_cookie());
+
+        for case in &contract.cases[1..] {
+            assert!(matches!(case.name.as_str(), "normal" | "vip"));
+            assert!(case.auth.requires_cookie());
+            assert_eq!(case.response.api_code, Some(0));
+            assert_eq!(case.response.rust_model.as_deref(), Some("ShortLinkData"));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn misc_b23_short_link_response_fixture_parses_declared_model() -> Result<(), BpiError> {
+        let mut data = ApiEnvelope::<ShortLinkData>::from_slice(include_bytes!(
+            "../../tests/contracts/misc/b23tv/short-link/responses/success.json"
+        ))?
+        .into_payload()?;
+
+        data.extract();
+
+        assert_eq!(data.count, 0);
+        assert_eq!(data.title, "sanitized-title");
+        assert_eq!(data.link, "https://b23.tv/sanitized");
+        Ok(())
+    }
+
+    #[test]
+    fn misc_b23_short_link_model_matches_local_probe_outputs_when_available() -> Result<(), BpiError>
+    {
+        for profile in ["anonymous", "normal", "vip"] {
+            let Some(body) = local_b23_short_link_probe_body(profile) else {
+                continue;
+            };
+
+            let mut data =
+                serde_json::from_value::<ApiEnvelope<ShortLinkData>>(body)?.into_payload()?;
+            data.extract();
+
+            assert_eq!(data.count, 0);
+            assert!(data.link.starts_with("https://b23.tv/"));
+            assert!(!data.title.trim().is_empty());
         }
         Ok(())
     }
