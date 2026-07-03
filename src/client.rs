@@ -13,6 +13,8 @@ use crate::auth::Account;
 use crate::clientinfo::ClientInfoClient;
 #[cfg(feature = "comment")]
 use crate::comment::CommentClient;
+#[cfg(feature = "historytoview")]
+use crate::historytoview::HistoryToViewClient;
 #[cfg(feature = "login")]
 use crate::login::LoginClient;
 #[cfg(feature = "message")]
@@ -396,6 +398,12 @@ impl BpiClient {
         CommentClient::new(self)
     }
 
+    /// Creates a history and to-view domain client.
+    #[cfg(feature = "historytoview")]
+    pub fn historytoview(&self) -> HistoryToViewClient<'_> {
+        HistoryToViewClient::new(self)
+    }
+
     /// Creates a login domain client.
     #[cfg(feature = "login")]
     pub fn login(&self) -> LoginClient<'_> {
@@ -758,6 +766,16 @@ mod tests {
         let client = BpiClient::new()?;
 
         let _comment = client.comment();
+
+        Ok(())
+    }
+
+    #[cfg(feature = "historytoview")]
+    #[test]
+    fn historytoview_domain_client_can_be_created() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        let _historytoview = client.historytoview();
 
         Ok(())
     }
