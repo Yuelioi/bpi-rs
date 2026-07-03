@@ -5,6 +5,8 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+const COIN_ENDPOINT: &str = "https://account.bilibili.com/site/getCoin";
+
 /// 获取硬币数 - 响应结构体
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CoinInfo {
@@ -18,15 +20,23 @@ impl BpiClient {
     /// # 文档
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login)
     pub async fn login_info_coin(&self) -> Result<BpiResponse<CoinInfo>, BpiError> {
-        self.get("https://account.bilibili.com/site/getCoin")
-            .send_bpi("获取硬币数")
-            .await
+        self.get(COIN_ENDPOINT).send_bpi("获取硬币数").await
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/login/coin/contract.json"
+        ))
+    }
 
     fn live_login_tests_enabled() -> bool {
         std::env::var("BPI_LIVE_TEST").ok().as_deref() == Some("1")
@@ -63,6 +73,42 @@ mod tests {
             }
         }
 
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_login_info_coin_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "login.coin");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), COIN_ENDPOINT);
+        assert!(contract.request.query.is_empty());
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(contract.cases[0].response.api_code, Some(-101));
+        assert_eq!(contract.cases[1].response.api_code, Some(0));
+        assert_eq!(contract.cases[2].response.api_code, Some(0));
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_login_info_coin_fixtures_parse_promoted_contract_models() -> BpiResult<()> {
+        for bytes in [
+            include_bytes!("../../../tests/contracts/login/coin/responses/normal.success.json")
+                .as_slice(),
+            include_bytes!("../../../tests/contracts/login/coin/responses/vip.success.json")
+                .as_slice(),
+        ] {
+            let payload = ApiEnvelope::<CoinInfo>::from_slice(bytes)?.into_payload()?;
+            assert!(payload.money >= 0.0);
+        }
+
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../../tests/contracts/login/coin/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
         Ok(())
     }
 }

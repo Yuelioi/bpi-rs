@@ -4,10 +4,13 @@
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+const NAV_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/nav";
+
 // ============ 导航栏用户信息 ============
 
 /// 用户信息数据
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct NavData {
     /// 是否已登录 false：未登录 true：已登录
     #[serde(rename = "isLogin")]
@@ -109,7 +112,7 @@ pub struct NavData {
 }
 
 /// 钱包信息
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct Wallet {
     pub mid: u64,
     pub bcoin_balance: i64,
@@ -118,7 +121,7 @@ pub struct Wallet {
 }
 
 /// Wbi 图片信息
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct WbiImg {
     pub img_url: String,
     pub sub_url: String,
@@ -139,9 +142,7 @@ pub struct User {
 impl BpiClient {
     /// 获取导航栏用户信息
     pub async fn login_info_nav_info(&self) -> Result<BpiResponse<NavData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/nav")
-            .send_bpi("获取导航栏用户信息")
-            .await
+        self.get(NAV_ENDPOINT).send_bpi("获取导航栏用户信息").await
     }
 
     /// 检查是否已登录
@@ -183,6 +184,16 @@ impl BpiClient {
 mod tests {
     use super::*;
     use tracing::info;
+
+    use crate::probe::contract::HttpMethod;
+    use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiResult};
+
+    fn contract() -> BpiResult<EndpointContract> {
+        EndpointContract::from_slice(include_bytes!(
+            "../../../tests/contracts/login/nav/contract.json"
+        ))
+    }
 
     fn live_login_tests_enabled() -> bool {
         std::env::var("BPI_LIVE_TEST").ok().as_deref() == Some("1")
@@ -229,6 +240,50 @@ mod tests {
 
         info!("用户信息：{:?}", user_info);
 
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_login_info_nav_contract_matches_endpoint_request() -> BpiResult<()> {
+        let contract = contract()?;
+
+        assert_eq!(contract.name, "login.nav");
+        assert_eq!(contract.request.method, HttpMethod::Get);
+        assert_eq!(contract.request.url.as_str(), NAV_ENDPOINT);
+        assert!(contract.request.query.is_empty());
+        assert_eq!(contract.cases.len(), 3);
+        assert_eq!(contract.cases[0].response.api_code, Some(-101));
+        assert_eq!(contract.cases[1].response.api_code, Some(0));
+        assert_eq!(contract.cases[2].response.api_code, Some(0));
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_login_info_nav_fixtures_parse_promoted_contract_models() -> BpiResult<()> {
+        for (bytes, expected_mid) in [
+            (
+                include_bytes!("../../../tests/contracts/login/nav/responses/normal.success.json")
+                    .as_slice(),
+                1_000_001,
+            ),
+            (
+                include_bytes!("../../../tests/contracts/login/nav/responses/vip.success.json")
+                    .as_slice(),
+                1_000_002,
+            ),
+        ] {
+            let payload = ApiEnvelope::<NavData>::from_slice(bytes)?.into_payload()?;
+            assert!(payload.is_login);
+            assert_eq!(payload.mid, expected_mid);
+            assert!(!payload.uname.trim().is_empty());
+        }
+
+        let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
+            "../../../tests/contracts/login/nav/responses/anonymous.error.json"
+        ))?
+        .ensure_success()
+        .unwrap_err();
+        assert!(err.requires_login());
         Ok(())
     }
 }

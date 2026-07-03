@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// 官方认证信息 2
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct OfficialVerify {
     #[serde(rename = "type", default)]
     pub r#type: i32,
@@ -9,7 +9,7 @@ pub struct OfficialVerify {
 }
 
 /// 认证信息
-#[derive(Debug, Serialize, Clone, Deserialize)]
+#[derive(Default, Debug, Serialize, Clone, Deserialize)]
 pub struct Official {
     /// 认证类型
     pub role: i32,

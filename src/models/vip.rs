@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// 会员信息
-#[derive(Debug, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct Vip {
     /// 会员类型 0：无 1：月大会员 2：年度及以上大会员
     /// 别名：vipType | vip_type | type
