@@ -153,6 +153,14 @@ impl BpiError {
         }
     }
 
+    /// 获取 HTTP 状态码
+    pub fn http_status(&self) -> Option<u16> {
+        match self {
+            BpiError::Http { status } | BpiError::HttpStatus { status } => Some(*status),
+            _ => None,
+        }
+    }
+
     /// 获取错误分类
     pub fn category(&self) -> ErrorCategory {
         match self {
@@ -217,12 +225,14 @@ impl BpiError {
     /// 判断是否需要用户登录
     pub fn requires_login(&self) -> bool {
         matches!(self.code(), Some(-101) | Some(-401) | Some(800501007))
+            || matches!(self.http_status(), Some(401))
     }
 
     /// 判断是否为权限问题
     pub fn is_permission_error(&self) -> bool {
         matches!(self.category(), ErrorCategory::Auth)
             || matches!(self.code(), Some(-403) | Some(-4))
+            || matches!(self.http_status(), Some(403))
     }
 
     /// 判断是否需要VIP权限
@@ -230,8 +240,81 @@ impl BpiError {
         matches!(self.code(), Some(-106) | Some(-650))
     }
 
+    /// 判断是否为风控拦截
+    pub fn is_risk_control(&self) -> bool {
+        matches!(self.code(), Some(-352) | Some(-412)) || matches!(self.http_status(), Some(412))
+    }
+
     /// 判断是否为业务逻辑错误
     pub fn is_business_error(&self) -> bool {
         matches!(self.category(), ErrorCategory::Business)
+    }
+
+    /// 获取可写入合同的稳定语义错误标签
+    pub fn semantic_error(&self) -> Option<&'static str> {
+        if self.requires_login() {
+            Some("requires_login")
+        } else if self.requires_vip() {
+            Some("requires_vip")
+        } else if self.is_risk_control() {
+            Some("risk_control")
+        } else if self.is_permission_error() {
+            Some("permission_denied")
+        } else if self.is_business_error() {
+            Some("business_error")
+        } else {
+            None
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn http_status_returns_status_for_legacy_and_current_http_variants() {
+        assert_eq!(BpiError::Http { status: 412 }.http_status(), Some(412));
+        assert_eq!(BpiError::http(403).http_status(), Some(403));
+    }
+
+    #[test]
+    fn requires_login_recognizes_api_and_http_unauthorized_errors() {
+        assert!(BpiError::from_code(-101).requires_login());
+        assert!(BpiError::from_code(800501007).requires_login());
+        assert!(BpiError::http(401).requires_login());
+    }
+
+    #[test]
+    fn is_permission_error_recognizes_api_and_http_forbidden_errors() {
+        assert!(BpiError::from_code(-403).is_permission_error());
+        assert!(BpiError::http(403).is_permission_error());
+    }
+
+    #[test]
+    fn is_risk_control_recognizes_api_and_http_risk_blocks() {
+        assert!(BpiError::from_code(-352).is_risk_control());
+        assert!(BpiError::from_code(-412).is_risk_control());
+        assert!(BpiError::http(412).is_risk_control());
+    }
+
+    #[test]
+    fn semantic_error_returns_stable_contract_labels() {
+        assert_eq!(
+            BpiError::from_code(-101).semantic_error(),
+            Some("requires_login")
+        );
+        assert_eq!(
+            BpiError::from_code(-106).semantic_error(),
+            Some("requires_vip")
+        );
+        assert_eq!(
+            BpiError::from_code(-352).semantic_error(),
+            Some("risk_control")
+        );
+        assert_eq!(
+            BpiError::from_code(-403).semantic_error(),
+            Some("permission_denied")
+        );
     }
 }
