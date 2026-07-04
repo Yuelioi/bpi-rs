@@ -33,16 +33,61 @@
 ## Current Working State
 
 - Branch: `feat/bpi-rs-0.2-migration`
-- Last committed batch: `45400bb refactor(api): remove remaining legacy flat methods`
-- Current intended batch: `write-api/module-client-legacy-write-surface`
-- Current batch type: Explicit non-Probe module-client write compatibility source batch.
-- Current commit policy: commit only after human approval; batch is verified in the working tree.
+- Last committed batch: `48cd13c feat(api): move legacy write surface to module clients`
+- Current intended batch: `release/post-write-surface-doc-sync`
+- Current batch type: Non-Probe release documentation/status sync batch.
+- Current commit policy: commit after verification; no endpoint Probe or live mutating execution expected.
+
+## Batch 33: `release/post-write-surface-doc-sync`
+
+**Type:** Non-Probe release documentation/status sync batch.
+
+**Status:** Implemented and verified in the working tree; commit pending.
+
+**Why this batch:** Batch 32 has been committed in `48cd13c`, direct `BpiClient` flat async
+inventory is now `COUNT=0`, and `manga/download-read` is marked not implemented for this
+migration. The topic docs still contain some pre-commit and superseded policy language. This
+batch makes the continuation map match the committed state before more 0.2 release cleanup.
+
+**Scope:**
+
+- Update current batch/commit status in topic docs.
+- Mark the old `release/gated-flat-api-policy` as superseded by the breaking flat cleanup
+  plus module-client write-surface commit.
+- Keep `manga/download-read` as not implemented and out of default continuation.
+- Do not edit `flightdeck/cockpit.md`.
+- Do not run Probe or live mutating endpoints.
+
+**Verification plan:**
+
+```powershell
+rg -n "commit pending human approval|COUNT=107|valid current Probe path|manga/download-read still lacks|Current batch is `write-api/module-client-legacy-write-surface`" flightdeck\work\bpi-rs-0.2-migration\index.md flightdeck\work\bpi-rs-0.2-migration\plans\batch-todolist.md flightdeck\work\bpi-rs-0.2-migration\plans\gated-flat-api-release-policy.md
+rg -n "COUNT=0|48cd13c|not implemented|post-write-surface-doc-sync" flightdeck\work\bpi-rs-0.2-migration\index.md flightdeck\work\bpi-rs-0.2-migration\plans\batch-todolist.md flightdeck\work\bpi-rs-0.2-migration\plans\gated-flat-api-release-policy.md
+git diff --check
+git diff -- flightdeck/cockpit.md
+```
+
+**Observed verification:**
+
+```text
+stale active-state search:
+  no matches for pending write-surface approval, missing manga Probe path, or old current-batch wording.
+
+current-state search:
+  found COUNT=0, 48cd13c, not implemented, and post-write-surface-doc-sync markers.
+
+git diff --check:
+  passed with only Windows LF/CRLF conversion warnings.
+
+git diff -- flightdeck/cockpit.md:
+  no diff.
+```
 
 ## Batch 32: `write-api/module-client-legacy-write-surface`
 
 **Type:** Explicit non-Probe module-client write compatibility source batch.
 
-**Status:** Implemented and verified in the working tree; commit pending human approval.
+**Status:** Implemented, verified, and committed in `48cd13c feat(api): move legacy write surface to module clients`.
 
 **Why this batch:** The old direct `BpiClient` flat methods were removed in Batch 31, but several of those methods were the only public SDK entry points for write/session/mutating flows. Before deleting or reshaping more old code, the new module-client API needs to preserve that capability surface. This batch moves the old method bodies onto domain clients while keeping direct `impl BpiClient` public async inventory at `COUNT=0`.
 

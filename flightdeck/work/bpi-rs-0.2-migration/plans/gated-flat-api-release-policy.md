@@ -4,11 +4,14 @@ Batch: `release/gated-flat-api-policy`
 
 Type: Non-Probe release policy documentation batch.
 
-Status: Implemented and verified in the working tree; commit pending human approval.
+Status: Superseded by `flat-api/remove-remaining-legacy-flat-methods` and
+`48cd13c feat(api): move legacy write surface to module clients`.
 
 ## Why
 
-The 0.2 migration has already promoted safe read contracts, added module-client bridges, and removed low-risk/deprecated/helper flat `BpiClient` methods. The current direct public async inventory under `impl BpiClient` is:
+This policy was written when the 0.2 migration had already promoted safe read contracts,
+added module-client bridges, and removed low-risk/deprecated/helper flat `BpiClient`
+methods. At that point, the direct public async inventory under `impl BpiClient` was:
 
 ```text
 COUNT=107
@@ -32,64 +35,67 @@ video=9
 vip=3
 ```
 
-These remaining methods are not default safe cleanup targets. They are mutating/write operations, session/login flows, risk-control-sensitive operations, or unavailable reader-proof work. In default goal-mode, they remain legacy compatibility-only flat APIs.
+Those remaining methods were not default safe cleanup targets. They were mutating/write
+operations, session/login flows, risk-control-sensitive operations, or unavailable
+reader-proof work.
 
-## Policy
+## Current State
 
-No default source cleanup should remove, migrate, Probe, or contract-promote these remaining flat methods without an explicit new batch decision.
+This policy is now historical. The later breaking cleanup removed the remaining direct
+flat methods, and `48cd13c` restored the old write/session/mutating capability surface on
+module clients.
 
-The remaining 107 flat methods are compatibility-only for this release state. They may stay in the crate while the 0.2 module-client API is reviewed, unless the user explicitly selects a follow-up batch with the safety controls below.
+Current release state:
 
-Future mutating or session batches require:
+- direct `BpiClient` flat async inventory is `COUNT=0`;
+- old write/session/mutating method names now live on module clients;
+- future work should target module clients, shared internals, docs, or an explicitly
+  approved gated batch.
 
-- explicit user selection of the module/submodule and endpoint list
-- `BPI_MUTATING_TEST=1`
-- account profile requirements documented before execution
-- dry-run or no-op behavior where the endpoint supports it
-- rollback/cleanup notes for any unavoidable side effect
-- raw Probe output only under `target/bpi-probe-runs/...`
-- request drafts only under `target/bpi-contract-drafts/...`
-- sanitized promoted contracts and fixtures only after review
-- no live side effects in default verification commands
+## Gated Work
 
-`manga/download-read` is not implemented in the current migration. Do not promote contracts or source changes from prior API `code=99` responses. Reopen it only as a dedicated proof-provider/API-design batch for the current reader `m2`/`m1` fields.
+Future mutating or session batches still require:
 
-`login` SMS/password/logout/sign-update and other session-sensitive methods require an explicit session-flow batch. They must not be pulled into a generic cleanup batch.
+- explicit user selection of the module/submodule and endpoint list;
+- `BPI_MUTATING_TEST=1`;
+- account profile requirements documented before execution;
+- dry-run or no-op behavior where the endpoint supports it;
+- rollback/cleanup notes for any unavoidable side effect;
+- raw Probe output only under `target/bpi-probe-runs/...`;
+- request drafts only under `target/bpi-contract-drafts/...`;
+- sanitized promoted contracts and fixtures only after review;
+- no live side effects in default verification commands.
 
-No `flightdeck/cockpit.md` update belongs to this policy batch. The cockpit remains a stable task index.
+`manga/download-read` is not implemented in the current migration. Do not promote
+contracts or source changes from prior API `code=99` responses. Reopen it only as a
+dedicated proof-provider/API-design batch for the current reader `m2`/`m1` fields.
+
+`login` SMS/password/logout/sign-update and other session-sensitive methods require an
+explicit session-flow batch. They must not be pulled into a generic cleanup batch.
+
+No `flightdeck/cockpit.md` update belongs to this policy. The cockpit remains a stable task
+index.
 
 ## No Default Source Cleanup
 
-Default goal-mode continuation is exhausted for low-risk direct flat API cleanup. The next source-changing work must be one of:
+Default goal-mode continuation is exhausted for low-risk direct flat API cleanup because
+there are no direct public async flat methods left on `BpiClient`. The next source-changing
+work must be one of:
 
-- an explicitly enabled mutating/write module batch
-- an explicitly enabled session/login flow batch
-- a user-approved `manga/download-read` proof-provider/API-design batch
-- a user-approved API compatibility decision to keep or remove selected legacy flat methods
+- an explicitly enabled mutating/write module batch;
+- an explicitly enabled session/login flow batch;
+- a user-approved `manga/download-read` proof-provider/API-design batch;
+- a user-approved API design/cleanup batch over module-client names, wrappers,
+  static/local helpers, or release docs.
 
 ## Verification Plan
 
 ```powershell
-rg -n "release/gated-flat-api-policy|COUNT=107|BPI_MUTATING_TEST|manga/download-read|compatibility-only|No default source cleanup" flightdeck\work\bpi-rs-0.2-migration\plans\gated-flat-api-release-policy.md flightdeck\work\bpi-rs-0.2-migration\plans\batch-todolist.md flightdeck\work\bpi-rs-0.2-migration\index.md flightdeck\work\bpi-rs-0.2-migration\migration-status.md
+rg -n "release/gated-flat-api-policy|COUNT=0|BPI_MUTATING_TEST|manga/download-read|No default source cleanup|Superseded" flightdeck\work\bpi-rs-0.2-migration\plans\gated-flat-api-release-policy.md flightdeck\work\bpi-rs-0.2-migration\plans\batch-todolist.md flightdeck\work\bpi-rs-0.2-migration\index.md
 git diff --check
 git diff -- flightdeck/cockpit.md
 git status --short --ignored=matching flightdeck\work\bpi-rs-0.2-migration\migration-status.md target\bpi-contract-drafts target\bpi-probe-runs target\bpi-probe-notes
 ```
 
-Cargo gates are not required unless Rust source, tests, contracts, or compiled rustdoc examples change.
-
-## Observed Verification
-
-```text
-rg -n "release/gated-flat-api-policy|COUNT=107|BPI_MUTATING_TEST|manga/download-read|compatibility-only|No default source cleanup" flightdeck\work\bpi-rs-0.2-migration\plans\gated-flat-api-release-policy.md flightdeck\work\bpi-rs-0.2-migration\plans\batch-todolist.md flightdeck\work\bpi-rs-0.2-migration\index.md flightdeck\work\bpi-rs-0.2-migration\migration-status.md
-  found the policy batch marker, COUNT=107 inventory, BPI_MUTATING_TEST gate, manga/download-read block, compatibility-only policy, and No default source cleanup language.
-
-git diff --check
-  exited 0 with only existing LF/CRLF conversion warnings.
-
-git diff -- flightdeck/cockpit.md
-  no diff.
-
-git status --short --ignored=matching flightdeck\work\bpi-rs-0.2-migration\migration-status.md target\bpi-contract-drafts target\bpi-probe-runs target\bpi-probe-notes
-  migration-status.md and target/ remain ignored.
-```
+Cargo gates are not required unless Rust source, tests, contracts, or compiled rustdoc
+examples change.
