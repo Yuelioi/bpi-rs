@@ -33,16 +33,62 @@
 ## Current Working State
 
 - Branch: `feat/bpi-rs-0.2-migration`
-- Last committed batch: `48cd13c feat(api): move legacy write surface to module clients`
-- Current intended batch: `release/post-write-surface-doc-sync`
-- Current batch type: Non-Probe release documentation/status sync batch.
+- Last committed batch: `d052140 docs(release): sync post write-surface migration state`
+- Current intended batch: `release/version-0.2.0`
+- Current batch type: Non-Probe release version bump batch.
 - Current commit policy: commit after verification; no endpoint Probe or live mutating execution expected.
+
+## Batch 34: `release/version-0.2.0`
+
+**Type:** Non-Probe release version bump batch.
+
+**Status:** In progress.
+
+**Why this batch:** The migration target is 0.2, direct `BpiClient` flat async inventory is
+`COUNT=0`, old write/session/mutating capability has moved to module clients, and
+`manga/download-read` is explicitly not implemented for this migration. The crate metadata
+still reports `0.1.3`, so the package version must move to `0.2.0`.
+
+**Scope:**
+
+- Update `Cargo.toml` package version to `0.2.0`.
+- Refresh `Cargo.lock` through Cargo.
+- Update topic docs/status to record the release version batch.
+- Do not edit `flightdeck/cockpit.md`.
+- Do not run Probe or live mutating endpoints.
+
+**Verification plan:**
+
+```powershell
+cargo check --all-features
+rg -n 'name = "bpi-rs"|version = "0.2.0"|version = "0.1.3"' Cargo.toml Cargo.lock
+git diff --check
+git diff -- flightdeck/cockpit.md
+```
+
+**Observed verification:**
+
+```text
+cargo check --all-features:
+  pass.
+
+version search:
+  Cargo.toml package version is 0.2.0.
+  Cargo.lock bpi-rs package version is 0.2.0.
+  Remaining 0.1.3 matches are dependency package versions, not this crate.
+
+git diff --check:
+  passed with only Windows LF/CRLF conversion warnings.
+
+git diff -- flightdeck/cockpit.md:
+  no diff.
+```
 
 ## Batch 33: `release/post-write-surface-doc-sync`
 
 **Type:** Non-Probe release documentation/status sync batch.
 
-**Status:** Implemented and verified in the working tree; commit pending.
+**Status:** Implemented, verified, and committed in `d052140 docs(release): sync post write-surface migration state`.
 
 **Why this batch:** Batch 32 has been committed in `48cd13c`, direct `BpiClient` flat async
 inventory is now `COUNT=0`, and `manga/download-read` is marked not implemented for this
