@@ -134,9 +134,10 @@ The public result alias is:
 pub type BpiResult<T> = Result<T, BpiError>;
 ```
 
-Legacy APIs and low-level custom helpers may still return `BpiResponse<T>`.
-When you are migrating a call site, prefer a module-client method that already
-returns `BpiResult<T>` directly.
+When a full Bilibili response envelope is required, use `ApiEnvelope<T>`.
+When you are migrating a call site, prefer a module-client method that returns
+`BpiResult<T>` directly. Remaining manga envelope aliases are compatibility
+names over `ApiEnvelope<T>`.
 
 If an endpoint can legitimately return success with `data: null`, its module
 client method may return `BpiResult<Option<T>>`.

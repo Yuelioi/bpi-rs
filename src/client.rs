@@ -12,7 +12,6 @@ use crate::activity::ActivityClient;
 use crate::article::ArticleClient;
 #[cfg(feature = "audio")]
 use crate::audio::AudioClient;
-use crate::auth::Account;
 #[cfg(feature = "bangumi")]
 use crate::bangumi::BangumiClient;
 #[cfg(feature = "cheese")]
@@ -49,6 +48,7 @@ use crate::note::NoteClient;
 use crate::opus::OpusClient;
 #[cfg(feature = "search")]
 use crate::search::SearchClient;
+use crate::session::Account;
 use crate::session::cookie::{format_cookie_pairs, parse_cookie_header as parse_cookie_pairs};
 use crate::sign::wbi::WbiKeyCache;
 #[cfg(feature = "user")]

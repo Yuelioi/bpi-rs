@@ -81,8 +81,6 @@ pub mod web_widget;
 
 pub mod models;
 
-pub mod auth;
-
 pub mod client;
 pub mod err;
 pub mod ids;
@@ -101,8 +99,8 @@ mod testing;
 // bv aid互转, 以及生成wbi
 pub mod utils;
 
-pub use auth::Account;
 pub use client::BpiClient;
 pub use err::error::BpiError;
 pub use request::BilibiliRequest;
 pub use response::{ApiEnvelope, BpiResult};
+pub use session::Account;
