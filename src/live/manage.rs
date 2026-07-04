@@ -243,14 +243,6 @@ impl BpiClient {
             .send_bpi("更新直播间公告")
             .await
     }
-
-    /// 获取 PC 直播姬版本号
-    pub async fn live_version(&self) -> Result<BpiResponse<PcLiveVersionData>, BpiError> {
-        self.get("https://api.live.bilibili.com/xlive/app-blink/v1/liveVersionInfo/getHomePageLiveVersion")
-            .query(&[("system_version", "2")])
-            .send_bpi("获取 PC 直播姬版本号")
-            .await
-    }
 }
 
 #[cfg(test)]
@@ -360,9 +352,7 @@ mod tests {
     #[tokio::test]
     async fn test_live_version() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.live_version().await?;
-        assert_eq!(resp.code, 0);
-        let data = resp.into_data()?;
+        let data = bpi.live().version().await?;
 
         info!("PC直播姬版本号: {}", data.curr_version);
 

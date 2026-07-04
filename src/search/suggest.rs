@@ -1,4 +1,4 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::BpiError;
 use serde::Deserialize;
 
 /// 搜索建议结果
@@ -40,30 +40,11 @@ impl SearchSuggestParams {
     }
 }
 
-impl BpiClient {
-    /// 获取搜索建议关键词
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/search)
-    ///
-    /// # 参数
-    /// - `params`: 搜索建议参数
-    pub async fn search_suggest(
-        &self,
-        params: SearchSuggestParams,
-    ) -> Result<BpiResponse<SearchSuggest>, BpiError> {
-        self.get("https://s.search.bilibili.com/main/suggest")
-            .query(&params.query_pairs())
-            .send_bpi("获取搜索建议")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
-        ApiEnvelope, BpiResult,
+        ApiEnvelope, BpiClient, BpiResult,
         probe::{contract::HttpMethod, endpoint_contract::EndpointContract},
     };
     use tracing::info;
@@ -166,31 +147,23 @@ mod tests {
     async fn test_search_suggest() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let params = SearchSuggestParams::new("rust")?;
-        let resp = bpi.search_suggest(params).await;
+        let resp = bpi.search().suggest(params).await;
 
         assert!(resp.is_ok());
 
-        if let Ok(r) = resp {
-            info!("搜索建议返回: {:?}", r);
+        if let Ok(suggests) = resp {
+            info!("搜索建议返回: {:?}", suggests);
 
-            if r.code == 0 {
-                if let Some(suggests) = r.data {
-                    if let Some(tags) = suggests.tag {
-                        assert!(!tags.is_empty());
-                        info!("获取到搜索建议列表，数量：{}", tags.len());
+            if let Some(tags) = suggests.tag {
+                assert!(!tags.is_empty());
+                info!("获取到搜索建议列表，数量：{}", tags.len());
 
-                        if let Some(first_suggest) = tags.first() {
-                            info!("第一个建议关键词: {:?}", first_suggest.value);
-                            info!("第一个建议显示内容: {:?}", first_suggest.name);
-                        }
-                    } else {
-                        info!("搜索建议列表为空。");
-                    }
-                } else {
-                    info!("返回数据中没有 'result' 字段。");
+                if let Some(first_suggest) = tags.first() {
+                    info!("第一个建议关键词: {:?}", first_suggest.value);
+                    info!("第一个建议显示内容: {:?}", first_suggest.name);
                 }
             } else {
-                info!("API 返回码不为0，可能存在错误: {}", r.code);
+                info!("搜索建议列表为空。");
             }
         }
 

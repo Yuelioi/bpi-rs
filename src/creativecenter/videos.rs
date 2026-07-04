@@ -4,9 +4,6 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::creativecenter::{UpArchiveVideosParams, UpArchivesListParams};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-
 /// 稿件统计信息
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct ArchiveStat {
@@ -101,57 +98,14 @@ pub struct ArchiveVideosData {
     pub videos: Vec<VideoPart>,
 }
 
-impl BpiClient {
-    /// 获取稿件列表
-    ///
-    /// 获取 UP 主的稿件列表，支持分页查询。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`UpArchivesListParams`] | 稿件列表分页参数 |
-    ///
-    /// # 文档
-    /// [获取稿件列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/videos.md#获取稿件列表)
-    pub async fn up_archives_list(
-        &self,
-        params: UpArchivesListParams,
-    ) -> Result<BpiResponse<SpArchivesData>, BpiError> {
-        self.get("https://member.bilibili.com/x2/creative/web/archives/sp")
-            .query(&params.query_pairs())
-            .send_bpi("获取稿件列表")
-            .await
-    }
-
-    /// 获取视频基础信息
-    ///
-    /// 获取指定视频的基础信息，包括分P列表等。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`UpArchiveVideosParams`] | 视频 aid 参数 |
-    ///
-    /// # 文档
-    /// [获取视频基础信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/videos.md#获取视频基础信息)
-    pub async fn up_archive_videos(
-        &self,
-        params: UpArchiveVideosParams,
-    ) -> Result<BpiResponse<ArchiveVideosData>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/archive/videos")
-            .query(&params.query_pairs())
-            .send_bpi("获取视频基础信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ApiEnvelope;
+    use crate::creativecenter::{UpArchiveVideosParams, UpArchivesListParams};
     use crate::ids::Aid;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiClient, BpiError};
     use std::collections::BTreeMap;
     use tracing::info;
 
@@ -187,7 +141,7 @@ mod tests {
     async fn test_archives_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let params = UpArchivesListParams::new(1)?.with_page_size(10)?;
-        let data = bpi.up_archives_list(params).await?.into_data()?;
+        let data = bpi.creativecenter().archives_list(params).await?;
         info!("稿件列表: {:?}", data);
         Ok(())
     }
@@ -197,7 +151,7 @@ mod tests {
     async fn test_archive_videos() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let params = UpArchiveVideosParams::new(Aid::new(TEST_AID)?);
-        let data = bpi.up_archive_videos(params).await?.into_data()?;
+        let data = bpi.creativecenter().archive_videos(params).await?;
         info!("视频基础信息: {:?}", data);
         Ok(())
     }

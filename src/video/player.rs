@@ -1,8 +1,6 @@
 //! B站 web 播放器相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use super::params::VideoPlayerInfoParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 pub(crate) const PLAYER_INFO_V2_ENDPOINT: &str = "https://api.bilibili.com/x/player/wbi/v2";
@@ -197,29 +195,6 @@ pub struct ElecHighLevel {
     pub qa_detail_link: String,
 }
 
-impl BpiClient {
-    /// 获取 web 播放器信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/player.html#获取web播放器信息)
-    ///
-    /// # 参数
-    /// | 名称     | 类型                    | 说明                               |
-    /// | -------- | ----------------------- | ---------------------------------- |
-    /// | `params` | `VideoPlayerInfoParams` | 稿件 id、cid 和可选 OGV 上下文     |
-    pub async fn video_player_info_v2(
-        &self,
-        params: VideoPlayerInfoParams,
-    ) -> Result<BpiResponse<PlayerInfoResponseData>, BpiError> {
-        let params = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        self.get(PLAYER_INFO_V2_ENDPOINT)
-            .query(&params)
-            .send_bpi("获取 web 播放器信息")
-            .await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
@@ -228,7 +203,8 @@ mod tests {
     use crate::ids::{Aid, Cid};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::video::params::VideoPlayerInfoParams;
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 1906473802;
@@ -239,8 +215,7 @@ mod tests {
     async fn test_video_player_info_v2_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let params = VideoPlayerInfoParams::from_aid(Aid::new(TEST_AID)?, Cid::new(TEST_CID)?);
-        let resp = bpi.video_player_info_v2(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().player_info_v2(params).await?;
 
         info!("播放器信息: {:?}", data);
 
@@ -255,8 +230,7 @@ mod tests {
     async fn test_video_player_info_v2_by_bvid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let params = VideoPlayerInfoParams::from_aid(Aid::new(TEST_AID)?, Cid::new(TEST_CID)?);
-        let resp = bpi.video_player_info_v2(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().player_info_v2(params).await?;
 
         info!("播放器信息: {:?}", data);
 

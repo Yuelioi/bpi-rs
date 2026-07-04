@@ -1,8 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::dynamic::params::{DynamicLiveUsersParams, DynamicUpUsersParams};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-
 /// 直播的已关注者列表项
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct LiveUser {
@@ -55,54 +52,13 @@ pub struct DynUpUsersData {
     pub items: Vec<DynUpUser>,
 }
 
-impl BpiClient {
-    /// 获取正在直播的已关注者
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`DynamicLiveUsersParams`] | 直播关注者列表参数 |
-    pub async fn dynamic_live_users(
-        &self,
-        params: DynamicLiveUsersParams,
-    ) -> Result<BpiResponse<LiveUsersData>, BpiError> {
-        self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_live_users")
-            .query(&params.query_pairs())
-            .send_bpi("获取正在直播的已关注者")
-            .await
-    }
-
-    /// 获取发布新动态的已关注者
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`DynamicUpUsersParams`] | 新动态关注者列表参数 |
-    pub async fn dynamic_up_users(
-        &self,
-        params: DynamicUpUsersParams,
-    ) -> Result<BpiResponse<DynUpUsersData>, BpiError> {
-        self.get("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist")
-            .query(&params.query_pairs())
-            .send_bpi("获取发布新动态的已关注者")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::dynamic::params::{DynamicLiveUsersParams, DynamicUpUsersParams};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use std::collections::BTreeMap;
     use tracing::info;
 
@@ -136,10 +92,10 @@ mod tests {
     #[tokio::test]
     async fn test_get_live_users() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .dynamic_live_users(DynamicLiveUsersParams::new().with_size(1)?)
+        let data = bpi
+            .dynamic()
+            .live_users(DynamicLiveUsersParams::new().with_size(1)?)
             .await?;
-        let data = resp.into_data()?;
 
         info!("直播中的关注者数量: {}", data.count);
         info!("第一位直播中的关注者: {:?}", data.items.first());
@@ -151,8 +107,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_dyn_up_users() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.dynamic_up_users(DynamicUpUsersParams::new()).await?;
-        let data = resp.into_data()?;
+        let data = bpi.dynamic().up_users(DynamicUpUsersParams::new()).await?;
 
         info!("发布新动态的关注者列表: {:?}", data.items);
         assert!(!data.items.is_empty());

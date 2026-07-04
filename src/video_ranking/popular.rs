@@ -1,8 +1,7 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
 use super::params::{PopularSeriesOneParams, VideoPopularListParams};
-use super::{POPULAR_LIST_ENDPOINT, POPULAR_SERIES_LIST_ENDPOINT, POPULAR_SERIES_ONE_ENDPOINT};
 
 // --- 获取当前热门视频列表 ---
 
@@ -86,64 +85,10 @@ pub struct PopularSeriesOneData {
     pub list: Vec<serde_json::Value>,
 }
 
-impl BpiClient {
-    /// 获取当前热门视频列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/popular.html#获取当前热门视频列表)
-    ///
-    /// # 参数
-    /// | 名称 | 类型         | 说明                 |
-    /// | ---- | ------------| -------------------- |
-    /// | `params` | `VideoPopularListParams` | 热门视频分页参数 |
-    pub async fn video_popular_list(
-        &self,
-        params: VideoPopularListParams,
-    ) -> Result<BpiResponse<PopularListData>, BpiError> {
-        self.get(POPULAR_LIST_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取当前热门视频列表")
-            .await
-    }
-
-    /// 获取每周必看全部列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/popular.html#获取每周必看全部列表)
-    ///
-    pub async fn video_popular_series_list(
-        &self,
-    ) -> Result<BpiResponse<PopularSeriesListData>, BpiError> {
-        self.get(POPULAR_SERIES_LIST_ENDPOINT)
-            .send_bpi("获取每周必看全部列表")
-            .await
-    }
-
-    /// 获取每周必看选期详细信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/popular.html#获取每周必看选期详细信息)
-    ///
-    /// # 参数
-    /// | 名称     | 类型     | 说明         |
-    /// | -------- | --------| ------------|
-    /// | `params` | `PopularSeriesOneParams` | 每周必看选期参数 |
-    pub async fn video_popular_series_one(
-        &self,
-        params: PopularSeriesOneParams,
-    ) -> Result<BpiResponse<PopularSeriesOneData>, BpiError> {
-        let params = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        self.get(POPULAR_SERIES_ONE_ENDPOINT)
-            .query(&params)
-            .send_bpi("获取每周必看选期详细信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::BpiClient;
     use tracing::info;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -155,33 +100,27 @@ mod tests {
             .expect("page is valid")
             .with_page_size(2)
             .expect("page size is valid");
-        let resp = bpi.video_popular_list(params).await;
+        let resp = bpi.video_ranking().popular_list(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("no_more: {}", data.no_more);
-            info!("first item: {:?}", data.list.first());
-        }
+        let data = resp.unwrap();
+        info!("no_more: {}", data.no_more);
+        info!("first item: {:?}", data.list.first());
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_popular_series_list() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.video_popular_series_list().await;
+        let resp = bpi.video_ranking().popular_series_list().await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("first series: {:?}", data.list.first());
-        }
+        let data = resp.unwrap();
+        info!("first series: {:?}", data.list.first());
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -189,16 +128,13 @@ mod tests {
     async fn test_video_popular_series_one() {
         let bpi = BpiClient::new().expect("client should build");
         let params = PopularSeriesOneParams::new(1).expect("number is valid");
-        let resp = bpi.video_popular_series_one(params).await;
+        let resp = bpi.video_ranking().popular_series_one(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("config: {:?}", data.config);
-            info!("first video: {:?}", data.list.first());
-        }
+        let data = resp.unwrap();
+        info!("config: {:?}", data.config);
+        info!("first video: {:?}", data.list.first());
     }
 }

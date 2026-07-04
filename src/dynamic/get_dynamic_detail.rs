@@ -1,12 +1,6 @@
 use serde::{Deserialize, Deserializer, Serialize, de};
 
-use crate::dynamic::params::DynamicCardDetailParams;
 use crate::models::{LevelInfo, Official, Pendant, Vip};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-
-const CARD_DETAIL_URL: &str =
-    "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail";
-const RECENT_UP_URL: &str = "https://api.bilibili.com/x/polymer/web-dynamic/v1/portal";
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct DynamicCardData {
@@ -167,47 +161,12 @@ where
     }
 }
 
-impl BpiClient {
-    /// 获取特定动态卡片信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`DynamicCardDetailParams`] | 动态 ID 参数 |
-    #[deprecated(
-        note = "observed HTTP 404 text/html from vc.bilibili.com on 2026-07-03; use dynamic_detail instead"
-    )]
-    pub async fn dynamic_card_detail(
-        &self,
-        params: DynamicCardDetailParams,
-    ) -> Result<BpiResponse<DynamicCardData>, BpiError> {
-        self.get(CARD_DETAIL_URL)
-            .query(&params.query_pairs())
-            .send_bpi("获取特定动态卡片信息")
-            .await
-    }
-
-    /// 获取最近更新 UP 主列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
-    pub async fn dynamic_recent_up_list(&self) -> Result<BpiResponse<RecentUpData>, BpiError> {
-        self.get(RECENT_UP_URL)
-            .send_bpi("获取最近更新 UP 主列表")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
 
     fn recent_up_contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -219,19 +178,11 @@ mod tests {
     #[tokio::test]
     async fn test_dynamic_recent_up_list() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.dynamic_recent_up_list().await;
+        let resp = bpi.dynamic().recent_up().await;
         assert!(resp.is_ok());
-        if let Ok(res) = resp {
-            tracing::info!("{:#?}", res.data.unwrap().up_list.len());
+        if let Ok(data) = resp {
+            tracing::info!("{:#?}", data.up_list.len());
         }
-    }
-
-    #[test]
-    fn dynamic_card_detail_legacy_url_matches_probe_draft() {
-        assert_eq!(
-            CARD_DETAIL_URL,
-            "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail"
-        );
     }
 
     #[test]
@@ -240,7 +191,10 @@ mod tests {
 
         assert_eq!(contract.name, "dynamic.recent_up");
         assert_eq!(contract.request.method, HttpMethod::Get);
-        assert_eq!(contract.request.url.as_str(), RECENT_UP_URL);
+        assert_eq!(
+            contract.request.url.as_str(),
+            "https://api.bilibili.com/x/polymer/web-dynamic/v1/portal"
+        );
         assert!(contract.request.query.is_empty());
         assert_eq!(contract.cases.len(), 3);
         assert_eq!(
@@ -296,13 +250,6 @@ mod tests {
         local_probe_response_body(&path)
     }
 
-    fn card_detail_local_probe_body(profile: &str) -> Option<serde_json::Value> {
-        let path = format!(
-            "target/bpi-probe-runs/dynamic/card-legacy-readonly/card-detail/{profile}.response.json"
-        );
-        local_probe_response_body(&path)
-    }
-
     fn local_probe_response_body(path: &str) -> Option<serde_json::Value> {
         let bytes = std::fs::read(path).ok()?;
         let value: serde_json::Value = serde_json::from_slice(&bytes).ok()?;
@@ -330,18 +277,5 @@ mod tests {
             assert_eq!(err.code(), Some(-101));
         }
         Ok(())
-    }
-
-    #[test]
-    fn dynamic_card_detail_local_probe_outputs_record_http_404_when_present() {
-        for profile in ["anonymous", "normal", "vip"] {
-            let Some(body) = card_detail_local_probe_body(profile) else {
-                continue;
-            };
-
-            assert_eq!(body["kind"], "binary");
-            assert_eq!(body["content_type"], "text/html");
-            assert_eq!(body["encoding"], "base64");
-        }
     }
 }

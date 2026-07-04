@@ -1,7 +1,6 @@
 //! 音频榜单
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md)
-use crate::audio::params::{AudioRankListParams, AudioRankPeriodParams};
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
@@ -64,69 +63,6 @@ pub struct AudioRankMusicItem {
 }
 
 impl BpiClient {
-    /// 获取音频榜单每期列表
-    ///
-    /// # 参数
-    /// | 名称     | 类型                    | 说明                    |
-    /// | -------- | ----------------------- | ----------------------- |
-    /// | `params` | `AudioRankPeriodParams` | 榜单类型 1:hot 2:origin |
-    ///
-    /// # 文档
-    /// [获取音频榜单每期列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md#获取音频榜单每期列表)
-    pub async fn audio_rank_period(
-        &self,
-        params: AudioRankPeriodParams,
-    ) -> Result<BpiResponse<AudioRankPeriodData>, BpiError> {
-        let csrf = self.csrf().unwrap_or_default();
-
-        self.get("https://api.bilibili.com/x/copyright-music-publicity/toplist/all_period")
-            .query(&params.query_pairs(&csrf))
-            .send_bpi("获取音频榜单每期列表")
-            .await
-    }
-
-    /// 查询音频榜单单期信息
-    ///
-    /// # 参数
-    /// | 名称     | 类型                  | 说明    |
-    /// | -------- | --------------------- | ------- |
-    /// | `params` | `AudioRankListParams` | 榜单 id |
-    ///
-    /// # 文档
-    /// [查询音频榜单单期信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md#查询音频榜单单期信息)
-    pub async fn audio_rank_detail(
-        &self,
-        params: AudioRankListParams,
-    ) -> Result<BpiResponse<AudioRankDetailData>, BpiError> {
-        let csrf = self.csrf().unwrap_or_default();
-
-        self.get("https://api.bilibili.com/x/copyright-music-publicity/toplist/detail")
-            .query(&params.query_pairs(&csrf))
-            .send_bpi("查询音频榜单单期信息")
-            .await
-    }
-
-    /// 获取音频榜单单期内容
-    ///
-    /// # 参数
-    /// | 名称     | 类型                  | 说明    |
-    /// | -------- | --------------------- | ------- |
-    /// | `params` | `AudioRankListParams` | 榜单 id |
-    ///
-    /// # 文档
-    /// [获取音频榜单单期内容](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md#获取音频榜单单期内容)
-    pub async fn audio_rank_music_list(
-        &self,
-        params: AudioRankListParams,
-    ) -> Result<BpiResponse<AudioRankMusicListData>, BpiError> {
-        let csrf = self.csrf().unwrap_or_default();
-
-        self.get("https://api.bilibili.com/x/copyright-music-publicity/toplist/music_list")
-            .query(&params.query_pairs(&csrf))
-            .send_bpi("获取音频榜单单期内容")
-            .await
-    }
-
     /// 订阅或退订榜单
     ///
     /// # 参数
@@ -158,7 +94,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::audio::params::AudioRankListType;
+    use crate::audio::params::{AudioRankListParams, AudioRankListType, AudioRankPeriodParams};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
     use crate::{ApiEnvelope, BpiResult};
@@ -187,10 +123,10 @@ mod tests {
     #[tokio::test]
     async fn test_audio_rank_period() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .audio_rank_period(AudioRankPeriodParams::new(AudioRankListType::Original))
+        let data = bpi
+            .audio()
+            .rank_period(AudioRankPeriodParams::new(AudioRankListType::Original))
             .await?;
-        let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
         // 检查年份数据
@@ -211,10 +147,10 @@ mod tests {
     #[tokio::test]
     async fn test_audio_rank_detail() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .audio_rank_detail(AudioRankListParams::new(TEST_LIST_ID)?)
+        let data = bpi
+            .audio()
+            .rank_detail(AudioRankListParams::new(TEST_LIST_ID)?)
             .await?;
-        let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
         assert!(data.listen_fid > 0);
@@ -229,10 +165,10 @@ mod tests {
     #[tokio::test]
     async fn test_audio_rank_music_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .audio_rank_music_list(AudioRankListParams::new(TEST_LIST_ID)?)
+        let data = bpi
+            .audio()
+            .rank_music_list(AudioRankListParams::new(TEST_LIST_ID)?)
             .await?;
-        let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
         for item in &data.list {

@@ -2,7 +2,6 @@
 //!
 //! [文档](https://api.bilibili.com/x/web-frontend/getbuvid)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 获取 buvid3 - 响应数据
@@ -10,18 +9,6 @@ use serde::{Deserialize, Serialize};
 pub struct Buvid3Data {
     /// buvid3，需要手动存放至 Cookie 中
     pub buvid: String,
-}
-
-impl BpiClient {
-    /// 获取 buvid3
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/misc)
-    pub async fn misc_buvid3(&self) -> Result<BpiResponse<Buvid3Data>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-frontend/getbuvid")
-            .send_bpi("获取 buvid3")
-            .await
-    }
 }
 
 /// 获取 buvid3/4 - 响应数据
@@ -36,24 +23,12 @@ pub struct BuvidData {
     pub buvid4: String,
 }
 
-impl BpiClient {
-    /// 获取 buvid3 / buvid4
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/misc)
-    pub async fn misc_buvid(&self) -> Result<BpiResponse<BuvidData>, BpiError> {
-        self.get("https://api.bilibili.com/x/frontend/finger/spi")
-            .send_bpi("获取 buvid3/4")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
 
     fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
         let bytes = match endpoint {
@@ -72,14 +47,9 @@ mod tests {
     async fn test_get_buvid3() {
         let bpi = BpiClient::new().expect("client should build");
 
-        match bpi.misc_buvid3().await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    let data = resp.data.unwrap();
-                    tracing::info!("获取 buvid3 成功: {}", data.buvid);
-                } else {
-                    tracing::info!("请求失败: code={}, message={}", resp.code, resp.message);
-                }
+        match bpi.misc().buvid3().await {
+            Ok(data) => {
+                tracing::info!("获取 buvid3 成功: {}", data.buvid);
             }
             Err(err) => {
                 panic!("请求出错: {}", err);
@@ -92,15 +62,10 @@ mod tests {
     async fn test_get_buvid() {
         let bpi = BpiClient::new().expect("client should build");
 
-        match bpi.misc_buvid().await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    let data = resp.data.unwrap();
-                    tracing::info!("获取 buvid3 成功: {}", data.buvid3);
-                    tracing::info!("获取 buvid4 成功: {}", data.buvid4);
-                } else {
-                    tracing::info!("请求失败: code={}, message={}", resp.code, resp.message);
-                }
+        match bpi.misc().buvid().await {
+            Ok(data) => {
+                tracing::info!("获取 buvid3 成功: {}", data.buvid3);
+                tracing::info!("获取 buvid4 成功: {}", data.buvid4);
             }
             Err(err) => {
                 panic!("请求出错: {}", err);

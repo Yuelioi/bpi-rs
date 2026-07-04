@@ -2,21 +2,11 @@
 //!
 //! [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/member_center.html#查询每日投币获得经验数)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+#[cfg(test)]
+use crate::BpiError;
 
+#[cfg(test)]
 const TODAY_COIN_EXP_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/coin/today/exp";
-
-impl BpiClient {
-    /// 查询每日投币获得经验数
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login)
-    pub async fn member_center_today_coin_exp(&self) -> Result<BpiResponse<u32>, BpiError> {
-        self.get(TODAY_COIN_EXP_ENDPOINT)
-            .send_bpi("每日投币经验")
-            .await
-    }
-}
 
 #[cfg(test)]
 mod tests {

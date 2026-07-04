@@ -1,8 +1,6 @@
 //! 视频 TAG 相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use super::params::VideoTagsParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 pub(crate) const TAGS_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/view/detail/tag";
@@ -24,27 +22,6 @@ pub struct VideoTag {
     pub jump_url: Option<String>,
 }
 
-impl BpiClient {
-    /// 获取视频 TAG 信息（新版）
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/tags.html#获取视频tag信息)
-    ///
-    /// # 参数
-    /// | 名称     | 类型              | 说明              |
-    /// | -------- | ----------------- | ----------------- |
-    /// | `params` | `VideoTagsParams` | 稿件 id 和可选 cid |
-    pub async fn video_tags(
-        &self,
-        params: VideoTagsParams,
-    ) -> Result<BpiResponse<Vec<VideoTag>>, BpiError> {
-        self.get(TAGS_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取视频 TAG 信息")
-            .await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
@@ -53,7 +30,8 @@ mod tests {
     use crate::ids::{Aid, Cid};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::video::params::VideoTagsParams;
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 89772773;
@@ -65,8 +43,7 @@ mod tests {
     async fn test_video_tags_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let params = VideoTagsParams::from_aid(Aid::new(TEST_AID)?).cid(Cid::new(TEST_CID)?);
-        let resp = bpi.video_tags(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().tags(params).await?;
 
         info!("视频 TAG 列表: {:?}", data);
 
@@ -79,10 +56,10 @@ mod tests {
     #[tokio::test]
     async fn test_video_tags_by_bvid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_tags(VideoTagsParams::from_bvid(TEST_BVID.parse()?))
+        let data = bpi
+            .video()
+            .tags(VideoTagsParams::from_bvid(TEST_BVID.parse()?))
             .await?;
-        let data = resp.into_data()?;
 
         info!("视频 TAG 列表: {:?}", data);
 

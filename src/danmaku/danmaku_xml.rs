@@ -3,7 +3,7 @@
 //! [文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
 
 use crate::ids::Cid;
-use crate::{BpiClient, BpiError, BpiResult};
+use crate::{BpiError, BpiResult};
 use flate2::read::DeflateDecoder;
 use quick_xml::de::from_str;
 use std::io::Read;
@@ -104,56 +104,6 @@ impl DanmakuXmlListParams {
     }
 }
 
-impl BpiClient {
-    /// 获取实时弹幕（接口1）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `oid` | i64 | 视频 oid/cid |
-    pub async fn danmaku_xml_list_so(
-        &self,
-        params: DanmakuXmlListParams,
-    ) -> Result<DanmakuXml, BpiError> {
-        let response = self
-            .get_without_response_decoding("https://api.bilibili.com/x/v1/dm/list.so")?
-            .query(&params.query_pairs())
-            .send()
-            .await?;
-        let bytes = response.bytes().await?;
-
-        parse_deflate_danmaku_xml(&bytes)
-    }
-
-    /// 获取实时弹幕（接口2）
-    /// 使用 deflate 压缩（reqwest 会自动解压），返回 XML 文本
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `cid` | i64 | 视频 cid |
-    pub async fn danmaku_xml_list(
-        &self,
-        params: DanmakuXmlListParams,
-    ) -> Result<DanmakuXml, BpiError> {
-        let response = self
-            .get_without_response_decoding(&params.comment_xml_url())?
-            .send()
-            .await?;
-        let bytes = response.bytes().await?;
-
-        parse_deflate_danmaku_xml(&bytes)
-    }
-}
-
 pub(crate) fn parse_deflate_danmaku_xml(bytes: &[u8]) -> BpiResult<DanmakuXml> {
     let mut decoder = DeflateDecoder::new(bytes);
     let mut xml = String::new();
@@ -175,7 +125,7 @@ mod tests {
     use super::*;
     use crate::probe::contract::{HttpMethod, ResponseDecoding};
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{BpiError, BpiResult};
+    use crate::{BpiClient, BpiError, BpiResult};
     use base64::{Engine as _, engine::general_purpose};
     use serde::Deserialize;
     use std::collections::BTreeMap;
@@ -240,7 +190,8 @@ mod tests {
         let start = Instant::now();
 
         let data = bpi
-            .danmaku_xml_list_so(DanmakuXmlListParams::new(Cid::new(TEST_CID)?))
+            .danmaku()
+            .xml_list_so(DanmakuXmlListParams::new(Cid::new(TEST_CID)?))
             .await?;
         let duration = start.elapsed();
 
@@ -259,7 +210,8 @@ mod tests {
         let start = Instant::now();
 
         let data = bpi
-            .danmaku_xml_list(DanmakuXmlListParams::new(Cid::new(TEST_CID)?))
+            .danmaku()
+            .xml_list(DanmakuXmlListParams::new(Cid::new(TEST_CID)?))
             .await?;
         let duration = start.elapsed();
 

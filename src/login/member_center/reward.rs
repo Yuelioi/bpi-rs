@@ -2,22 +2,15 @@
 //!
 //! [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/member_center.html#查询每日奖励状态)
 
+#[cfg(test)]
+use crate::BpiError;
 use crate::login::LoginDailyReward;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
+#[cfg(test)]
 const DAILY_REWARD_ENDPOINT: &str = "https://api.bilibili.com/x/member/web/exp/reward";
 
 /// Legacy member-center daily reward type.
 pub type DailyReward = LoginDailyReward;
-
-impl BpiClient {
-    /// 查询每日奖励状态
-    pub async fn member_center_daily_reward(&self) -> Result<BpiResponse<DailyReward>, BpiError> {
-        self.get(DAILY_REWARD_ENDPOINT)
-            .send_bpi("查询每日奖励状态")
-            .await
-    }
-}
 
 #[cfg(test)]
 mod tests {

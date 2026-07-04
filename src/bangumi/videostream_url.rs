@@ -1,10 +1,6 @@
 //! 视频流URL
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/videostream_url.md)
-use crate::bangumi::BangumiVideoStreamParams;
-use crate::ids::{Cid, EpisodeId};
-use crate::models::{Fnval, VideoQuality};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 番剧视频流响应
@@ -41,93 +37,15 @@ pub struct BangumiRecordInfo {
     pub record: String,
 }
 
-impl BpiClient {
-    /// 获取番剧视频流 URL
-    ///
-    /// # 参数
-    /// | 名称    | 类型   | 说明                                |
-    /// | ------- | ------ | ----------------------------------- |
-    /// | `ep_id` | `Option<u64>`    | 稿件 epid                           |
-    /// | `cid`   | `Option<u64>` | 视频 cid（可选，与 ep_id 二选一） |
-    /// | `qn`    | u32    | 视频清晰度选择                       |
-    /// | `fnval` | u32    | 视频获取方式选择                     |
-    ///
-    /// # 文档
-    /// [获取番剧视频流URL](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/videostream_url.md#获取番剧视频流url)
-    pub async fn bangumi_video_stream(
-        &self,
-        params: BangumiVideoStreamParams,
-    ) -> Result<BpiResponse<BangumiVideoStreamData>, BpiError> {
-        self.get("https://api.bilibili.com/pgc/player/web/playurl")
-            .with_bilibili_headers()
-            .query(&params.query_pairs())
-            .send_bpi("获取番剧视频流URL")
-            .await
-    }
-
-    /// 获取番剧视频流 URL
-    ///
-    /// # 参数
-    /// | 名称    | 类型   | 说明                                |
-    /// | ------- | ------ | ----------------------------------- |
-    /// | `ep_id` | u64    | 稿件 epid                           |
-    /// | `qn`    | u32    | 视频清晰度选择                       |
-    /// | `fnval` | u32    | 视频获取方式选择                     |
-    ///
-    /// # 文档
-    /// [获取番剧视频流URL](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/videostream_url.md#获取番剧视频流url)
-    pub async fn bangumi_video_stream_by_epid(
-        &self,
-        ep_id: u64,
-        qn: Option<VideoQuality>,
-        fnval: Option<Fnval>,
-    ) -> Result<BpiResponse<BangumiVideoStreamData>, BpiError> {
-        let mut params = BangumiVideoStreamParams::from_episode_id(EpisodeId::new(ep_id)?);
-        if let Some(quality) = qn {
-            params = params.with_quality(quality);
-        }
-        if let Some(fnval) = fnval {
-            params = params.with_fnval(fnval);
-        }
-
-        self.bangumi_video_stream(params).await
-    }
-
-    /// 获取番剧视频流 URL
-    ///
-    /// # 参数
-    /// | 名称    | 类型   | 说明                                |
-    /// | ------- | ------ | ----------------------------------- |
-    /// | `cid`   | u64 | 视频 cid（|
-    /// | `qn`    | u32    | 视频清晰度选择                       |
-    /// | `fnval` | u32    | 视频获取方式选择                     |
-    ///
-    /// # 文档
-    /// [获取番剧视频流URL](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/videostream_url.md#获取番剧视频流url)
-    pub async fn bangumi_video_stream_by_cid(
-        &self,
-        cid: u64,
-        qn: Option<VideoQuality>,
-        fnval: Option<Fnval>,
-    ) -> Result<BpiResponse<BangumiVideoStreamData>, BpiError> {
-        let mut params = BangumiVideoStreamParams::from_cid(Cid::new(cid)?);
-        if let Some(quality) = qn {
-            params = params.with_quality(quality);
-        }
-        if let Some(fnval) = fnval {
-            params = params.with_fnval(fnval);
-        }
-
-        self.bangumi_video_stream(params).await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::bangumi::BangumiVideoStreamParams;
+    use crate::ids::{Cid, EpisodeId};
+    use crate::models::{Fnval, VideoQuality};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     const TEST_EP_ID: u64 = 21265; // epid
     const TEST_CID: u64 = 91549662;
@@ -142,23 +60,23 @@ mod tests {
     #[tokio::test]
     async fn test_bangumi_video_stream_url_simple() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .bangumi_video_stream_by_epid(
-                TEST_EP_ID,
-                Some(VideoQuality::P8K),
-                Some(
-                    Fnval::DASH
-                        | Fnval::FOURK
-                        | Fnval::EIGHTK
-                        | Fnval::HDR
-                        | Fnval::DOLBY_AUDIO
-                        | Fnval::DOLBY_VISION
-                        | Fnval::AV1,
-                ),
+        let data = bpi
+            .bangumi()
+            .video_stream(
+                BangumiVideoStreamParams::from_episode_id(EpisodeId::new(TEST_EP_ID)?)
+                    .with_quality(VideoQuality::P8K)
+                    .with_fnval(
+                        Fnval::DASH
+                            | Fnval::FOURK
+                            | Fnval::EIGHTK
+                            | Fnval::HDR
+                            | Fnval::DOLBY_AUDIO
+                            | Fnval::DOLBY_VISION
+                            | Fnval::AV1,
+                    ),
             )
             .await?;
 
-        let data = result.into_data()?;
         tracing::info!(
             "==========最佳格式==========\n{:#?}",
             data.base.best_format()
@@ -179,21 +97,21 @@ mod tests {
     #[tokio::test]
     async fn test_bangumi_video_stream_url_by_cid() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .bangumi_video_stream_by_cid(TEST_CID, Some(VideoQuality::P480), Some(Fnval::DASH))
+        let data = bpi
+            .bangumi()
+            .video_stream(
+                BangumiVideoStreamParams::from_cid(Cid::new(TEST_CID)?)
+                    .with_quality(VideoQuality::P480)
+                    .with_fnval(Fnval::DASH),
+            )
             .await?;
-        let data = result.into_data()?;
         tracing::info!("{:#?}", data);
         Ok(())
     }
 
     #[test]
-    fn bangumi_video_stream_by_epid_rejects_zero_episode_id() {
-        let runtime = tokio::runtime::Runtime::new().expect("runtime should build");
-        let bpi = BpiClient::new().expect("client should build");
-
-        let result =
-            runtime.block_on(async { bpi.bangumi_video_stream_by_epid(0, None, None).await });
+    fn bangumi_video_stream_params_rejects_zero_episode_id() {
+        let result = EpisodeId::new(0);
 
         assert!(matches!(
             result.unwrap_err(),

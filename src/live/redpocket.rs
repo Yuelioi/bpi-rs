@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::BpiResponse;
 
 // ================= 数据结构 =================
 
@@ -78,43 +78,12 @@ pub struct LotteryInfoData {
 
 pub type LotteryInfoResponse = BpiResponse<LotteryInfoData>;
 
-// ================= 实现 =================
-
-impl BpiClient {
-    /// 获取指定直播间的红包信息
-    ///
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `room_id` | i64 | 直播间 ID |
-    pub async fn live_lottery_info(&self, room_id: i64) -> Result<LotteryInfoResponse, BpiError> {
-        let params = self
-            .get_wbi_sign2(vec![("roomid", room_id.to_string())])
-            .await?;
-
-        let resp: LotteryInfoResponse = self
-            .get(
-                "https://api.live.bilibili.com/xlive/lottery-interface/v1/lottery/getLotteryInfoWeb"
-            )
-            .query(&params)
-            .send_bpi("获取指定直播间的红包信息")
-            .await?;
-
-        Ok(resp)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -126,7 +95,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_live_lottery_info() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        bpi.live_lottery_info(23174842).await?;
+        bpi.live().lottery_info(23174842).await?;
 
         // 注意：直播间可能没有红包，所以不做额外断言
         Ok(())

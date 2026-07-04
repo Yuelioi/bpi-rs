@@ -2,7 +2,6 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/railgun.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 电磁力等级信息
@@ -22,28 +21,12 @@ pub struct ElectromagneticInfo {
     pub update_date: u64,
 }
 
-impl BpiClient {
-    /// 获取电磁力等级
-    ///
-    /// 获取当前用户的电磁力等级信息，包括等级、分数、信用分等。
-    ///
-    /// # 文档
-    /// [获取电磁力等级](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/railgun.md#获取电磁力等级)
-    pub async fn up_electromagnetic_info(
-        &self,
-    ) -> Result<BpiResponse<ElectromagneticInfo>, BpiError> {
-        self.get("https://api.bilibili.com/studio/up-rating/v3/rating/info")
-            .send_bpi("获取电磁力等级")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -56,7 +39,7 @@ mod tests {
     async fn test_electromagnetic_info() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let data = bpi.up_electromagnetic_info().await?.into_data()?;
+        let data = bpi.creativecenter().electromagnetic_info().await?;
 
         tracing::info!(
             "mid={}, level={}, score={}, credit={}, state={}",

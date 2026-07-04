@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-
 // --- Structs for `getChargeRecord` ---
 
 /// 充电自动续费详情
@@ -314,116 +312,12 @@ pub struct MemberRankData {
     pub level_info: Vec<LevelInfo>,
 }
 
-impl BpiClient {
-    /// 获取包月充电列表
-    ///
-    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `page` | u64 | 页码 |
-    /// | `charge_type` | u32 | 充电状态：1 使用中，2 已过期 |
-    pub async fn electric_charge_record(
-        &self,
-        page: u64,
-        charge_type: u32,
-    ) -> Result<BpiResponse<ChargeRecordData>, BpiError> {
-        self.get("https://api.live.bilibili.com/xlive/revenue/v1/guard/getChargeRecord")
-            .query(&[
-                ("page", page.to_string()),
-                ("type", charge_type.to_string()),
-            ])
-            .send_bpi("获取包月充电列表")
-            .await
-    }
-
-    /// UP主包月充电详情
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `up_mid` | u64 | 目标用户 mid |
-    pub async fn electric_upower_item_detail(
-        &self,
-        up_mid: u64,
-    ) -> Result<BpiResponse<UpowerItemDetail>, BpiError> {
-        self.get("https://api.bilibili.com/x/upower/item/detail")
-            .query(&[("up_mid", up_mid)])
-            .send_bpi("获取UP主包月充电详情")
-            .await
-    }
-
-    /// 与UP主的包月充电关系
-    ///
-    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `up_mid` | u64 | 目标用户 mid |
-    pub async fn electric_charge_follow_info(
-        &self,
-        up_mid: u64,
-    ) -> Result<BpiResponse<ChargeFollowInfo>, BpiError> {
-        self.get("https://api.bilibili.com/x/upower/charge/follow/info")
-            .query(&[("up_mid", up_mid)])
-            .send_bpi("获取与UP主的包月充电关系")
-            .await
-    }
-
-    /// 包月充电用户排名
-    ///
-    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `up_mid` | u64 | 目标用户 mid |
-    /// | `pn` | u64 | 页码 |
-    /// | `ps` | u64 | 每页项数，最大 101 |
-    /// | `privilege_type` | `Option<u64>` | 充电档位代码 |
-    pub async fn electric_upower_member_rank(
-        &self,
-        up_mid: u64,
-        pn: u64,
-        ps: u64,
-        privilege_type: Option<u64>,
-    ) -> Result<BpiResponse<MemberRankData>, BpiError> {
-        let mut req = self
-            .get("https://api.bilibili.com/x/upower/up/member/rank/v2")
-            .query(&[("up_mid", up_mid), ("pn", pn), ("ps", ps)]);
-
-        if let Some(ptype) = privilege_type {
-            req = req.query(&[("privilege_type", ptype)]);
-        }
-
-        req.send_bpi("获取包月充电用户排名").await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
     use tracing::info;
 
     fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
@@ -455,12 +349,12 @@ mod tests {
     async fn test_get_charge_record() {
         let bpi = BpiClient::new().expect("client should build");
         // 获取自己使用中的包月充电列表
-        let resp = bpi.electric_charge_record(1, 1).await;
+        let resp = bpi.electric().charge_record(1, 1).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
-        if let Ok(response) = resp {
-            if let Some(list) = response.data.unwrap().list {
+        if let Ok(data) = resp {
+            if let Some(list) = data.list {
                 info!("找到 {} 个正在充电的UP主", list.len());
             } else {
                 info!("没有正在充电的UP主");
@@ -474,12 +368,11 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         // 替换为有效的UP主mid
         let up_mid = 1265680561;
-        let resp = bpi.electric_upower_item_detail(up_mid).await;
+        let resp = bpi.electric().upower_item_detail(up_mid).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
-        if let Ok(response) = resp {
-            let data = response.data.unwrap();
+        if let Ok(data) = resp {
             info!(
                 "UP主 {} 的充电总人数: {}",
                 data.user_card.nickname, data.upower_rank.total
@@ -492,12 +385,11 @@ mod tests {
     async fn test_get_charge_follow_info() {
         let bpi = BpiClient::new().expect("client should build");
         let up_mid = 293793435;
-        let resp = bpi.electric_charge_follow_info(up_mid).await;
+        let resp = bpi.electric().charge_follow_info(up_mid).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
-        if let Ok(response) = resp {
-            let data = response.data.unwrap();
+        if let Ok(data) = resp {
             info!(
                 "与UP主 {} 的充电关系：已保持 {} 天",
                 data.up_card.nickname, data.days
@@ -512,13 +404,11 @@ mod tests {
         // 替换为有效的UP主mid
         let up_mid = 1265680561;
         // 获取所有档位的用户排名
-        let resp = bpi.electric_upower_member_rank(up_mid, 1, 10, None).await;
+        let resp = bpi.electric().upower_member_rank(up_mid, 1, 10, None).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
-        if let Ok(response) = resp {
-            let data = response.data.unwrap();
-
+        if let Ok(data) = resp {
             info!("当前档位充电用户总数: {}", data.member_total);
             if let Some(first_rank) = data.rank_info.first() {
                 info!("排名第一的用户: {}", first_rank.nickname);

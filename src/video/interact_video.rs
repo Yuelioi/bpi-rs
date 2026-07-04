@@ -1,8 +1,6 @@
 //! 互动视频相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use super::params::InteractiveVideoInfoParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 pub(crate) const INTERACTIVE_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/stein/edgeinfo_v2";
@@ -164,27 +162,6 @@ pub struct InteractiveVideoHiddenVar {
     pub name: String,
 }
 
-impl BpiClient {
-    /// 获取互动视频模块详细信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/interact_video.html#获取互动视频信息)
-    ///
-    /// # 参数
-    /// | 名称     | 类型                         | 说明                           |
-    /// | -------- | ---------------------------- | ------------------------------ |
-    /// | `params` | `InteractiveVideoInfoParams` | 稿件 id、剧情图和可选模块编号   |
-    pub async fn video_interactive_video_info(
-        &self,
-        params: InteractiveVideoInfoParams,
-    ) -> Result<BpiResponse<InteractiveVideoInfoResponseData>, BpiError> {
-        self.get(INTERACTIVE_INFO_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取互动视频模块详细信息")
-            .await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
@@ -193,7 +170,8 @@ mod tests {
     use crate::ids::Aid;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::video::params::InteractiveVideoInfoParams;
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 114347430905959;
@@ -204,8 +182,7 @@ mod tests {
     async fn test_video_interactive_video_info_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let params = InteractiveVideoInfoParams::from_aid(Aid::new(TEST_AID)?, TEST_GRAPH_VERSION)?;
-        let resp = bpi.video_interactive_video_info(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().interactive_video_info(params).await?;
 
         info!("互动视频信息: {:?}", data);
         assert!(!data.title.is_empty());

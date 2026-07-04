@@ -2,11 +2,6 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/cheese/info.md)
 
-use crate::{
-    BilibiliRequest, BpiClient, BpiError, BpiResponse,
-    cheese::{CheeseEpListParams, CheeseInfoParams},
-    ids::{EpisodeId, SeasonId},
-};
 use serde::{Deserialize, Serialize};
 
 // ==========================
@@ -195,94 +190,17 @@ pub struct CourseEpPage {
 }
 
 // ==========================
-// API 封装
-// ==========================
-
-impl BpiClient {
-    /// 获取课程基本信息
-    ///
-    /// 通过课程 season_id 或分集 ep_id 获取课程的详细信息，包括课程简介、
-    /// 分集列表、UP主信息、统计数据等。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `CheeseInfoParams` | 课程 season_id 或 ep_id 参数 |
-    ///
-    /// # 文档
-    /// [获取课程基本信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/cheese/info.md#获取课程基本信息)
-    pub async fn cheese_info(
-        &self,
-        params: CheeseInfoParams,
-    ) -> Result<BpiResponse<CourseInfo>, BpiError> {
-        self.get("https://api.bilibili.com/pugv/view/web/season")
-            .with_bilibili_headers()
-            .query(&params.query_pairs())
-            .send_bpi("获取课程基本信息")
-            .await
-    }
-
-    /// 通过 season_id 获取课程基本信息
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `season_id` | `SeasonId` | 课程 season_id |
-    pub async fn cheese_info_by_season_id(
-        &self,
-        season_id: SeasonId,
-    ) -> Result<BpiResponse<CourseInfo>, BpiError> {
-        self.cheese_info(CheeseInfoParams::from_season_id(season_id))
-            .await
-    }
-
-    /// 通过 ep_id 获取课程基本信息
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `ep_id` | `EpisodeId` | 课程分集 ep_id |
-    pub async fn cheese_info_by_ep_id(
-        &self,
-        ep_id: EpisodeId,
-    ) -> Result<BpiResponse<CourseInfo>, BpiError> {
-        self.cheese_info(CheeseInfoParams::from_episode_id(ep_id))
-            .await
-    }
-
-    /// 获取课程分集列表
-    ///
-    /// 获取指定课程的所有分集信息，支持分页查询。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `CheeseEpListParams` | 课程分集列表参数 |
-    ///
-    /// # 文档
-    /// [获取课程分集列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/cheese/info.md#获取课程分集列表)
-    pub async fn cheese_ep_list(
-        &self,
-        params: CheeseEpListParams,
-    ) -> Result<BpiResponse<CourseEpList>, BpiError> {
-        self.get("https://api.bilibili.com/pugv/view/web/ep/list")
-            .query(&params.query_pairs())
-            .send_bpi("获取课程分集列表")
-            .await
-    }
-}
-
-// ==========================
 // 测试
 // ==========================
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cheese::CheeseInfoParams;
+    use crate::cheese::{CheeseEpListParams, CheeseInfoParams};
+    use crate::ids::{EpisodeId, SeasonId};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     const TEST_SEASON_ID: u64 = 556;
     const TEST_EP_ID: u64 = 20767;
@@ -310,9 +228,9 @@ mod tests {
     async fn test_cheese_info_by_season_id() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let data = bpi
-            .cheese_info_by_season_id(SeasonId::new(TEST_SEASON_ID)?)
-            .await?
-            .into_data()?;
+            .cheese()
+            .info_by_season_id(SeasonId::new(TEST_SEASON_ID)?)
+            .await?;
 
         assert_eq!(data.season_id, TEST_SEASON_ID);
         tracing::info!("{:#?}", data);
@@ -324,9 +242,9 @@ mod tests {
     async fn test_cheese_info_by_ep_id() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let data = bpi
-            .cheese_info_by_ep_id(EpisodeId::new(TEST_EP_ID)?)
-            .await?
-            .into_data()?;
+            .cheese()
+            .info_by_ep_id(EpisodeId::new(TEST_EP_ID)?)
+            .await?;
         assert_eq!(data.season_id, TEST_SEASON_ID);
 
         tracing::info!("课程标题: {:?}", data.title);
@@ -339,13 +257,13 @@ mod tests {
     async fn test_cheese_ep_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let data = bpi
-            .cheese_ep_list(
+            .cheese()
+            .ep_list(
                 CheeseEpListParams::new(SeasonId::new(TEST_SEASON_ID)?)
                     .with_page_size(50)?
                     .with_page(1)?,
             )
-            .await?
-            .into_data()?;
+            .await?;
         assert_eq!(data.items.first().unwrap().id, TEST_SEASON_ID);
 
         tracing::info!("课程标题: {:?}", data.items.first().unwrap().title);

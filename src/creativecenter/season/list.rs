@@ -2,10 +2,8 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/list.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
-use super::SeasonListParams;
 use super::models::{Season, Section};
 
 /// 合集列表返回结构
@@ -90,33 +88,10 @@ pub struct PartEpisode {
     pub charging_pay: u32,
 }
 
-impl BpiClient {
-    /// 获取合集列表
-    ///
-    /// 获取当前用户创建的合集列表，支持分页和排序。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`SeasonListParams`] | 合集列表分页和排序参数 |
-    ///
-    /// # 文档
-    /// [获取合集列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/list.md#获取合集列表)
-    pub async fn season_list(
-        &self,
-        params: SeasonListParams,
-    ) -> Result<BpiResponse<SeasonListData>, BpiError> {
-        self.get("https://member.bilibili.com/x2/creative/web/seasons")
-            .query(&params.query_pairs())
-            .send_bpi("获取合集列表")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::creativecenter::season::{SeasonListOrder, SeasonListSort};
+    use crate::creativecenter::season::{SeasonListOrder, SeasonListParams, SeasonListSort};
+    use crate::{BpiClient, BpiError};
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -125,7 +100,7 @@ mod tests {
         let params = SeasonListParams::new(1, 10)?
             .with_order(SeasonListOrder::CreatedAt)
             .with_sort(SeasonListSort::Desc);
-        let data = bpi.season_list(params).await?.into_data()?;
+        let data = bpi.creativecenter().season_list(params).await?;
 
         tracing::info!("共 {} 个合集", data.total);
         for s in data.seasons {

@@ -2,11 +2,9 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/misc/b23tv.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
-use super::MiscB23ShortLinkParams;
-
+#[cfg(test)]
 const B23_SHORT_LINK_ENDPOINT: &str = "https://api.biliapi.net/x/share/click";
 
 /// 生成 b23.tv 短链 - 响应数据
@@ -38,41 +36,11 @@ impl ShortLinkData {
     }
 }
 
-impl BpiClient {
-    /// 根据视频 aid 生成 b23.tv 短链
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/misc)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`MiscB23ShortLinkParams`] | 稿件和客户端分享参数 |
-    pub async fn misc_b23_short_link(
-        &self,
-        params: MiscB23ShortLinkParams,
-    ) -> Result<BpiResponse<ShortLinkData>, BpiError> {
-        let form = params.form_pairs();
-
-        let mut result: BpiResponse<ShortLinkData> = self
-            .post(B23_SHORT_LINK_ENDPOINT)
-            .form(&form)
-            .send_bpi("生成短链")
-            .await?;
-
-        if let Some(data) = &mut result.data {
-            data.extract();
-        }
-
-        Ok(result)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::ApiEnvelope;
+    use crate::BpiError;
     use crate::ids::Aid;
     use crate::misc::MiscB23ShortLinkParams;
     use crate::probe::contract::HttpMethod;

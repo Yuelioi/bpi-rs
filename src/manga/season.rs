@@ -2,7 +2,7 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/Season.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::BpiResponse;
 use serde::{Deserialize, Serialize};
 
 // ================= 数据结构 =================
@@ -79,26 +79,12 @@ pub struct SeasonInfoData {
 
 pub type SeasonInfoResponse = BpiResponse<SeasonInfoData>;
 
-// ================= 实现 =================
-
-impl BpiClient {
-    /// 获取漫画赛季信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
-    pub async fn manga_season_info(&self) -> Result<SeasonInfoResponse, BpiError> {
-        self.post("https://manga.bilibili.com/twirp/user.v1.Season/GetSeasonInfo")
-            .send_bpi("获取漫画赛季信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -111,11 +97,9 @@ mod tests {
     async fn test_get_manga_season_info() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi.manga_season_info().await?;
+        let data = bpi.manga().season_info().await?;
 
         // 不需要登录也可以获取基本信息
-
-        let data = result.into_data()?;
 
         tracing::info!("{:#?}", data);
 

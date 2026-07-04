@@ -1,21 +1,10 @@
-use crate::models::WbiData;
 use crate::{BpiClient, BpiError};
 
 impl BpiClient {
-    pub async fn get_wbi_sign(&self) -> Result<WbiData, BpiError> {
-        let params = self
-            .sign_wbi_params(std::iter::empty::<(String, String)>())
-            .await?;
-
-        Ok(WbiData {
-            wts: param_value(&params, "wts")?
-                .parse::<u64>()
-                .map_err(|_| BpiError::parse("wts 转换失败"))?,
-            w_rid: param_value(&params, "w_rid")?.to_string(),
-        })
-    }
-
-    pub async fn get_wbi_sign2<I, K, V>(&self, params: I) -> Result<Vec<(String, String)>, BpiError>
+    pub(crate) async fn get_wbi_sign2<I, K, V>(
+        &self,
+        params: I,
+    ) -> Result<Vec<(String, String)>, BpiError>
     where
         I: IntoIterator<Item = (K, V)>,
         K: ToString,
@@ -25,37 +14,9 @@ impl BpiClient {
     }
 }
 
-fn param_value<'a>(params: &'a [(String, String)], key: &str) -> Result<&'a str, BpiError> {
-    params
-        .iter()
-        .find_map(|(param_key, value)| (param_key == key).then_some(value.as_str()))
-        .ok_or_else(|| BpiError::parse(format!("缺少 {key}")))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::sign::wbi::WbiKeys;
-    use crate::sign::wbi_client::current_wbi_cache_bucket;
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn get_wbi_sign_uses_cached_client_keys() -> Result<(), BpiError> {
-        let client = BpiClient::new()?;
-        client.wbi_key_cache().insert(
-            current_wbi_cache_bucket(),
-            WbiKeys::new(
-                "abcdefghijklmnopqrstuvwxyz123456",
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZ654321",
-            )?,
-        )?;
-
-        let wbi = client.get_wbi_sign().await?;
-
-        assert!(wbi.wts > 0);
-        assert!(!wbi.w_rid.is_empty());
-        Ok(())
-    }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]

@@ -1,12 +1,8 @@
 //! 番剧基本信息
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md)
+use crate::BpiResponse;
 use crate::models::VipLabel;
-use crate::{
-    BilibiliRequest, BpiClient, BpiError, BpiResponse,
-    bangumi::params::{BangumiDetailParams, BangumiInfoParams, BangumiSectionsParams},
-    ids::{EpisodeId, SeasonId},
-};
 use serde::{Deserialize, Serialize};
 
 /// 剧集地区
@@ -700,100 +696,14 @@ pub struct BangumiSectionEpisodeInfo {
     pub vid: String,
 }
 
-impl BpiClient {
-    /// 获取剧集基本信息（mdid方式）
-    ///
-    /// # 参数
-    /// * `params` - 剧集 mdid 参数
-    ///
-    /// # 文档
-    /// [剧集基本信息（mdid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#剧集基本信息mdid方式)
-    pub async fn bangumi_info(
-        &self,
-        params: BangumiInfoParams,
-    ) -> Result<BangumiInfoResponse, BpiError> {
-        let result: BangumiInfoResponse = self
-            .get("https://api.bilibili.com/pgc/review/user")
-            .query(&params.query_pairs())
-            .send_bpi("获取剧集基本信息")
-            .await?;
-        Ok(result)
-    }
-
-    /// 获取剧集明细（web端）（ssid/epid方式）
-    ///
-    /// # 参数
-    /// * `params` - 番剧 ssid 或 epid 参数
-    ///
-    /// # 文档
-    /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#获取剧集明细web端ssidepid方式)
-    pub async fn bangumi_detail(
-        &self,
-        params: BangumiDetailParams,
-    ) -> Result<BangumiDetailResponse, BpiError> {
-        let result: BangumiDetailResponse = self
-            .get("https://api.bilibili.com/pgc/view/web/season")
-            .query(&params.query_pairs())
-            .send_bpi("获取剧集明细")
-            .await?;
-        Ok(result)
-    }
-
-    /// 获取剧集明细（web端）（ssid方式）
-    ///
-    /// # 参数
-    /// * `season_id` - 番剧 ssid
-    ///
-    /// # 文档
-    /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#获取剧集明细web端ssidepid方式)
-    pub async fn bangumi_detail_by_season_id(
-        &self,
-        season_id: SeasonId,
-    ) -> Result<BangumiDetailResponse, BpiError> {
-        self.bangumi_detail(BangumiDetailParams::from_season_id(season_id))
-            .await
-    }
-
-    /// 获取剧集明细（web端）（epid方式）
-    ///
-    /// # 参数
-    /// * `ep_id` - 剧集 epid
-    ///
-    /// # 文档
-    /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#获取剧集明细web端ssidepid方式)
-    pub async fn bangumi_detail_by_epid(
-        &self,
-        ep_id: EpisodeId,
-    ) -> Result<BangumiDetailResponse, BpiError> {
-        self.bangumi_detail(BangumiDetailParams::from_episode_id(ep_id))
-            .await
-    }
-
-    /// 获取剧集分集信息
-    ///
-    /// # 参数
-    /// * `params` - 剧集 ssid 参数
-    ///
-    /// # 文档
-    /// [获取剧集明细（web端）（ssid/epid方式）](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/info.md#获取剧集分集信息)
-    pub async fn bangumi_sections_by_season_id(
-        &self,
-        params: BangumiSectionsParams,
-    ) -> Result<BpiResponse<BangumiSectionResult>, BpiError> {
-        self.get("https://api.bilibili.com/pgc/web/season/section")
-            .query(&params.query_pairs())
-            .send_bpi("获取剧集分集信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ids::MediaId;
+    use crate::bangumi::params::{BangumiDetailParams, BangumiInfoParams, BangumiSectionsParams};
+    use crate::ids::{EpisodeId, MediaId, SeasonId};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     const TEST_SEASON_ID: u64 = 1172; // ssid
     const TEST_EP_ID: u64 = 21265; // epid
@@ -827,10 +737,10 @@ mod tests {
     #[tokio::test]
     async fn test_bangumi_info() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .bangumi_info(BangumiInfoParams::new(MediaId::new(TEST_MEDIA_ID)?))
+        let data = bpi
+            .bangumi()
+            .info(BangumiInfoParams::new(MediaId::new(TEST_MEDIA_ID)?))
             .await?;
-        let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
         assert_eq!(data.media.media_id, TEST_MEDIA_ID);
@@ -844,10 +754,10 @@ mod tests {
     #[tokio::test]
     async fn test_bangumi_detail_by_season_id() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .bangumi_detail_by_season_id(SeasonId::new(TEST_SEASON_ID)?)
+        let data = bpi
+            .bangumi()
+            .detail_by_season_id(SeasonId::new(TEST_SEASON_ID)?)
             .await?;
-        let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
         assert_eq!(data.season_id, TEST_SEASON_ID);
@@ -861,10 +771,10 @@ mod tests {
     #[tokio::test]
     async fn test_bangumi_detail_by_epid() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .bangumi_detail_by_epid(EpisodeId::new(TEST_EP_ID)?)
+        let data = bpi
+            .bangumi()
+            .detail_by_ep_id(EpisodeId::new(TEST_EP_ID)?)
             .await?;
-        let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
         assert!(!data.title.is_empty());
@@ -877,12 +787,10 @@ mod tests {
     #[tokio::test]
     async fn test_bangumi_section() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .bangumi_sections_by_season_id(BangumiSectionsParams::new(SeasonId::new(
-                TEST_SEASON_ID,
-            )?))
+        let data = bpi
+            .bangumi()
+            .sections(BangumiSectionsParams::new(SeasonId::new(TEST_SEASON_ID)?))
             .await?;
-        let data = result.into_data()?;
         tracing::info!("{:#?}", data);
 
         assert!(!data.main_section.episodes.is_empty());

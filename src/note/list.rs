@@ -1,10 +1,3 @@
-use crate::{
-    BilibiliRequest, BpiClient, BpiError, BpiResponse,
-    note::{
-        NoteArchiveListParams, NotePublicArchiveListParams, NoteUserPrivateListParams,
-        NoteUserPublicListParams,
-    },
-};
 use serde::{Deserialize, Serialize};
 
 /// 稿件私有笔记列表数据
@@ -108,85 +101,6 @@ pub struct PublicNoteListUserData {
     pub page: Option<NotePage>,
 }
 
-impl BpiClient {
-    /// 查询稿件私有笔记
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// # 参数
-    /// - params: 稿件 avid 参数
-    pub async fn note_list_archive(
-        &self,
-        params: NoteArchiveListParams,
-    ) -> Result<BpiResponse<NoteListArchiveData>, BpiError> {
-        self.get("https://api.bilibili.com/x/note/list/archive")
-            .query(&params.query_pairs())
-            .send_bpi("查询稿件私有笔记")
-            .await
-    }
-
-    /// 查询用户私有笔记
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `NoteUserPrivateListParams` | 用户私有笔记列表参数 |
-    pub async fn note_list_user_private(
-        &self,
-        params: NoteUserPrivateListParams,
-    ) -> Result<BpiResponse<PrivateNoteListData>, BpiError> {
-        self.get("https://api.bilibili.com/x/note/list")
-            .query(&params.query_pairs())
-            .send_bpi("查询用户私有笔记")
-            .await
-    }
-
-    /// 查询稿件公开笔记
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `NotePublicArchiveListParams` | 稿件公开笔记列表参数 |
-    pub async fn note_list_public_archive(
-        &self,
-        params: NotePublicArchiveListParams,
-    ) -> Result<BpiResponse<PublicNoteListArchiveData>, BpiError> {
-        self.get("https://api.bilibili.com/x/note/publish/list/archive")
-            .query(&params.query_pairs())
-            .send_bpi("查询稿件公开笔记")
-            .await
-    }
-
-    /// 查询用户公开笔记
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `NoteUserPublicListParams` | 用户公开笔记列表参数 |
-    pub async fn note_list_public_user(
-        &self,
-        params: NoteUserPublicListParams,
-    ) -> Result<BpiResponse<PublicNoteListUserData>, BpiError> {
-        self.get("https://api.bilibili.com/x/note/publish/list/user")
-            .query(&params.query_pairs())
-            .send_bpi("查询用户公开笔记")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -197,7 +111,7 @@ mod tests {
     };
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use base64::{Engine as _, engine::general_purpose};
     use tracing::info;
 
@@ -238,7 +152,8 @@ mod tests {
     async fn test_note_list_archive() {
         let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
-            .note_list_archive(NoteArchiveListParams::new(
+            .note()
+            .archive_list(NoteArchiveListParams::new(
                 Aid::new(TEST_PRIVATE_AID).expect("test aid should be valid"),
             ))
             .await;
@@ -246,11 +161,8 @@ mod tests {
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("note ids: {:?}", data.note_ids);
-        }
+        let data = resp.unwrap();
+        info!("note ids: {:?}", data.note_ids);
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -258,7 +170,8 @@ mod tests {
     async fn test_note_list_user_private() {
         let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
-            .note_list_user_private(
+            .note()
+            .user_private_list(
                 NoteUserPrivateListParams::new()
                     .with_page(1)
                     .expect("test page should be valid")
@@ -270,8 +183,8 @@ mod tests {
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        if let Some(list) = resp_data.data.as_ref().and_then(|data| data.list.as_ref()) {
+        let data = resp.unwrap();
+        if let Some(list) = data.list.as_ref() {
             info!("first note item: {:?}", list.first());
         }
     }
@@ -281,7 +194,8 @@ mod tests {
     async fn test_note_list_public_archive() {
         let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
-            .note_list_public_archive(
+            .note()
+            .public_archive_list(
                 NotePublicArchiveListParams::new(
                     Aid::new(TEST_PUBLIC_AID).expect("test aid should be valid"),
                 )
@@ -295,11 +209,8 @@ mod tests {
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("show_public_note: {}", data.show_public_note);
-        }
+        let data = resp.unwrap();
+        info!("show_public_note: {}", data.show_public_note);
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -307,7 +218,8 @@ mod tests {
     async fn test_note_list_public_user() {
         let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
-            .note_list_public_user(
+            .note()
+            .user_public_list(
                 NoteUserPublicListParams::new()
                     .with_page(1)
                     .expect("test page should be valid")
@@ -319,11 +231,8 @@ mod tests {
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("total public notes: {}", data.page.as_ref().unwrap().total);
-        }
+        let data = resp.unwrap();
+        info!("total public notes: {}", data.page.as_ref().unwrap().total);
     }
 
     #[test]

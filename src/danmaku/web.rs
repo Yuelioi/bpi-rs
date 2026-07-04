@@ -3,9 +3,7 @@
 //! 响应体需使用官方 [`dm.proto`](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/grpc_api/bilibili/community/service/dm/v1)
 //! 中的 `DmSegMobileReply`、`DmWebViewReply` 等自行反序列化。
 
-use bytes::Bytes;
-
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResult};
+use crate::{BpiError, BpiResult};
 
 /// Parameters for realtime protobuf danmaku segment endpoints.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -228,114 +226,10 @@ fn validate_date(value: &str) -> BpiResult<()> {
     Ok(())
 }
 
-impl BpiClient {
-    /// 获取实时弹幕分包（Web，`DmSegMobileReply` protobuf）
-    ///
-    /// `GET https://api.bilibili.com/x/v2/dm/web/seg.so`
-    ///
-    /// # 参数
-    /// - `typ`: 1 视频 / 2 漫画
-    /// - `oid`: 视频 cid
-    /// - `segment_index`: 6 分钟一包，从 1 起
-    /// - `pid`: 稿件 avid（可选，建议填写）
-    pub async fn danmaku_web_seg_proto(
-        &self,
-        params: DanmakuSegmentParams,
-    ) -> Result<Bytes, BpiError> {
-        self.get("https://api.bilibili.com/x/v2/dm/web/seg.so")
-            .with_bilibili_headers()
-            .query(&params.query_pairs())
-            .send_request("弹幕 web 分段 seg.so")
-            .await
-    }
-
-    /// 获取实时弹幕分包（Web + WBI，`DmSegMobileReply` protobuf）
-    ///
-    /// `GET https://api.bilibili.com/x/v2/dm/wbi/web/seg.so`
-    pub async fn danmaku_web_seg_wbi_proto(
-        &self,
-        params: DanmakuSegmentParams,
-    ) -> Result<Bytes, BpiError> {
-        let signed = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        self.get("https://api.bilibili.com/x/v2/dm/wbi/web/seg.so")
-            .with_bilibili_headers()
-            .query(&signed)
-            .send_request("弹幕 WBI web 分段 seg.so")
-            .await
-    }
-
-    /// 获取弹幕元数据（互动弹幕、BAS 专包 URL、个人弹幕配置等，`DmWebViewReply` protobuf）
-    ///
-    /// `GET https://api.bilibili.com/x/v2/dm/web/view`
-    ///
-    /// 文档注明需登录 Cookie（`SESSDATA`）方可拿到完整个人配置。
-    pub async fn danmaku_web_view_proto(
-        &self,
-        params: DanmakuWebViewParams,
-    ) -> Result<Bytes, BpiError> {
-        let query = params.query_pairs();
-
-        self.get("https://api.bilibili.com/x/v2/dm/web/view")
-            .with_bilibili_headers()
-            .query(&query)
-            .send_request("弹幕 web/view 元数据 protobuf")
-            .await
-    }
-
-    /// 获取实时弹幕分包（移动客户端路径，`DmSegMobileReply` protobuf）
-    ///
-    /// `GET https://api.bilibili.com/x/v2/dm/list/seg.so`
-    pub async fn danmaku_mobile_seg_proto(
-        &self,
-        params: DanmakuSegmentParams,
-    ) -> Result<Bytes, BpiError> {
-        self.get("https://api.bilibili.com/x/v2/dm/list/seg.so")
-            .with_bilibili_headers()
-            .query(&params.query_pairs())
-            .send_request("弹幕 APP list/seg.so")
-            .await
-    }
-
-    /// 获取指定日期的历史弹幕分包（protobuf）
-    ///
-    /// `GET https://api.bilibili.com/x/v2/dm/web/history/seg.so`
-    ///
-    /// 需登录（历史弹幕）。
-    pub async fn danmaku_web_history_seg_proto(
-        &self,
-        params: DanmakuHistoryBytesParams,
-    ) -> Result<Bytes, BpiError> {
-        let query = params.query_pairs();
-
-        self.get("https://api.bilibili.com/x/v2/dm/web/history/seg.so")
-            .with_bilibili_headers()
-            .query(&query)
-            .send_request("历史弹幕 web/history/seg.so")
-            .await
-    }
-
-    /// 获取指定日期的历史弹幕（压缩 XML 正文，需自行 inflate）
-    ///
-    /// `GET https://api.bilibili.com/x/v2/dm/history`
-    ///
-    /// 需登录。响应一般为 deflate 压缩的 XML，与 `danmaku_xml` 模块解析格式一致。
-    pub async fn danmaku_history_xml_bytes(
-        &self,
-        params: DanmakuHistoryBytesParams,
-    ) -> Result<Bytes, BpiError> {
-        let query = params.query_pairs();
-
-        self.get_without_response_decoding("https://api.bilibili.com/x/v2/dm/history")?
-            .query(&query)
-            .send_request("历史弹幕 XML /dm/history")
-            .await
-    }
-}
-
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use crate::BpiClient;
     use base64::{Engine as _, engine::general_purpose};
     use serde::Deserialize;
     use std::collections::BTreeMap;
@@ -412,7 +306,7 @@ pub mod tests {
     async fn test_danmaku_web_seg_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let params = DanmakuSegmentParams::new(1, TEST_OID, 1)?;
-        let data = bpi.danmaku_web_seg_proto(params).await?;
+        let data = bpi.danmaku().web_seg_proto(params).await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("web seg.so 响应字节数: {}", data.len());
@@ -425,7 +319,7 @@ pub mod tests {
     async fn test_danmaku_web_seg_wbi_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let params = DanmakuSegmentParams::new(1, TEST_OID, 1)?;
-        let data = bpi.danmaku_web_seg_wbi_proto(params).await?;
+        let data = bpi.danmaku().web_seg_wbi_proto(params).await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("wbi web seg.so 响应字节数: {}", data.len());
@@ -438,7 +332,7 @@ pub mod tests {
     async fn test_danmaku_web_view_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let params = DanmakuWebViewParams::new(1, TEST_OID)?;
-        let data = bpi.danmaku_web_view_proto(params).await?;
+        let data = bpi.danmaku().web_view_proto(params).await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("web/view 响应字节数: {}", data.len());
@@ -451,7 +345,7 @@ pub mod tests {
     async fn test_danmaku_mobile_seg_proto() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let params = DanmakuSegmentParams::new(1, TEST_OID, 1)?;
-        let data = bpi.danmaku_mobile_seg_proto(params).await?;
+        let data = bpi.danmaku().mobile_seg_proto(params).await?;
 
         assert!(!data.is_empty(), "protobuf 响应不应为空");
         tracing::info!("mobile seg.so 响应字节数: {}", data.len());

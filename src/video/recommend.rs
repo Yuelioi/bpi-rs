@@ -1,8 +1,6 @@
 //! 视频推荐相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use super::params::{VideoHomepageRecommendationsParams, VideoRelatedParams};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 pub(crate) const HOMEPAGE_RECOMMENDATIONS_ENDPOINT: &str =
@@ -173,47 +171,6 @@ pub struct RcmdFeedResponseData {
     pub preload_floor_expose_pct: f32,
 }
 
-impl BpiClient {
-    /// 获取单视频推荐列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/recommend.html#获取单视频推荐列表)
-    ///
-    /// # 参数
-    /// | 名称     | 类型                 | 说明              |
-    /// | -------- | -------------------- | ----------------- |
-    /// | `params` | `VideoRelatedParams` | 稿件 id 参数      |
-    pub async fn video_related_videos(
-        &self,
-        params: VideoRelatedParams,
-    ) -> Result<BpiResponse<Vec<RelatedVideo>>, BpiError> {
-        self.get(RELATED_VIDEOS_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取单视频推荐列表")
-            .await
-    }
-
-    /// 获取首页视频推荐列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/recommend.html#获取首页视频推荐列表)
-    ///
-    /// # 参数
-    /// | 名称     | 类型                                  | 说明                 |
-    /// | -------- | ------------------------------------- | -------------------- |
-    /// | `params` | `VideoHomepageRecommendationsParams`  | 推荐分页参数         |
-    pub async fn video_homepage_recommendations(
-        &self,
-        params: VideoHomepageRecommendationsParams,
-    ) -> Result<BpiResponse<RcmdFeedResponseData>, BpiError> {
-        let params = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        let req = self.get(HOMEPAGE_RECOMMENDATIONS_ENDPOINT).query(&params);
-
-        req.send_bpi("获取首页视频推荐列表").await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
@@ -222,7 +179,8 @@ mod tests {
     use crate::ids::Aid;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::video::params::{VideoHomepageRecommendationsParams, VideoRelatedParams};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 10001;
@@ -231,10 +189,10 @@ mod tests {
     #[tokio::test]
     async fn test_video_related_videos_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .video_related_videos(VideoRelatedParams::from_aid(Aid::new(TEST_AID)?))
+        let data = bpi
+            .video()
+            .related_videos(VideoRelatedParams::from_aid(Aid::new(TEST_AID)?))
             .await?;
-        let data = resp.into_data()?;
 
         info!("单视频推荐列表: {:?}", data);
 
@@ -252,8 +210,7 @@ mod tests {
             .page_size(12)?
             .fresh_idx(1)?
             .fetch_row(1)?;
-        let resp = bpi.video_homepage_recommendations(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().homepage_recommendations(params).await?;
 
         info!("首页推荐列表: {:?}", data);
 

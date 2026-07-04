@@ -3,8 +3,7 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/view.md)
 
 use super::models::{ArticleAuthor, ArticleCategory, ArticleMedia, ArticleStats};
-use crate::article::params::ArticleViewParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::BpiResponse;
 use serde::{Deserialize, Serialize};
 
 /// 专栏内容响应类型
@@ -340,33 +339,13 @@ pub struct OpusLiveCard {
     pub width: i32,
 }
 
-impl BpiClient {
-    /// 获取专栏正文内容
-    ///
-    /// # 参数
-    /// * `params` - 专栏正文参数
-    pub async fn article_view(
-        &self,
-        params: ArticleViewParams,
-    ) -> Result<ArticleViewResponse, BpiError> {
-        let params = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        let result: ArticleViewResponse = self
-            .get("https://api.bilibili.com/x/article/view")
-            .query(&params)
-            .send_bpi("获取专栏正文内容")
-            .await?;
-
-        Ok(result)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::article::params::ArticleViewParams;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use std::mem;
 
     const TEST_CVID: i64 = 2;
@@ -384,9 +363,7 @@ mod tests {
 
         let params = ArticleViewParams::new(TEST_CVID)?;
 
-        let result = bpi.article_view(params).await?;
-
-        let data = result.data.unwrap();
+        let data = bpi.article().view(params).await?;
         assert!(!data.title.is_empty());
         assert!(!data.content.is_empty());
         assert!(!data.author.name.is_empty());

@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
+use crate::BpiResponse;
 use crate::models::Account;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 视频分辨率信息
@@ -335,60 +335,24 @@ fn default_staff() -> Vec<StaffItem> {
 /// 获取视频详细信息响应类型
 pub type VideoInfoResponse = BpiResponse<VideoData>;
 
-impl BpiClient {
-    /// 获取视频详细信息 (Web端)
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/video.html#获取视频详细信息)
-    ///
-    /// # 参数
-    /// | 名称   | 类型         | 说明                 |
-    /// | ------ | ------------| -------------------- |
-    /// | `aid`  | `Option<u64>` | 稿件 avid，可选      |
-    /// | `bvid` | `Option<&str>`| 稿件 bvid，可选      |
-    ///
-    /// 两者任选一个
-    pub async fn video_info(
-        &self,
-        aid: Option<u64>,
-        bvid: Option<&str>,
-    ) -> Result<VideoInfoResponse, BpiError> {
-        let aid = aid.map(|v| v.to_string());
-        let bvid = bvid.map(|v| v.to_string());
-
-        self.get("https://api.bilibili.com/x/web-interface/view")
-            .query(&[("aid", aid), ("bvid", bvid)])
-            .send_bpi("视频详细信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::ids::Aid;
+    use crate::video::params::VideoViewParams;
+    use crate::{BpiClient, BpiError};
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    async fn test_video_info() {
+    async fn test_video_info() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let aid = Some(10001);
-        let bvid = None;
+        let data = bpi
+            .video()
+            .view(VideoViewParams::from_aid(Aid::new(10001)?))
+            .await?;
 
-        match bpi.video_info(aid, bvid).await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    // tracing::info!("视频标题: {}", resp.data.title);
-                    // tracing::info!("UP主: {} ({})", resp.data.owner.name, resp.data.owner.mid);
-                    // tracing::info!("总播放数: {}", resp.data.stat.view);
-                    // tracing::info!("分P数量: {}", resp.data.pages.len());
-                } else {
-                    tracing::info!("请求失败: code={}, message={}", resp.code, resp.message);
-                }
-            }
-            Err(err) => {
-                panic!("请求出错: {}", err);
-            }
-        }
+        assert!(!data.title.is_empty());
+
+        Ok(())
     }
 }

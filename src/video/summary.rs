@@ -1,8 +1,6 @@
 //! 视频 AI 总结相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use super::params::VideoAiSummaryParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 pub(crate) const AI_SUMMARY_ENDPOINT: &str =
@@ -57,28 +55,6 @@ pub struct AiSummaryResponseData {
     pub dislike_num: u64,
 }
 
-impl BpiClient {
-    /// 获取视频 AI 总结内容
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/summary.html#获取视频ai总结)
-    ///
-    /// # 参数
-    /// | 名称     | 类型                   | 说明                 |
-    /// | -------- | ---------------------- | -------------------- |
-    /// | `params` | `VideoAiSummaryParams` | 稿件 id、cid 和 UP mid |
-    pub async fn video_ai_summary(
-        &self,
-        params: VideoAiSummaryParams,
-    ) -> Result<BpiResponse<AiSummaryResponseData>, BpiError> {
-        let wbi_params = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        let req = self.get(AI_SUMMARY_ENDPOINT).query(&wbi_params);
-
-        req.send_bpi("获取视频 AI 总结内容").await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
@@ -87,7 +63,8 @@ mod tests {
     use crate::ids::{Aid, Cid};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::video::params::VideoAiSummaryParams;
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 10001;
@@ -101,8 +78,7 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         let params =
             VideoAiSummaryParams::from_aid(Aid::new(TEST_AID)?, Cid::new(TEST_CID)?, TEST_UP_MID)?;
-        let resp = bpi.video_ai_summary(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().ai_summary(params).await?;
 
         info!("视频 AI 总结: {:?}", data);
 

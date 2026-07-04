@@ -1,21 +1,17 @@
 use bpi_rs::ids::MediaId;
-use bpi_rs::{BpiClient, bangumi::BangumiInfoParams};
+use bpi_rs::{BpiClient, BpiResult, bangumi::BangumiInfoParams};
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let bpi = BpiClient::new()?;
+async fn main() -> BpiResult<()> {
+    let client = BpiClient::new()?;
+    let params = BangumiInfoParams::new(MediaId::new(28_220_978)?);
 
-    let result = bpi
-        .bangumi_info(BangumiInfoParams::new(MediaId::new(28220978)?))
-        .await;
-    match result {
-        Ok(result) => {
-            tracing::info!("{:#?}", result.data);
-        }
-        Err(e) => {
-            tracing::error!("{:#?}", e);
-        }
+    if std::env::var("BPI_RUN_EXAMPLE").as_deref() != Ok("1") {
+        println!("bpi-rs quickstart compiled; set BPI_RUN_EXAMPLE=1 to call live APIs");
+        return Ok(());
     }
 
+    let info = client.bangumi().info(params).await?;
+    println!("bangumi: {}", info.media.title);
     Ok(())
 }

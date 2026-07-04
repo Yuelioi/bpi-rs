@@ -269,22 +269,6 @@ impl BpiClient {
             .await
     }
 
-    /// 查询直播间禁言列表
-    /// ps: 每页数量
-    /// pn: 页码，默认1
-    pub async fn live_list_silent_users(
-        &self,
-        params: LiveSilentUserListParams,
-    ) -> Result<BpiResponse<SilentUserListData>, BpiError> {
-        let csrf = self.csrf().unwrap_or_default();
-        let form = params.form_pairs(&csrf);
-
-        self.post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/GetSilentUserList")
-            .form(&form)
-            .send_bpi("查询直播间禁言列表")
-            .await
-    }
-
     /// 解除禁言
     ///
     pub async fn live_del_block_user(
@@ -330,22 +314,6 @@ impl BpiClient {
             .header("Referer", format!("https://live.bilibili.com/{}", room_id))
             .form(&form)
             .send_bpi("拉黑观众")
-            .await
-    }
-
-    /// 查询直播间拉黑列表
-    /// pn: 页码，默认1
-    /// ps: 每页数量
-    pub async fn live_list_banned_users(
-        &self,
-        params: LiveBannedUserListParams,
-    ) -> Result<BpiResponse<BannedUserListData>, BpiError> {
-        let csrf = self.csrf().unwrap_or_default();
-        let query = params.query_pairs(&csrf);
-
-        self.get("https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/GetBlackList")
-            .query(&query)
-            .send_bpi("查询直播间拉黑列表")
             .await
     }
 
@@ -400,21 +368,6 @@ impl BpiClient {
         self.post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/AddShieldKeyword")
             .form(&form)
             .send_bpi("添加屏蔽词")
-            .await
-    }
-
-    /// 查询直播间屏蔽词列表
-    /// 没有ps和pn，返回全部屏蔽词
-    pub async fn live_list_shield_keyword(
-        &self,
-        params: LiveShieldKeywordListParams,
-    ) -> Result<BpiResponse<ShieldKeywordListData>, BpiError> {
-        let csrf = self.csrf().unwrap_or_default();
-        let form = params.form_pairs(&csrf);
-
-        self.post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/GetShieldKeywordList")
-            .form(&form)
-            .send_bpi("查询直播间屏蔽词列表")
             .await
     }
 
@@ -487,8 +440,8 @@ mod tests {
         let params = LiveSilentUserListParams::new(room_id())
             .page_size(10)
             .unwrap();
-        let resp = bpi.live_list_silent_users(params).await.unwrap();
-        tracing::info!("{:?}", resp);
+        let data = bpi.live().silent_users(params).await.unwrap();
+        tracing::info!("{:?}", data);
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -517,8 +470,8 @@ mod tests {
         let params = LiveBannedUserListParams::new(anchor_id())
             .page_size(10)
             .unwrap();
-        let resp = bpi.live_list_banned_users(params).await.unwrap();
-        tracing::info!("{:?}", resp);
+        let data = bpi.live().banned_users(params).await.unwrap();
+        tracing::info!("{:?}", data);
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -547,8 +500,8 @@ mod tests {
     async fn test_get_keyword_list() {
         let bpi = BpiClient::new().expect("client should build");
         let params = LiveShieldKeywordListParams::new(room_id());
-        let resp = bpi.live_list_shield_keyword(params).await.unwrap();
-        tracing::info!("{:?}", resp);
+        let data = bpi.live().shield_keywords(params).await.unwrap();
+        tracing::info!("{:?}", data);
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]

@@ -2,10 +2,8 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
-use super::SeasonInfoParams;
 use super::models::{Season, Section};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
@@ -25,22 +23,11 @@ pub struct Sections {
     pub total: i64,
 }
 
-impl BpiClient {
-    pub async fn season_info(
-        &self,
-        params: SeasonInfoParams,
-    ) -> Result<BpiResponse<SeasonInfoData>, BpiError> {
-        self.get("https://member.bilibili.com/x2/creative/web/season")
-            .query(&params.query_pairs())
-            .send_bpi("获取合集信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::creativecenter::season::SeasonInfoParams;
     use crate::ids::SeasonId;
+    use crate::{BpiClient, BpiError};
 
     const TEST_SSID: u64 = 4294056;
 
@@ -49,7 +36,7 @@ mod tests {
     async fn test_season_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let params = SeasonInfoParams::new(SeasonId::new(TEST_SSID)?);
-        let data = bpi.season_info(params).await?.into_data()?;
+        let data = bpi.creativecenter().season_info(params).await?;
 
         tracing::info!("共 {:?} 个合集", data);
 

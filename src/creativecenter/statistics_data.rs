@@ -4,9 +4,6 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::creativecenter::{UpArchiveCompareParams, UpArticleTrendParams, UpVideoTrendParams};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-
 /// UP主视频状态数据
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct UpStatData {
@@ -431,127 +428,16 @@ pub struct ViewerData {
     pub viewer_base: ViewerBase,
 }
 
-impl BpiClient {
-    /// 获取 UP 主视频状态数据
-    ///
-    /// 获取 UP 主的视频统计数据，包括播放、点赞、投币、收藏等数据。
-    ///
-    /// # 文档
-    /// [获取 UP 主视频状态数据](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取-up-主视频状态数据)
-    pub async fn up_stat(&self) -> Result<BpiResponse<UpStatData>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/index/stat")
-            .send_bpi("获取UP主视频状态数据")
-            .await
-    }
-
-    /// 获取 UP 主视频数据比较
-    ///
-    /// 获取 UP 主视频的数据对比分析，包括播放量、互动率等指标。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`UpArchiveCompareParams`] | 视频对比查询参数 |
-    ///
-    /// # 文档
-    /// [获取 UP 主视频数据比较](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取-up-主视频数据比较)
-    pub async fn up_archive_compare(
-        &self,
-        params: UpArchiveCompareParams,
-    ) -> Result<BpiResponse<ArchiveCompareData>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/data/archive_diagnose/compare")
-            .query(&params.query_pairs())
-            .send_bpi("获取UP主视频数据比较")
-            .await
-    }
-
-    /// 获取UP主专栏状态数据
-    ///
-    /// 获取 UP 主专栏的统计数据，包括阅读、评论、点赞等数据。
-    ///
-    /// # 文档
-    /// [获取UP主专栏状态数据](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主专栏状态数据)
-    pub async fn up_article_stat(&self) -> Result<BpiResponse<UpArticleStatData>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/data/article")
-            .send_bpi("获取UP主专栏状态数据")
-            .await
-    }
-
-    /// 获取UP主视频数据增量趋势
-    ///
-    /// 获取 UP 主视频数据的增量趋势，支持多种数据类型。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`UpVideoTrendParams`] | 视频趋势查询参数 |
-    ///
-    /// # 文档
-    /// [获取UP主视频数据增量趋势](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主视频数据增量趋势)
-    pub async fn up_video_trend(
-        &self,
-        params: UpVideoTrendParams,
-    ) -> Result<BpiResponse<Vec<VideoTrendItem>>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/data/pandect")
-            .query(&params.query_pairs())
-            .send_bpi("获取UP主视频数据增量趋势")
-            .await
-    }
-
-    /// 获取UP主专栏数据增量趋势
-    ///
-    /// 获取 UP 主专栏数据的增量趋势，支持多种数据类型。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`UpArticleTrendParams`] | 专栏趋势查询参数 |
-    ///
-    /// # 文档
-    /// [获取UP主专栏数据增量趋势](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取up主专栏数据增量趋势)
-    pub async fn up_article_trend(
-        &self,
-        params: UpArticleTrendParams,
-    ) -> Result<BpiResponse<Vec<ArticleTrendItem>>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/data/article/thirty")
-            .query(&params.query_pairs())
-            .send_bpi("获取UP主专栏数据增量趋势")
-            .await
-    }
-
-    /// 获取播放来源占比
-    ///
-    /// 获取视频播放来源的占比情况，包括动态、搜索、推荐等来源。
-    ///
-    /// # 文档
-    /// [获取播放来源占比](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取播放来源占比)
-    pub async fn up_play_source(&self) -> Result<BpiResponse<PlaySourceData>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/data/playsource")
-            .with_bilibili_headers()
-            .send_bpi("获取播放来源占比情况")
-            .await
-    }
-
-    /// 获取播放分布情况
-    ///
-    /// 获取视频播放的分布情况，包括粉丝与路人的观看数据。
-    ///
-    /// # 文档
-    /// [获取播放分布情况](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/statistics&data.md#获取播放分布情况)
-    pub async fn up_viewer_data(&self) -> Result<BpiResponse<ViewerData>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/data/base")
-            .send_bpi("获取播放分布情况")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ApiEnvelope;
-    use crate::creativecenter::{UpArticleTrendMetric, UpVideoTrendMetric};
+    use crate::creativecenter::{
+        UpArchiveCompareParams, UpArticleTrendMetric, UpArticleTrendParams, UpVideoTrendMetric,
+        UpVideoTrendParams,
+    };
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
+    use crate::{ApiEnvelope, BpiClient, BpiError};
     use std::collections::BTreeMap;
     use tracing::info;
 
@@ -612,7 +498,7 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi.up_stat().await?.into_data()?;
+        let data = bpi.creativecenter().up_stat().await?;
         info!("UP主视频状态数据: {:?}", data);
         Ok(())
     }
@@ -626,7 +512,7 @@ mod tests {
 
         let bpi = BpiClient::new().expect("client should build");
         let params = UpArchiveCompareParams::new().with_size(3)?;
-        let data = bpi.up_archive_compare(params).await?.into_data()?;
+        let data = bpi.creativecenter().archive_compare(params).await?;
         info!("UP主视频数据比较: {:?}", data);
         Ok(())
     }
@@ -639,7 +525,7 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi.up_article_stat().await?.into_data()?;
+        let data = bpi.creativecenter().article_stat().await?;
         info!("UP主专栏状态数据: {:?}", data);
         Ok(())
     }
@@ -653,7 +539,7 @@ mod tests {
 
         let bpi = BpiClient::new().expect("client should build");
         let params = UpVideoTrendParams::new(UpVideoTrendMetric::Play);
-        let data = bpi.up_video_trend(params).await?.into_data()?;
+        let data = bpi.creativecenter().video_trend(params).await?;
         info!("UP主视频数据增量趋势: {:?}", data);
         Ok(())
     }
@@ -667,7 +553,7 @@ mod tests {
 
         let bpi = BpiClient::new().expect("client should build");
         let params = UpArticleTrendParams::new(UpArticleTrendMetric::Read);
-        let data = bpi.up_article_trend(params).await?.into_data()?;
+        let data = bpi.creativecenter().article_trend(params).await?;
         info!("UP主专栏数据增量趋势: {:?}", data);
         Ok(())
     }
@@ -680,7 +566,7 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let data = bpi.up_viewer_data().await?.into_data()?;
+        let data = bpi.creativecenter().viewer_data().await?;
         info!("播放分布情况: {:?}", data);
         Ok(())
     }

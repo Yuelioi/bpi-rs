@@ -1,8 +1,12 @@
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
+use crate::BpiClient;
+#[cfg(test)]
+use crate::BpiError;
 use crate::ids::Mid;
+#[cfg(test)]
 use crate::login::params::{LoginLogParams, LoginNoticeParams};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 // --- API 结构体 ---
 
@@ -37,36 +41,6 @@ pub struct LoginLogEntry {
     pub location: String,
 }
 
-impl BpiClient {
-    /// 查询指定登录记录。
-    ///
-    /// # 参数
-    /// * `params` - 用户 mid 和可选 buvid。
-    pub async fn login_notice(
-        &self,
-        params: LoginNoticeParams,
-    ) -> Result<BpiResponse<LoginNoticeData>, BpiError> {
-        self.get("https://api.bilibili.com/x/safecenter/login_notice")
-            .query(&params.query_pairs())
-            .send_bpi("查询登录记录")
-            .await
-    }
-
-    /// 查询最近一周的登录情况。
-    ///
-    /// # 参数
-    /// * `params` - JSONP 和 web_location 查询参数。
-    pub async fn login_log(
-        &self,
-        params: LoginLogParams,
-    ) -> Result<BpiResponse<LoginLogData>, BpiError> {
-        self.get("https://api.bilibili.com/x/member/web/login/log")
-            .query(&params.query_pairs())
-            .send_bpi("查询最近一周登录情况")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -97,10 +71,10 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         let mid = 1000001;
 
-        let resp = bpi
-            .login_notice(LoginNoticeParams::new(Mid::new(mid)?))
+        let data = bpi
+            .login()
+            .notice(LoginNoticeParams::new(Mid::new(mid)?))
             .await?;
-        let data = resp.into_data()?;
 
         println!("指定登录记录:");
         println!("  设备名: {}", data.device_name);
@@ -119,8 +93,7 @@ mod tests {
     async fn test_get_login_log() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let resp = bpi.login_log(LoginLogParams::new()).await?;
-        let data = resp.into_data()?;
+        let data = bpi.login().log(LoginLogParams::new()).await?;
 
         println!("最近一周登录记录 (共 {} 条):", data.count);
         for entry in data.list {

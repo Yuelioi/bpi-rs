@@ -170,9 +170,9 @@ mod tests {
         tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
 
         let params = SeasonInfoParams::new(SeasonId::new(season_id)?);
-        let season = bpi.season_info(params).await?;
+        let season = bpi.creativecenter().season_info(params).await?;
 
-        let section_id = season.into_data()?.sections.sections.first().unwrap().id;
+        let section_id = season.sections.sections.first().unwrap().id;
 
         tracing::info!("获取成功，section ID = {}", section_id);
 

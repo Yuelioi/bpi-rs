@@ -2,7 +2,7 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResponse, BpiResult};
 use serde::{Deserialize, Serialize};
 
 use super::types::{
@@ -283,8 +283,6 @@ pub struct Notice {
     pub title: Option<String>,
 }
 
-type HotCommentResponse = BpiResponse<HotCommentData>;
-
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct HotCommentData {
     pub page: HotCommentPage,
@@ -314,107 +312,11 @@ fn validate_positive(field: &'static str, value: u32) -> BpiResult<u32> {
     Ok(value)
 }
 
-impl BpiClient {
-    /// 获取评论主列表
-    ///
-    /// 获取指定评论区的评论列表，支持分页和排序。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `type` | i32 | 评论区类型 |
-    /// | `oid` | i64 | 对象 ID |
-    /// | `pn` | `Option<i32>` | 页码，可选，默认为 1 |
-    /// | `ps` | `Option<i32>` | 每页条数，可选，范围 1-20 |
-    /// | `sort` | `Option<i32>` | 排序方式，可选：0 按时间，1 按点赞，2 按回复数 |
-    /// | `nohot` | `Option<i32>` | 是否不显示热评，可选：0 显示，1 不显示 |
-    ///
-    /// # 文档
-    /// [获取评论主列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取评论主列表)
-    pub async fn comment_list(
-        &self,
-        params: CommentListParams,
-    ) -> Result<CommentListResponse, BpiError> {
-        self.get("https://api.bilibili.com/x/v2/reply")
-            .query(&params.query_pairs())
-            .send_bpi("获取评论主列表")
-            .await
-    }
-
-    /// 获取某条根评论下的子评论列表
-    ///
-    /// 获取指定根评论下的所有子评论，支持分页。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `type` | i32 | 评论区类型 |
-    /// | `oid` | i64 | 对象 ID |
-    /// | `root` | i64 | 根评论 rpid |
-    /// | `pn` | `Option<i32>` | 页码，可选，默认为 1 |
-    /// | `ps` | `Option<i32>` | 每页条数，可选 |
-    ///
-    /// # 文档
-    /// [获取子评论列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取子评论列表)
-    pub async fn comment_replies(
-        &self,
-        params: CommentRepliesParams,
-    ) -> Result<CommentListResponse, BpiError> {
-        self.get("https://api.bilibili.com/x/v2/reply/reply")
-            .query(&params.query_pairs())
-            .send_bpi("获取子评论列表")
-            .await
-    }
-
-    /// 获取评论区热评列表
-    ///
-    /// 获取指定根评论下的热评列表，支持分页。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `type` | i32 | 评论区类型 |
-    /// | `oid` | i64 | 对象 ID |
-    /// | `root` | i64 | 根评论 rpid |
-    /// | `pn` | `Option<i32>` | 页码，可选，默认为 1 |
-    /// | `ps` | `Option<i32>` | 每页条数，可选 |
-    ///
-    /// # 文档
-    /// [获取热评列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取热评列表)
-    pub async fn comment_hot(
-        &self,
-        params: CommentHotParams,
-    ) -> Result<HotCommentResponse, BpiError> {
-        self.get("https://api.bilibili.com/x/v2/reply/hot")
-            .query(&params.query_pairs())
-            .send_bpi("获取评论区热评列表")
-            .await
-    }
-    /// 获取评论区评论总数
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `type` | i32 | 评论区类型 |
-    /// | `oid` | i64 | 对象 ID |
-    ///
-    /// # 文档
-    /// [获取评论总数](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md#获取评论总数)
-    pub async fn comment_count(
-        &self,
-        params: CommentCountParams,
-    ) -> Result<BpiResponse<CountData>, BpiError> {
-        self.get("https://api.bilibili.com/x/v2/reply/count")
-            .query(&params.query_pairs())
-            .send_bpi("获取评论区评论总数")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::ApiEnvelope;
+    use crate::BpiClient;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
     use std::collections::BTreeMap;
@@ -459,7 +361,8 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi
-            .comment_list(
+            .comment()
+            .list(
                 CommentListParams::new(CommentTarget::new(TEST_TYPE, TEST_OID)?)
                     .with_page(1)?
                     .with_page_size(5)?
@@ -467,7 +370,7 @@ mod tests {
                     .without_hot(false),
             )
             .await?;
-        let data = result.into_data()?;
+        let data = result;
         info!("总评论数: {}", data.replies.unwrap().len());
 
         Ok(())
@@ -479,7 +382,8 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi
-            .comment_replies(
+            .comment()
+            .replies(
                 CommentRepliesParams::new(
                     CommentTarget::new(TEST_TYPE, TEST_OID)?,
                     TEST_ROOT_RPID,
@@ -488,7 +392,7 @@ mod tests {
                 .with_page_size(5)?,
             )
             .await?;
-        let data = result.into_data()?;
+        let data = result;
         info!("总评论数: {}", data.replies.unwrap().len());
 
         Ok(())
@@ -501,13 +405,14 @@ mod tests {
         let root_rpid = 654321;
 
         let result = bpi
-            .comment_hot(
+            .comment()
+            .hot(
                 CommentHotParams::new(CommentTarget::new(TEST_TYPE, TEST_OID)?, root_rpid)?
                     .with_page(1)?
                     .with_page_size(5)?,
             )
             .await?;
-        let data = result.into_data()?;
+        let data = result.ok_or_else(|| BpiError::unsupported_response("missing hot comments"))?;
 
         info!("热评数量: {}", data.replies.len());
         for comment in data.replies.iter() {
@@ -523,12 +428,13 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let result = bpi
-            .comment_count(CommentCountParams::new(CommentTarget::new(
+            .comment()
+            .count(CommentCountParams::new(CommentTarget::new(
                 TEST_TYPE, TEST_OID,
             )?))
             .await?;
 
-        let data = result.into_data()?;
+        let data = result;
         info!("评论总数: {}", data.count);
 
         Ok(())

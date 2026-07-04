@@ -1,9 +1,9 @@
 //! 导航栏用户信息
 //!
 //! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info_info.html#导航栏用户信息)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
 const NAV_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/nav";
 
 // ============ 导航栏用户信息 ============
@@ -129,56 +129,6 @@ pub struct WbiImg {
 
 use crate::models::{LevelInfo, Official, OfficialVerify, Pendant, Vip, VipLabel};
 
-#[derive(Debug, Clone, Serialize)]
-pub struct User {
-    is_login: bool, // 是否登录
-    face: String,   // 头像
-    mid: u64,       // 用户id
-    money: f64,     // 硬币
-    uname: String,  // 用户昵称
-    is_vip: bool,   // 是否vip
-}
-
-impl BpiClient {
-    /// 获取导航栏用户信息
-    pub async fn login_info_nav_info(&self) -> Result<BpiResponse<NavData>, BpiError> {
-        self.get(NAV_ENDPOINT).send_bpi("获取导航栏用户信息").await
-    }
-
-    /// 检查是否已登录
-    pub async fn is_logged_in(&self) -> bool {
-        self.login_info_nav_info().await.is_ok()
-    }
-
-    /// 获取用户基本信息
-    pub async fn login_info_user_info(&self) -> Result<User, BpiError> {
-        let nav_response = self.login_info_nav_info().await;
-
-        match nav_response {
-            Ok(nav_response) => Ok(if let Some(data) = nav_response.data {
-                User {
-                    is_login: data.is_login,
-                    face: data.face,
-                    mid: data.mid,
-                    money: data.money,
-                    uname: data.uname,
-                    is_vip: data.vip.vip_status == 1,
-                }
-            } else {
-                User {
-                    is_login: false,
-                    face: String::new(),
-                    mid: 0,
-                    money: 0.0,
-                    uname: String::new(),
-                    is_vip: false,
-                }
-            }),
-            _ => Err(BpiError::auth("账号未登录".to_string())),
-        }
-    }
-}
-
 // 测试模块
 #[cfg(test)]
 mod tests {
@@ -187,7 +137,7 @@ mod tests {
 
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -216,12 +166,14 @@ mod tests {
 
         let bpi = live_client()?;
 
-        let resp = bpi.login_info_nav_info().await?;
+        let data = bpi.login().nav().await?;
 
-        if resp.code == 0
-            && let Some(data) = resp.data
-        {
-            info!("登录成功！UID={} 昵称={} ", data.mid, data.uname);
+        if data.is_login {
+            info!(
+                "登录成功！UID={:?} 昵称={:?} ",
+                data.mid.as_ref().map(|mid| mid.get()),
+                data.uname
+            );
         }
 
         Ok(())
@@ -236,7 +188,7 @@ mod tests {
 
         let bpi = live_client()?;
 
-        let user_info = bpi.login_info_user_info().await?;
+        let user_info = bpi.login().nav().await?;
 
         info!("用户信息：{:?}", user_info);
 

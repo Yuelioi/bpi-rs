@@ -1,3 +1,4 @@
+#[cfg(test)]
 use crate::historytoview::params::HistoryListParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
@@ -119,26 +120,6 @@ pub struct HistoryListData {
 }
 
 impl BpiClient {
-    /// 获取历史记录列表（web端）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `HistoryListParams` | 历史记录游标查询参数 |
-    pub async fn history_list(
-        &self,
-        params: HistoryListParams,
-    ) -> Result<BpiResponse<HistoryListData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-interface/history/cursor")
-            .query(&params.query_pairs())
-            .send_bpi("获取历史记录列表")
-            .await
-    }
-
     /// 删除历史记录
     ///
     /// # 文档
@@ -201,16 +182,6 @@ impl BpiClient {
             .send_bpi("停用历史记录")
             .await
     }
-
-    /// 查询历史记录停用状态
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
-    pub async fn history_shadow_get(&self) -> Result<BpiResponse<bool>, BpiError> {
-        self.get("https://api.bilibili.com/x/v2/history/shadow")
-            .send_bpi("查询历史记录停用状态")
-            .await
-    }
 }
 
 #[cfg(test)]
@@ -244,19 +215,15 @@ mod tests {
         let params = HistoryListParams::new()
             .with_page_size(10)
             .expect("fixture page size should be valid");
-        let resp = bpi.history_list(params).await;
+        let resp = bpi.historytoview().history_list(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        info!("message: {}", resp_data.message);
-        if let Some(data) = resp_data.data {
-            info!("cursor: {:?}", data.cursor);
-            info!("tabs: {:?}", data.tab);
-            info!("first item: {:?}", data.list.first());
-        }
+        let data = resp.unwrap();
+        info!("cursor: {:?}", data.cursor);
+        info!("tabs: {:?}", data.tab);
+        info!("first item: {:?}", data.list.first());
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -265,8 +232,7 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         // 获取当前状态
-        let current_status_resp = bpi.history_shadow_get().await.unwrap();
-        let current_status = current_status_resp.data.unwrap();
+        let current_status = bpi.historytoview().history_shadow().await.unwrap();
 
         // 切换状态
         let new_status = !current_status;
@@ -275,10 +241,10 @@ mod tests {
         assert!(set_resp.is_ok());
 
         // 再次获取状态，验证是否已切换
-        let new_status_resp = bpi.history_shadow_get().await;
+        let new_status_resp = bpi.historytoview().history_shadow().await;
         info!("New status: {:?}", new_status_resp);
         assert!(new_status_resp.is_ok());
-        assert_eq!(new_status_resp.unwrap().data.unwrap(), new_status);
+        assert_eq!(new_status_resp.unwrap(), new_status);
 
         // 恢复原始状态
         let set_back_resp = bpi.history_shadow_set(current_status).await;

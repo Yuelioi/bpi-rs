@@ -2,10 +2,7 @@
 //!
 //! [空间图文](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/opus/space.md#空间图文)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-
-use super::OpusSpaceFeedParams;
 
 /// 空间图文封面信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -55,30 +52,6 @@ pub struct SpaceData {
     pub update_num: u32,
 }
 
-impl BpiClient {
-    /// 获取用户空间图文
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/opus)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`OpusSpaceFeedParams`] | 用户、分页和类型参数 |
-    pub async fn opus_space_feed(
-        &self,
-        params: OpusSpaceFeedParams,
-    ) -> Result<BpiResponse<SpaceData>, BpiError> {
-        let query = params.query_pairs();
-
-        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space")
-            .query(&query)
-            .send_bpi("获取用户空间图文")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -86,7 +59,7 @@ mod tests {
     use crate::opus::{OpusSpaceFeedKind, OpusSpaceFeedParams};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     fn contract() -> BpiResult<EndpointContract> {
@@ -102,7 +75,7 @@ mod tests {
         let params = OpusSpaceFeedParams::new(Mid::new(4279370)?)
             .with_page(1)
             .with_kind(OpusSpaceFeedKind::All);
-        let resp = bpi.opus_space_feed(params).await;
+        let resp = bpi.opus().space_feed(params).await;
         assert!(resp.is_ok());
         if let Ok(r) = resp {
             info!("空间图文返回: {:?}", r);

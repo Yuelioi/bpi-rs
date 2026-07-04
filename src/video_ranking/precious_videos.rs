@@ -1,7 +1,4 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-
-use super::POPULAR_PRECIOUS_ENDPOINT;
 
 // --- 获取入站必刷视频 ---
 
@@ -18,38 +15,22 @@ pub struct PreciousVideoData {
     pub list: Vec<serde_json::Value>, // 视频内容复杂，这里用Value代替
 }
 
-impl BpiClient {
-    /// 获取入站必刷视频
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/precious_videos.html#获取入站必刷视频)
-    ///
-    pub async fn video_popular_precious(&self) -> Result<BpiResponse<PreciousVideoData>, BpiError> {
-        self.get(POPULAR_PRECIOUS_ENDPOINT)
-            .send_bpi("获取入站必刷视频")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::BpiClient;
     use tracing::info;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_video_popular_precious() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.video_popular_precious().await;
+        let resp = bpi.video_ranking().popular_precious().await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("total lists: {}", data.list.len());
-            info!("first list item: {:?}", data.list.first());
-        }
+        let data = resp.unwrap();
+        info!("total lists: {}", data.list.len());
+        info!("first list item: {:?}", data.list.first());
     }
 }

@@ -1,7 +1,3 @@
-use crate::fav::params::{
-    FavCollectedListParams, FavCreatedListParams, FavFolderInfoParams, FavResourceInfosParams,
-};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 // --- 获取收藏夹元数据 ---
@@ -149,95 +145,15 @@ pub struct ResourceInfoItem {
     pub season: Option<serde_json::Value>,
 }
 
-impl BpiClient {
-    /// 获取收藏夹元数据
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `FavFolderInfoParams` | 收藏夹元数据参数 |
-    pub async fn fav_folder_info(
-        &self,
-        params: FavFolderInfoParams,
-    ) -> Result<BpiResponse<FavFolderInfo>, BpiError> {
-        self.get("https://api.bilibili.com/x/v3/fav/folder/info")
-            .query(&params.query_pairs())
-            .send_bpi("获取收藏夹元数据")
-            .await
-    }
-
-    /// 获取指定用户创建的所有收藏夹信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `FavCreatedListParams` | 用户创建收藏夹列表参数 |
-    pub async fn fav_created_list(
-        &self,
-        params: FavCreatedListParams,
-    ) -> Result<BpiResponse<CreatedFolderListData>, BpiError> {
-        self.get("https://api.bilibili.com/x/v3/fav/folder/created/list-all")
-            .query(&params.query_pairs())
-            .send_bpi("获取指定用户创建的所有收藏夹信息")
-            .await
-    }
-
-    /// 查询用户收藏的视频收藏夹
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `FavCollectedListParams` | 用户收藏视频收藏夹列表参数 |
-    pub async fn fav_collected_list(
-        &self,
-        params: FavCollectedListParams,
-    ) -> Result<BpiResponse<CollectedFolderListData>, BpiError> {
-        self.get("https://api.bilibili.com/x/v3/fav/folder/collected/list")
-            .query(&params.query_pairs())
-            .send_bpi("查询用户收藏的视频收藏夹")
-            .await
-    }
-
-    /// 批量获取指定收藏id的内容
-    /// `resources`: "{内容id}:{内容类型},..."
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `FavResourceInfosParams` | 批量内容信息参数 |
-    pub async fn fav_resource_infos(
-        &self,
-        params: FavResourceInfosParams,
-    ) -> Result<BpiResponse<Vec<ResourceInfoItem>>, BpiError> {
-        self.get("https://api.bilibili.com/x/v3/fav/resource/infos")
-            .query(&params.query_pairs())
-            .send_bpi("批量获取指定收藏id的内容")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::fav::params::{
+        FavCollectedListParams, FavCreatedListParams, FavFolderInfoParams, FavResourceInfosParams,
+    };
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
     use tracing::info;
 
     fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
@@ -272,18 +188,15 @@ mod tests {
         let params = FavFolderInfoParams::new(
             crate::ids::MediaId::new(1052622027).expect("fixture media id should be valid"),
         );
-        let resp = bpi.fav_folder_info(params).await;
+        let resp = bpi.fav().folder_info(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("folder title: {}", data.title);
-            info!("folder media_count: {}", data.media_count);
-            info!("upper info: {:?}", data.upper);
-        }
+        let data = resp.unwrap();
+        info!("folder title: {}", data.title);
+        info!("folder media_count: {}", data.media_count);
+        info!("upper info: {:?}", data.upper);
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -294,17 +207,14 @@ mod tests {
         let params = FavCreatedListParams::new(
             crate::ids::Mid::new(7792521).expect("fixture mid should be valid"),
         );
-        let resp = bpi.fav_created_list(params).await;
+        let resp = bpi.fav().created_list(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("created folders count: {}", data.count);
-            info!("first folder info: {:?}", data.list.first());
-        }
+        let data = resp.unwrap();
+        info!("created folders count: {}", data.count);
+        info!("first folder info: {:?}", data.list.first());
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -319,17 +229,14 @@ mod tests {
         .expect("fixture page should be valid")
         .with_page_size(20)
         .expect("fixture page size should be valid");
-        let resp = bpi.fav_collected_list(params).await;
+        let resp = bpi.fav().collected_list(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("collected folders count: {}", data.count);
-            info!("first collected folder info: {:?}", data.list.first());
-        }
+        let data = resp.unwrap();
+        info!("collected folders count: {}", data.count);
+        info!("first collected folder info: {:?}", data.list.first());
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -338,17 +245,14 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         let params =
             FavResourceInfosParams::new("371494037:2").expect("fixture resources should be valid");
-        let resp = bpi.fav_resource_infos(params).await;
+        let resp = bpi.fav().resource_infos(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("retrieved {} resources", data.len());
-            info!("first resource info: {:?}", data.first());
-        }
+        let data = resp.unwrap();
+        info!("retrieved {} resources", data.len());
+        info!("first resource info: {:?}", data.first());
     }
 
     #[test]

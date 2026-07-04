@@ -96,16 +96,6 @@ impl BpiClient {
             .send_bpi("漫画补签")
             .await
     }
-
-    /// 获取漫画签到信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
-    pub async fn manga_clock_in_info(&self) -> Result<ClockInInfoResponse, BpiError> {
-        self.post("https://manga.bilibili.com/twirp/activity.v1.Activity/GetClockInInfo")
-            .send_bpi("获取漫画签到信息")
-            .await
-    }
 }
 
 #[cfg(test)]
@@ -140,9 +130,7 @@ mod tests {
     async fn test_get_manga_clock_in_info() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi.manga_clock_in_info().await?;
-
-        let data = result.into_data()?;
+        let data = bpi.manga().clock_in_info().await?;
 
         assert!(data.day_count >= 0);
         assert!(data.status == 0 || data.status == 1);

@@ -1,8 +1,7 @@
 use crate::models::{Account, Vip};
-use crate::vip::params::VipCenterInfoParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::Deserialize;
 
+#[cfg(test)]
 const VIP_CENTER_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/vip/web/vip_center/combine";
 
 /// 大会员中心信息响应结构体
@@ -73,29 +72,13 @@ pub struct WalletInfo {
     pub privilege_received: bool,
 }
 
-impl BpiClient {
-    /// 获取大会员中心信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/vip/center.html#获取大会员中心信息)
-    ///
-    pub async fn vip_center_info(
-        &self,
-        params: VipCenterInfoParams,
-    ) -> Result<BpiResponse<VipCenterData>, BpiError> {
-        self.get(VIP_CENTER_INFO_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取大会员中心信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::vip::params::VipCenterInfoParams;
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     const PROFILES: [&str; 3] = ["anonymous", "normal", "vip"];
 
@@ -121,13 +104,11 @@ mod tests {
         tracing::info!("开始测试大会员中心信息的综合功能");
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.vip_center_info(VipCenterInfoParams::new()).await;
+        let resp = bpi.vip().center_info(VipCenterInfoParams::new()).await;
 
         match resp {
-            Ok(response) => {
+            Ok(data) => {
                 tracing::info!("开始详细分析大会员中心信息数据结构");
-
-                let data = &response.data.unwrap();
 
                 // 1. 用户账户信息详细检查
                 tracing::info!("=== 用户账户信息 ===");
@@ -251,11 +232,11 @@ mod tests {
         tracing::info!("开始测试时间计算功能");
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.vip_center_info(VipCenterInfoParams::new()).await;
+        let resp = bpi.vip().center_info(VipCenterInfoParams::new()).await;
 
         match resp {
-            Ok(response) => {
-                let user = &response.data.unwrap().user;
+            Ok(data) => {
+                let user = &data.user;
 
                 // 计算剩余时间
                 if user.surplus_seconds > 0 {

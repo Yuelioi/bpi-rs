@@ -1,13 +1,8 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
 use super::params::{
-    VideoRegionDynamicParams, VideoRegionNewListParams, VideoRegionNewListRankParams,
-    VideoRegionTagDynamicParams,
-};
-use super::{
-    REGION_DYNAMIC_ENDPOINT, REGION_NEWLIST_ENDPOINT, REGION_NEWLIST_RANK_ENDPOINT,
-    REGION_TAG_DYNAMIC_ENDPOINT,
+    VideoRegionDynamicParams, VideoRegionNewListRankParams, VideoRegionTagDynamicParams,
 };
 
 // --- 获取分区最新视频列表 ---
@@ -100,88 +95,11 @@ pub struct NewListRankData {
     pub msg: String,
 }
 
-impl BpiClient {
-    /// 获取分区最新视频列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区最新视频列表)
-    ///
-    /// # 参数
-    /// | 名称   | 类型         | 说明                 |
-    /// | ------ | ------------| -------------------- |
-    /// | `params` | `VideoRegionDynamicParams` | 分区和分页参数 |
-    pub async fn video_region_dynamic(
-        &self,
-        params: VideoRegionDynamicParams,
-    ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        self.get(REGION_DYNAMIC_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取分区最新视频列表")
-            .await
-    }
-
-    /// 获取分区标签近期互动列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区标签近期互动列表)
-    ///
-    /// # 参数
-    /// | 名称    | 类型         | 说明                 |
-    /// | ------- | ------------| -------------------- |
-    /// | `params` | `VideoRegionTagDynamicParams` | 分区、标签和分页参数 |
-    pub async fn video_region_tag_dynamic(
-        &self,
-        params: VideoRegionTagDynamicParams,
-    ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        self.get(REGION_TAG_DYNAMIC_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取分区标签近期互动列表")
-            .await
-    }
-
-    /// 获取分区近期投稿列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区近期投稿列表)
-    ///
-    /// # 参数
-    /// | 名称   | 类型         | 说明                 |
-    /// | ------ | ------------| -------------------- |
-    /// | `params` | `VideoRegionNewListParams` | 分区、分页和类型参数 |
-    pub async fn video_region_newlist(
-        &self,
-        params: VideoRegionNewListParams,
-    ) -> Result<BpiResponse<RegionArchivesData>, BpiError> {
-        self.get(REGION_NEWLIST_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取分区近期投稿列表")
-            .await
-    }
-
-    /// 获取分区近期投稿列表（带排序）
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video_ranking/dynamic.html#获取分区近期投稿列表带排序)
-    ///
-    /// # 参数
-    /// | 名称        | 类型           | 说明                 |
-    /// | ----------- | --------------| -------------------- |
-    /// | `params` | `VideoRegionNewListRankParams` | 分类、排序、分页和日期参数 |
-    pub async fn video_region_newlist_rank(
-        &self,
-        params: VideoRegionNewListRankParams,
-    ) -> Result<BpiResponse<NewListRankData>, BpiError> {
-        self.get(REGION_NEWLIST_RANK_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取分区近期投稿列表 (带排序)")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::super::params::VideoNewListRankOrder;
     use super::*;
+    use crate::BpiClient;
     use chrono::{Duration, Local};
     use tracing::info;
 
@@ -196,17 +114,14 @@ mod tests {
             .expect("page is valid")
             .with_page_size(2)
             .expect("page size is valid");
-        let resp = bpi.video_region_dynamic(params).await;
+        let resp = bpi.video_ranking().region_dynamic(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("total videos: {}", data.page.count);
-            info!("first item: {:?}", data.archives.first());
-        }
+        let data = resp.unwrap();
+        info!("total videos: {}", data.page.count);
+        info!("first item: {:?}", data.archives.first());
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -221,17 +136,14 @@ mod tests {
             .expect("page is valid")
             .with_page_size(2)
             .expect("page size is valid");
-        let resp = bpi.video_region_tag_dynamic(params).await;
+        let resp = bpi.video_ranking().region_tag_dynamic(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("total videos: {}", data.page.count);
-            info!("first item: {:?}", data.archives.first());
-        }
+        let data = resp.unwrap();
+        info!("total videos: {}", data.page.count);
+        info!("first item: {:?}", data.archives.first());
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -252,16 +164,13 @@ mod tests {
             .with_page(1)
             .expect("page is valid");
 
-        let resp = bpi.video_region_newlist_rank(params).await;
+        let resp = bpi.video_ranking().region_newlist_rank(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("total results: {}", data.num_results);
-            info!("first result: {:?}", data.result.unwrap().first());
-        }
+        let data = resp.unwrap();
+        info!("total results: {}", data.num_results);
+        info!("first result: {:?}", data.result.unwrap().first());
     }
 }

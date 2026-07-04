@@ -5,11 +5,9 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/misc/sign/bili_ticket.md)
 
-use crate::sign::bili_ticket::ticket_request_params;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-use std::time::{SystemTime, UNIX_EPOCH};
 
+#[cfg(test)]
 const BILI_TICKET_ENDPOINT: &str =
     "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket";
 
@@ -37,41 +35,14 @@ pub struct NavData {
     pub sub: String,
 }
 
-impl BpiClient {
-    /// 生成 bili_ticket
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/misc)
-    pub async fn misc_sign_bili_ticket(&self) -> Result<BpiResponse<TicketData>, BpiError> {
-        let csrf = self.csrf().unwrap_or_default();
-        let timestamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|e| BpiError::network(format!("获取时间戳失败: {}", e)))?
-            .as_secs();
-
-        let params = ticket_request_params(timestamp, csrf.as_str())?;
-
-        self.post(BILI_TICKET_ENDPOINT)
-            .query(&params)
-            .send_bpi("生成bili_ticket")
-            .await
-    }
-
-    /// 仅获取 bili_ticket 字符串
-    pub async fn misc_sign_bili_ticket_string(&self) -> Result<String, BpiError> {
-        let resp = self.misc_sign_bili_ticket().await?;
-        let data = resp.data.ok_or_else(BpiError::missing_data)?;
-        Ok(data.ticket)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::ApiEnvelope;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::sign::bili_ticket::hexsign;
+    use crate::sign::bili_ticket::{hexsign, ticket_request_params};
+    use crate::{BpiClient, BpiError};
 
     fn local_bili_ticket_probe_body(profile: &str) -> Option<serde_json::Value> {
         let path = format!("target/bpi-probe-runs/misc/sign/bili-ticket/{profile}.response.json");
@@ -195,26 +166,21 @@ mod tests {
             return Ok(());
         };
 
-        match bpi.misc_sign_bili_ticket().await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    let data = resp.data.unwrap();
-                    tracing::info!("Ticket: {}", data.ticket);
-                    tracing::info!("创建时间: {}", data.created_at);
-                    tracing::info!(
-                        "有效时长: {} 秒 ({:.1} 天)",
-                        data.ttl,
-                        (data.ttl as f64) / 86400.0
-                    );
-                    tracing::info!("WBI img: {}", data.nav.img);
-                    tracing::info!("WBI sub: {}", data.nav.sub);
+        match bpi.misc().bili_ticket().await {
+            Ok(data) => {
+                tracing::info!("Ticket: {}", data.ticket);
+                tracing::info!("创建时间: {}", data.created_at);
+                tracing::info!(
+                    "有效时长: {} 秒 ({:.1} 天)",
+                    data.ttl,
+                    (data.ttl as f64) / 86400.0
+                );
+                tracing::info!("WBI img: {}", data.nav.img);
+                tracing::info!("WBI sub: {}", data.nav.sub);
 
-                    // 验证 ticket 是 JWT 格式
-                    assert!(data.ticket.contains('.'));
-                    assert!(data.ttl > 250000); // 大约 3 天
-                } else {
-                    panic!("API 返回错误: code={}, message={}", resp.code, resp.message);
-                }
+                // 验证 ticket 是 JWT 格式
+                assert!(data.ticket.contains('.'));
+                assert!(data.ttl > 250000); // 大约 3 天
             }
 
             Err(err) => {
@@ -232,7 +198,7 @@ mod tests {
             return Ok(());
         };
 
-        match bpi.misc_sign_bili_ticket_string().await {
+        match bpi.misc().bili_ticket_string().await {
             Ok(ticket) => {
                 tracing::info!("获取到的 bili_ticket: {}", ticket);
 
@@ -260,12 +226,9 @@ mod tests {
         };
 
         // 测试带 CSRF 的情况
-        match bpi.misc_sign_bili_ticket().await {
-            Ok(resp) => {
-                tracing::info!(
-                    "带 CSRF 的 bili_ticket 生成成功: {}",
-                    resp.data.unwrap().ticket
-                );
+        match bpi.misc().bili_ticket().await {
+            Ok(data) => {
+                tracing::info!("带 CSRF 的 bili_ticket 生成成功: {}", data.ticket);
             }
             Err(err) => {
                 tracing::info!("带 CSRF 测试失败（预期可能失败）: {}", err);

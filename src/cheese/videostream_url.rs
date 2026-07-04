@@ -5,7 +5,6 @@
 use std::collections::HashMap;
 
 use crate::models::{DashStreams, SupportFormat};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, cheese::CheeseVideoStreamParams};
 use serde::{Deserialize, Serialize};
 
 /// 课程视频流数据
@@ -113,34 +112,6 @@ pub struct FileInfoEntry {
     pub timelength: i64,
 }
 
-impl BpiClient {
-    /// 获取课程视频流 URL
-    ///
-    /// 获取课程视频的播放流地址，支持多种视频质量和格式。
-    /// 仅课程视频可用，与普通视频 API 不互通。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `CheeseVideoStreamParams` | 课程视频流参数 |
-    ///
-    /// # 注意
-    /// 需要 Cookie（SESSDATA）和 Referer: `https://www.bilibili.com`
-    ///
-    /// # 文档
-    /// [获取课程视频流 URL](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/cheese/videostream_url.md)
-    pub async fn cheese_video_stream(
-        &self,
-        params: CheeseVideoStreamParams,
-    ) -> Result<BpiResponse<CourseVideoStreamData>, BpiError> {
-        self.get("https://api.bilibili.com/pugv/player/web/playurl")
-            .with_bilibili_headers()
-            .query(&params.query_pairs())
-            .send_bpi("获取课程视频流 URL")
-            .await
-    }
-}
-
 // ==========================
 // 测试
 // ==========================
@@ -153,7 +124,7 @@ mod tests {
     use crate::models::{Fnval, VideoQuality};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     const TEST_AVID: u64 = 997984154;
     const TEST_EP_ID: u64 = 163956;
@@ -171,7 +142,8 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let data = bpi
-            .cheese_video_stream(
+            .cheese()
+            .video_stream(
                 CheeseVideoStreamParams::new(
                     Aid::new(TEST_AVID)?,
                     EpisodeId::new(TEST_EP_ID)?,
@@ -188,8 +160,7 @@ mod tests {
                         | Fnval::AV1,
                 ),
             )
-            .await?
-            .into_data()?;
+            .await?;
 
         tracing::info!("{:#?}", data);
 

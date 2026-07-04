@@ -1,11 +1,7 @@
 //! B站用户搜索相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::ids::Mid;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-
-use super::params::{UserUploadedVideoOrder, UserUploadedVideosParams};
 
 // --- 响应数据结构体 ---
 
@@ -126,69 +122,16 @@ pub struct ContributedVideosResponseData {
     pub gaia_data: Option<serde_json::Value>,
 }
 
-// --- API 实现 ---
-
-impl BpiClient {
-    /// 查询用户投稿视频明细
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `mid` | u64 | 目标用户 UID |
-    /// | `order` | `Option<&str>` | 排序方式，默认 `pubdate` |
-    /// | `tid` | `Option<u64>` | 分区筛选，默认 0 |
-    /// | `keyword` | `Option<&str>` | 关键词筛选 |
-    /// | `pn` | `Option<u32>` | 页码，默认 1 |
-    /// | `ps` | `Option<u32>` | 每页项数，默认 30 |
-    pub async fn user_contributed_videos(
-        &self,
-        mid: u64,
-        order: Option<&str>,
-        tid: Option<u64>,
-        keyword: Option<&str>,
-        pn: Option<u32>,
-        ps: Option<u32>,
-    ) -> Result<BpiResponse<ContributedVideosResponseData>, BpiError> {
-        let mut params = UserUploadedVideosParams::new(Mid::new(mid)?);
-
-        if let Some(order) = order {
-            params = params.with_order(UserUploadedVideoOrder::try_from(order)?);
-        }
-        if let Some(tid) = tid {
-            params = params.with_tid(tid);
-        }
-        if let Some(keyword) = keyword {
-            params = params.with_keyword(keyword);
-        }
-        if let Some(pn) = pn {
-            params = params.with_page(pn)?;
-        }
-        if let Some(ps) = ps {
-            params = params.with_page_size(ps)?;
-        }
-
-        let params = self.sign_wbi_params(params.query_pairs()).await?;
-
-        let req = self
-            .get("https://api.bilibili.com/x/space/wbi/arc/search")
-            .query(&params);
-
-        req.send_bpi("查询用户投稿视频明细").await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::Mid;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::user::params::UserUploadedVideosParams;
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     // 假设这是一个已知用户
@@ -203,15 +146,19 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .user_contributed_videos(TEST_MID, None, None, None, Some(1), Some(2))
+        let data = bpi
+            .user()
+            .uploaded_videos(
+                UserUploadedVideosParams::new(Mid::new(TEST_MID)?)
+                    .with_page(1)?
+                    .with_page_size(2)?,
+            )
             .await?;
-        let data = resp.into_data()?;
 
         info!("用户投稿视频明细: {:?}", data);
         assert_eq!(data.page.pn, 1);
         assert_eq!(data.page.ps, 2);
-        assert_eq!(data.list.vlist.len(), 2);
+        assert_eq!(data.list.videos.len(), 2);
         assert!(data.page.count > 0);
 
         Ok(())
@@ -225,10 +172,15 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .user_contributed_videos(TEST_MID, None, None, Some(TEST_KEYWORD), Some(1), Some(10))
+        let data = bpi
+            .user()
+            .uploaded_videos(
+                UserUploadedVideosParams::new(Mid::new(TEST_MID)?)
+                    .with_keyword(TEST_KEYWORD)
+                    .with_page(1)?
+                    .with_page_size(10)?,
+            )
             .await?;
-        let data = resp.into_data()?;
 
         info!("用户投稿视频明细（关键词）: {:?}", data);
         assert!(data.page.count > 0);

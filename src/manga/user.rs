@@ -2,7 +2,6 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/User.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 漫读券信息
@@ -62,46 +61,12 @@ pub struct GetCouponsRequest {
     pub r#type: Option<i32>,
 }
 
-// ================= 实现 =================
-
-impl BpiClient {
-    /// 获取拥有的漫读券列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `page_num` | i32 | 页码 |
-    /// | `page_size` | i32 | 分页大小，默认 20，`[1,100]` |
-    pub async fn manga_coupons(
-        &self,
-        page_num: i32,
-        page_size: i32,
-    ) -> Result<BpiResponse<CouponsData>, BpiError> {
-        let params = GetCouponsRequest {
-            page_num,
-            page_size,
-            not_expired: Some(true),
-            tab_type: Some(1),
-            r#type: Some(0),
-        };
-
-        self.post("https://manga.bilibili.com/twirp/user.v1.User/GetCoupons")
-            .json(&params)
-            .send_bpi("获取漫读券列表")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -114,9 +79,9 @@ mod tests {
     async fn test_get_manga_coupons() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi.manga_coupons(1, 20).await?;
+        let data = bpi.manga().coupons(1, 20).await?;
 
-        tracing::info!("{:#?}", result.data.unwrap());
+        tracing::info!("{:#?}", data);
 
         Ok(())
     }

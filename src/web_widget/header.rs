@@ -3,8 +3,7 @@
 //! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/header.html)
 use serde::{Deserialize, Serialize};
 
-use crate::web_widget::params::WebWidgetHeaderPageParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::BpiError;
 
 /// B站首页头图数据
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -99,38 +98,13 @@ pub struct Opacity {
     pub initial: Option<f64>,
 }
 
-impl BpiClient {
-    /// 获取首页头图
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/header.html#获取首页头图)
-    ///
-    pub async fn web_widget_header_page(
-        &self,
-        params: WebWidgetHeaderPageParams,
-    ) -> Result<BpiResponse<HeaderData>, BpiError> {
-        let mut result = self
-            .get("https://api.bilibili.com/x/web-show/page/header")
-            .query(&params.query_pairs())
-            .send_bpi("获取首页头图")
-            .await?;
-        let mut header: HeaderData = result.data.take().ok_or_else(BpiError::missing_data)?;
-
-        header.parse_split_layer()?;
-
-        // 将解析后的数据放回 response
-        result.data = Some(header);
-
-        Ok(result)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::web_widget::params::WebWidgetHeaderPageParams;
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
     use tracing::info;
 
     fn contract() -> BpiResult<EndpointContract> {
@@ -144,7 +118,8 @@ mod tests {
     async fn test_get_header_page() {
         let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
-            .web_widget_header_page(WebWidgetHeaderPageParams::new())
+            .web_widget()
+            .header_page(WebWidgetHeaderPageParams::new())
             .await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());

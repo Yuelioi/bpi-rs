@@ -1,10 +1,14 @@
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
 use crate::login::LoginQrPollParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+#[cfg(test)]
+use crate::{BpiClient, BpiError, BpiResponse};
 
+#[cfg(test)]
 const QR_GENERATE_ENDPOINT: &str =
     "https://passport.bilibili.com/x/passport-login/web/qrcode/generate";
+#[cfg(test)]
 const QR_POLL_ENDPOINT: &str = "https://passport.bilibili.com/x/passport-login/web/qrcode/poll";
 
 /// 生成 QRCode 数据
@@ -35,50 +39,6 @@ pub struct CheckQrCodeStatusData {
 pub struct QrcodeImageData {
     pub qr_image: String, // base64 编码的二维码图片
     pub expires_in: u64,  // 过期时间（秒）
-}
-
-impl BpiClient {
-    /// 发送二维码请求
-    pub async fn login_send_qrcode(&self) -> Result<BpiResponse<GenerateQrCodeData>, BpiError> {
-        self.get(QR_GENERATE_ENDPOINT).send_bpi("发送二维码").await
-    }
-
-    /// 检查二维码状态
-    pub async fn login_check_qrcode_status(
-        &self,
-        params: LoginQrPollParams,
-    ) -> Result<BpiResponse<CheckQrCodeStatusData>, BpiError> {
-        let response = self
-            .get(QR_POLL_ENDPOINT)
-            .query(&params.query_pairs())
-            .send()
-            .await?;
-
-        let cookies: Vec<(String, String)> = response
-            .cookies()
-            .map(|c| (c.name().to_string(), c.value().to_string()))
-            .collect();
-
-        let mut qr_response: BpiResponse<CheckQrCodeStatusData> = response
-            .json()
-            .await
-            .map_err(|e| BpiError::parse(e.to_string()))?;
-
-        if qr_response.code == 0 {
-            if let Some(ref mut data) = qr_response.data {
-                if data.code == 0 {
-                    data.cookies = cookies;
-                    Ok(qr_response)
-                } else {
-                    Err(BpiError::from_code_message(data.code, data.message.clone()))
-                }
-            } else {
-                Err(BpiError::missing_data())
-            }
-        } else {
-            Err(BpiError::from_code(qr_response.code))
-        }
-    }
 }
 
 #[cfg(test)]
@@ -233,12 +193,8 @@ mod tests {
         tracing::info!("获取二维码...");
 
         let bpi = BpiClient::new().expect("client should build");
-        match bpi.login_send_qrcode().await {
-            Ok(response) => {
-                tracing::info!("Code: {}", response.code);
-                tracing::info!("Message: {}", response.message);
-
-                let data = response.data.unwrap();
+        match bpi.login().qr_generate().await {
+            Ok(data) => {
                 tracing::info!("二维码URL: {}", data.url);
                 tracing::info!("已获取二维码轮询 key");
 
@@ -246,7 +202,7 @@ mod tests {
                     // 每次循环延迟 5 秒
                     sleep(Duration::from_secs(20)).await;
                     let params = LoginQrPollParams::new(data.qrcode_key.as_str()).unwrap();
-                    let resp = bpi.login_check_qrcode_status(params).await;
+                    let resp = bpi.login().qr_poll(params).await;
 
                     if resp.is_ok() {
                         tracing::info!("扫码成功{:?}", resp);

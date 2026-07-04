@@ -207,25 +207,6 @@ pub struct BangumiFollowListResponseData {
 // --- API 实现 ---
 
 impl BpiClient {
-    /// 获取用户空间公告
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称   | 类型   | 说明           |
-    /// | ------ | ------ | -------------- |
-    /// | `mid`  | u64    | 目标用户 mid   |
-    pub async fn user_space_notice(
-        &self,
-        mid: u64,
-    ) -> Result<BpiResponse<SpaceNoticeResponseData>, BpiError> {
-        self.get("https://api.bilibili.com/x/space/notice")
-            .query(&[("mid", &mid.to_string())])
-            .send_bpi("查看用户空间公告")
-            .await
-    }
-
     /// 修改空间公告
     ///
     /// # 文档
@@ -254,46 +235,6 @@ impl BpiClient {
             .send_bpi("修改空间公告")
             .await
     }
-
-    /// 查询用户追番/追剧明细
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称      | 类型           | 说明                 |
-    /// | --------- | --------------| -------------------- |
-    /// | `mid`     | u64           | 目标用户 mid         |
-    /// | `pn`      | `Option<u32>`   | 页码，默认1          |
-    /// | `ps`      | `Option<u32>`   | 每页项数，默认15     |
-    /// | `list_type`| u8           | 查询类型 1:追番 2:追剧 |
-    pub async fn user_bangumi_follow_list(
-        &self,
-        mid: u64,
-        pn: Option<u32>,
-        ps: Option<u32>,
-        list_type: u8,
-    ) -> Result<BpiResponse<BangumiFollowListResponseData>, BpiError> {
-        let pn_val = pn.unwrap_or(1);
-        let ps_val = ps.unwrap_or(15);
-
-        if !(1..=30).contains(&ps_val) {
-            return Err(BpiError::parse("ps 参数超出有效范围 [1, 30]"));
-        }
-
-        let mut req = self
-            .get("https://api.bilibili.com/x/space/bangumi/follow/list")
-            .query(&[("vmid", &mid.to_string()), ("type", &list_type.to_string())]);
-
-        if pn.is_some() {
-            req = req.query(&[("pn", &pn_val.to_string())]);
-        }
-        if ps.is_some() {
-            req = req.query(&[("ps", &ps_val.to_string())]);
-        }
-
-        req.send_bpi("查询用户追番/追剧明细").await
-    }
 }
 
 // --- 测试模块 ---
@@ -301,8 +242,10 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::Mid;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
+    use crate::user::params::{UserBangumiFollowListParams, UserSpaceNoticeParams};
     use crate::{ApiEnvelope, BpiResult};
     use tracing::info;
 
@@ -319,8 +262,10 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.user_space_notice(TEST_MID).await?;
-        let data = resp.into_data()?;
+        let data = bpi
+            .user()
+            .space_notice(UserSpaceNoticeParams::new(Mid::new(TEST_MID)?))
+            .await?;
 
         info!("空间公告: {:?}", data);
 
@@ -344,9 +289,11 @@ mod tests {
         info!("设置空间公告结果: {:?}", resp);
 
         // 验证设置后内容
-        let get_resp = bpi.user_space_notice(TEST_MID).await?;
-        let get_data = get_resp.into_data()?;
-        assert_eq!(get_data.0, notice);
+        let get_data = bpi
+            .user()
+            .space_notice(UserSpaceNoticeParams::new(Mid::new(TEST_MID)?))
+            .await?;
+        assert_eq!(get_data.content, notice);
         info!("验证公告内容成功");
 
         // 删除公告
@@ -355,9 +302,11 @@ mod tests {
         assert_eq!(delete_resp.code, 0);
 
         // 验证删除后内容
-        let get_resp_after_delete = bpi.user_space_notice(TEST_MID).await?;
-        let get_data_after_delete = get_resp_after_delete.into_data()?;
-        assert!(get_data_after_delete.0.is_empty());
+        let get_data_after_delete = bpi
+            .user()
+            .space_notice(UserSpaceNoticeParams::new(Mid::new(TEST_MID)?))
+            .await?;
+        assert!(get_data_after_delete.content.is_empty());
         info!("验证删除公告内容成功");
 
         Ok(())
@@ -371,16 +320,19 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        // 1: 追番, 2: 追剧
-        let resp = bpi
-            .user_bangumi_follow_list(TEST_MID, Some(1), Some(15), 1)
+        let data = bpi
+            .user()
+            .bangumi_follow_list(
+                UserBangumiFollowListParams::new(Mid::new(TEST_MID)?)
+                    .with_page(1)
+                    .with_page_size(15)?,
+            )
             .await?;
-        let data = resp.into_data()?;
 
         info!("追番列表: {:?}", data);
-        assert_eq!(data.pn, 1);
-        assert_eq!(data.ps, 15);
-        assert!(!data.list.is_empty());
+        assert_eq!(data.page, 1);
+        assert_eq!(data.page_size, 15);
+        assert!(!data.items.is_empty());
 
         Ok(())
     }

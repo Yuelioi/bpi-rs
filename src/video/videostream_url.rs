@@ -1,10 +1,7 @@
 //! 视频流地址相关接口 (web端)
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-
-use super::params::VideoPlayUrlParams;
 
 pub(crate) const PLAY_URL_ENDPOINT: &str = "https://api.bilibili.com/x/player/wbi/playurl";
 
@@ -108,28 +105,6 @@ pub struct PlayUrlResponseData {
     pub last_play_cid: u64,
 }
 
-// --- API 实现 ---
-
-impl BpiClient {
-    /// 获取视频流地址（web端）
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/videostream_url.html#获取视频流地址)
-    ///
-    pub async fn video_playurl(
-        &self,
-        params: VideoPlayUrlParams,
-    ) -> Result<BpiResponse<PlayUrlResponseData>, BpiError> {
-        let params = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        self.get(PLAY_URL_ENDPOINT)
-            .with_bilibili_headers()
-            .query(&params)
-            .send_bpi("获取视频流地址")
-            .await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
@@ -138,7 +113,8 @@ mod tests {
     use crate::ids::{Aid, Cid};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::video::params::VideoPlayUrlParams;
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 113898824998659;
@@ -157,8 +133,7 @@ mod tests {
         let params = VideoPlayUrlParams::from_aid(Aid::new(TEST_AID)?, Cid::new(TEST_CID)?)
             .quality(64)
             .format_flags(1);
-        let resp = bpi.video_playurl(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().play_url(params).await?;
 
         info!("MP4 视频流信息: {:?}", data);
         assert!(data.durl.is_some());
@@ -176,8 +151,7 @@ mod tests {
             .format_flags(16 | 128)
             .format_version(0)
             .fourk(true);
-        let resp = bpi.video_playurl(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().play_url(params).await?;
 
         info!("4K 视频流信息: {:?}", data);
         assert!(data.dash.is_some());

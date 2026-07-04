@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::BpiResponse;
 
 // ================= 数据结构 =================
 
@@ -67,40 +67,12 @@ pub struct MyMedalsData {
 
 pub type MyMedalsResponse = BpiResponse<MyMedalsData>;
 
-// ================= 实现 =================
-
-impl BpiClient {
-    /// 获取自己持有的粉丝勋章信息
-    ///
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
-    pub async fn live_my_medals(
-        &self,
-        page: i32,
-        page_size: i32,
-    ) -> Result<MyMedalsResponse, BpiError> {
-        let params = [
-            ("page", page.to_string()),
-            ("page_size", page_size.to_string()),
-        ];
-
-        let resp: MyMedalsResponse = self
-            .get("https://api.live.bilibili.com/xlive/app-ucenter/v1/user/GetMyMedals")
-            .query(&params)
-            .send_bpi("获取自己持有的粉丝勋章信息")
-            .await?;
-
-        Ok(resp)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -112,9 +84,9 @@ mod tests {
     #[tokio::test]
     async fn test_get_my_medals() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.live_my_medals(1, 10).await?;
+        let data = bpi.live().my_medals(1, 10).await?;
 
-        tracing::info!("{:?}", resp.data);
+        tracing::info!("{:?}", data);
         Ok(())
     }
 

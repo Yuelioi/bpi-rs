@@ -1,4 +1,3 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 动态首页公告栏响应数据
@@ -31,30 +30,12 @@ pub struct DynamicBanner {
     pub weight: u64,
 }
 
-impl BpiClient {
-    /// 获取动态首页公告栏
-    ///
-    /// # 参数
-    /// * `platform` - 平台，默认为 1
-    pub async fn dynamic_feed_banner(&self) -> Result<BpiResponse<DynamicBannerData>, BpiError> {
-        let req = self
-            .get("https://api.bilibili.com/x/dynamic/feed/dyn/banner")
-            .query(&[
-                ("platform", "1"),
-                ("position", "web动态"),
-                ("web_location", "333.1365"),
-            ]);
-
-        req.send_bpi("获取动态首页公告栏").await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     fn contract() -> BpiResult<EndpointContract> {
@@ -67,8 +48,7 @@ mod tests {
     #[tokio::test]
     async fn test_dynamic_feed_banner() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.dynamic_feed_banner().await?;
-        let data = resp.into_data()?;
+        let data = bpi.dynamic().feed_banner().await?;
 
         info!("成功获取到 {} 条公告", data.banners.len());
         assert!(!data.banners.is_empty());

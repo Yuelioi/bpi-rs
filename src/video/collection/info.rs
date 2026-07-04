@@ -1,14 +1,7 @@
 //! B站视频合集信息相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-
-use super::params::{
-    VideoCollectionHomeSeasonsSeriesParams, VideoCollectionSeasonsArchivesParams,
-    VideoCollectionSeasonsSeriesParams, VideoCollectionSeriesArchivesParams,
-    VideoCollectionSeriesInfoParams,
-};
 
 pub(crate) const HOME_SEASONS_SERIES_ENDPOINT: &str =
     "https://api.bilibili.com/x/polymer/web-space/home/seasons_series";
@@ -206,102 +199,18 @@ pub struct GetSeriesArchivesData {
     pub archives: Vec<Archive>,
 }
 
-impl BpiClient {
-    /// 获取视频合集信息
-    ///
-    /// 此接口用于获取特定UP主某个视频合集的详细信息，包括合集内的所有视频列表和元数据。
-    ///
-    /// # 参数
-    /// * `params` - 用户、合集 ID、排序和分页参数。
-    pub async fn video_seasons_list(
-        &self,
-        params: VideoCollectionSeasonsArchivesParams,
-    ) -> Result<BpiResponse<GetSeasonsArchivesData>, BpiError> {
-        let params = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        self.get(SEASONS_ARCHIVES_LIST_ENDPOINT)
-            .with_bilibili_headers()
-            .query(&params)
-            .send_bpi("获取视频合集信息")
-            .await
-    }
-
-    /// 只获取系列视频列表
-    ///
-    /// 此接口用于获取特定UP主创建的系列视频列表。
-    ///
-    /// # 参数
-    /// * `params` - 用户和分页参数。
-    pub async fn video_series_list(
-        &self,
-        params: VideoCollectionHomeSeasonsSeriesParams,
-    ) -> Result<BpiResponse<GetSeasonsSeriesData>, BpiError> {
-        let params = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        self.get(HOME_SEASONS_SERIES_ENDPOINT)
-            .query(&params)
-            .send_bpi("只获取系列视频列表")
-            .await
-    }
-
-    /// 获取系列和合集视频列表
-    ///
-    /// 此接口用于获取特定UP主创建的系列和合集视频列表，返回结果包含两种类型。
-    ///
-    /// # 参数
-    /// * `params` - 用户和可选分页参数。
-    pub async fn video_seasons_series_list(
-        &self,
-        params: VideoCollectionSeasonsSeriesParams,
-    ) -> Result<BpiResponse<GetSeasonsSeriesData>, BpiError> {
-        let params = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        self.get(SEASONS_SERIES_LIST_ENDPOINT)
-            .query(&params)
-            .send_bpi("获取系列和合集视频列表")
-            .await
-    }
-
-    /// 查询指定系列信息
-    ///
-    /// 此接口用于获取指定系列的基本信息，如名称、描述、总视频数量等。
-    ///
-    /// # 参数
-    /// * `params` - 系列 ID 参数。
-    pub async fn video_series_info(
-        &self,
-        params: VideoCollectionSeriesInfoParams,
-    ) -> Result<BpiResponse<GetSeriesData>, BpiError> {
-        self.get(SERIES_INFO_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("查询指定系列信息")
-            .await
-    }
-
-    /// 获取指定系列视频列表
-    ///
-    /// 此接口用于获取指定系列内的所有视频列表，支持分页和排序。
-    ///
-    /// # 参数
-    /// * `params` - 用户、系列 ID、过滤、排序和分页参数。
-    pub async fn video_series_archives(
-        &self,
-        params: VideoCollectionSeriesArchivesParams,
-    ) -> Result<BpiResponse<GetSeriesArchivesData>, BpiError> {
-        self.get(SERIES_ARCHIVES_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取指定系列视频列表")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use super::super::params::{
+        VideoCollectionHomeSeasonsSeriesParams, VideoCollectionSeasonsArchivesParams,
+        VideoCollectionSeasonsSeriesParams, VideoCollectionSeriesArchivesParams,
+        VideoCollectionSeriesInfoParams,
+    };
     use super::*;
     use crate::ids::{Mid, SeasonId};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     use super::super::params::CollectionArchiveSort;
@@ -350,8 +259,7 @@ mod tests {
             SeasonId::new(TEST_SEASON_ID)?,
         )
         .with_sort_reverse(false);
-        let resp = bpi.video_seasons_list(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().seasons_archives_list(params).await?;
 
         info!("测试结果: {:?}", data);
         assert!(!data.archives.is_empty(), "返回的合集视频列表不应为空");
@@ -364,8 +272,7 @@ mod tests {
     async fn test_video_seasons_series_only() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let params = VideoCollectionHomeSeasonsSeriesParams::new(Mid::new(TEST_MID)?);
-        let resp = bpi.video_series_list(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().home_seasons_series(params).await?;
 
         info!("测试结果: {:?}", data);
 
@@ -379,8 +286,7 @@ mod tests {
         let params = VideoCollectionSeasonsSeriesParams::new(Mid::new(TEST_MID)?)
             .with_page_num(1)?
             .with_page_size(5)?;
-        let resp = bpi.video_seasons_series_list(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().seasons_series_list(params).await?;
 
         info!("测试结果: {:?}", data);
         assert!(
@@ -397,8 +303,7 @@ mod tests {
     async fn test_video_series_info() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let params = VideoCollectionSeriesInfoParams::new(TEST_SERIES_ID)?;
-        let resp = bpi.video_series_info(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().series_info(params).await?;
 
         info!("测试结果: {:?}", data);
         assert_eq!(
@@ -417,8 +322,7 @@ mod tests {
             .with_sort(CollectionArchiveSort::Asc)
             .with_page_num(1)?
             .with_page_size(10)?;
-        let resp = bpi.video_series_archives(params).await?;
-        let data = resp.into_data()?;
+        let data = bpi.video().series_archives(params).await?;
 
         info!("测试结果: {:?}", data);
         assert!(!data.archives.is_empty(), "返回的系列视频列表不应为空");

@@ -298,29 +298,6 @@ impl DanmakuAdvStateParams {
     }
 }
 
-impl BpiClient {
-    /// 检测高级弹幕发送权限
-    ///
-    /// 文档: [弹幕相关](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`DanmakuAdvStateParams`] | 视频 cid |
-    pub async fn danmaku_adv_state(
-        &self,
-        params: DanmakuAdvStateParams,
-    ) -> Result<BpiResponse<DanmakuAdvState>, BpiError> {
-        let query = params.query_pairs();
-
-        self.get("https://api.bilibili.com/x/dm/adv/state")
-            .query(&query)
-            .send_bpi("检测高级弹幕发送权限")
-            .await
-    }
-}
-
 // -------------------
 // 点赞弹幕
 // -------------------
@@ -552,7 +529,7 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let params = DanmakuAdvStateParams::new(Cid::new(TEST_CID).expect("cid is valid"));
-        let resp = bpi.danmaku_adv_state(params).await;
+        let resp = bpi.danmaku().adv_state(params).await;
         info!("{:#?}", resp);
         assert!(resp.is_ok());
     }

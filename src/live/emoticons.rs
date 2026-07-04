@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::BpiResponse;
 
 // ================= 数据结构 =================
 
@@ -100,37 +100,12 @@ pub struct EmoticonData {
 
 pub type EmoticonResponse = BpiResponse<EmoticonData>;
 
-// ================= 实现 =================
-
-impl BpiClient {
-    /// 获取直播间的表情包
-    ///
-    pub async fn live_emoticons(
-        &self,
-        room_id: i64,
-        platform: &str,
-    ) -> Result<EmoticonResponse, BpiError> {
-        let params = [
-            ("room_id", room_id.to_string()),
-            ("platform", platform.to_string()),
-        ];
-
-        let resp: EmoticonResponse = self
-            .get("https://api.live.bilibili.com/xlive/web-ucenter/v2/emoticon/GetEmoticons")
-            .query(&params)
-            .send_bpi("获取直播间表情包")
-            .await?;
-
-        Ok(resp)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -142,9 +117,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_live_emoticons() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.live_emoticons(14047, "pc").await?;
+        let data = bpi.live().emoticons(14047, "pc").await?;
 
-        let data = resp.data.unwrap();
         assert!(!data.data.is_empty());
         Ok(())
     }

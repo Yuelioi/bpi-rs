@@ -1,7 +1,6 @@
 //! B站用户粉丝勋章相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 粉丝勋章响应数据
@@ -74,28 +73,14 @@ pub struct UinfoMedal {
     pub user_receive_count: Option<u32>,
 }
 
-impl BpiClient {
-    /// 获取指定用户的所有粉丝勋章
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    pub async fn user_medal_wall(
-        &self,
-        target_id: u64,
-    ) -> Result<BpiResponse<MedalWallData>, BpiError> {
-        self.get("https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall")
-            .query(&[("target_id", target_id.to_string())])
-            .send_bpi("获取用户粉丝勋章")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::Mid;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::user::params::UserMedalWallParams;
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -106,8 +91,11 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.user_medal_wall(2).await?; // UID=2: 碧诗
-        info!("粉丝勋章墙: {:?}", resp.data);
+        let data = bpi
+            .user()
+            .medal_wall(UserMedalWallParams::new(Mid::new(2)?))
+            .await?;
+        info!("粉丝勋章墙: {:?}", data);
 
         Ok(())
     }

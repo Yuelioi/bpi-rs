@@ -4,7 +4,6 @@
 //!
 //! [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/video.html#查询视频分p列表)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 分P分辨率信息
@@ -43,71 +42,32 @@ pub struct PageItem {
     pub ctime: u64,
 }
 
-/// 分P列表响应
-type PageListResponse = BpiResponse<Vec<PageItem>>;
-impl BpiClient {
-    /// 查询视频分P列表 获取视频cid
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/video.html#查询视频分p列表)
-    ///
-    /// # 参数
-    /// | 名称   | 类型         | 说明                 |
-    /// | ------ | ------------| -------------------- |
-    /// | `aid`  | `Option<u64>` | 稿件 avid，可选      |
-    /// | `bvid` | `Option<&str>`| 稿件 bvid，可选      |
-    ///
-    /// 两者任选一个
-    pub async fn video_pagelist(
-        &self,
-        aid: Option<u64>,
-        bvid: Option<&str>,
-    ) -> Result<PageListResponse, BpiError> {
-        let aid = aid.map(|v| v.to_string());
-        let bvid = bvid.map(|v| v.to_string());
-        self.get("https://api.bilibili.com/x/player/pagelist")
-            .query(&[("aid", aid), ("bvid", bvid)])
-            .send_bpi("查询视频分P列表")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::ids::Aid;
+    use crate::video::params::VideoPageListParams;
+    use crate::{BpiClient, BpiError};
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    async fn test_video_pagelist() {
+    async fn test_video_pagelist() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
 
-        match bpi.video_pagelist(Some(10001), None).await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    for item in resp.data.unwrap() {
-                        tracing::info!(
-                            "P{}: {}, cid={}, duration={}秒",
-                            item.page,
-                            item.part,
-                            item.cid,
-                            item.duration
-                        );
-                        if let Some(dim) = item.dimension {
-                            tracing::info!(
-                                "分辨率: {}x{}, rotate={}",
-                                dim.width,
-                                dim.height,
-                                dim.rotate
-                            );
-                        }
-                    }
-                } else {
-                    tracing::info!("请求失败: code={}, message={}", resp.code, resp.message);
-                }
-            }
-            Err(err) => {
-                panic!("请求出错: {}", err);
-            }
+        let data = bpi
+            .video()
+            .page_list(VideoPageListParams::from_aid(Aid::new(10001)?))
+            .await?;
+
+        for item in data {
+            tracing::info!(
+                "P{}: {}, cid={}, duration={}秒",
+                item.page,
+                item.part,
+                item.cid,
+                item.duration
+            );
         }
+
+        Ok(())
     }
 }

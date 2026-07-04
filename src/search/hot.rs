@@ -1,4 +1,3 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 默认搜索内容
@@ -45,50 +44,11 @@ pub struct HotWordDataResponse {
     pub list: Vec<HotWordItem>,
 }
 
-impl BpiClient {
-    /// 获取默认搜索内容（web端）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/search)
-    pub async fn search_default(&self) -> Result<BpiResponse<DefaultSearchData>, BpiError> {
-        let signed_params = self.get_wbi_sign2(vec![("foo", "bar")]).await?;
-
-        self.get("https://api.bilibili.com/x/web-interface/wbi/search/default")
-            .query(&signed_params)
-            .send_bpi("获取默认搜索内容")
-            .await
-    }
-
-    /// 获取热搜列表（web端）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/search)
-    ///
-    /// - 无参数
-    pub async fn search_hotwords(&self) -> Result<BpiResponse<HotWordDataResponse>, BpiError> {
-        let response = self
-            .get("https://s.search.bilibili.com/main/hotword")
-            .send()
-            .await?;
-
-        let data: HotWordDataResponse = response.json().await?;
-
-        let resp: BpiResponse<HotWordDataResponse> = BpiResponse {
-            code: 0,
-            data: Some(data),
-            message: "".to_string(),
-            status: false,
-        };
-
-        Ok(resp)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
-        ApiEnvelope, BpiResult,
+        ApiEnvelope, BpiClient, BpiError, BpiResult,
         probe::{contract::HttpMethod, endpoint_contract::EndpointContract},
     };
 
@@ -220,8 +180,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_default_search() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.search_default().await?;
-        let data = result.into_data()?;
+        let data = bpi.search().default().await?;
         tracing::info!("{:#?}", data);
 
         Ok(())
@@ -231,8 +190,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_hotword_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi.search_hotwords().await?;
-        let data = result.into_data()?;
+        let data = bpi.search().hotwords().await?;
         tracing::info!("{:#?}", data);
 
         Ok(())

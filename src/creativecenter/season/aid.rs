@@ -2,10 +2,7 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-
-use super::SeasonByAidParams;
 
 /// 合集信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -90,34 +87,11 @@ pub struct SeasonByAidData {
     pub has_pugv_pay: u32,
 }
 
-impl BpiClient {
-    /// 根据视频 aid 查询所属合集信息
-    ///
-    /// 通过视频 aid 查询该视频所属的合集信息。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`SeasonByAidParams`] | 视频 aid 参数 |
-    ///
-    /// # 文档
-    /// [根据 aid 反查合集信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/aid.md#根据-aid-反查合集信息)
-    pub async fn season_by_aid(
-        &self,
-        params: SeasonByAidParams,
-    ) -> Result<BpiResponse<SeasonByAidData>, BpiError> {
-        self.get("https://member.bilibili.com/x2/creative/web/season/aid")
-            .query(&params.query_pairs())
-            .send_bpi("根据 aid 查询合集")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::creativecenter::season::SeasonByAidParams;
     use crate::ids::Aid;
+    use crate::{BpiClient, BpiError};
 
     const TEST_AID: u64 = 113602455409683;
 
@@ -127,7 +101,7 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         let params = SeasonByAidParams::new(Aid::new(TEST_AID)?);
 
-        let data = bpi.season_by_aid(params).await?.into_data()?;
+        let data = bpi.creativecenter().season_by_aid(params).await?;
         tracing::info!("视频 {} 所属合集 {} - {}", TEST_AID, data.id, data.title);
 
         Ok(())

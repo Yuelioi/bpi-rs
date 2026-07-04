@@ -191,22 +191,6 @@ impl DynamicUpUsersParams {
     }
 }
 
-/// Parameters for `/dynamic_svr/v1/dynamic_svr/get_dynamic_detail`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DynamicCardDetailParams {
-    id: DynamicId,
-}
-
-impl DynamicCardDetailParams {
-    pub fn new(id: DynamicId) -> Self {
-        Self { id }
-    }
-
-    pub fn query_pairs(&self) -> [(&'static str, String); 1] {
-        [("dynamic_id", self.id.to_string())]
-    }
-}
-
 /// Parameters for `/x/polymer/web-dynamic/v1/detail`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicDetailParams {
@@ -367,10 +351,6 @@ fn normalize_non_blank(field: &'static str, value: String) -> BpiResult<String> 
 mod tests {
     use super::*;
 
-    fn dynamic_id() -> BpiResult<DynamicId> {
-        DynamicId::new("1099138163191840776")
-    }
-
     #[test]
     fn all_params_serializes_defaults() {
         let params = DynamicAllParams::new();
@@ -500,16 +480,5 @@ mod tests {
             params.query_pairs(),
             vec![("teenagers_mode", "1".to_string())]
         );
-    }
-
-    #[test]
-    fn card_detail_params_serializes_dynamic_id() -> BpiResult<()> {
-        let params = DynamicCardDetailParams::new(dynamic_id()?);
-
-        assert_eq!(
-            params.query_pairs(),
-            [("dynamic_id", "1099138163191840776".to_string())]
-        );
-        Ok(())
     }
 }

@@ -2,24 +2,15 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/login/member_center.md)
 
+#[cfg(test)]
+use crate::BpiError;
 use crate::login::LoginAccountInfo;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
+#[cfg(test)]
 const ACCOUNT_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/member/web/account";
 
 /// Legacy member-center account info type.
 pub type AccountInfo = LoginAccountInfo;
-
-impl BpiClient {
-    /// 获取我的账号信息
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login)
-    pub async fn member_center_account_info(&self) -> Result<BpiResponse<AccountInfo>, BpiError> {
-        self.get(ACCOUNT_INFO_ENDPOINT)
-            .send_bpi("获取我的信息")
-            .await
-    }
-}
 
 #[cfg(test)]
 mod tests {

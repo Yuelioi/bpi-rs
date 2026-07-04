@@ -20,8 +20,7 @@ mod serde_utils;
 
 pub use client::DynamicClient;
 pub use params::{
-    DynamicAllParams, DynamicCardDetailParams, DynamicCheckNewParams, DynamicDetailParams,
-    DynamicForwardItemParams, DynamicForwardsParams, DynamicLiveUsersParams,
-    DynamicLotteryNoticeParams, DynamicNavFeedParams, DynamicPicsParams, DynamicReactionsParams,
-    DynamicUpUsersParams,
+    DynamicAllParams, DynamicCheckNewParams, DynamicDetailParams, DynamicForwardItemParams,
+    DynamicForwardsParams, DynamicLiveUsersParams, DynamicLotteryNoticeParams,
+    DynamicNavFeedParams, DynamicPicsParams, DynamicReactionsParams, DynamicUpUsersParams,
 };

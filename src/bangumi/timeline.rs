@@ -1,7 +1,6 @@
 //! 番剧或影视时间线
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/timeline.md)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, bangumi::BangumiTimelineParams};
 use serde::{Deserialize, Serialize};
 
 /// 番剧类型
@@ -50,30 +49,13 @@ pub struct BangumiTimelineEpisode {
     pub title: String,
 }
 
-impl BpiClient {
-    /// 获取番剧或影视时间线
-    ///
-    /// # 参数
-    /// * `params` - 时间线类型和日期范围参数
-    /// # 文档
-    /// [获取番剧或影视时间线](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/timeline.md#获取番剧或影视时间线)
-    pub async fn bangumi_timeline(
-        &self,
-        params: BangumiTimelineParams,
-    ) -> Result<BpiResponse<Vec<BangumiTimelineDay>>, BpiError> {
-        self.get("https://api.bilibili.com/pgc/web/timeline")
-            .query(&params.query_pairs())
-            .send_bpi("获取番剧或影视时间线")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::bangumi::BangumiTimelineParams;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -85,16 +67,15 @@ mod tests {
     #[tokio::test]
     async fn test_bangumi_timeline() {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .bangumi_timeline(
+        let data = bpi
+            .bangumi()
+            .timeline(
                 BangumiTimelineParams::new(BangumiTimelineType::Anime, 3, 7)
                     .expect("valid timeline params"),
             )
             .await;
-        assert!(result.is_ok());
-        let response = result.unwrap();
-        assert_eq!(response.code, 0);
-        let data = response.data.unwrap();
+        assert!(data.is_ok());
+        let data = data.unwrap();
 
         assert!(!data.is_empty());
         for day in &data {

@@ -1,5 +1,3 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -195,118 +193,12 @@ pub struct ElecRankData {
     pub pager: ElecRankPager,
 }
 
-impl BpiClient {
-    /// 获取空间充电公示列表
-    pub async fn electric_month_up_list(
-        &self,
-        up_mid: i64,
-    ) -> Result<BpiResponse<ChargeMonthUpData>, BpiError> {
-        self.get("https://api.bilibili.com/x/ugcpay-rank/elec/month/up")
-            .query(&[("up_mid", up_mid)])
-            .send_bpi("获取空间充电公示列表")
-            .await
-    }
-
-    /// 获取视频充电鸣谢名单
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `mid` | i64 | up 主 mid |
-    /// | `aid` | `Option<i64>` | 稿件 avid |
-    /// | `bvid` | `Option<&str>` | 稿件 bvid |
-    pub async fn electric_video_show(
-        &self,
-        mid: i64,
-        aid: Option<i64>,
-        bvid: Option<&str>,
-    ) -> Result<BpiResponse<VideoElecShowData>, BpiError> {
-        let mut req = self
-            .get("https://api.bilibili.com/x/web-interface/elec/show")
-            .query(&[("mid", mid)]);
-        if let Some(a) = aid {
-            req = req.query(&[("aid", a)]);
-        }
-        if let Some(b) = bvid {
-            req = req.query(&[("bvid", b)]);
-        }
-        req.send_bpi("获取视频充电鸣谢").await
-    }
-
-    /// 获取我收到的充电列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `page` | u64 | 页数 |
-    /// | `page_size` | u64 | 分页大小 `[1,50]` |
-    /// | `begin_time` | `Option<NaiveDate>` | 开始日期 YYYY-MM-DD |
-    /// | `end_time` | `Option<NaiveDate>` | 结束日期 YYYY-MM-DD |
-    pub async fn electric_recharge_list(
-        &self,
-        page: u64,
-        page_size: u64,
-        begin_time: Option<NaiveDate>,
-        end_time: Option<NaiveDate>,
-    ) -> Result<BpiResponse<RechargeData>, BpiError> {
-        let mut req = self
-            .get("https://pay.bilibili.com/bk/brokerage/listForCustomerRechargeRecord")
-            .query(&[("customerId", "10026")])
-            .query(&[("currentPage", page), ("pageSize", page_size)]);
-
-        if let Some(begin) = begin_time {
-            req = req.query(&[("beginTime", begin.format("%Y-%m-%d").to_string())]);
-        }
-        if let Some(end) = end_time {
-            req = req.query(&[("endTime", end.format("%Y-%m-%d").to_string())]);
-        }
-
-        req.send_bpi("获取收到的充电列表").await
-    }
-
-    /// 获取历史充电数据
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `pn` | `Option<u64>` | 页数，默认 1 |
-    /// | `ps` | `Option<u64>` | 分页大小，默认 10，范围 `[1,20]` |
-    pub async fn electric_rank_recent(
-        &self,
-        pn: Option<u64>,
-        ps: Option<u64>,
-    ) -> Result<BpiResponse<ElecRankData>, BpiError> {
-        let mut req = self.get("https://member.bilibili.com/x/h5/elec/rank/recent");
-
-        if let Some(page) = pn {
-            req = req.query(&[("pn", page)]);
-        }
-        if let Some(size) = ps {
-            req = req.query(&[("ps", size)]);
-        }
-
-        req.send_bpi("获取历史充电数据").await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
     use chrono::{Duration, Utc};
     use tracing::info;
 
@@ -338,7 +230,7 @@ mod tests {
     #[tokio::test]
     async fn test_electric_month_up_list() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.electric_month_up_list(53456).await;
+        let resp = bpi.electric().month_up_list(53456).await;
         assert!(resp.is_ok());
     }
 
@@ -347,7 +239,8 @@ mod tests {
     async fn test_electric_video_show() {
         let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
-            .electric_video_show(53456, None, Some("BV1Dh411S7sS"))
+            .electric()
+            .video_show(53456, None, Some("BV1Dh411S7sS"))
             .await;
         assert!(resp.is_ok());
     }
@@ -357,12 +250,11 @@ mod tests {
     async fn test_get_recharge_list() {
         let bpi = BpiClient::new().expect("client should build");
         // 测试获取第一页，每页10条记录
-        let resp = bpi.electric_recharge_list(1, 10, None, None).await;
+        let resp = bpi.electric().recharge_list(1, 10, None, None).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
-        if let Ok(response) = resp {
-            let data = response.data.unwrap();
+        if let Ok(data) = resp {
             info!("充电总记录数: {}", data.page.total_count);
             info!("当前页充电记录数: {}", data.result.len());
             if let Some(record) = data.result.first() {
@@ -380,16 +272,14 @@ mod tests {
         let end_date = now;
 
         let resp = bpi
-            .electric_recharge_list(1, 10, Some(start_date), Some(end_date))
+            .electric()
+            .recharge_list(1, 10, Some(start_date), Some(end_date))
             .await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
-        if let Ok(response) = resp {
-            info!(
-                "在日期范围内获取到的总记录数: {}",
-                response.data.unwrap().page.total_count
-            );
+        if let Ok(data) = resp {
+            info!("在日期范围内获取到的总记录数: {}", data.page.total_count);
         }
     }
 
@@ -398,13 +288,11 @@ mod tests {
     async fn test_get_elec_rank_recent() {
         let bpi = BpiClient::new().expect("client should build");
         // 测试获取第一页，每页10条记录
-        let resp = bpi.electric_rank_recent(Some(1), Some(10)).await;
+        let resp = bpi.electric().rank_recent(Some(1), Some(10)).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
-        if let Ok(response) = resp {
-            let data = response.data.unwrap();
-
+        if let Ok(data) = resp {
             info!("充电总记录数: {}", data.pager.total);
             info!("当前页充电记录数: {}", data.list.len());
             if let Some(record) = data.list.first() {

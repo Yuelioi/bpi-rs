@@ -2,8 +2,6 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/clientinfo/ip.md)
 
-use crate::clientinfo::params::ClientInfoIpParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 // ==========================
@@ -24,40 +22,13 @@ pub struct IpInfo {
     pub addr: Option<String>,
 }
 
-// ==========================
-// API 封装
-// ==========================
-
-impl BpiClient {
-    /// 查询 IP 地址归属地
-    ///
-    /// 查询指定 IP 地址的地理位置信息，包括国家、省份、城市和 ISP 运营商。
-    /// 如果不提供 IP 参数，将返回请求方 IP 的地理信息。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `ClientInfoIpParams` | IP 归属地查询参数。如果留空，返回请求方 IP 信息 |
-    ///
-    /// # 文档
-    /// [IP 地址归属地查询](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/clientinfo/ip.md)
-    pub async fn clientinfo_ip(
-        &self,
-        params: ClientInfoIpParams,
-    ) -> Result<BpiResponse<IpInfo>, BpiError> {
-        self.get("https://api.live.bilibili.com/ip_service/v1/ip_service/get_ip_addr")
-            .query(&params.query_pairs())
-            .send_bpi("查询 IP 地址归属地")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::clientinfo::params::ClientInfoIpParams;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     const TEST_IP: &str = "8.8.8.8";
 
@@ -67,20 +38,14 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let params = ClientInfoIpParams::new().with_ip_str(TEST_IP)?;
-        let resp = bpi.clientinfo_ip(params).await?;
-        if resp.code == 0 {
-            if let Some(data) = resp.data {
-                tracing::info!(
-                    "IP 地址: {}, 省份: {:?}, 城市: {:?}, ISP: {:?}",
-                    data.addr.unwrap_or_default(),
-                    data.province,
-                    data.city,
-                    data.isp
-                );
-            }
-        } else {
-            tracing::error!("请求失败: code={}, message={}", resp.code, resp.message);
-        }
+        let data = bpi.clientinfo().ip(params).await?;
+        tracing::info!(
+            "IP 地址: {}, 省份: {:?}, 城市: {:?}, ISP: {:?}",
+            data.addr.unwrap_or_default(),
+            data.province,
+            data.city,
+            data.isp
+        );
 
         Ok(())
     }

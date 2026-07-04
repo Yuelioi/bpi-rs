@@ -1,5 +1,3 @@
-use crate::message::params::{MessageReplyFeedParams, MessageUnreadCountParams};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 // --- API 结构体 ---
@@ -89,48 +87,13 @@ pub struct AtUserDetail {
     pub follow: bool,
 }
 
-impl BpiClient {
-    /// 获取未读消息数。
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/message)
-    pub async fn message_unread_count(
-        &self,
-        params: MessageUnreadCountParams,
-    ) -> Result<BpiResponse<UnreadCountData>, BpiError> {
-        self.get("https://api.vc.bilibili.com/x/im/web/msgfeed/unread")
-            .query(&params.query_pairs())
-            .send_bpi("获取未读消息数")
-            .await
-    }
-
-    /// 获取"回复我的"信息列表。
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/message)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `MessageReplyFeedParams` | 回复消息分页参数 |
-    pub async fn message_reply_feed(
-        &self,
-        params: MessageReplyFeedParams,
-    ) -> Result<BpiResponse<ReplyFeedData>, BpiError> {
-        self.get("https://api.bilibili.com/x/msgfeed/reply")
-            .query(&params.query_pairs())
-            .send_bpi("获取回复我的信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::message::params::{MessageReplyFeedParams, MessageUnreadCountParams};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
         let bytes = match endpoint {
@@ -158,10 +121,10 @@ mod tests {
     async fn test_get_unread_count() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let new_resp = bpi
-            .message_unread_count(MessageUnreadCountParams::new())
+        let new_data = bpi
+            .message()
+            .unread_count(MessageUnreadCountParams::new())
             .await?;
-        let new_data = new_resp.into_data()?;
         println!("未读消息数 (新接口): {:?}", new_data);
         Ok(())
     }
@@ -171,10 +134,10 @@ mod tests {
     async fn test_get_reply_feed() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let resp = bpi
-            .message_reply_feed(MessageReplyFeedParams::new())
+        let data = bpi
+            .message()
+            .reply_feed(MessageReplyFeedParams::new())
             .await?;
-        let data = resp.into_data()?;
 
         println!("最近回复我的信息:");
         println!("  上次查看时间: {}", data.last_view_at);

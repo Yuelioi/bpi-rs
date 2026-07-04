@@ -1,4 +1,3 @@
-use crate::message::params::MessageSingleUnreadParams;
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -68,28 +67,6 @@ pub enum MessageType {
 }
 
 impl BpiClient {
-    /// 获取未读私信数。
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/message)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `MessageSingleUnreadParams` | 未读私信查询参数 |
-    ///
-    /// 备注：若 `unread_type` 为 Blocked，`show_dustbin` 必须为 true。
-    pub async fn message_single_unread(
-        &self,
-        params: MessageSingleUnreadParams,
-    ) -> Result<BpiResponse<SingleUnreadData>, BpiError> {
-        self.get("https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread")
-            .query(&params.query_pairs())
-            .send_bpi("获取未读私信数")
-            .await
-    }
-
     /// 发送私信。
     ///
     /// # 文档
@@ -166,6 +143,7 @@ impl BpiClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::message::params::MessageSingleUnreadParams;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
     use crate::{ApiEnvelope, BpiResult};
@@ -184,10 +162,10 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         // 默认查询所有未读私信数
-        let all_unread_resp = bpi
-            .message_single_unread(MessageSingleUnreadParams::new())
+        let all_unread_data = bpi
+            .message()
+            .single_unread(MessageSingleUnreadParams::new())
             .await?;
-        let all_unread_data = all_unread_resp.into_data()?;
         println!("所有未读私信数: {:?}", all_unread_data);
 
         assert_eq!(all_unread_data.dustbin_unread, 0); // show_dustbin为false时，该值为0

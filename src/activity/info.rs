@@ -2,7 +2,7 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/info.md)
 use crate::ids::Bvid;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResult};
 use serde::{Deserialize, Serialize};
 
 /// 活动主题信息数据
@@ -72,36 +72,12 @@ impl ActivityInfoParams {
     }
 }
 
-impl BpiClient {
-    /// 获取活动主题信息
-    ///
-    /// # 参数
-    /// | 名称   | 类型   | 说明       |
-    /// | ------ | ------ | ---------- |
-    /// | `params` | `ActivityInfoParams` | 活动主题参数 |
-    ///
-    /// # 文档
-    /// [查看API文档](<https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/info.md#主题信息>)
-    pub async fn activity_info(
-        &self,
-        params: ActivityInfoParams,
-    ) -> Result<BpiResponse<ActivityInfoData>, BpiError> {
-        let result = self
-            .get("https://api.bilibili.com/x/activity/subject/info")
-            .query(&params.query_pairs())
-            .send_bpi("获取活动主题信息")
-            .await?;
-
-        Ok(result)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
 
     const TEST_ACTIVITY_ID: u64 = 4_017_552;
     const TEST_ACTIVITY_BVID: &str = "BV1mKY4e8ELy";
@@ -119,8 +95,7 @@ mod tests {
         let params = ActivityInfoParams::new(4017552)?
             .with_bvid("BV1mKY4e8ELy".parse().expect("bvid should be valid"));
 
-        let result = bpi.activity_info(params).await?;
-        let data = result.into_data()?;
+        let data = bpi.activity().info(params).await?;
         tracing::info!("{:#?}", data);
 
         Ok(())
@@ -133,8 +108,7 @@ mod tests {
         let sid = 4017552;
         let params = ActivityInfoParams::new(sid)?;
 
-        let result = bpi.activity_info(params).await?;
-        let data = result.into_data()?;
+        let data = bpi.activity().info(params).await?;
         tracing::info!("{:#?}", data);
 
         assert_eq!(data.id, sid);

@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct FollowUpLiveItem {
     /// 房间号
@@ -131,71 +129,12 @@ pub struct LiveWebListData {
     pub not_living_num: i32,
 }
 
-impl BpiClient {
-    /// 获取用户关注的所有UP的直播情况
-    ///
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
-    pub async fn live_follow_up_list(
-        &self,
-        page: Option<i32>,
-        page_size: Option<i32>,
-        ignore_record: Option<i32>,
-        hit_ab: Option<bool>,
-    ) -> Result<BpiResponse<FollowUpLiveData>, BpiError> {
-        let mut query = Vec::new();
-
-        if let Some(page) = page {
-            query.push(("page", page.to_string()));
-        }
-
-        if let Some(page_size) = page_size {
-            query.push(("page_size", page_size.to_string()));
-        }
-
-        if let Some(ignore_record) = ignore_record {
-            query.push(("ignoreRecord", ignore_record.to_string()));
-        }
-
-        if let Some(hit_ab) = hit_ab {
-            query.push(("hit_ab", hit_ab.to_string()));
-        }
-
-        self.get("https://api.live.bilibili.com/xlive/web-ucenter/user/following")
-            .query(&query)
-            .send_bpi("获取用户关注的所有UP的直播情况")
-            .await
-    }
-
-    /// 获取用户关注的所有UP且正在直播的列表（PC端）
-    ///
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
-    pub async fn live_follow_up_web_list(
-        &self,
-        hit_ab: Option<bool>,
-    ) -> Result<BpiResponse<LiveWebListData>, BpiError> {
-        let mut query = Vec::new();
-
-        if let Some(hit_ab) = hit_ab {
-            query.push(("hit_ab", hit_ab.to_string()));
-        }
-
-        self.get("https://api.live.bilibili.com/xlive/web-ucenter/v1/xfetter/GetWebList")
-            .query(&query)
-            .send_bpi("获取用户关注的所有UP且正在直播的列表")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
 
     fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
         let bytes = match endpoint {
@@ -217,19 +156,20 @@ mod tests {
     #[tokio::test]
     async fn test_get_follow_up_live_list() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .live_follow_up_list(Some(1), Some(2), Some(1), Some(true))
+        let data = bpi
+            .live()
+            .follow_up_list(Some(1), Some(2), Some(1), Some(true))
             .await
             .unwrap();
-        tracing::info!("{:?}", resp);
+        tracing::info!("{:?}", data);
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
     async fn test_get_follow_up_live_web_list() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.live_follow_up_web_list(Some(false)).await.unwrap();
-        tracing::info!("{:?}", resp);
+        let data = bpi.live().follow_up_web_list(Some(false)).await.unwrap();
+        tracing::info!("{:?}", data);
     }
 
     #[test]

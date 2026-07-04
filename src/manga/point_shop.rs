@@ -89,26 +89,6 @@ pub type ExchangeResponse = BpiResponse<serde_json::Value>;
 // ================= 实现 =================
 
 impl BpiClient {
-    /// 获取当前持有点数
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
-    pub async fn manga_user_point(&self) -> Result<UserPointResponse, BpiError> {
-        self.post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/GetUserPoint")
-            .send_bpi("获取当前持有点数")
-            .await
-    }
-
-    /// 获取兑换奖品列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
-    pub async fn manga_point_products(&self) -> Result<ProductListResponse, BpiError> {
-        self.post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/ListProduct")
-            .send_bpi("获取兑换奖品列表")
-            .await
-    }
-
     /// 兑换物品
     ///
     /// # 文档
@@ -172,9 +152,9 @@ mod tests {
     #[tokio::test]
     async fn test_list_product() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.manga_point_products().await?;
 
-        let data = resp.into_data()?;
+        let data = bpi.manga().point_products().await?;
+
         assert!(!data.is_empty());
         Ok(())
     }
@@ -184,8 +164,7 @@ mod tests {
     async fn test_get_user_point() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let resp = bpi.manga_user_point().await?;
-        let data = resp.into_data()?;
+        let data = bpi.manga().user_point().await?;
 
         tracing::info!("User point: {}", data.point);
         Ok(())

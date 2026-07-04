@@ -1,6 +1,7 @@
+#[cfg(test)]
 use crate::fav::params::FavResourceIdsParams;
 use crate::ids::MediaId;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResult};
 use serde::{Deserialize, Serialize};
 
 // --- 获取收藏夹内容明细列表 ---
@@ -215,50 +216,13 @@ fn validate_non_blank(field: &'static str, value: &str) -> BpiResult<()> {
     Ok(())
 }
 
-impl BpiClient {
-    /// 获取收藏夹内容明细列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    pub async fn fav_list_detail(
-        &self,
-        params: FavListDetailParams,
-    ) -> Result<BpiResponse<FavListDetailData>, BpiError> {
-        self.get("https://api.bilibili.com/x/v3/fav/resource/list")
-            .query(&params.query_pairs())
-            .send_bpi("获取收藏夹内容明细列表")
-            .await
-    }
-
-    /// 获取收藏夹全部内容id
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `FavResourceIdsParams` | 收藏夹内容 ID 参数 |
-    pub async fn fav_resource_ids(
-        &self,
-        params: FavResourceIdsParams,
-    ) -> Result<BpiResponse<Vec<FavResourceIdItem>>, BpiError> {
-        self.get("https://api.bilibili.com/x/v3/fav/resource/ids")
-            .query(&params.query_pairs())
-            .send_bpi("获取收藏夹全部内容id")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::ids::MediaId;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
     use tracing::info;
 
     fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
@@ -290,19 +254,16 @@ mod tests {
             .expect("page size is valid")
             .page(1)
             .expect("page is valid");
-        let resp = bpi.fav_list_detail(params).await;
+        let resp = bpi.fav().list_detail(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("has_more: {}", data.has_more);
-            info!("total media count: {}", data.info.media_count);
-            info!("retrieved media count: {}", data.medias.len());
-            info!("first media item: {:?}", data.medias.first());
-        }
+        let data = resp.unwrap();
+        info!("has_more: {}", data.has_more);
+        info!("total media count: {}", data.info.media_count);
+        info!("retrieved media count: {}", data.medias.len());
+        info!("first media item: {:?}", data.medias.first());
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -312,17 +273,14 @@ mod tests {
         let params = FavResourceIdsParams::new(
             MediaId::new(1052622027).expect("fixture media id should be valid"),
         );
-        let resp = bpi.fav_resource_ids(params).await;
+        let resp = bpi.fav().resource_ids(params).await;
 
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("total IDs retrieved: {}", data.len());
-            info!("first ID item: {:?}", data.first());
-        }
+        let data = resp.unwrap();
+        info!("total IDs retrieved: {}", data.len());
+        info!("first ID item: {:?}", data.first());
     }
 
     #[test]

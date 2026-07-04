@@ -1,8 +1,4 @@
-use crate::wallet::params::WalletInfoParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-
-const WALLET_INFO_ENDPOINT: &str = "https://pay.bilibili.com/paywallet/wallet/getUserWallet";
 
 /// 用户钱包数据
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
@@ -30,32 +26,17 @@ pub struct UserWallet {
     pub need_show_class_balance: i64,
 }
 
-impl BpiClient {
-    /// 获取用户钱包信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/wallet/info.html#获取用户钱包信息)
-    pub async fn wallet_info(
-        &self,
-        params: WalletInfoParams,
-    ) -> Result<BpiResponse<UserWallet>, BpiError> {
-        let csrf = self.csrf()?;
-        let body = params.body(&csrf);
-
-        self.post(WALLET_INFO_ENDPOINT)
-            .json(&body)
-            .send_bpi("获取用户钱包")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::ApiEnvelope;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
+    use crate::wallet::params::WalletInfoParams;
+    use crate::{BpiClient, BpiError};
     use tracing::info;
+
+    const WALLET_INFO_ENDPOINT: &str = "https://pay.bilibili.com/paywallet/wallet/getUserWallet";
 
     fn local_wallet_probe_body(profile: &str) -> Option<serde_json::Value> {
         let path = format!("target/bpi-probe-runs/wallet/read/info/{profile}.response.json");
@@ -158,11 +139,11 @@ mod tests {
     #[tokio::test]
     async fn test_get_user_wallet() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.wallet_info(WalletInfoParams::new()).await;
+        let resp = bpi.wallet().info(WalletInfoParams::new()).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
-        if let Ok(data) = resp {
-            info!("用户mid: {}", data.data.unwrap().mid);
+        if let Ok(wallet) = resp {
+            info!("用户mid: {}", wallet.mid);
         }
     }
 }

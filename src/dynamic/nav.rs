@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::dynamic::params::DynamicNavFeedParams;
 use crate::dynamic::serde_utils::deserialize_u64_from_string_or_number;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 // --- 导航栏动态 API 结构体 ---
 
@@ -57,34 +55,13 @@ pub struct DynamicNavData {
     pub update_num: u64,
 }
 
-impl BpiClient {
-    /// 获取导航栏动态列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`DynamicNavFeedParams`] | 导航栏动态翻页参数 |
-    pub async fn dynamic_nav_feed(
-        &self,
-        params: DynamicNavFeedParams,
-    ) -> Result<BpiResponse<DynamicNavData>, BpiError> {
-        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/nav")
-            .query(&params.query_pairs())
-            .send_bpi("获取导航栏动态列表")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::dynamic::params::DynamicNavFeedParams;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use std::collections::BTreeMap;
     use tracing::info;
 
@@ -105,8 +82,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_dynamic_nav_feed() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.dynamic_nav_feed(DynamicNavFeedParams::new()).await?;
-        let data = resp.into_data()?;
+        let data = bpi.dynamic().nav_feed(DynamicNavFeedParams::new()).await?;
 
         info!("获取到 {} 条动态", data.items.len());
         info!("第一条动态ID: {}", data.items[0].id_str);

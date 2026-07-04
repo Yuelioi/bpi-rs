@@ -169,16 +169,6 @@ impl BpiClient {
             .await
     }
 
-    /// 获取稍后再看视频列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
-    pub async fn toview_list(&self) -> Result<BpiResponse<ToViewListData>, BpiError> {
-        self.get("https://api.bilibili.com/x/v2/history/toview")
-            .send_bpi("获取稍后再看视频列表")
-            .await
-    }
-
     /// 删除稍后再看视频
     /// `aid` 和 `viewed` 参数任选一个
     ///
@@ -254,11 +244,11 @@ mod tests {
         assert!(add_resp.is_ok());
 
         // 2. 获取列表
-        let get_resp = bpi.toview_list().await;
+        let get_resp = bpi.historytoview().toview_list().await;
         info!("Get list result: {:?}", get_resp);
         assert!(get_resp.is_ok());
 
-        let list_data = get_resp.unwrap().data.unwrap();
+        let list_data = get_resp.unwrap();
         info!("Total to view videos: {}", list_data.count);
         info!("First video in list: {:?}", list_data.list.first());
 

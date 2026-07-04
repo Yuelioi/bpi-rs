@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::dynamic::params::{DynamicAllParams, DynamicCheckNewParams};
 use crate::dynamic::serde_utils::deserialize_u64_from_string_or_number;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DynamicAllData {
@@ -41,54 +39,13 @@ pub struct DynamicUpdateData {
     pub update_num: u64,
 }
 
-impl BpiClient {
-    /// 获取全部动态列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`DynamicAllParams`] | 动态流筛选和翻页参数 |
-    pub async fn dynamic_all(
-        &self,
-        params: DynamicAllParams,
-    ) -> Result<BpiResponse<DynamicAllData>, BpiError> {
-        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all")
-            .query(&params.query_pairs())
-            .send_bpi("获取全部动态列表")
-            .await
-    }
-
-    /// 检测是否有新动态
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`DynamicCheckNewParams`] | 更新基线和类型筛选参数 |
-    pub async fn dynamic_check_new(
-        &self,
-        params: DynamicCheckNewParams,
-    ) -> Result<BpiResponse<DynamicUpdateData>, BpiError> {
-        self.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all/update")
-            .query(&params.query_pairs())
-            .send_bpi("检测新动态")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::dynamic::params::{DynamicAllParams, DynamicCheckNewParams};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use std::collections::BTreeMap;
     use tracing::info;
 
@@ -118,10 +75,7 @@ mod tests {
     #[tokio::test]
     async fn test_dynamic_get_all() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.dynamic_all(DynamicAllParams::new()).await?;
-        assert_eq!(resp.code, 0);
-
-        let data = resp.into_data()?;
+        let data = bpi.dynamic().all(DynamicAllParams::new()).await?;
 
         info!("成功获取 {} 条动态", data.items.len());
 
@@ -133,10 +87,10 @@ mod tests {
     async fn test_dynamic_check_new() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let update_baseline = "0";
-        let resp = bpi
-            .dynamic_check_new(DynamicCheckNewParams::new(update_baseline)?)
+        let data = bpi
+            .dynamic()
+            .check_new(DynamicCheckNewParams::new(update_baseline)?)
             .await?;
-        let data = resp.into_data().unwrap();
 
         info!("成功检测到 {} 条新动态", data.update_num);
 

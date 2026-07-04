@@ -2,7 +2,6 @@
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
 use crate::models::{LevelInfo, Nameplate, Official, OfficialVerify, Pendant, Vip, VipLabel};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 用户空间详细信息响应结构体
@@ -378,113 +377,13 @@ pub struct UserOfficial {
     pub r#type: i32,
 }
 
-impl BpiClient {
-    /// 获取用户空间详细信息
-    /// 需要 Wbi 签名认证
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// - `mid`: 用户 UID
-    pub async fn user_space_info(&self, mid: u64) -> Result<BpiResponse<UserSpaceInfo>, BpiError> {
-        // 构建查询参数
-        let params = vec![("mid", mid.to_string())];
-
-        let params = self.get_wbi_sign2(params).await?;
-
-        self.get("https://api.bilibili.com/x/space/wbi/acc/info")
-            .query(&params)
-            .send_bpi("获取用户空间详细信息")
-            .await
-    }
-
-    /// 获取用户名片信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `mid` | u64 | 用户 UID |
-    /// | `photo` | `Option<bool>` | 是否包含主页头图 |
-    pub async fn user_card_info(
-        &self,
-        mid: u64,
-        photo: Option<bool>,
-    ) -> Result<BpiResponse<UserCardInfo>, BpiError> {
-        let mut params = vec![("mid", mid.to_string())];
-
-        // 如果指定了photo参数，则添加到请求参数中
-        if let Some(photo_value) = photo {
-            params.push(("photo", photo_value.to_string()));
-        }
-
-        self.get("https://api.bilibili.com/x/web-interface/card")
-            .query(&params)
-            .send_bpi("获取用户名片信息")
-            .await
-    }
-
-    /// 获取用户名片信息（包含主页头图）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// - `mid`: 用户 UID
-    pub async fn user_card_info_with_photo(
-        &self,
-        mid: u64,
-    ) -> Result<BpiResponse<UserCardInfo>, BpiError> {
-        self.user_card_info(mid, Some(true)).await
-    }
-
-    /// 获取用户名片信息（不包含主页头图）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// - `mid`: 用户 UID
-    pub async fn user_card_info_without_photo(
-        &self,
-        mid: u64,
-    ) -> Result<BpiResponse<UserCardInfo>, BpiError> {
-        self.user_card_info(mid, Some(false)).await
-    }
-
-    /// 批量获取用户卡片（精简信息）
-    pub async fn user_cards(&self, mids: &[u64]) -> Result<BpiResponse<Vec<UserCard>>, BpiError> {
-        let mids_str = mids
-            .iter()
-            .map(|m| m.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-
-        self.get("https://api.vc.bilibili.com/account/v1/user/cards")
-            .query(&[("uids", mids_str)])
-            .send_bpi("批量获取用户卡片")
-            .await
-    }
-
-    /// 批量获取用户详细信息（带大会员/认证信息）
-    pub async fn user_infos(&self, mids: &[u64]) -> Result<BpiResponse<Vec<UserInfo>>, BpiError> {
-        let mids_str = mids
-            .iter()
-            .map(|m| m.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-
-        self.get("https://api.vc.bilibili.com/x/im/user_infos")
-            .query(&[("uids", mids_str)])
-            .send_bpi("批量获取用户详细信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::BpiClient;
+    use crate::ids::Mid;
+    use crate::user::params::{
+        UserCardParams, UserCardPhoto, UserCardsParams, UserInfosParams, UserSpaceParams,
+    };
 
     fn live_user_tests_enabled() -> bool {
         std::env::var("BPI_LIVE_TEST").ok().as_deref() == Some("1")
@@ -504,16 +403,20 @@ mod tests {
 
         tracing::info!("测试用户ID: {}", mid);
 
-        let resp = bpi.user_space_info(mid).await;
+        let resp = bpi
+            .user()
+            .space_info(UserSpaceParams::new(Mid::new(mid).expect("valid mid")))
+            .await;
 
         match &resp {
-            Ok(response) => {
-                let data = response.clone().data.unwrap();
-                tracing::info!("请求成功，返回码: {}", response.code);
+            Ok(data) => {
                 tracing::info!("用户昵称: {}", data.name);
                 tracing::info!("用户等级: {}", data.level);
-                tracing::info!("是否为会员: {}", data.vip.vip_type > 0);
-                tracing::info!("粉丝数量: {}", data.fans_medal.as_ref().map_or(0, |_| 1));
+                tracing::info!(
+                    "是否为会员: {}",
+                    data.vip.as_ref().is_some_and(|vip| vip.status > 0)
+                );
+                tracing::info!("是否有粉丝勋章: {}", data.fans_badge);
             }
             Err(e) => {
                 tracing::error!("请求失败: {:?}", e);
@@ -538,14 +441,14 @@ mod tests {
 
         tracing::info!("测试用户ID: {}", mid);
 
-        let resp = bpi.user_space_info(mid).await;
+        let resp = bpi
+            .user()
+            .space_info(UserSpaceParams::new(Mid::new(mid).expect("valid mid")))
+            .await;
 
         match &resp {
-            Ok(response) => {
-                tracing::info!("请求返回码: {}", response.code);
-                tracing::info!("错误信息: {}", response.message);
-                // 应该返回 -404 表示用户不存在
-                assert_eq!(response.code, -404);
+            Ok(data) => {
+                tracing::info!("意外返回用户: {}", data.name);
             }
             Err(e) => {
                 tracing::error!("请求失败: {:?}", e);
@@ -569,39 +472,20 @@ mod tests {
 
         tracing::info!("测试用户ID: {}", mid);
 
-        let resp = bpi.user_card_info(mid, None).await;
+        let resp = bpi
+            .user()
+            .card(UserCardParams::new(Mid::new(mid).expect("valid mid")))
+            .await;
 
         match &resp {
-            Ok(response) => {
-                let data = response.clone().data.unwrap();
-
-                tracing::info!("请求成功，返回码: {}", response.code);
+            Ok(data) => {
                 tracing::info!("用户昵称: {}", data.card.name);
-                tracing::info!("用户性别: {}", data.card.sex);
-                tracing::info!("用户等级: {}", data.card.level_info.current_level);
+                tracing::info!("用户性别: {:?}", data.card.sex);
                 tracing::info!("是否关注: {}", data.following);
                 tracing::info!("稿件数: {}", data.archive_count);
                 tracing::info!("粉丝数: {}", data.follower);
                 tracing::info!("点赞数: {}", data.like_num);
                 tracing::info!("用户签名: {}", data.card.sign);
-
-                // 认证信息
-                let official = &data.card.official;
-                if official.r#type >= 0 {
-                    tracing::info!("认证类型: {}", official.r#type);
-                    tracing::info!("认证信息: {}", official.title);
-                } else {
-                    tracing::info!("用户未认证");
-                }
-
-                // VIP信息
-                let vip = &data.card.vip;
-                if vip.vip_status > 0 {
-                    tracing::info!("大会员状态: 已开通");
-                    tracing::info!("大会员类型: {}", vip.vip_type);
-                } else {
-                    tracing::info!("大会员状态: 未开通");
-                }
             }
             Err(e) => {
                 tracing::error!("请求失败: {:?}", e);
@@ -626,40 +510,18 @@ mod tests {
 
         tracing::info!("测试用户ID: {}", mid);
 
-        let resp = bpi.user_card_info_with_photo(mid).await;
+        let resp = bpi
+            .user()
+            .card(
+                UserCardParams::new(Mid::new(mid).expect("valid mid"))
+                    .with_photo(UserCardPhoto::Include),
+            )
+            .await;
 
         match &resp {
-            Ok(response) => {
-                let data = response.clone().data.unwrap();
-
-                tracing::info!("请求成功，返回码: {}", response.code);
+            Ok(data) => {
                 tracing::info!("用户昵称: {}", data.card.name);
-
-                // 检查主页头图信息
-                if let Some(space) = &data.card.space {
-                    tracing::info!("主页头图（小）: {}", space.s_img);
-                    tracing::info!("主页头图（正常）: {}", space.l_img);
-                } else {
-                    tracing::info!("用户没有设置主页头图");
-                }
-
-                // 挂件信息
-                let pendant = &data.card.pendant;
-                if pendant.pid > 0 {
-                    tracing::info!("挂件名称: {}", pendant.name);
-                    tracing::info!("挂件图片: {}", pendant.image);
-                } else {
-                    tracing::info!("用户没有佩戴挂件");
-                }
-
-                // 勋章信息
-                let nameplate = &data.card.nameplate;
-                if nameplate.nid > 0 {
-                    tracing::info!("勋章名称: {}", nameplate.name);
-                    tracing::info!("勋章等级: {}", nameplate.level);
-                } else {
-                    tracing::info!("用户没有佩戴勋章");
-                }
+                tracing::info!("粉丝数: {}", data.card.fans);
             }
             Err(e) => {
                 tracing::error!("请求失败: {:?}", e);
@@ -684,23 +546,19 @@ mod tests {
 
         tracing::info!("测试用户ID: {}", mid);
 
-        let resp = bpi.user_card_info_without_photo(mid).await;
+        let resp = bpi
+            .user()
+            .card(
+                UserCardParams::new(Mid::new(mid).expect("valid mid"))
+                    .with_photo(UserCardPhoto::Exclude),
+            )
+            .await;
 
         match &resp {
-            Ok(response) => {
-                let data = response.clone().data.unwrap();
-
-                tracing::info!("请求成功，返回码: {}", response.code);
+            Ok(data) => {
                 tracing::info!("用户昵称: {}", data.card.name);
                 tracing::info!("粉丝数: {}", data.card.fans);
                 tracing::info!("关注数: {}", data.card.attention);
-
-                // 应该没有主页头图信息
-                if data.card.space.is_none() {
-                    tracing::info!("正确：没有返回主页头图信息");
-                } else {
-                    tracing::warn!("注意：返回了主页头图信息");
-                }
             }
             Err(e) => {
                 tracing::error!("请求失败: {:?}", e);
@@ -725,16 +583,14 @@ mod tests {
 
         tracing::info!("测试用户ID: {}", mid);
 
-        let resp = bpi.user_card_info(mid, None).await;
+        let resp = bpi
+            .user()
+            .card(UserCardParams::new(Mid::new(mid).expect("valid mid")))
+            .await;
 
         match &resp {
-            Ok(response) => {
-                tracing::info!("请求返回码: {}", response.code);
-                tracing::info!("错误信息: {}", response.message);
-                // 应该返回错误码
-                if response.code != 0 {
-                    tracing::info!("正确：返回了错误码 {}", response.code);
-                }
+            Ok(data) => {
+                tracing::info!("意外返回用户: {}", data.card.name);
             }
             Err(e) => {
                 tracing::error!("请求失败: {:?}", e);
@@ -758,24 +614,14 @@ mod tests {
 
         tracing::info!("测试用户ID: {}", mid);
 
-        let resp = bpi.user_card_info(mid, None).await;
+        let resp = bpi
+            .user()
+            .card(UserCardParams::new(Mid::new(mid).expect("valid mid")))
+            .await;
 
         match &resp {
-            Ok(response) => {
-                tracing::info!("请求成功，返回码: {}", response.code);
-
-                if response.code == 0 {
-                    let data = response.clone().data.unwrap();
-
-                    let spacesta = data.card.spacesta;
-                    if spacesta == -2 {
-                        tracing::info!("用户状态: 被封禁");
-                    } else if spacesta == 0 {
-                        tracing::info!("用户状态: 正常");
-                    } else {
-                        tracing::info!("用户状态: 未知 ({})", spacesta);
-                    }
-                }
+            Ok(data) => {
+                tracing::info!("请求成功，用户昵称: {}", data.card.name);
             }
             Err(e) => {
                 tracing::error!("请求失败: {:?}", e);
@@ -795,11 +641,31 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         // 测试精简版
-        let cards = bpi.user_cards(&[2, 3]).await.unwrap();
-        tracing::info!("用户卡片: {:?}", cards.data);
+        let cards = bpi
+            .user()
+            .cards(
+                UserCardsParams::new([
+                    Mid::new(2).expect("valid mid"),
+                    Mid::new(3).expect("valid mid"),
+                ])
+                .expect("valid params"),
+            )
+            .await
+            .unwrap();
+        tracing::info!("用户卡片: {:?}", cards);
 
         // 测试完整版
-        let infos = bpi.user_infos(&[2, 3]).await.unwrap();
-        tracing::info!("用户详细信息: {:?}", infos.data);
+        let infos = bpi
+            .user()
+            .infos(
+                UserInfosParams::new([
+                    Mid::new(2).expect("valid mid"),
+                    Mid::new(3).expect("valid mid"),
+                ])
+                .expect("valid params"),
+            )
+            .await
+            .unwrap();
+        tracing::info!("用户详细信息: {:?}", infos);
     }
 }

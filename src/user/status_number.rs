@@ -1,7 +1,6 @@
 //! B站用户关系、UP主状态、导航栏等相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
@@ -108,91 +107,18 @@ pub struct AlbumCountResponseData {
     pub daily_count: u64,
 }
 
-// --- API 实现 ---
-
-impl BpiClient {
-    /// 获取用户关系状态数
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称   | 类型   | 说明           |
-    /// | ------ | ------ | -------------- |
-    /// | `vmid` | u64    | 目标用户 mid   |
-    pub async fn user_relation_stat(
-        &self,
-        vmid: u64,
-    ) -> Result<BpiResponse<RelationStatResponseData>, BpiError> {
-        self.get("https://api.bilibili.com/x/relation/stat")
-            .query(&[("vmid", &vmid.to_string())])
-            .send_bpi("获取用户关系状态数")
-            .await
-    }
-
-    /// 获取UP主状态数
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称   | 类型   | 说明           |
-    /// | ------ | ------ | -------------- |
-    /// | `mid`  | u64    | 目标用户 mid   |
-    pub async fn user_up_stat(
-        &self,
-        mid: u64,
-    ) -> Result<BpiResponse<UpstatResponseData>, BpiError> {
-        self.get("https://api.bilibili.com/x/space/upstat")
-            .query(&[("mid", &mid.to_string())])
-            .send_bpi("获取 UP 主状态数")
-            .await
-    }
-
-    /// 获取用户导航栏状态数
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称   | 类型   | 说明           |
-    /// | ------ | ------ | -------------- |
-    /// | `mid`  | u64    | 目标用户 mid   |
-    pub async fn user_navnum(&self, mid: u64) -> Result<BpiResponse<NavnumResponseData>, BpiError> {
-        self.get("https://api.bilibili.com/x/space/navnum")
-            .query(&[("mid", &mid.to_string())])
-            .send_bpi("获取用户导航栏状态数")
-            .await
-    }
-
-    /// 获取相簿投稿数
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称   | 类型   | 说明           |
-    /// | ------ | ------ | -------------- |
-    /// | `uid`  | u64    | 目标用户 mid   |
-    pub async fn user_album_count(
-        &self,
-        uid: u64,
-    ) -> Result<BpiResponse<AlbumCountResponseData>, BpiError> {
-        self.get("https://api.vc.bilibili.com/link_draw/v1/doc/upload_count")
-            .query(&[("uid", &uid.to_string())])
-            .send_bpi("获取相簿投稿数")
-            .await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::Mid;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::user::params::{
+        UserAlbumCountParams, UserNavStatParams, UserRelationStatParams, UserUpStatParams,
+    };
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     // 请在运行测试前设置环境变量 `BPI_COOKIE`，以包含 SESSDATA 等登录信息
@@ -209,11 +135,13 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.user_relation_stat(TEST_MID).await?;
-        let data = resp.into_data()?;
+        let data = bpi
+            .user()
+            .relation_stat(UserRelationStatParams::new(Mid::new(TEST_MID)?))
+            .await?;
 
         info!("关系状态数: {:?}", data);
-        assert_eq!(data.mid, TEST_MID);
+        assert_eq!(data.mid.get(), TEST_MID);
 
         Ok(())
     }
@@ -226,8 +154,10 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.user_up_stat(TEST_UP_MID).await?;
-        let data = resp.into_data()?;
+        let data = bpi
+            .user()
+            .up_stat(UserUpStatParams::new(Mid::new(TEST_UP_MID)?))
+            .await?;
 
         info!("UP主状态数: {:?}", data);
         assert!(data.likes > 0);
@@ -243,8 +173,10 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.user_navnum(TEST_NAV_MID).await?;
-        let data = resp.into_data()?;
+        let data = bpi
+            .user()
+            .nav_stat(UserNavStatParams::new(Mid::new(TEST_NAV_MID)?))
+            .await?;
 
         info!("用户导航栏状态数: {:?}", data);
         assert!(data.video > 0);
@@ -260,8 +192,10 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.user_album_count(TEST_NAV_MID).await?;
-        let data = resp.into_data()?;
+        let data = bpi
+            .user()
+            .album_count(UserAlbumCountParams::new(Mid::new(TEST_NAV_MID)?))
+            .await?;
 
         info!("相簿投稿数: {:?}", data);
         assert!(data.all_count > 0);

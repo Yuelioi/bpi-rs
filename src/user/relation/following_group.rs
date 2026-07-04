@@ -1,7 +1,6 @@
 //! B站用户关注分组相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 关注分组
@@ -13,24 +12,12 @@ pub struct FollowTag {
     pub tip: Option<String>, // 提示信息
 }
 
-impl BpiClient {
-    /// 查询关注分组列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    pub async fn user_follow_tags(&self) -> Result<BpiResponse<Vec<FollowTag>>, BpiError> {
-        self.get("https://api.bilibili.com/x/relation/tags")
-            .send_bpi("查询关注分组列表")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     fn contract() -> BpiResult<EndpointContract> {
@@ -47,8 +34,7 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.user_follow_tags().await?;
-        let data = resp.into_data()?;
+        let data = bpi.user().follow_tags().await?;
 
         info!("关注分组列表: {:?}", data);
         Ok(())

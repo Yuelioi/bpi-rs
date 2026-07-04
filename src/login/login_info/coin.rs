@@ -2,9 +2,9 @@
 //!
 //! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info_info.html#获取硬币数)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
 const COIN_ENDPOINT: &str = "https://account.bilibili.com/site/getCoin";
 
 /// 获取硬币数 - 响应结构体
@@ -14,23 +14,13 @@ pub struct CoinInfo {
     pub money: f64,
 }
 
-impl BpiClient {
-    /// 获取账号硬币数
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/login)
-    pub async fn login_info_coin(&self) -> Result<BpiResponse<CoinInfo>, BpiError> {
-        self.get(COIN_ENDPOINT).send_bpi("获取硬币数").await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -58,15 +48,9 @@ mod tests {
 
         let bpi = live_client()?;
 
-        match bpi.login_info_coin().await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    if let Some(data) = resp.data {
-                        tracing::info!("获取硬币数成功: {:?}", data.money);
-                    }
-                } else {
-                    tracing::info!("请求失败: code={}", resp.code);
-                }
+        match bpi.login().coin().await {
+            Ok(data) => {
+                tracing::info!("获取硬币数成功: {:?}", data.money);
             }
             Err(err) => {
                 return Err(err);

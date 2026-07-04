@@ -1,7 +1,7 @@
 use base64::{Engine as _, engine::general_purpose};
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResponse, BpiResult};
 
 // ================= 数据结构 =================
 
@@ -77,43 +77,12 @@ impl LiveWebHeartBeatParams {
     }
 }
 
-// ================= 实现 =================
-
-impl BpiClient {
-    /// 直播心跳 (Web端)
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
-    pub async fn live_web_heart_beat(
-        &self,
-        room_id: i64,
-        next_interval: Option<i32>,
-        platform: Option<&str>,
-    ) -> Result<HeartBeatResponse, BpiError> {
-        let mut params = LiveWebHeartBeatParams::new(room_id)?;
-        if let Some(next_interval) = next_interval {
-            params = params.next_interval(next_interval)?;
-        }
-        if let Some(platform) = platform {
-            params = params.platform(platform)?;
-        }
-
-        let resp: HeartBeatResponse = self
-            .get("https://live-trace.bilibili.com/xlive/rdata-interface/v1/heartbeat/webHeartBeat")
-            .query(&params.query_pairs())
-            .send_bpi("直播心跳上报")
-            .await?;
-
-        Ok(resp)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -125,9 +94,10 @@ mod tests {
     #[tokio::test]
     async fn test_web_heart_beat() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.live_web_heart_beat(23174842, None, None).await?;
-
-        let data = resp.data.unwrap();
+        let data = bpi
+            .live()
+            .web_heart_beat(LiveWebHeartBeatParams::new(23174842)?)
+            .await?;
 
         assert!(data.next_interval > 0);
         Ok(())

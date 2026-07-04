@@ -1,8 +1,6 @@
 //! 歌单&音频收藏夹详细信息
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/music_list.md)
-use crate::audio::params::{AudioCollectionInfoParams, AudioPageParams};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -182,90 +180,13 @@ pub struct AudioRankItem {
     pub duration: i64,
 }
 
-impl BpiClient {
-    /// 查询自己创建的歌单
-    ///
-    /// # 参数
-    /// | 名称     | 类型              | 说明             |
-    /// | -------- | ----------------- | ---------------- |
-    /// | `params` | `AudioPageParams` | 页码和每页项数   |
-    ///
-    /// # 文档
-    /// [查询自己创建的歌单](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/music_list.md#查询自己创建的歌单)
-    pub async fn audio_collections_list(
-        &self,
-        params: AudioPageParams,
-    ) -> Result<BpiResponse<AudioCollectionsListData>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/collections/list")
-            .query(&params.query_pairs())
-            .send_bpi("查询自己创建的歌单")
-            .await
-    }
-
-    /// 查询音频收藏夹信息
-    ///
-    /// # 参数
-    /// | 名称     | 类型                        | 说明                                     |
-    /// | -------- | --------------------------- | ---------------------------------------- |
-    /// | `params` | `AudioCollectionInfoParams` | 音频收藏夹 mlid（必须为默认收藏夹 mlid） |
-    ///
-    /// # 文档
-    /// [查询音频收藏夹（默认歌单）信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/music_list.md#查询音频收藏夹默认歌单信息)
-    pub async fn audio_collection_info(
-        &self,
-        params: AudioCollectionInfoParams,
-    ) -> Result<BpiResponse<AudioCollection>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/collections/info")
-            .query(&params.query_pairs())
-            .send_bpi("查询音频收藏夹信息")
-            .await
-    }
-
-    /// 查询热门歌单
-    ///
-    /// # 参数
-    /// | 名称     | 类型              | 说明             |
-    /// | -------- | ----------------- | ---------------- |
-    /// | `params` | `AudioPageParams` | 页码和每页项数   |
-    ///
-    /// # 文档
-    /// [查询热门歌单](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/music_list.md#查询热门歌单)
-    pub async fn audio_hot_menu(
-        &self,
-        params: AudioPageParams,
-    ) -> Result<BpiResponse<AudioHotMenuData>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/menu/hit")
-            .query(&params.query_pairs())
-            .send_bpi("查询热门歌单")
-            .await
-    }
-
-    /// 查询热门榜单
-    ///
-    /// # 参数
-    /// | 名称     | 类型              | 说明             |
-    /// | -------- | ----------------- | ---------------- |
-    /// | `params` | `AudioPageParams` | 页码和每页项数   |
-    ///
-    /// # 文档
-    /// [查询热门榜单](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/music_list.md#查询热门榜单)
-    pub async fn audio_rank_menu(
-        &self,
-        params: AudioPageParams,
-    ) -> Result<BpiResponse<AudioRankMenuData>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/menu/rank")
-            .query(&params.query_pairs())
-            .send_bpi("查询热门榜单")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::audio::params::{AudioCollectionInfoParams, AudioPageParams};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
 
     fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
         let bytes = match endpoint {
@@ -294,11 +215,10 @@ mod tests {
     async fn test_audio_collections_list() {
         let bpi = BpiClient::new().expect("client should build");
         let result = bpi
-            .audio_collections_list(AudioPageParams::new(1, 2).expect("valid page params"))
+            .audio()
+            .collections_list(AudioPageParams::new(1, 2).expect("valid page params"))
             .await;
-        if let Ok(response) = result {
-            assert_eq!(response.code, 0);
-            let data = response.data.unwrap();
+        if let Ok(data) = result {
             assert!(data.cur_page >= 1);
             assert!(data.page_size > 0);
         }
@@ -309,13 +229,10 @@ mod tests {
     async fn test_audio_collection_info() {
         let bpi = BpiClient::new().expect("client should build");
         let result = bpi
-            .audio_collection_info(
-                AudioCollectionInfoParams::new(15967839).expect("valid collection id"),
-            )
+            .audio()
+            .collection_info(AudioCollectionInfoParams::new(15967839).expect("valid collection id"))
             .await;
-        if let Ok(response) = result {
-            assert_eq!(response.code, 0);
-        }
+        assert!(result.is_ok());
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -323,12 +240,11 @@ mod tests {
     async fn test_audio_hot_menu() {
         let bpi = BpiClient::new().expect("client should build");
         let result = bpi
-            .audio_hot_menu(AudioPageParams::new(1, 3).expect("valid page params"))
+            .audio()
+            .hot_menu(AudioPageParams::new(1, 3).expect("valid page params"))
             .await;
         assert!(result.is_ok());
-        let response = result.unwrap();
-        assert_eq!(response.code, 0);
-        let data = response.data.unwrap();
+        let data = result.unwrap();
 
         assert!(data.cur_page >= 1);
         assert!(data.page_size > 0);
@@ -340,14 +256,11 @@ mod tests {
     async fn test_audio_rank_menu() {
         let bpi = BpiClient::new().expect("client should build");
         let result = bpi
-            .audio_rank_menu(AudioPageParams::new(1, 6).expect("valid page params"))
+            .audio()
+            .rank_menu(AudioPageParams::new(1, 6).expect("valid page params"))
             .await;
         assert!(result.is_ok());
-        let response = result.unwrap();
-
-        assert_eq!(response.code, 0);
-
-        let data = response.data.unwrap();
+        let data = result.unwrap();
 
         assert!(data.cur_page >= 1);
         assert!(data.page_size > 0);

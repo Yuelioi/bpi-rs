@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-
 // ================= 数据结构 =================
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -40,28 +38,12 @@ pub struct LiveParentArea {
     pub list: Vec<LiveSubArea>,
 }
 
-impl BpiClient {
-    /// 获取全部直播间分区列表
-    ///
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
-    pub async fn live_area_list(&self) -> Result<BpiResponse<Vec<LiveParentArea>>, BpiError> {
-        let resp = self
-            .get("https://api.live.bilibili.com/room/v1/Area/getList")
-            .send_bpi("获取全部直播间分区列表")
-            .await?;
-
-        Ok(resp)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -73,9 +55,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_live_area_list() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.live_area_list().await?;
+        let data = bpi.live().area_list().await?;
 
-        let data = resp.data.unwrap();
         assert!(!data.is_empty());
         Ok(())
     }

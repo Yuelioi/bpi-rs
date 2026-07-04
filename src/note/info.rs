@@ -1,7 +1,3 @@
-use crate::{
-    BilibiliRequest, BpiClient, BpiError, BpiResponse,
-    note::{NoteIsForbidParams, NotePrivateInfoParams, NotePublicInfoParams},
-};
 use serde::{Deserialize, Serialize};
 
 // --- 查询该稿件是否禁止笔记 ---
@@ -92,60 +88,6 @@ pub struct PublicNoteInfoData {
     pub forbid_note_entrance: bool,
 }
 
-impl BpiClient {
-    /// 查询该稿件是否禁止笔记
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// - params: 稿件 avid 参数
-    pub async fn note_is_forbid(
-        &self,
-        params: NoteIsForbidParams,
-    ) -> Result<BpiResponse<NoteIsForbidData>, BpiError> {
-        self.get("https://api.bilibili.com/x/note/is_forbid")
-            .query(&params.query_pairs())
-            .send_bpi("查询稿件是否禁止笔记")
-            .await
-    }
-
-    /// 查询私有笔记内容
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | `NotePrivateInfoParams` | 私有笔记查询参数 |
-    pub async fn note_get_private_info(
-        &self,
-        params: NotePrivateInfoParams,
-    ) -> Result<BpiResponse<PrivateNoteInfoData>, BpiError> {
-        self.get("https://api.bilibili.com/x/note/info")
-            .query(&params.query_pairs())
-            .send_bpi("查询私有笔记内容")
-            .await
-    }
-
-    /// 查询公开笔记内容
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// - params: 公开笔记 cvid 参数
-    pub async fn note_get_public_info(
-        &self,
-        params: NotePublicInfoParams,
-    ) -> Result<BpiResponse<PublicNoteInfoData>, BpiError> {
-        self.get("https://api.bilibili.com/x/note/publish/info")
-            .query(&params.query_pairs())
-            .send_bpi("查询公开笔记内容")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -153,7 +95,7 @@ mod tests {
     use crate::note::{NoteIsForbidParams, NotePrivateInfoParams, NotePublicInfoParams};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     const TEST_AID: u64 = 338_677_252;
@@ -190,7 +132,8 @@ mod tests {
     async fn test_note_is_forbid() {
         let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
-            .note_is_forbid(NoteIsForbidParams::new(
+            .note()
+            .is_forbid(NoteIsForbidParams::new(
                 Aid::new(TEST_AID).expect("test aid should be valid"),
             ))
             .await;
@@ -198,11 +141,8 @@ mod tests {
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("forbid_note_entrance: {}", data.forbid_note_entrance);
-        }
+        let data = resp.unwrap();
+        info!("forbid_note_entrance: {}", data.forbid_note_entrance);
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -210,7 +150,8 @@ mod tests {
     async fn test_note_get_private_info() {
         let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
-            .note_get_private_info(NotePrivateInfoParams::new(
+            .note()
+            .private_info(NotePrivateInfoParams::new(
                 Aid::new(TEST_PRIVATE_AID).expect("test aid should be valid"),
                 NoteId::new(TEST_NOTE_ID).expect("test note id should be valid"),
             ))
@@ -219,12 +160,9 @@ mod tests {
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("note title: {}", data.title);
-            info!("note content: {}", data.content);
-        }
+        let data = resp.unwrap();
+        info!("note title: {}", data.title);
+        info!("note content: {}", data.content);
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
@@ -232,7 +170,8 @@ mod tests {
     async fn test_note_get_public_info() {
         let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
-            .note_get_public_info(NotePublicInfoParams::new(
+            .note()
+            .public_info(NotePublicInfoParams::new(
                 Cvid::new(TEST_CVID).expect("test cvid should be valid"),
             ))
             .await;
@@ -240,13 +179,10 @@ mod tests {
         info!("{:?}", resp);
         assert!(resp.is_ok());
 
-        let resp_data = resp.unwrap();
-        info!("code: {}", resp_data.code);
-        if let Some(data) = resp_data.data {
-            info!("note title: {}", data.title);
-            info!("note content: {}", data.content);
-            info!("author name: {}", data.author.name);
-        }
+        let data = resp.unwrap();
+        info!("note title: {}", data.title);
+        info!("note content: {}", data.content);
+        info!("author name: {}", data.author.name);
     }
 
     #[test]

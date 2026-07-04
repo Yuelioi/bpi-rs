@@ -3,8 +3,6 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/info.md)
 
 use crate::article::models::ArticleStats;
-use crate::article::params::ArticleInfoParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 专栏基本信息数据
@@ -72,33 +70,13 @@ pub struct ShareChannel {
     pub share_channel: String,
 }
 
-impl BpiClient {
-    /// 获取专栏文章基本信息
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明              |
-    /// | ---- | ---- | ----------------- |
-    /// | `params` | `ArticleInfoParams` | 专栏基本信息参数 |
-    ///
-    /// # 文档
-    /// [获取专栏文章基本信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/info.md#获取专栏文章基本信息)
-    pub async fn article_info(
-        &self,
-        params: ArticleInfoParams,
-    ) -> Result<BpiResponse<ArticleInfoData>, BpiError> {
-        self.get("https://api.bilibili.com/x/article/viewinfo")
-            .query(&params.query_pairs())
-            .send_bpi("获取专栏文章基本信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::article::params::ArticleInfoParams;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     const TEST_CVID: i64 = 2;
 
@@ -115,9 +93,7 @@ mod tests {
 
         let params = ArticleInfoParams::new(TEST_CVID)?;
 
-        let result = bpi.article_info(params).await?;
-
-        let data = result.data.unwrap();
+        let data = bpi.article().info(params).await?;
         assert!(!data.title.is_empty());
         assert!(!data.author_name.is_empty());
         assert!(data.mid > 0);
@@ -131,9 +107,7 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let params = ArticleInfoParams::new(TEST_CVID)?;
-        let result = bpi.article_info(params).await?;
-
-        let data = result.data.unwrap();
+        let data = bpi.article().info(params).await?;
         let stats = &data.stats;
         assert!(stats.view >= 0);
         assert!(stats.favorite >= 0);

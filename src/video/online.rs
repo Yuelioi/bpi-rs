@@ -1,8 +1,6 @@
 //! 视频在线人数相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use super::params::VideoOnlineTotalParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 pub(crate) const ONLINE_TOTAL_ENDPOINT: &str = "https://api.bilibili.com/x/player/online/total";
@@ -29,27 +27,6 @@ pub struct OnlineTotalResponseData {
     pub show_switch: OnlineTotalShowSwitch,
 }
 
-impl BpiClient {
-    /// 获取视频在线人数（web端）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/online.md)
-    ///
-    /// # 参数
-    /// | 名称     | 类型                     | 说明                 |
-    /// | -------- | ------------------------ | -------------------- |
-    /// | `params` | `VideoOnlineTotalParams` | 稿件 id 和视频 cid   |
-    pub async fn video_online_total(
-        &self,
-        params: VideoOnlineTotalParams,
-    ) -> Result<BpiResponse<OnlineTotalResponseData>, BpiError> {
-        self.get(ONLINE_TOTAL_ENDPOINT)
-            .query(&params.query_pairs())
-            .send_bpi("获取视频在线人数")
-            .await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
@@ -58,7 +35,8 @@ mod tests {
     use crate::ids::{Aid, Cid};
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::video::params::VideoOnlineTotalParams;
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     // 假设这是一个已知的视频
@@ -71,9 +49,7 @@ mod tests {
     async fn test_video_online_total_by_aid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let params = VideoOnlineTotalParams::from_aid(Aid::new(TEST_AID)?, Cid::new(TEST_CID)?);
-        let resp = bpi.video_online_total(params).await?;
-
-        let data = resp.into_data()?;
+        let data = bpi.video().online_total(params).await?;
 
         info!("视频在线人数: {:?}", data);
         assert!(!data.count.is_empty());
@@ -87,9 +63,7 @@ mod tests {
     async fn test_video_online_total_by_bvid() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
         let params = VideoOnlineTotalParams::from_bvid(TEST_BVID.parse()?, Cid::new(TEST_CID)?);
-        let resp = bpi.video_online_total(params).await?;
-
-        let data = resp.into_data()?;
+        let data = bpi.video().online_total(params).await?;
 
         info!("视频在线人数: {:?}", data);
 

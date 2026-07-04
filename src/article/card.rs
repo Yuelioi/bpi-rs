@@ -3,8 +3,7 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/card.md)
 
 use super::models::{ArticleAuthor, ArticleCategory, ArticleMedia, ArticleStats};
-use crate::article::params::ArticleCardsParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::BpiResponse;
 use serde::{Deserialize, Serialize};
 
 /// 卡片信息响应类型
@@ -335,39 +334,13 @@ pub struct LiveCard {
     pub uname: String,
 }
 
-impl BpiClient {
-    /// 获取专栏显示卡片信息
-    ///
-    /// # 参数
-    /// | 名称   | 类型    | 说明                                                                 |
-    /// | ------ | ------- | -------------------------------------------------------------------- |
-    /// | `params` | `ArticleCardsParams` | 专栏卡片查询参数 |
-    ///
-    /// # 文档
-    /// [获取专栏显示卡片信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/card.md#获取专栏显示卡片信息)
-    pub async fn article_cards(
-        &self,
-        params: ArticleCardsParams,
-    ) -> Result<CardResponse, BpiError> {
-        let params = self.get_wbi_sign2(params.query_pairs()).await?;
-
-        let result: CardResponse = self
-            .get("https://api.bilibili.com/x/article/cards")
-            .with_bilibili_headers()
-            .query(&params)
-            .send_bpi("获取专栏显示卡片信息")
-            .await?;
-
-        Ok(result)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::article::params::ArticleCardsParams;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use std::mem;
 
     fn contract() -> BpiResult<EndpointContract> {
@@ -383,8 +356,7 @@ mod tests {
 
         let params = ArticleCardsParams::new("av2,cv1,cv2")?;
 
-        let result = bpi.article_cards(params).await?;
-        let data = result.into_data()?;
+        let data = bpi.article().cards(params).await?;
         tracing::info!("{:#?}", data);
 
         Ok(())

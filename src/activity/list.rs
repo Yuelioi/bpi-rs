@@ -2,7 +2,7 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResult};
 use serde::{Deserialize, Serialize};
 
 const DEFAULT_PLATFORM_FILTER: &str = "1,3";
@@ -123,38 +123,6 @@ impl ActivityListParams {
     }
 }
 
-impl BpiClient {
-    /// 获取活动列表
-    ///
-    /// # 参数
-    /// | 名称    | 类型   | 说明                                               |
-    /// | ------- | ------ | -------------------------------------------------- |
-    /// | `params` | `ActivityListParams` | 活动列表参数 |
-    ///
-    /// # 文档
-    /// [获取活动列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md#获取活动列表)
-    pub async fn activity_list(
-        &self,
-        params: ActivityListParams,
-    ) -> Result<BpiResponse<ActivityListData>, BpiError> {
-        let result = self
-            .get("https://api.bilibili.com/x/activity/page/list")
-            .query(&params.query_pairs())
-            .send_bpi("获取活动列表")
-            .await?;
-
-        Ok(result)
-    }
-
-    /// 获取活动列表（简化版本，使用默认参数）
-    ///
-    /// # 文档
-    /// [获取活动列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/activity/list.md#获取活动列表)
-    pub async fn activity_list_default(&self) -> Result<BpiResponse<ActivityListData>, BpiError> {
-        self.activity_list(ActivityListParams::default()).await
-    }
-}
-
 fn validate_non_blank(field: &'static str, value: &str) -> BpiResult<()> {
     if value.trim().is_empty() {
         return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
@@ -176,7 +144,7 @@ mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -191,8 +159,7 @@ mod tests {
 
         // 测试获取活动列表
         let params = ActivityListParams::new().page_size(4)?;
-        let result = bpi.activity_list(params).await?;
-        let data = result.into_data()?;
+        let data = bpi.activity().list(params).await?;
         tracing::info!("{:#?}", data);
 
         assert!(!data.list.is_empty());
@@ -209,8 +176,7 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         // 测试简化版本获取活动列表
-        let result = bpi.activity_list_default().await?;
-        let data = result.into_data()?;
+        let data = bpi.activity().list_default().await?;
         tracing::info!("{:#?}", data);
 
         assert!(!data.list.is_empty());
@@ -226,8 +192,7 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
 
         let params = ActivityListParams::new().page_size(1)?;
-        let result = bpi.activity_list(params).await?;
-        let data = result.into_data()?;
+        let data = bpi.activity().list(params).await?;
         tracing::info!("{:#?}", data);
 
         if let Some(activity) = data.list.first() {

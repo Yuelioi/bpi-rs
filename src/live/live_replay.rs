@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct LiveInfo {
     /// 直播标题
@@ -80,40 +78,12 @@ pub struct ReplayListData {
     pub pagination: Pagination,
 }
 
-impl BpiClient {
-    /// 获取直播回放列表
-    ///
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
-    pub async fn live_replay_list(
-        &self,
-        page: Option<i32>,
-        page_size: Option<i32>,
-    ) -> Result<BpiResponse<ReplayListData>, BpiError> {
-        let mut query = Vec::new();
-
-        if let Some(page) = page {
-            query.push(("page", page.to_string()));
-        }
-
-        if let Some(page_size) = page_size {
-            query.push(("page_size", page_size.to_string()));
-        }
-
-        self.get("https://api.live.bilibili.com/xlive/app-blink/v1/anchorVideo/AnchorGetReplayList")
-            .query(&query)
-            .send_bpi("获取直播回放列表")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -125,8 +95,8 @@ mod tests {
     #[tokio::test]
     async fn test_get_live_replay_list() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi.live_replay_list(Some(1), Some(2)).await.unwrap();
-        tracing::info!("{:?}", resp);
+        let data = bpi.live().replay_list(Some(1), Some(2)).await.unwrap();
+        tracing::info!("{:?}", data);
     }
 
     #[test]

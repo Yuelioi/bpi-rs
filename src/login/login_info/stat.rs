@@ -2,9 +2,9 @@
 //!
 //! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/login_info.html#登录用户状态数-双端)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
+#[cfg(test)]
 const STAT_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/nav/stat";
 
 /// 登录用户状态数 - 信息体
@@ -18,21 +18,13 @@ pub struct UserStat {
     pub dynamic_count: u64,
 }
 
-impl BpiClient {
-    /// 获取登录用户状态数（关注/粉丝/动态）
-    pub async fn login_info_user_stat(&self) -> Result<BpiResponse<UserStat>, BpiError> {
-        let result = self.get(STAT_ENDPOINT).send_bpi("获取登录用户状态").await?;
-        Ok(result)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -60,22 +52,14 @@ mod tests {
 
         let bpi = live_client()?;
 
-        match bpi.login_info_user_stat().await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    let Some(data) = resp.data else {
-                        return Ok(());
-                    };
-
-                    tracing::info!(
-                        "关注数: {}, 粉丝数: {}, 动态数: {}",
-                        data.following,
-                        data.follower,
-                        data.dynamic_count
-                    );
-                } else {
-                    tracing::info!("请求失败: code={}, message={}", resp.code, resp.message);
-                }
+        match bpi.login().stat().await {
+            Ok(data) => {
+                tracing::info!(
+                    "关注数: {}, 粉丝数: {}, 动态数: {}",
+                    data.following,
+                    data.follower,
+                    data.dynamic_count
+                );
             }
             Err(err) => {
                 return Err(err);

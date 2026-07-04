@@ -1,4 +1,3 @@
-use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
 use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
@@ -118,68 +117,6 @@ impl BpiClient {
             .await
     }
 
-    /// 查询我收到的充电留言
-    ///
-    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `pn` | `Option<u64>` | 页数，默认 1 |
-    /// | `ps` | `Option<u64>` | 分页大小，默认 10，范围 `[1,12]` |
-    /// | `begin` | `Option<NaiveDate>` | 开始日期 YYYY-MM-DD |
-    /// | `end` | `Option<NaiveDate>` | 结束日期 YYYY-MM-DD |
-    pub async fn electric_remark_list(
-        &self,
-        pn: Option<u64>,
-        ps: Option<u64>,
-        begin: Option<NaiveDate>,
-        end: Option<NaiveDate>,
-    ) -> Result<BpiResponse<ElecRemarkList>, BpiError> {
-        let mut req = self.get("https://member.bilibili.com/x/web/elec/remark/list");
-
-        if let Some(page) = pn {
-            req = req.query(&[("pn", page)]);
-        }
-        if let Some(size) = ps {
-            req = req.query(&[("ps", size)]);
-        }
-        if let Some(begin_date) = begin {
-            req = req.query(&[("begin", begin_date.format("%Y-%m-%d").to_string())]);
-        }
-        if let Some(end_date) = end {
-            req = req.query(&[("end", end_date.format("%Y-%m-%d").to_string())]);
-        }
-
-        req.send_bpi("查询收到的充电留言").await
-    }
-
-    /// 查询充电留言详情
-    ///
-    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `id` | u64 | 留言 id |
-    pub async fn electric_remark_detail(
-        &self,
-        id: u64,
-    ) -> Result<BpiResponse<ElecRemarkDetail>, BpiError> {
-        self.get("https://member.bilibili.com/x/web/elec/remark/detail")
-            .query(&[("id", id)])
-            .send_bpi("查询充电留言详情")
-            .await
-    }
-
     /// 回复充电留言
     ///
     /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
@@ -262,13 +199,13 @@ mod tests {
     async fn test_get_elec_remark_list() {
         let bpi = BpiClient::new().expect("client should build");
         let resp = bpi
-            .electric_remark_list(Some(1), Some(10), None, None)
+            .electric()
+            .remark_list(Some(1), Some(10), None, None)
             .await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
-        if let Ok(response) = resp {
-            let data = response.data.unwrap();
+        if let Ok(data) = resp {
             info!("留言总记录数: {}", data.pager.total);
             info!("当前页留言记录数: {}", data.list.len());
         }
@@ -279,7 +216,7 @@ mod tests {
     async fn test_get_elec_remark_detail() {
         let bpi = BpiClient::new().expect("client should build");
         // 替换为有效的留言id
-        let resp = bpi.electric_remark_detail(6507563).await;
+        let resp = bpi.electric().remark_detail(6507563).await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
     }

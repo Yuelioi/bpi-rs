@@ -1,8 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+#[cfg(test)]
+use crate::{BpiClient, BpiError};
 
+#[cfg(test)]
 const CAPTCHA_GENERATE_ENDPOINT: &str = "https://passport.bilibili.com/x/passport-login/captcha";
+#[cfg(test)]
 const CAPTCHA_SOURCE: &str = "main_web";
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -30,27 +33,6 @@ pub struct GenerateCaptcha {
     pub token: String,
     pub gt: String,
     pub challenge: String,
-}
-
-impl BpiClient {
-    pub async fn login_generate_captcha(&self) -> Result<GenerateCaptcha, BpiError> {
-        let result: BpiResponse<GeetestData> = self
-            .get(CAPTCHA_GENERATE_ENDPOINT)
-            .query(&[("source", CAPTCHA_SOURCE)])
-            .send_bpi("获取验证码")
-            .await?;
-
-        let data = result.into_data()?;
-
-        let token = data.token;
-        let geetest = data.geetest;
-
-        Ok(GenerateCaptcha {
-            token,
-            gt: geetest.gt,
-            challenge: geetest.challenge,
-        })
-    }
 }
 
 #[cfg(test)]
@@ -166,7 +148,7 @@ mod tests {
 #[tokio::test]
 async fn test_generate_captcha() {
     let bpi = BpiClient::new().expect("client should build");
-    match bpi.login_generate_captcha().await {
+    match bpi.login().generate_captcha().await {
         Ok(captcha) => {
             tracing::info!("验证码请求成功！");
             tracing::info!("Token: {}", captcha.token);

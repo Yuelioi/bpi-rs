@@ -3,7 +3,7 @@
 //! [文档入口](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
 
 use crate::ids::Cid;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResponse, BpiResult};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DanmakuHistoryDatesParams {
@@ -68,36 +68,10 @@ fn validate_month(value: &str) -> BpiResult<()> {
 
 pub type HistoryDatesResponse = BpiResponse<Vec<String>>;
 
-impl BpiClient {
-    /// 查询历史弹幕日期
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`DanmakuHistoryDatesParams`] | 视频 cid 与月份 |
-    pub async fn danmaku_history_dates(
-        &self,
-        params: DanmakuHistoryDatesParams,
-    ) -> Result<HistoryDatesResponse, BpiError> {
-        let query = params.query_pairs();
-
-        let resp: HistoryDatesResponse = self
-            .get("https://api.bilibili.com/x/v2/dm/history/index")
-            .query(&query)
-            .send_bpi("查询历史弹幕日期")
-            .await?;
-
-        Ok(resp)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::BpiClient;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
     use crate::response::ApiEnvelope;
@@ -124,8 +98,7 @@ mod tests {
     async fn test_get_history_dates() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
         let params = DanmakuHistoryDatesParams::new(Cid::new(TEST_CID)?, TEST_MONTH)?;
-        let result = bpi.danmaku_history_dates(params).await?;
-        let data = result.into_data()?;
+        let data = bpi.danmaku().history_dates(params).await?;
         tracing::info!("{:#?}", data);
 
         Ok(())

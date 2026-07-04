@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct QualityDescription {
     /// 画质代码
@@ -36,66 +34,12 @@ pub struct LiveStreamData {
     pub durl: Vec<LiveStreamUrl>,
 }
 
-impl BpiClient {
-    /// 根据真实直播间号获取直播视频流
-    ///
-    /// # 参数
-    /// * `cid` - 目标真实直播间号（必要），直播间的 room_id（非短号）。
-    ///
-    /// * `platform` - 播放平台（非必要，默认 `web` 即 http-flv 方式）。
-    ///   - `"h5"`  → HLS 方式
-    ///   - `"web"` → HTTP-FLV 方式
-    ///
-    /// * `quality` - 画质（非必要，与 `qn` 二选一）。
-    ///   - `2` → 流畅
-    ///   - `3` → 高清
-    ///   - `4` → 原画
-    ///
-    /// * `qn` - 画质（非必要，与 `quality` 二选一）。
-    ///   - `80` → 流畅
-    ///   - `150` → 高清
-    ///   - `250` → 超清
-    ///   - `400` → 蓝光
-    ///   - `10000` → 原画
-    ///   - `20000` → 4K
-    ///   - `25000` → 默认
-    ///   - `30000` → 杜比
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/live)
-    pub async fn live_stream(
-        &self,
-        cid: i64,
-        platform: Option<&str>,
-        quality: Option<i32>,
-        qn: Option<i32>,
-    ) -> Result<BpiResponse<LiveStreamData>, BpiError> {
-        let mut query = vec![("cid", cid.to_string())];
-
-        if let Some(platform) = platform {
-            query.push(("platform", platform.to_string()));
-        }
-
-        if let Some(quality) = quality {
-            query.push(("quality", quality.to_string()));
-        }
-
-        if let Some(qn) = qn {
-            query.push(("qn", qn.to_string()));
-        }
-
-        self.get("https://api.live.bilibili.com/room/v1/Room/playUrl")
-            .query(&query)
-            .send_bpi("获取直播视频流")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -107,11 +51,12 @@ mod tests {
     #[tokio::test]
     async fn test_get_live_stream() {
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .live_stream(14073662, Some("web"), None, Some(10000))
+        let data = bpi
+            .live()
+            .stream(14073662, Some("web"), None, Some(10000))
             .await
             .unwrap();
-        tracing::info!("{:?}", resp);
+        tracing::info!("{:?}", data);
     }
 
     #[test]

@@ -2,29 +2,15 @@
 //!
 //! [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/member_center.html#查询大会员状态)
 
+#[cfg(test)]
+use crate::BpiError;
 use crate::login::LoginVipInfo;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 
+#[cfg(test)]
 const VIP_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/vip/web/user/info";
 
 /// Legacy member-center VIP info type.
 pub type VipInfo = LoginVipInfo;
-
-impl BpiClient {
-    /// 查询大会员状态
-    pub async fn member_center_vip_info(&self) -> Result<BpiResponse<VipInfo>, BpiError> {
-        self.get(VIP_INFO_ENDPOINT).send_bpi("查询大会员状态").await
-    }
-
-    pub async fn is_vip(&self) -> bool {
-        self.member_center_vip_info()
-            .await
-            .ok()
-            .and_then(|resp| resp.data)
-            .map(LoginVipInfo::is_active)
-            .unwrap_or(false)
-    }
-}
 
 #[cfg(test)]
 mod tests {

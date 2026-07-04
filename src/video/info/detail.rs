@@ -2,8 +2,8 @@
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
+use crate::BpiResponse;
 use crate::models::{LevelInfo, Nameplate, Official, OfficialVerify, Pendant, VipLabel};
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -415,62 +415,24 @@ pub struct ViewAddit {
 /// 获取视频详细信息响应类型
 pub type VideoDetailResponse = BpiResponse<VideoDetailData>;
 
-impl BpiClient {
-    /// 获取视频超详细信息 (Web端)
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/video.html#获取视频超详细信息-web端)
-    ///
-    /// # 参数
-    /// | 名称        | 类型         | 说明                 |
-    /// | ----------- | ------------| -------------------- |
-    /// | `aid`       | `Option<u64>` | 稿件 avid，可选      |
-    /// | `bvid`      | `Option<&str>`| 稿件 bvid，可选      |
-    /// | `need_elec` | `Option<u8>`  | 是否获取充电信息 0否 1是，可选 |
-    ///
-    /// `aid` 和 `bvid` 二选一
-    pub async fn video_detail(
-        &self,
-        aid: Option<u64>,
-        bvid: Option<&str>,
-        need_elec: Option<u8>,
-    ) -> Result<VideoDetailResponse, BpiError> {
-        let aid = aid.map(|aid| aid.to_string());
-        let bvid = bvid.map(|bvid| bvid.to_string());
-        let need_elec = need_elec.map(|need_elec| need_elec.to_string());
-
-        self.get("https://api.bilibili.com/x/web-interface/view/detail")
-            .query(&[("aid", aid), ("bvid", bvid), ("need_elec", need_elec)])
-            .send_bpi("视频超详细信息")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::ids::Aid;
+    use crate::video::params::VideoDetailParams;
+    use crate::{BpiClient, BpiError};
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
-    async fn test_video_detail() {
+    async fn test_video_detail() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let aid = Some(10001);
-        // let aid = Some(114993303389765);
-        let bvid = None;
+        let data = bpi
+            .video()
+            .detail(VideoDetailParams::from_aid(Aid::new(10001)?).need_elec(false))
+            .await?;
 
-        match bpi.video_detail(aid, bvid, Some(0)).await {
-            Ok(resp) => {
-                if resp.code == 0 {
-                    // tracing::info!("视频标题: {}", resp.data.view.title);
-                    // tracing::info!("回复: {:?} )", resp.data.reply.page);
-                } else {
-                    tracing::info!("请求失败: code={}, message={}", resp.code, resp.message);
-                }
-            }
-            Err(err) => {
-                panic!("请求出错: {}", err);
-            }
-        }
+        assert!(!data.view.title.is_empty());
+
+        Ok(())
     }
 }

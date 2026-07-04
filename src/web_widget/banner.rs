@@ -1,8 +1,6 @@
 //! B站分区轮播图相关接口
 //!
 //! [查看 API 文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/banner.html)
-use crate::web_widget::params::WebWidgetRegionBannerParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 轮播图对象
@@ -21,34 +19,14 @@ pub struct RegionBannerData {
     pub region_banner_list: Vec<RegionBanner>, // 轮播图列表
 }
 
-impl BpiClient {
-    /// 获取各分区的轮播图（Web端）
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/web_widget/banner.html#获取各分区的轮播图)
-    ///
-    /// # 参数
-    /// | 名称        | 类型                | 说明         |
-    /// | ----------- | -------------------| ------------|
-    /// | `params`    | [`WebWidgetRegionBannerParams`] | 分区参数 |
-    pub async fn web_widget_region_banner(
-        &self,
-        params: WebWidgetRegionBannerParams,
-    ) -> Result<BpiResponse<RegionBannerData>, BpiError> {
-        self.get("https://api.bilibili.com/x/web-show/region/banner")
-            .query(&params.query_pairs())
-            .send_bpi("获取各分区的轮播图")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
     use crate::video::video_zone_v2::{Douga, VideoPartitionV2};
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::web_widget::params::WebWidgetRegionBannerParams;
+    use crate::{ApiEnvelope, BpiClient, BpiResult};
 
     use tracing::info;
 
@@ -64,14 +42,15 @@ mod tests {
         let bpi = BpiClient::new().expect("client should build");
         // 例如 region_id = 1 (动画)
         let resp = bpi
-            .web_widget_region_banner(WebWidgetRegionBannerParams::new(VideoPartitionV2::Douga(
+            .web_widget()
+            .region_banner(WebWidgetRegionBannerParams::new(VideoPartitionV2::Douga(
                 Douga::Douga,
             )))
             .await;
         info!("响应: {:?}", resp);
         assert!(resp.is_ok());
 
-        let data = resp.unwrap().data.unwrap();
+        let data = resp.unwrap();
         info!("分区轮播图: {:?}", data);
     }
 

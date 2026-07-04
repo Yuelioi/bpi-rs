@@ -3,7 +3,7 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/danmaku/thumbup.md)
 
 use crate::ids::Cid;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResponse, BpiResult};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -53,24 +53,6 @@ impl DanmakuThumbupStatsParams {
             .collect::<Vec<_>>()
             .join(",");
         [("oid", self.oid.to_string()), ("ids", ids)]
-    }
-}
-
-impl BpiClient {
-    /// 查询指定 dmid 的点赞状态与统计
-    pub async fn danmaku_thumbup_stats(
-        &self,
-        params: DanmakuThumbupStatsParams,
-    ) -> Result<ThumbupStatsResponse, BpiError> {
-        let query = params.query_pairs();
-
-        let resp: ThumbupStatsResponse = self
-            .get("https://api.bilibili.com/x/v2/dm/thumbup/stats")
-            .query(&query)
-            .send_bpi("查询弹幕点赞状态")
-            .await?;
-
-        Ok(resp)
     }
 }
 

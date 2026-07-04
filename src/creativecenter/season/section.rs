@@ -2,10 +2,7 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
-
-use super::SeasonSectionEpisodesParams;
 
 /// 小节中的视频信息
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -72,33 +69,11 @@ pub struct SeasonSectionEpisode {
     pub charging_pay: u32,
 }
 
-impl BpiClient {
-    /// 获取合集小节中的视频
-    ///
-    /// 获取指定合集中所有小节的视频信息。
-    ///
-    /// # 参数
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `params` | [`SeasonSectionEpisodesParams`] | 合集小节查询参数 |
-    ///
-    /// # 文档
-    /// [获取合集小节中的视频](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/section.md#获取合集小节中的视频)
-    pub async fn season_section_episodes(
-        &self,
-        params: SeasonSectionEpisodesParams,
-    ) -> Result<BpiResponse<SeasonSectionEpisodesData>, BpiError> {
-        self.get("https://member.bilibili.com/x2/creative/web/season/section")
-            .query(&params.query_pairs())
-            .send_bpi("获取合集小节中的视频")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::creativecenter::season::SeasonSectionEpisodesParams;
     use crate::ids::SeasonId;
+    use crate::{BpiClient, BpiError};
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
     #[tokio::test]
@@ -107,7 +82,7 @@ mod tests {
 
         let season_id = 176088;
         let params = SeasonSectionEpisodesParams::new(SeasonId::new(season_id)?);
-        let data = bpi.season_section_episodes(params).await?.into_data()?;
+        let data = bpi.creativecenter().season_section_episodes(params).await?;
 
         tracing::info!("小节: {} - {}", data.section.id, data.section.title);
         if let Some(episodes) = data.episodes

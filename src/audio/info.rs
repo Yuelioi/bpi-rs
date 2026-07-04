@@ -2,8 +2,7 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md)
 
-use crate::audio::params::AudioSongParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::BpiResponse;
 use serde::{Deserialize, Serialize};
 
 /// 歌曲基本信息数据
@@ -127,91 +126,14 @@ pub struct AudioMember {
     pub member_id: i64,
 }
 
-impl BpiClient {
-    /// 查询歌曲基本信息
-    ///
-    /// # 参数
-    /// | 名称     | 类型              | 说明             |
-    /// | -------- | ----------------- | ---------------- |
-    /// | `params` | `AudioSongParams` | 音频 auid 参数   |
-    ///
-    /// # 文档
-    /// [查询歌曲基本信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#查询歌曲基本信息)
-    pub async fn audio_info(
-        &self,
-        params: AudioSongParams,
-    ) -> Result<BpiResponse<AudioInfoData>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/song/info")
-            .query(&params.query_pairs())
-            .send_bpi("查询歌曲基本信息")
-            .await
-    }
-
-    /// 查询歌曲 TAG
-    ///
-    /// # 参数
-    /// | 名称     | 类型              | 说明             |
-    /// | -------- | ----------------- | ---------------- |
-    /// | `params` | `AudioSongParams` | 音频 auid 参数   |
-    ///
-    /// # 文档
-    /// [查询歌曲 TAG](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#查询歌曲tag)
-    pub async fn audio_tags(
-        &self,
-        params: AudioSongParams,
-    ) -> Result<BpiResponse<Vec<AudioTag>>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/tag/song")
-            .query(&params.query_pairs())
-            .send_bpi("查询歌曲TAG")
-            .await
-    }
-
-    /// 查询歌曲创作成员列表
-    ///
-    /// # 参数
-    /// | 名称     | 类型              | 说明             |
-    /// | -------- | ----------------- | ---------------- |
-    /// | `params` | `AudioSongParams` | 音频 auid 参数   |
-    ///
-    /// # 文档
-    /// [查询歌曲创作成员列表](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#查询歌曲创作成员列表)
-    pub async fn audio_members(
-        &self,
-        params: AudioSongParams,
-    ) -> Result<AudioMemberResponse, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/member/song")
-            .query(&params.query_pairs())
-            .send_bpi("查询歌曲创作成员列表")
-            .await
-    }
-
-    /// 获取歌曲歌词
-    ///
-    /// # 参数
-    /// | 名称     | 类型              | 说明             |
-    /// | -------- | ----------------- | ---------------- |
-    /// | `params` | `AudioSongParams` | 音频 auid 参数   |
-    ///
-    /// # 文档
-    /// [获取歌曲歌词](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md#获取歌曲歌词)
-    pub async fn audio_lyric(
-        &self,
-        params: AudioSongParams,
-    ) -> Result<BpiResponse<String>, BpiError> {
-        self.get("https://www.bilibili.com/audio/music-service-c/web/song/lyric")
-            .query(&params.query_pairs())
-            .send_bpi("获取歌曲歌词")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::audio::params::AudioSongParams;
     use crate::ids::AudioId;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
 
     const TEST_SID: u64 = 13603;
 
@@ -233,10 +155,10 @@ mod tests {
     #[tokio::test]
     async fn test_audio_info() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .audio_info(AudioSongParams::new(AudioId::new(TEST_SID)?))
+        let data = bpi
+            .audio()
+            .info(AudioSongParams::new(AudioId::new(TEST_SID)?))
             .await?;
-        let data = result.data.unwrap();
         assert!(!data.title.is_empty());
         assert!(!data.author.is_empty());
         assert!(data.duration > 0);
@@ -248,10 +170,10 @@ mod tests {
     #[tokio::test]
     async fn test_audio_tags() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .audio_tags(AudioSongParams::new(AudioId::new(TEST_SID)?))
+        let data = bpi
+            .audio()
+            .tags(AudioSongParams::new(AudioId::new(TEST_SID)?))
             .await?;
-        let data = result.into_data()?;
 
         tracing::info!("{:#?}", data);
 
@@ -262,10 +184,10 @@ mod tests {
     #[tokio::test]
     async fn test_audio_members() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
-        let result = bpi
-            .audio_members(AudioSongParams::new(AudioId::new(TEST_SID)?))
+        let data = bpi
+            .audio()
+            .members(AudioSongParams::new(AudioId::new(TEST_SID)?))
             .await?;
-        let data = result.into_data()?;
 
         tracing::info!("{:#?}", data);
 
@@ -277,11 +199,10 @@ mod tests {
     async fn test_audio_lyric() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi
-            .audio_lyric(AudioSongParams::new(AudioId::new(TEST_SID)?))
+        let data = bpi
+            .audio()
+            .lyric(AudioSongParams::new(AudioId::new(TEST_SID)?))
             .await?;
-
-        let data = result.into_data()?;
 
         tracing::info!("{:#?}", data);
 
@@ -293,11 +214,11 @@ mod tests {
     async fn test_audio_info_fields() -> Result<(), Box<BpiError>> {
         let bpi = BpiClient::new().expect("client should build");
 
-        let result = bpi
-            .audio_info(AudioSongParams::new(AudioId::new(13598)?))
+        let data = bpi
+            .audio()
+            .info(AudioSongParams::new(AudioId::new(13598)?))
             .await?;
 
-        let data = &result.data.unwrap();
         assert!(data.id > 0);
         assert!(data.uid > 0);
         assert!(!data.uname.is_empty());

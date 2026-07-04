@@ -2,7 +2,6 @@
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
 use crate::models::Vip;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 // --- 响应数据结构体 ---
 
@@ -56,65 +55,16 @@ pub struct FansListResponseData {
     pub total: u64,
 }
 
-// --- API 实现 ---
-
-impl BpiClient {
-    /// 查询用户粉丝明细
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称            | 类型           | 说明                                   |
-    /// | --------------- | --------------| -------------------------------------- |
-    /// | `vmid`          | u64           | 目标用户 mid                           |
-    /// | `ps`            | `Option<u32>`   | 每页项数，默认50                       |
-    /// | `pn`            | `Option<u32>`   | 页码，默认1                            |
-    /// | `offset`        | `Option<&str>`  | 偏移量，翻页用                         |
-    /// | `last_access_ts`| `Option<u64>`   | 上次访问时间戳，秒                     |
-    /// | `from`          | `Option<&str>`  | 请求来源，部分场景传"main"             |
-    pub async fn user_followers(
-        &self,
-        vmid: u64,
-        ps: Option<u32>,
-        pn: Option<u32>,
-        offset: Option<&str>,
-        last_access_ts: Option<u64>,
-        from: Option<&str>,
-    ) -> Result<BpiResponse<FansListResponseData>, BpiError> {
-        let mut req = self
-            .get("https://api.bilibili.com/x/relation/fans")
-            .with_bilibili_headers()
-            .query(&[("vmid", &vmid.to_string())]);
-
-        if let Some(p) = ps {
-            req = req.query(&[("ps", &p.to_string())]);
-        }
-        if let Some(p) = pn {
-            req = req.query(&[("pn", &p.to_string())]);
-        }
-        if let Some(o) = offset {
-            req = req.query(&[("offset", o)]);
-        }
-        if let Some(l) = last_access_ts {
-            req = req.query(&[("last_access_ts", &l.to_string())]);
-        }
-        if let Some(f) = from {
-            req = req.query(&[("from", f)]);
-        }
-
-        req.send_bpi("查询用户粉丝明细").await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ids::Mid;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::{ApiEnvelope, BpiResult};
+    use crate::user::params::UserFollowersParams;
+    use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
     const TEST_VMID: u64 = 4279370;
@@ -133,10 +83,14 @@ mod tests {
         }
 
         let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .user_followers(TEST_VMID, Some(50), Some(1), None, None, None)
+        let data = bpi
+            .user()
+            .followers(
+                UserFollowersParams::new(Mid::new(TEST_VMID)?)
+                    .with_page_size(50)
+                    .with_page(1),
+            )
             .await?;
-        let data = resp.into_data()?;
 
         info!("用户粉丝明细: {:?}", data);
         assert!(!data.list.is_empty());
