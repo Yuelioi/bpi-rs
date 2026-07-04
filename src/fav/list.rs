@@ -2,7 +2,7 @@
 use crate::fav::params::FavResourceIdsParams;
 use crate::ids::MediaId;
 use crate::{BpiError, BpiResult};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 // --- 获取收藏夹内容明细列表 ---
 
@@ -86,6 +86,7 @@ pub struct FavListMedia {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct FavListDetailData {
     pub info: FavListInfo,
+    #[serde(default, deserialize_with = "empty_vec_on_null")]
     pub medias: Vec<FavListMedia>,
     pub has_more: bool,
     pub ttl: u64,
@@ -214,6 +215,14 @@ fn validate_non_blank(field: &'static str, value: &str) -> BpiResult<()> {
     }
 
     Ok(())
+}
+
+fn empty_vec_on_null<'de, D, T>(deserializer: D) -> Result<Vec<T>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    Ok(Option::<Vec<T>>::deserialize(deserializer)?.unwrap_or_default())
 }
 
 #[cfg(test)]
@@ -397,6 +406,49 @@ mod tests {
         ))?
         .into_payload()?;
         assert_eq!(ids.len(), 1);
+        Ok(())
+    }
+
+    #[test]
+    fn fav_list_detail_accepts_null_medias_as_empty_list() -> BpiResult<()> {
+        let detail = serde_json::from_value::<FavListDetailData>(serde_json::json!({
+            "info": {
+                "id": 1052622027,
+                "fid": 1052622027,
+                "mid": 7792521,
+                "attr": 0,
+                "title": "empty folder",
+                "cover": "",
+                "upper": {
+                    "mid": 7792521,
+                    "name": "owner",
+                    "face": "",
+                    "followed": false,
+                    "vip_type": 0,
+                    "vip_status": 0
+                },
+                "cover_type": 0,
+                "cnt_info": {
+                    "collect": 0,
+                    "play": 0,
+                    "share": 0,
+                    "thumb_up": 0
+                },
+                "type": 2,
+                "intro": "",
+                "ctime": 0,
+                "mtime": 0,
+                "state": 0,
+                "fav_state": 0,
+                "like_state": 0,
+                "media_count": 0
+            },
+            "medias": null,
+            "has_more": false,
+            "ttl": 1
+        }))?;
+
+        assert!(detail.medias.is_empty());
         Ok(())
     }
 
