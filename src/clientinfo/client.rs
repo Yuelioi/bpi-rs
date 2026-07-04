@@ -8,7 +8,7 @@ const IP_ENDPOINT: &str = "https://api.live.bilibili.com/ip_service/v1/ip_servic
 /// Client information API client.
 #[derive(Clone, Copy)]
 pub struct ClientInfoClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> ClientInfoClient<'a> {

@@ -1,8 +1,13 @@
-use serde::{Deserialize, Serialize};
-
 // --- 获取稍后再看视频列表 ---
 
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::historytoview::HistoryToViewClient;
+use serde::{Deserialize, Serialize};
+
 /// 稿件属性标志
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ToViewRights {
     pub bp: u8,
@@ -132,6 +137,92 @@ pub struct ToViewListData {
     pub count: u32,
     /// 稍后再看视频列表
     pub list: Vec<ToViewVideoItem>,
+}
+
+impl<'a> HistoryToViewClient<'a> {
+    /// 视频添加稍后再看（最多100个）
+    /// avid 与 bvid 任选一个
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
+    ///
+    /// # 参数
+    ///
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `aid` | `Option<u64>` | 稿件 avid |
+    /// | `bvid` | `Option<&str>` | 稿件 bvid |
+    pub async fn toview_add_video(
+        &self,
+        aid: Option<u64>,
+        bvid: Option<&str>,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let mut form = vec![("csrf", csrf)];
+        if let Some(avid) = aid {
+            form.push(("aid", avid.to_string()));
+        }
+        if let Some(bvid_str) = bvid {
+            form.push(("bvid", bvid_str.to_string()));
+        }
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/history/toview/add")
+            .form(&form)
+            .send_bpi("添加稍后再看视频")
+            .await
+    }
+
+    /// 删除稍后再看视频
+    /// `aid` 和 `viewed` 参数任选一个
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
+    ///
+    /// # 参数
+    ///
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `aid` | `Option<u64>` | 稿件 avid |
+    /// | `viewed` | `Option<bool>` | 是否删除已观看 |
+    pub async fn toview_delete(
+        &self,
+        aid: Option<u64>,
+        viewed: Option<bool>,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let mut form = vec![("csrf", csrf)];
+        if let Some(avid) = aid {
+            form.push(("aid", avid.to_string()));
+        }
+        if let Some(is_viewed) = viewed {
+            form.push(("viewed", is_viewed.to_string()));
+        }
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/history/toview/del")
+            .form(&form)
+            .send_bpi("删除稍后再看视频")
+            .await
+    }
+
+    /// 清空稍后再看视频列表
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
+    pub async fn toview_clear(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let form = [("csrf", csrf)];
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/history/toview/clear")
+            .form(&form)
+            .send_bpi("清空稍后再看视频列表")
+            .await
+    }
 }
 
 #[cfg(test)]

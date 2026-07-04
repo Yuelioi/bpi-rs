@@ -25,7 +25,7 @@ const REMARK_DETAIL_ENDPOINT: &str = "https://member.bilibili.com/x/web/elec/rem
 /// Electric charging API client.
 #[derive(Clone, Copy)]
 pub struct ElectricClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> ElectricClient<'a> {

@@ -18,7 +18,7 @@ const RESOURCE_IDS_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/resource/
 /// Favorite API client.
 #[derive(Clone, Copy)]
 pub struct FavClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> FavClient<'a> {

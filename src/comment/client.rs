@@ -12,7 +12,7 @@ const COUNT_ENDPOINT: &str = "https://api.bilibili.com/x/v2/reply/count";
 /// Comment API client.
 #[derive(Clone, Copy)]
 pub struct CommentClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> CommentClient<'a> {

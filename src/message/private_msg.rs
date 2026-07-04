@@ -1,9 +1,17 @@
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-
 // --- API 结构体 ---
 
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::message::MessageClient;
+use chrono::Utc;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use serde_json::json;
+use uuid::Uuid;
+
 /// 未读私信数数据
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct SingleUnreadData {
     pub unfollow_unread: u32,
@@ -60,6 +68,82 @@ pub enum MessageType {
     Text(String),
     /// 图片消息，内容为JSON字符串
     Image(Image),
+}
+
+impl<'a> MessageClient<'a> {
+    /// 发送私信。
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/message)
+    ///
+    /// # 参数
+    ///
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `receiver_id` | u64 | 接收者 ID |
+    /// | `receiver_type` | u32 | 接收者类型：1 用户，2 粉丝团 |
+    /// | `message_type` | MessageType | 消息类型（文本/图片） |
+    pub async fn message_send(
+        &self,
+        receiver_id: u64,
+        receiver_type: u32,
+        message_type: MessageType,
+    ) -> Result<BpiResponse<SendMsgData>, BpiError> {
+        // 1. 获取必需的参数
+        let csrf = self.client.csrf()?;
+        let sender_uid = &self
+            .client
+            .get_account()
+            .ok_or(BpiError::auth("未登录"))?
+            .dede_user_id;
+        let dev_id = Uuid::new_v4().to_string();
+        let timestamp = Utc::now().timestamp();
+
+        let msg_type = match message_type {
+            MessageType::Text(_) => 1,
+            MessageType::Image(_) => 2,
+        };
+
+        // 2. 准备请求体参数
+        let mut form = vec![
+            ("msg[sender_uid]", sender_uid.to_string()),
+            ("msg[receiver_id]", receiver_id.to_string()),
+            ("msg[receiver_type]", receiver_type.to_string()),
+            ("msg[msg_type]", msg_type.to_string()),
+            ("msg[msg_status]", "0".to_string()),
+            ("msg[dev_id]", dev_id.clone()),
+            ("msg[timestamp]", timestamp.to_string()),
+            ("msg[new_face_version]", "1".to_string()),
+            ("csrf", csrf.clone()),
+            ("csrf_token", csrf.clone()),
+            ("build", "0".to_string()),
+            ("mobi_app", "web".to_string()),
+        ];
+
+        // 3. 构造 msg[content] 参数
+        let content = match message_type {
+            MessageType::Text(text) => json!({ "content": text }).to_string(),
+            MessageType::Image(image) => serde_json::to_string(&image)?,
+        };
+
+        form.push(("msg[content]", content));
+
+        let params = vec![
+            ("w_sender_uid", sender_uid.to_string()),
+            ("w_receiver_id", receiver_id.to_string()),
+            ("w_dev_id", dev_id.clone()),
+        ];
+
+        let signed_params = self.client.get_wbi_sign2(params).await?;
+
+        // 发送请求
+        self.client
+            .post("https://api.vc.bilibili.com/web_im/v1/web_im/send_msg")
+            .query(&signed_params)
+            .form(&form)
+            .send_bpi("发送私信")
+            .await
+    }
 }
 
 #[cfg(test)]

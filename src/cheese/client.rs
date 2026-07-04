@@ -11,7 +11,7 @@ const VIDEO_STREAM_ENDPOINT: &str = "https://api.bilibili.com/pugv/player/web/pl
 /// Cheese course API client.
 #[derive(Clone, Copy)]
 pub struct CheeseClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> CheeseClient<'a> {

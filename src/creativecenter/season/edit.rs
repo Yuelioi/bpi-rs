@@ -1,10 +1,16 @@
-//! 编辑合集小节 API
-//!
-//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
+// 编辑合集小节 API
+//
+// [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::creativecenter::CreativeCenterClient;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 /// 合集信息编辑
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SeasonEdit {
     pub id: u64,       // 合集 ID
@@ -50,6 +56,13 @@ pub struct EpisodeEdit {
     pub order: u64,
 }
 
+#[derive(Serialize)]
+struct EpisodeEditPayload {
+    #[serde(flatten)]
+    section: EpisodeEdit,
+    sorts: Vec<EpisodeSort>,
+}
+
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EpisodeSort {
     pub id: u64,
@@ -78,6 +91,156 @@ pub struct Episode {
     pub charging_pay: i64,
     pub member_first: i64,
     pub limited_free: bool,
+}
+
+impl<'a> CreativeCenterClient<'a> {
+    /// 编辑合集信息
+    ///
+    /// 编辑合集的基本信息，包括标题、封面、简介等。
+    ///
+    /// # 参数
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `season` | SeasonEdit | 合集信息 |
+    /// | `sorts` | `Vec<SeasonSectionSort>` | 小节排序列表 |
+    ///
+    /// # 文档
+    /// [编辑合集信息](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/edit.md#编辑合集信息)
+    pub async fn season_edit(
+        &self,
+        season: SeasonEdit,
+        sorts: Vec<SeasonSectionSort>,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let payload = json!({
+            "season": season,
+            "sorts": sorts
+        });
+
+        self.client
+            .post("https://member.bilibili.com/x2/creative/web/season/edit")
+            .query(&[("csrf", csrf)])
+            .json(&payload)
+            .send_bpi("编辑合集信息")
+            .await
+    }
+    /// 编辑合集小节(需要开启小节功能)
+    ///
+    /// 编辑合集中的小节信息，包括小节标题和视频排序。
+    ///
+    /// # 参数
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `section` | SeasonSectionEdit | 小节信息 |
+    /// | `sorts` | `Vec<SectionSort>` | 视频排序信息 |
+    ///
+    /// # 文档
+    /// [编辑合集小节](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/edit.md#编辑合集小节)
+    pub async fn season_section_edit(
+        &self,
+        section: SeasonSectionEdit,
+        sorts: Vec<SectionSort>,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let payload = json!({
+            "section": section,
+            "sorts": sorts
+        });
+
+        self.client
+            .post("https://member.bilibili.com/x2/creative/web/season/section/edit")
+            .query(&[("csrf", csrf)])
+            .json(&payload)
+            .send_bpi("编辑合集小节")
+            .await
+    }
+
+    /// 编辑小节中的章节
+    ///
+    /// 编辑合集中的小节信息，包括小节标题和视频排序。
+    ///
+    /// # 参数
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `section` | SeasonSectionEdit | 小节信息 |
+    /// | `sorts` | `Vec<SectionSort>` | 视频排序信息 |
+    ///
+    /// # 文档
+    /// [编辑合集小节](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/edit.md#编辑合集小节)
+    pub async fn season_section_episode_edit(
+        &self,
+        section: EpisodeEdit,
+        sorts: Vec<EpisodeSort>,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let payload = EpisodeEditPayload { section, sorts };
+
+        self.client
+            .post("https://member.bilibili.com/x2/creative/web/season/section/episode/edit")
+            .query(&[("csrf", csrf)])
+            .json(&payload)
+            .send_bpi("编辑合集章节")
+            .await
+    }
+
+    /// 切换小节/正常显示
+    ///
+    /// # 参数
+    /// * season_id 合集id
+    pub async fn season_enable_section(
+        &self,
+        season_id: u64,
+        enable: bool,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let params = vec![
+            ("csrf", csrf),
+            ("season_id", season_id.to_string()),
+            ("no_section", (if enable { "0" } else { "1" }).to_string()),
+        ];
+
+        self.client
+            .post("https://member.bilibili.com/x2/creative/web/season/section/switch")
+            .form(&params)
+            .send_bpi("切换 小节/正常 模式")
+            .await
+    }
+    /// 添加视频到小节(需要开启小节功能)
+    ///
+    /// 将视频添加到指定的合集小节中。
+    ///
+    /// # 参数
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `aid` | u64 | 视频 aid |
+    /// | `season_id` | u64 | 合集 ID |
+    /// | `section_id` | u64 | 小节 ID |
+    /// | `title` | &str | 视频标题 |
+    ///
+    /// # 文档
+    /// [编辑投稿视频合集/小节](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/edit.md#编辑投稿视频合集小节)
+    pub async fn season_section_add_episodes(
+        &self,
+        section_id: u64,
+        episodes: Vec<Episode>,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let payload = SectionAddEpisodesRequest {
+            section_id,
+            episodes,
+        };
+
+        self.client
+            .post("https://member.bilibili.com/x2/creative/web/season/section/episodes/add")
+            .json(&payload)
+            .query(&[("csrf", csrf)])
+            .send_bpi("编辑投稿视频合集")
+            .await
+    }
 }
 
 #[cfg(test)]

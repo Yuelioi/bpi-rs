@@ -32,7 +32,7 @@ const UPLOADED_VIDEOS_ENDPOINT: &str = "https://api.bilibili.com/x/space/wbi/arc
 /// User domain API client.
 #[derive(Clone, Copy)]
 pub struct UserClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> UserClient<'a> {

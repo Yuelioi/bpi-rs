@@ -1,14 +1,144 @@
-//! 音频投币&收藏
-//!
-//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md)
-//!
+// 音频投币&收藏
+//
+// [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md)
+//
 
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::audio::AudioClient;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+fn normalize_audio_coin_multiply(multiply: u32) -> u32 {
+    multiply.clamp(1, 2)
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PromptData {
     /// 是否为未关注用户收藏
     prompt: bool,
+}
+
+impl<'a> AudioClient<'a> {
+    /// 收藏音频到收藏夹(同视频收藏夹)
+    ///
+    /// # 参数
+    /// | 名称   | 类型 | 说明       |
+    /// | ------ | ---- | ---------- |
+    /// | `rid`  | u64  | 音频 auid  |
+    /// | `add_media_ids` | `Vec<&str>`|添加的合集ids|
+    /// | `del_media_ids` | `Vec<&str>`|从中删除的合集ids|
+    ///
+    /// 与视频收藏几乎一样
+    pub async fn audio_collection_to_fav(
+        &self,
+        rid: u64,
+        add_media_ids: Option<Vec<&str>>,
+        del_media_ids: Option<Vec<&str>>,
+    ) -> Result<BpiResponse<PromptData>, BpiError> {
+        if add_media_ids.is_none() && del_media_ids.is_none() {
+            return Err(BpiError::InvalidParameter {
+                field: "media_ids",
+                message: "请至少指定一个操作",
+            });
+        }
+        let csrf = self.client.csrf()?;
+        let mut params = HashMap::new();
+
+        params.extend([
+            ("rid", rid.to_string()),
+            ("type", "12".to_string()),
+            ("csrf", csrf),
+        ]);
+
+        if let Some(ids) = add_media_ids {
+            let s = ids
+                .into_iter()
+                .map(|id| id.to_string())
+                .collect::<Vec<_>>()
+                .join(",");
+            params.insert("add_media_ids", s);
+        }
+        if let Some(ids) = del_media_ids {
+            let s = ids
+                .into_iter()
+                .map(|id| id.to_string())
+                .collect::<Vec<_>>()
+                .join(",");
+            params.insert("del_media_ids", s);
+        }
+        let result = self
+            .client
+            .get("https://api.bilibili.com/medialist/gateway/coll/resource/deal")
+            .form(&params)
+            .send_bpi("收藏音频到收藏夹")
+            .await?;
+        Ok(result)
+    }
+
+    /// 查询音频收藏状态
+    ///
+    /// # 参数
+    /// | 名称   | 类型 | 说明       |
+    /// | ------ | ---- | ---------- |
+    /// | `sid`  | u64  | 音频 auid  |
+    /// | `cids` | u64  | 歌单 id    |
+    ///
+    /// # 返回
+    /// | 值       | 说明     |
+    /// | -------- | -------- |
+    /// | `true`   | 操作成功?   |
+    pub async fn audio_collection_to(
+        &self,
+        sid: u64,
+        cids: u64,
+    ) -> Result<BpiResponse<bool>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let result = self
+            .client
+            .get("https://www.bilibili.com/audio/music-service-c/web/collections/songs-coll")
+            .form(&[
+                ("sid", sid.to_string()),
+                ("cids", cids.to_string()),
+                ("csrf", csrf),
+            ])
+            .send_bpi("收藏音频到歌单")
+            .await?;
+        Ok(result)
+    }
+
+    /// 投币音频
+    ///
+    /// # 参数
+    /// | 名称       | 类型 | 说明                  |
+    /// | ---------- | ---- | --------------------- |
+    /// | `sid`      | u64  | 音频 auid             |
+    /// | `multiply` | i32  | 投币数量（最大为 `2`）|
+    ///
+    /// # 返回
+    /// 当前投币数量
+    ///
+    /// # 文档
+    /// [投币音频](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/action.md#投币音频)
+    pub async fn audio_coin(
+        &self,
+        sid: u64,
+        multiply: u32,
+    ) -> Result<BpiResponse<String>, BpiError> {
+        let multiply = normalize_audio_coin_multiply(multiply);
+        let csrf = self.client.csrf()?;
+        self.client
+            .post("https://www.bilibili.com/audio/music-service-c/web/coin/add")
+            .form(&[
+                ("sid", sid.to_string()),
+                ("multiply", multiply.to_string()),
+                ("csrf", csrf),
+            ])
+            .send_bpi("投币音频")
+            .await
+    }
 }
 
 #[cfg(test)]

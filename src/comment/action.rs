@@ -1,10 +1,15 @@
-//! 评论区相关操作 API
-//!
-//! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action)
+// 评论区相关操作 API
+//
+// [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action)
 
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::comment::CommentClient;
 use serde::{Deserialize, Serialize};
 
 /// 评论区类型枚举（部分示例，需按需求扩展）
+
 #[derive(Debug, Clone, Copy, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CommentType {
@@ -49,4 +54,229 @@ pub struct CommentData {
     pub dialog: u64,
     pub dialog_str: String,
     pub success_toast: Option<String>,
+}
+
+impl<'a> CommentClient<'a> {
+    /// 发表评论
+    ///
+    /// 在指定评论区发表评论，支持回复根评论或父评论。
+    ///
+    /// # 参数
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `type` | CommentType | 评论区类型 |
+    /// | `oid` | u64 | 对象 ID |
+    /// | `message` | &str | 评论内容 |
+    /// | `root` | `Option<u64>` | 根评论 rpid，可选 |
+    /// | `parent` | `Option<u64>` | 父评论 rpid，可选 |
+    ///
+    /// # 文档
+    /// [发表评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#发表评论)
+    pub async fn comment_add(
+        &self,
+        r#type: CommentType,
+        oid: u64,
+        message: &str,
+        root: Option<u64>,
+        parent: Option<u64>,
+    ) -> Result<BpiResponse<CommentData>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let mut params = vec![
+            ("type", (r#type as u32).to_string()),
+            ("oid", oid.to_string()),
+            ("message", message.to_string()),
+            ("plat", "1".to_string()), // 默认 web
+            ("csrf", csrf.to_string()),
+        ];
+        if let Some(r) = root {
+            params.push(("root", r.to_string()));
+        }
+        if let Some(p) = parent {
+            params.push(("parent", p.to_string()));
+        }
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/reply/add")
+            .form(&params)
+            .send_bpi("发表评论")
+            .await
+    }
+    /// 点赞评论
+    ///
+    /// # 参数
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `type` | CommentType | 评论区类型 |
+    /// | `oid` | u64 | 对象 ID |
+    /// | `rpid` | u64 | 评论 rpid |
+    /// | `action` | u8 | 操作：0 取消，1 点赞 |
+    ///
+    /// # 文档
+    /// [点赞评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#点赞评论)
+    pub async fn comment_like(
+        &self,
+        r#type: CommentType,
+        oid: u64,
+        rpid: u64,
+        action: u8,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let params = [
+            ("type", (r#type as u32).to_string()),
+            ("oid", oid.to_string()),
+            ("rpid", rpid.to_string()),
+            ("action", action.to_string()), // 0 取消，1 点赞
+            ("csrf", csrf.to_string()),
+        ];
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/reply/action")
+            .form(&params)
+            .send_bpi("点赞评论")
+            .await
+    }
+
+    /// 点踩评论
+    ///
+    /// # 参数
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `type` | CommentType | 评论区类型 |
+    /// | `oid` | u64 | 对象 ID |
+    /// | `rpid` | u64 | 评论 rpid |
+    /// | `action` | u8 | 操作：0 取消，1 点踩 |
+    ///
+    /// # 文档
+    /// [点踩评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#点踩评论)
+    pub async fn comment_dislike(
+        &self,
+        r#type: CommentType,
+        oid: u64,
+        rpid: u64,
+        action: u8,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let params = [
+            ("type", (r#type as u32).to_string()),
+            ("oid", oid.to_string()),
+            ("rpid", rpid.to_string()),
+            ("action", action.to_string()), // 0 取消，1 点踩
+            ("csrf", csrf.to_string()),
+        ];
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/reply/hate")
+            .form(&params)
+            .send_bpi("点踩评论")
+            .await
+    }
+    /// 删除评论
+    ///
+    /// # 参数
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `type` | CommentType | 评论区类型 |
+    /// | `oid` | u64 | 对象 ID |
+    /// | `rpid` | u64 | 评论 rpid |
+    ///
+    /// # 文档
+    /// [删除评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#删除评论)
+    pub async fn comment_delete(
+        &self,
+        r#type: CommentType,
+        oid: u64,
+        rpid: u64,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let params = [
+            ("type", (r#type as u32).to_string()),
+            ("oid", oid.to_string()),
+            ("rpid", rpid.to_string()),
+            ("csrf", csrf.to_string()),
+        ];
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/reply/del")
+            .form(&params)
+            .send_bpi("删除评论")
+            .await
+    }
+    /// 置顶评论
+    ///
+    /// # 参数
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `type` | CommentType | 评论区类型 |
+    /// | `oid` | u64 | 对象 ID |
+    /// | `rpid` | u64 | 评论 rpid |
+    /// | `action` | u8 | 操作：0 取消置顶，1 置顶 |
+    ///
+    /// # 文档
+    /// [置顶评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#置顶评论)
+    pub async fn comment_top(
+        &self,
+        r#type: CommentType,
+        oid: u64,
+        rpid: u64,
+        action: u8,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let params = [
+            ("type", (r#type as u32).to_string()),
+            ("oid", oid.to_string()),
+            ("rpid", rpid.to_string()),
+            ("action", action.to_string()), // 0 取消置顶，1 置顶
+            ("csrf", csrf.to_string()),
+        ];
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/reply/top")
+            .form(&params)
+            .send_bpi("置顶评论")
+            .await
+    }
+
+    /// 举报评论
+    ///
+    /// # 参数
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `type` | CommentType | 评论区类型 |
+    /// | `oid` | u64 | 对象 ID |
+    /// | `rpid` | u64 | 评论 rpid |
+    /// | `reason` | ReportReason | 举报原因 |
+    /// | `content` | `Option<&str>` | 举报内容，可选 |
+    ///
+    /// # 文档
+    /// [举报评论](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/action.md#举报评论)
+    pub async fn comment_report(
+        &self,
+        r#type: CommentType,
+        oid: u64,
+        rpid: u64,
+        reason: ReportReason,
+        content: Option<&str>,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let mut params = vec![
+            ("type", (r#type as u32).to_string()),
+            ("oid", oid.to_string()),
+            ("rpid", rpid.to_string()),
+            ("reason", (reason as u32).to_string()),
+            ("csrf", csrf),
+        ];
+        if let Some(c) = content {
+            params.push(("content", c.to_string()));
+        }
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/reply/report")
+            .form(&params)
+            .send_bpi("举报评论")
+            .await
+    }
 }

@@ -32,7 +32,7 @@ video=9
 vip=3
 ```
 
-These remaining methods are not default safe cleanup targets. They are mutating/write operations, session/login flows, risk-control-sensitive operations, or Probe-blocked read work. In default goal-mode, they remain legacy compatibility-only flat APIs.
+These remaining methods are not default safe cleanup targets. They are mutating/write operations, session/login flows, risk-control-sensitive operations, or unavailable reader-proof work. In default goal-mode, they remain legacy compatibility-only flat APIs.
 
 ## Policy
 
@@ -52,7 +52,7 @@ Future mutating or session batches require:
 - sanitized promoted contracts and fixtures only after review
 - no live side effects in default verification commands
 
-`manga/download-read` remains Probe-blocked. Do not promote contracts or source changes from prior API `code=99` responses. Retry only after a valid current chapter id, web-reader handshake, or other working flow is identified.
+`manga/download-read` is not implemented in the current migration. Do not promote contracts or source changes from prior API `code=99` responses. Reopen it only as a dedicated proof-provider/API-design batch for the current reader `m2`/`m1` fields.
 
 `login` SMS/password/logout/sign-update and other session-sensitive methods require an explicit session-flow batch. They must not be pulled into a generic cleanup batch.
 
@@ -64,7 +64,7 @@ Default goal-mode continuation is exhausted for low-risk direct flat API cleanup
 
 - an explicitly enabled mutating/write module batch
 - an explicitly enabled session/login flow batch
-- a successful current `manga/download-read` Probe path
+- a user-approved `manga/download-read` proof-provider/API-design batch
 - a user-approved API compatibility decision to keep or remove selected legacy flat methods
 
 ## Verification Plan

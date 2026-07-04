@@ -16,7 +16,7 @@ const COUPONS_ENDPOINT: &str = "https://manga.bilibili.com/twirp/user.v1.User/Ge
 /// Manga API client.
 #[derive(Clone, Copy)]
 pub struct MangaClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> MangaClient<'a> {

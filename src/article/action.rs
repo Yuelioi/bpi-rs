@@ -1,12 +1,138 @@
-//! 专栏点赞&投币&收藏
-//!
-//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md)
+// 专栏点赞&投币&收藏
+//
+// [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md)
+
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::article::ArticleClient;
 
 /// 投币响应数据
+
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct CoinResponseData {
     /// 是否点赞成功 true：成功 false：失败 已赞过则附加点赞失败
     pub like: bool,
+}
+
+impl<'a> ArticleClient<'a> {
+    /// 点赞文章
+    ///
+    /// # 参数
+    /// | 名称   | 类型  | 说明                     |
+    /// | ------ | ----- | ------------------------ |
+    /// | `id`   | u64   | 文章 cvid (必要)         |
+    /// | `like` | bool  | 是否点赞，`true` 点赞，`false` 取消点赞 |
+    ///
+    /// # 文档
+    /// [点赞文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#点赞文章)
+    pub async fn article_like(
+        &self,
+        id: u64,
+        like: bool,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let r#type = if like { 1 } else { 2 };
+
+        let result = self
+            .client
+            .post("https://api.bilibili.com/x/article/like")
+            .form(&[
+                ("id", id.to_string()),
+                ("type", r#type.to_string()),
+                ("csrf", csrf),
+            ])
+            .send_bpi("点赞文章")
+            .await?;
+
+        Ok(result)
+    }
+
+    /// 投币文章
+    ///
+    /// # 参数
+    /// | 名称       | 类型  | 说明                        |
+    /// | ---------- | ----- | --------------------------- |
+    /// | `aid`      | i64   | 文章 cvid (必要)            |
+    /// | `upid`     | i64   | 文章作者 mid (必要)         |
+    /// | `multiply` | u32   | 投币数量 (必要，上限为 2)   |
+    ///
+    /// # 文档
+    /// [投币文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#投币文章)
+    pub async fn article_coin(
+        &self,
+        aid: u64,
+        upid: u64,
+        multiply: u32,
+    ) -> Result<BpiResponse<CoinResponseData>, BpiError> {
+        let multiply = multiply.min(2);
+        let csrf = self.client.csrf()?;
+
+        let result = self
+            .client
+            .post("https://api.bilibili.com/x/web-interface/coin/add")
+            .form(&[
+                ("aid", aid.to_string()),
+                ("upid", upid.to_string()),
+                ("multiply", multiply.to_string()),
+                ("avtype", "2".to_string()),
+                ("csrf", csrf),
+            ])
+            .send_bpi("投币文章")
+            .await?;
+
+        Ok(result)
+    }
+
+    /// 收藏文章
+    ///
+    /// # 参数
+    /// | 名称   | 类型  | 说明             |
+    /// | ------ | ----- | ---------------- |
+    /// | `id`   | u64   | 文章 cvid (必要) |
+    ///
+    /// # 文档
+    /// [收藏文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#收藏文章)
+    pub async fn article_favorite(
+        &self,
+        id: u64,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let result = self
+            .client
+            .post("https://api.bilibili.com/x/article/favorites/add")
+            .form(&[("id", id.to_string()), ("csrf", csrf)])
+            .send_bpi("收藏文章")
+            .await?;
+
+        Ok(result)
+    }
+
+    /// 收藏文章
+    ///
+    /// # 参数
+    /// | 名称   | 类型  | 说明             |
+    /// | ------ | ----- | ---------------- |
+    /// | `id`   | i64   | 文章 cvid (必要) |
+    ///
+    /// # 文档
+    /// [收藏文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#收藏文章)
+    pub async fn article_unfavorite(
+        &self,
+        id: i64,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let result = self
+            .client
+            .post("https://api.bilibili.com/x/article/favorites/del")
+            .form(&[("id", id.to_string()), ("csrf", csrf)])
+            .send_bpi("收藏文章")
+            .await?;
+
+        Ok(result)
+    }
 }
 
 #[cfg(test)]

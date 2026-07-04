@@ -16,7 +16,7 @@ const BILI_TICKET_ENDPOINT: &str =
 /// Misc API client.
 #[derive(Clone, Copy)]
 pub struct MiscClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> MiscClient<'a> {

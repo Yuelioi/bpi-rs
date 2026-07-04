@@ -1,6 +1,11 @@
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::historytoview::HistoryToViewClient;
 use serde::{Deserialize, Serialize};
 
 /// 历史记录列表的页面信息
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HistoryCursor {
     /// 最后一项目标 ID
@@ -114,6 +119,74 @@ pub struct HistoryListData {
     pub tab: Vec<HistoryTab>,
     /// 分段历史记录列表
     pub list: Vec<HistoryListItem>,
+}
+
+impl<'a> HistoryToViewClient<'a> {
+    /// 删除历史记录
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
+    ///
+    /// # 参数
+    ///
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `kid` | &str | 记录目标 id |
+    pub async fn history_delete(
+        &self,
+        kid: &str,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let payload = [("kid", kid), ("csrf", &csrf)];
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/history/delete")
+            .form(&payload)
+            .send_bpi("删除历史记录")
+            .await
+    }
+
+    /// 清空历史记录
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
+    pub async fn history_clear(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let payload = [("csrf", &csrf)];
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/history/clear")
+            .form(&payload)
+            .send_bpi("清空历史记录")
+            .await
+    }
+
+    /// 停用历史记录
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
+    ///
+    /// # 参数
+    ///
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `switch` | bool | 是否停用 |
+    pub async fn history_shadow_set(
+        &self,
+        switch: bool,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let payload = [("switch", switch.to_string()), ("csrf", csrf)];
+
+        self.client
+            .post("https://api.bilibili.com/x/v2/history/shadow/set")
+            .form(&payload)
+            .send_bpi("停用历史记录")
+            .await
+    }
 }
 
 #[cfg(test)]

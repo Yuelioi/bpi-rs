@@ -27,7 +27,7 @@ const QR_POLL_ENDPOINT: &str = "https://passport.bilibili.com/x/passport-login/w
 /// Login domain API client.
 #[derive(Clone, Copy)]
 pub struct LoginClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> LoginClient<'a> {

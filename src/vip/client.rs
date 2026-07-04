@@ -7,7 +7,7 @@ const CENTER_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/vip/web/vip_cente
 /// VIP API client.
 #[derive(Clone, Copy)]
 pub struct VipClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> VipClient<'a> {

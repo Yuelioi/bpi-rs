@@ -7,7 +7,7 @@ const SPACE_FEED_ENDPOINT: &str =
 /// Opus API client.
 #[derive(Clone, Copy)]
 pub struct OpusClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> OpusClient<'a> {

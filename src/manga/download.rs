@@ -1,8 +1,14 @@
-//! 购买漫画章节
+//! 漫画图片下载模型
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/Comic.md)
+//!
+//! Status: not implemented.
+//!
+//! The current web reader requires browser-generated proof fields (`m2` for
+//! `GetImageIndex` and `m1` for `ImageToken`). The legacy request shape returns
+//! API `code = 99`, so this module intentionally exposes data models only until
+//! the SDK has an explicit proof-provider boundary.
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 漫画图片信息
@@ -66,13 +72,6 @@ pub struct ImageIndexData {
     pub video: MangaVideo,
 }
 
-/// 图片token请求参数
-#[derive(Debug, Clone, Serialize)]
-pub struct ImageTokenRequest {
-    /// 请求token的图片地址数组
-    pub urls: String,
-}
-
 /// 图片token信息
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct ImageToken {
@@ -80,70 +79,4 @@ pub struct ImageToken {
     pub url: String,
     /// 图片下载需要的token
     pub token: String,
-}
-
-// ================= 实现 =================
-
-impl BpiClient {
-    /// 获取当前话全部图片地址
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
-    #[allow(dead_code)]
-    async fn manga_image_index(&self, ep_id: i32) -> Result<BpiResponse<ImageIndexData>, BpiError> {
-        let params = serde_json::json!({
-            "ep_id": ep_id
-        });
-
-        self.post("https://manga.bilibili.com/twirp/comic.v1.Comic/GetImageIndex")
-            .json(&params)
-            .send_bpi("获取漫画图片索引")
-            .await
-    }
-
-    /// 获取某一图片的token
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `image_path` | &str | 图片相对路径，如 /bfs/... |
-    #[allow(dead_code)]
-    async fn manga_image_token(
-        &self,
-        image_path: &str,
-    ) -> Result<BpiResponse<Vec<ImageToken>>, BpiError> {
-        // 构建请求的图片URL
-        let url = format!("[\"https://i0.hdslb.com{}\"]", image_path);
-
-        let params = ImageTokenRequest { urls: url };
-
-        self.post("https://manga.bilibili.com/twirp/comic.v1.Comic/ImageToken")
-            .json(&params)
-            .send_bpi("获取漫画图片token")
-            .await
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_manga_image_index() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new().expect("client should build");
-
-        let ep_id = 482133;
-
-        let result = bpi.manga_image_index(ep_id).await?;
-        let data = result.into_data()?;
-
-        tracing::info!("{:#?}", data);
-
-        Ok(())
-    }
 }

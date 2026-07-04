@@ -11,7 +11,7 @@ const ONLINE_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/online";
 /// Web widget API client.
 #[derive(Clone, Copy)]
 pub struct WebWidgetClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> WebWidgetClient<'a> {

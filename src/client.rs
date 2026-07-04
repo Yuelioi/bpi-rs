@@ -1031,4 +1031,16 @@ mod tests {
 
         Ok(())
     }
+
+    #[cfg(all(feature = "article", feature = "video", feature = "fav"))]
+    #[test]
+    fn module_clients_expose_legacy_write_capability_futures() -> Result<(), BpiError> {
+        let client = BpiClient::new()?;
+
+        std::mem::drop(client.article().article_like(1, true));
+        std::mem::drop(client.video().video_like(Some(1), None, 1));
+        std::mem::drop(client.fav().fav_folder_add("title", None, Some(1), None));
+
+        Ok(())
+    }
 }

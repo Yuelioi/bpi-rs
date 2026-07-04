@@ -37,7 +37,7 @@ const ELECTROMAGNETIC_INFO_ENDPOINT: &str =
 /// Creative center API client.
 #[derive(Clone, Copy)]
 pub struct CreativeCenterClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> CreativeCenterClient<'a> {

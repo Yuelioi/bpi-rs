@@ -37,7 +37,7 @@ const RECENT_UP_ENDPOINT: &str = "https://api.bilibili.com/x/polymer/web-dynamic
 /// Dynamic API client.
 #[derive(Clone, Copy)]
 pub struct DynamicClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> DynamicClient<'a> {

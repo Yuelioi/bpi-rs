@@ -33,7 +33,7 @@ const VIEW_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/view";
 /// Video domain API client.
 #[derive(Clone, Copy)]
 pub struct VideoClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> VideoClient<'a> {

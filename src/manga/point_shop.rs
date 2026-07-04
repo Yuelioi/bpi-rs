@@ -1,11 +1,14 @@
-//! 积分商城
-//!
-//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/point_shop.md)
-
-use crate::BpiResponse;
-use serde::{Deserialize, Serialize};
+// 积分商城
+//
+// [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/point_shop.md)
 
 // ================= 数据结构 =================
+
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::manga::MangaClient;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct UserPointData {
@@ -87,6 +90,39 @@ pub struct ExchangeRequest {
 pub type ExchangeResponse = BpiResponse<serde_json::Value>;
 
 // ================= 实现 =================
+
+impl<'a> MangaClient<'a> {
+    /// 兑换物品
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
+    ///
+    /// # 参数
+    ///
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `product_id` | i64 | 物品 ID |
+    /// | `product_num` | i32 | 兑换数量 |
+    /// | `point` | i32 | 现价所需点数 |
+    pub async fn manga_point_exchange(
+        &self,
+        product_id: i64,
+        product_num: i32,
+        point: i32,
+    ) -> Result<ExchangeResponse, BpiError> {
+        let req = ExchangeRequest {
+            product_id: product_id.to_string(),
+            product_num,
+            point,
+        };
+
+        self.client
+            .post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/Exchange")
+            .form(&req)
+            .send_bpi("兑换物品")
+            .await
+    }
+}
 
 #[cfg(test)]
 mod tests {

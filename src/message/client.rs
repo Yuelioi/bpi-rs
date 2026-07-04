@@ -13,7 +13,7 @@ const SINGLE_UNREAD_ENDPOINT: &str =
 /// Message API client.
 #[derive(Clone, Copy)]
 pub struct MessageClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> MessageClient<'a> {

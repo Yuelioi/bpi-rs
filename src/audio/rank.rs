@@ -1,6 +1,11 @@
-//! 音频榜单
-//!
-//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md)
+// 音频榜单
+//
+// [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md)
+
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::audio::AudioClient;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -59,6 +64,36 @@ pub struct AudioRankMusicItem {
     pub material_duration: u64,
     pub material_show: u64,
     pub song_type: u64,
+}
+
+impl<'a> AudioClient<'a> {
+    /// 订阅或退订榜单
+    ///
+    /// # 参数
+    /// | 名称      | 类型           | 说明                       |
+    /// | --------- | -------------- | -------------------------- |
+    /// | `state`   | u32            | 操作代码（1：订阅，2：退订）|
+    /// | `list_id` | `Option<u64>`    | 榜单 id（可选）            |
+    ///
+    /// # 文档
+    /// [订阅或退订榜单](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md#订阅或退订榜单)
+    pub async fn audio_rank_subscribe(
+        &self,
+        state: u32,
+        list_id: Option<u64>,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let mut params = vec![("state", state.to_string()), ("csrf", csrf.to_string())];
+        if let Some(id) = list_id {
+            params.push(("list_id", id.to_string()));
+        }
+
+        self.client
+            .post("https://api.bilibili.com/x/copyright-music-publicity/toplist/subscribe/update")
+            .form(&params)
+            .send_bpi("订阅或退订榜单")
+            .await
+    }
 }
 
 #[cfg(test)]

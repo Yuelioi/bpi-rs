@@ -19,7 +19,7 @@ const USER_PUBLIC_LIST_ENDPOINT: &str = "https://api.bilibili.com/x/note/publish
 /// Note API client.
 #[derive(Clone, Copy)]
 pub struct NoteClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> NoteClient<'a> {

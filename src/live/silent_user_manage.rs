@@ -1,7 +1,10 @@
-use serde::{Deserialize, Deserializer, Serialize};
-
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::BpiResult;
 use crate::ids::{Mid, RoomId};
-use crate::{BpiError, BpiResult};
+use crate::live::LiveClient;
+use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct SilentUserInfo {
@@ -225,6 +228,183 @@ where
     T: Deserialize<'de>,
 {
     Ok(Option::<Vec<T>>::deserialize(deserializer)?.unwrap_or_default())
+}
+
+impl<'a> LiveClient<'a> {
+    /// 禁言观众
+    /// tuid: 用户uid
+    /// hour: -1永久 0本场直播
+    /// msg: 禁言理由，一般为禁言的弹幕，选填
+    pub async fn live_add_silent_user(
+        &self,
+        room_id: i64,
+        tuid: i64,
+        hour: i32,
+        msg: Option<String>,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let form = vec![
+            ("room_id", room_id.to_string()),
+            ("tuid", tuid.to_string()),
+            ("msg", msg.unwrap_or_default()),
+            ("mobile_app", "web".to_string()),
+            (
+                "type",
+                if hour == 0 {
+                    "2".to_string()
+                } else {
+                    "1".to_string()
+                },
+            ),
+            ("hour", hour.to_string()),
+            ("csrf_token", csrf.clone()),
+            ("csrf", csrf),
+        ];
+
+        // if let Some(msg) = msg {
+        //     form.push(("msg", msg.to_string()));
+        // }
+
+        self.client
+            .post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/AddSilentUser")
+            .form(&form)
+            .send_bpi("禁言观众")
+            .await
+    }
+
+    /// 解除禁言
+    ///
+    pub async fn live_del_block_user(
+        &self,
+        roomid: i64,
+        tuid: i64,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let form = vec![
+            ("room_id", roomid.to_string()),
+            ("tuid", tuid.to_string()),
+            ("csrf_token", csrf.clone()),
+            ("csrf", csrf),
+        ];
+
+        self.client
+            .post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/DelSilentUser")
+            .form(&form)
+            .send_bpi("解除禁言")
+            .await
+    }
+
+    /// 拉黑观众
+    /// anchor_id：主播uid
+    pub async fn live_add_banned_user(
+        &self,
+        room_id: i64,
+        anchor_id: i64,
+        tuid: i64,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let form = vec![
+            ("tuid", tuid.to_string()),
+            ("anchor_id", anchor_id.to_string()),
+            ("spmid", "444.8.0.0".to_string()),
+            ("csrf_token", csrf.clone()),
+            ("csrf", csrf),
+            ("visit_id", "".to_string()),
+        ];
+
+        self.client
+            .post("https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/AddBlack")
+            .header("Referer", format!("https://live.bilibili.com/{}", room_id))
+            .form(&form)
+            .send_bpi("拉黑观众")
+            .await
+    }
+
+    /// 解除拉黑
+    /// anchor_id：主播uid
+    pub async fn live_del_banned_user(
+        &self,
+        room_id: i64,
+        anchor_id: i64,
+        tuid: i64,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let form = vec![
+            ("tuid", tuid.to_string()),
+            ("anchor_id", anchor_id.to_string()),
+            ("spmid", "444.8.0.0".to_string()),
+            ("csrf_token", csrf.clone()),
+            ("csrf", csrf),
+            ("visit_id", "".to_string()),
+            ("mobi_app", "android".to_string()),
+            ("platform", "android".to_string()),
+        ];
+
+        self.client
+            .post("https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/DelBlack")
+            .header("Referer", format!("https://live.bilibili.com/{}", room_id))
+            .form(&form)
+            .send_bpi("解除拉黑")
+            .await
+    }
+
+    /// 添加屏蔽词
+    ///
+    pub async fn live_add_shield_keyword(
+        &self,
+        room_id: i64,
+        keyword: String,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let form = vec![
+            ("keyword", keyword),
+            ("room_id", room_id.to_string()),
+            ("spmid", "444.8.0.0".to_string()),
+            ("csrf_token", csrf.clone()),
+            ("csrf", csrf),
+            ("visit_id", "".to_string()),
+            ("mobi_app", "android".to_string()),
+            ("platform", "android".to_string()),
+        ];
+
+        self.client
+            .post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/AddShieldKeyword")
+            .form(&form)
+            .send_bpi("添加屏蔽词")
+            .await
+    }
+
+    /// 删除屏蔽词
+    ///
+    pub async fn live_del_shield_keyword(
+        &self,
+        room_id: i64,
+        keyword: String,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let form = vec![
+            ("keyword", keyword),
+            ("room_id", room_id.to_string()),
+            ("spmid", "444.8.0.0".to_string()),
+            ("csrf_token", csrf.clone()),
+            ("csrf", csrf),
+            ("visit_id", "".to_string()),
+            ("mobi_app", "android".to_string()),
+            ("platform", "android".to_string()),
+        ];
+
+        self.client
+            .post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/DelShieldKeyword")
+            .form(&form)
+            .send_bpi("删除屏蔽词")
+            .await
+    }
 }
 
 #[cfg(test)]

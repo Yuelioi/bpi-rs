@@ -17,7 +17,7 @@ const VIDEO_STREAM_ENDPOINT: &str = "https://api.bilibili.com/pgc/player/web/pla
 /// Bangumi API client.
 #[derive(Clone, Copy)]
 pub struct BangumiClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> BangumiClient<'a> {

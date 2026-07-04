@@ -1,6 +1,11 @@
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::electric::ElectricClient;
 use serde::{Deserialize, Serialize};
 
 /// 发送充电留言的请求体
+
 #[derive(Debug, Clone, Serialize)]
 pub struct SendElecMessageBody<'a> {
     pub order_id: &'a str,
@@ -80,6 +85,74 @@ pub struct ElecRemarkDetail {
     pub ctime: u64,
     /// 回复时间毫秒级时间戳
     pub reply_time: u64,
+}
+
+impl<'a> ElectricClient<'a> {
+    /// 发送充电留言
+    ///
+    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
+    ///
+    /// # 参数
+    ///
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `order_id` | &str | 留言 token |
+    /// | `message` | &str | 留言内容 |
+    pub async fn electric_message_send(
+        &self,
+        order_id: &str,
+        message: &str,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let body = [
+            ("order_id", order_id),
+            ("message", message),
+            ("csrf", &csrf),
+        ];
+
+        self.client
+            .post("https://api.bilibili.com/x/ugcpay/trade/elec/message")
+            .form(&body)
+            .send_bpi("发送充电留言")
+            .await
+    }
+
+    /// 回复充电留言
+    ///
+    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
+    ///
+    /// # 参数
+    ///
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `id` | u64 | 留言 id |
+    /// | `msg` | &str | 回复内容 |
+    pub async fn electric_remark_reply(
+        &self,
+        id: u64,
+        msg: &str,
+    ) -> Result<BpiResponse<u64>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let body = [
+            ("id", id.to_string()),
+            ("msg", msg.to_string()),
+            ("csrf", csrf.to_string()),
+        ];
+
+        self.client
+            .post("https://member.bilibili.com/x/web/elec/remark/reply")
+            .form(&body)
+            .send_bpi("回复充电留言")
+            .await
+    }
 }
 
 #[cfg(test)]

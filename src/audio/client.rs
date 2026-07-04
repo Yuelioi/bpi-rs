@@ -37,7 +37,7 @@ const RANK_MUSIC_LIST_ENDPOINT: &str =
 /// Audio API client.
 #[derive(Clone, Copy)]
 pub struct AudioClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> AudioClient<'a> {

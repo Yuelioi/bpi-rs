@@ -1,12 +1,18 @@
-//! B站视频合集相关接口实现
-//!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use crate::{BpiError, BpiResult};
-use serde::{Deserialize, Serialize};
+// B站视频合集相关接口实现
+//
+// [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
 // --- 响应数据结构体 ---
 
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::BpiResult;
+use crate::video::VideoClient;
+use serde::{Deserialize, Serialize};
+
 /// 创建视频列表响应数据
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CreateSeriesResponseData {
     /// 视频列表 ID
@@ -80,9 +86,201 @@ impl CollectionUpdateSeriesParams {
         self.del_aids = Some(aids.into());
         self
     }
+
+    fn form_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut form = vec![
+            ("mid", self.mid.to_string()),
+            ("series_id", self.series_id.to_string()),
+            ("name", self.name.clone()),
+        ];
+
+        if let Some(keywords) = self.keywords.as_ref() {
+            form.push(("keywords", keywords.clone()));
+        }
+        if let Some(description) = self.description.as_ref() {
+            form.push(("description", description.clone()));
+        }
+        if let Some(add_aids) = self.add_aids.as_ref() {
+            form.push(("add_aids", add_aids.clone()));
+        }
+        if let Some(del_aids) = self.del_aids.as_ref() {
+            form.push(("del_aids", del_aids.clone()));
+        }
+
+        form
+    }
+
+    fn into_multipart(self) -> reqwest::multipart::Form {
+        self.form_pairs()
+            .into_iter()
+            .fold(reqwest::multipart::Form::new(), |form, (key, value)| {
+                form.text(key, value)
+            })
+    }
 }
 
 // --- 测试模块 ---
+
+impl<'a> VideoClient<'a> {
+    /// 创建视频列表并添加视频
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
+    ///
+    /// # 参数
+    /// | 名称         | 类型           | 说明                 |
+    /// | ------------ | --------------| -------------------- |
+    /// | `mid`        | u64           | 用户 mid             |
+    /// | `name`       | &str          | 标题                 |
+    /// | `keywords`   | `Option<&str>`  | 关键词，可选         |
+    /// | `description`| `Option<&str>`  | 简介，可选           |
+    /// | `aids`       | `Option<&str>`  | 视频 aid 列表，以`,`分隔，可选 |
+    pub async fn collection_create_and_add_archives(
+        &self,
+        mid: u64,
+        name: &str,
+        keywords: Option<&str>,
+        description: Option<&str>,
+        aids: Option<&str>,
+    ) -> Result<BpiResponse<CreateSeriesResponseData>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let mut form = reqwest::multipart::Form::new()
+            .text("mid", mid.to_string())
+            .text("name", name.to_string());
+
+        if let Some(k) = keywords {
+            form = form.text("keywords", k.to_string());
+        }
+        if let Some(d) = description {
+            form = form.text("description", d.to_string());
+        }
+        if let Some(a) = aids {
+            form = form.text("aids", a.to_string());
+        }
+
+        self.client
+            .post("https://api.bilibili.com/x/series/series/createAndAddArchives")
+            .query(&[("csrf", csrf)])
+            .multipart(form)
+            .send_bpi("创建视频列表并添加视频")
+            .await
+    }
+
+    /// 删除视频列表
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
+    ///
+    /// # 参数
+    /// | 名称         | 类型           | 说明                 |
+    /// | ------------ | --------------| -------------------- |
+    /// | `mid`        | u64           | 用户 mid             |
+    /// | `series_id`  | u64           | 视频列表 ID          |
+    pub async fn collection_delete_series(
+        &self,
+        mid: u64,
+        series_id: u64,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        self.client
+            .post("https://api.bilibili.com/x/series/series/delete")
+            .query(&[
+                ("csrf", csrf),
+                ("mid", mid.to_string()),
+                ("series_id", series_id.to_string()),
+                ("aids", "".to_string()),
+            ])
+            .send_bpi("删除视频列表")
+            .await
+    }
+
+    /// 从视频列表中删除稿件
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
+    ///
+    /// # 参数
+    /// | 名称         | 类型           | 说明                 |
+    /// | ------------ | --------------| -------------------- |
+    /// | `mid`        | u64           | 用户 mid             |
+    /// | `series_id`  | u64           | 视频列表 ID          |
+    /// | `aids`       | &str          | 视频 aid 列表，以`,`分隔 |
+    pub async fn collection_delete_archives_from_series(
+        &self,
+        mid: u64,
+        series_id: u64,
+        aids: &str,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let params = [
+            ("mid", mid.to_string()),
+            ("series_id", series_id.to_string()),
+            ("aids", aids.to_string()),
+        ];
+
+        self.client
+            .post("https://api.bilibili.com/x/series/series/delArchives")
+            .query(&[("csrf", csrf)])
+            .form(&params)
+            .send_bpi("从视频列表中删除稿件")
+            .await
+    }
+
+    /// 添加稿件至视频列表
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
+    ///
+    /// # 参数
+    /// | 名称         | 类型           | 说明                 |
+    /// | ------------ | --------------| -------------------- |
+    /// | `mid`        | u64           | 用户 mid             |
+    /// | `series_id`  | u64           | 视频列表 ID          |
+    /// | `aids`       | &str          | 视频 aid 列表，以`,`分隔 |
+    pub async fn collection_add_archives_to_series(
+        &self,
+        mid: u64,
+        series_id: u64,
+        aids: &str,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+
+        let params = [
+            ("mid", mid.to_string()),
+            ("series_id", series_id.to_string()),
+            ("aids", aids.to_string()),
+        ];
+
+        self.client
+            .post("https://api.bilibili.com/x/series/series/addArchives")
+            .query(&[("csrf", csrf)])
+            .form(&params)
+            .send_bpi("添加稿件至视频列表")
+            .await
+    }
+
+    /// 编辑视频列表信息
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
+    ///
+    pub async fn collection_update_series(
+        &self,
+        params: CollectionUpdateSeriesParams,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let form = params.into_multipart();
+
+        self.client
+            .post("https://api.bilibili.com/x/series/series/update")
+            .query(&[("csrf", csrf)])
+            .multipart(form)
+            .send_bpi("编辑视频列表信息")
+            .await
+    }
+}
 
 #[cfg(test)]
 mod tests {

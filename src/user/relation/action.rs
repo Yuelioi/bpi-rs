@@ -1,13 +1,19 @@
-//! B站用户关系操作相关接口
-//!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use serde::{Deserialize, Serialize};
+// B站用户关系操作相关接口
+//
+// [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
 
 // --- 响应数据结构体 ---
+
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::user::UserClient;
+use serde::{Deserialize, Serialize};
 
 /// 操作用户关系响应数据
 ///
 /// 该接口的响应 `data` 字段为 `null`，因此我们使用空元组 `()` 来表示。
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ModifyRelationResponseData;
 
@@ -80,6 +86,42 @@ pub enum RelationSource {
 }
 
 // --- 测试模块 ---
+
+impl<'a> UserClient<'a> {
+    /// 操作用户关系
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+    ///
+    /// # 参数
+    /// | 名称      | 类型                | 说明                       |
+    /// | --------- | -------------------| -------------------------- |
+    /// | `fid`     | u64                | 目标用户 mid               |
+    /// | `action`  | RelationAction     | 操作代码，见 RelationAction 枚举 |
+    /// | `source`  | `Option<RelationSource>` | 关注来源代码，可选，见 RelationSource 枚举 |
+    pub async fn user_modify_relation(
+        &self,
+        fid: u64,
+        action: RelationAction,
+        source: Option<RelationSource>,
+    ) -> Result<BpiResponse<()>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let mut form = reqwest::multipart::Form::new()
+            .text("fid", fid.to_string())
+            .text("act", (action as u8).to_string())
+            .text("csrf", csrf.to_string());
+
+        if let Some(s) = source {
+            form = form.text("re_src", (s as u32).to_string());
+        }
+
+        self.client
+            .post("https://api.bilibili.com/x/relation/modify")
+            .multipart(form)
+            .send_bpi("操作用户关系")
+            .await
+    }
+}
 
 #[cfg(test)]
 mod tests {}

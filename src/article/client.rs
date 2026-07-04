@@ -15,7 +15,7 @@ const ARTICLES_ENDPOINT: &str = "https://api.bilibili.com/x/article/list/web/art
 /// Article API client.
 #[derive(Clone, Copy)]
 pub struct ArticleClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> ArticleClient<'a> {

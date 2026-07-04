@@ -1,13 +1,17 @@
-//! 签到
-//!
-//! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/ClockIn.md)
-
-use crate::BpiResponse;
-use serde::{Deserialize, Serialize};
+// 签到
+//
+// [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/ClockIn.md)
 
 // ================= 数据结构 =================
 
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::manga::MangaClient;
+use serde::{Deserialize, Serialize};
+
 /// 补签请求参数
+
 #[derive(Debug, Clone, Serialize)]
 pub struct ClockInMakeupRequest {
     /// 补签类型
@@ -59,6 +63,46 @@ pub struct ClockInInfoData {
 pub type ClockInInfoResponse = BpiResponse<ClockInInfoData>;
 
 // ================= 实现 =================
+
+impl<'a> MangaClient<'a> {
+    /// 漫画签到
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
+    pub async fn manga_clock_in(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let params = [("platform", "android")];
+        self.client
+            .post("https://manga.bilibili.com/twirp/activity.v1.Activity/ClockIn")
+            .form(&params)
+            .send_bpi("漫画签到")
+            .await
+    }
+
+    /// 漫画补签
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
+    ///
+    /// # 参数
+    ///
+    /// | 名称 | 类型 | 说明 |
+    /// | ---- | ---- | ---- |
+    /// | `date` | &str | 补签日期，YYYY-MM-DD |
+    pub async fn manga_clock_in_makeup(
+        &self,
+        date: &str,
+    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        let params = ClockInMakeupRequest {
+            r#type: 0,
+            date: date.to_string(),
+        };
+        self.client
+            .post("https://manga.bilibili.com/twirp/activity.v1.Activity/ClockIn?platform=android")
+            .json(&params)
+            .send_bpi("漫画补签")
+            .await
+    }
+}
 
 #[cfg(test)]
 mod tests {

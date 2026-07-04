@@ -33,10 +33,101 @@
 ## Current Working State
 
 - Branch: `feat/bpi-rs-0.2-migration`
-- Last committed batch: `472b145 feat(api): finalize module client migration cleanup`
-- Current intended batch: `flat-api/remove-remaining-legacy-flat-methods`
-- Current batch type: Explicit breaking API compatibility source batch.
-- Current commit policy: commit after the verified removal batch is staged with only intended files.
+- Last committed batch: `45400bb refactor(api): remove remaining legacy flat methods`
+- Current intended batch: `write-api/module-client-legacy-write-surface`
+- Current batch type: Explicit non-Probe module-client write compatibility source batch.
+- Current commit policy: commit only after human approval; batch is verified in the working tree.
+
+## Batch 32: `write-api/module-client-legacy-write-surface`
+
+**Type:** Explicit non-Probe module-client write compatibility source batch.
+
+**Status:** Implemented and verified in the working tree; commit pending human approval.
+
+**Why this batch:** The old direct `BpiClient` flat methods were removed in Batch 31, but several of those methods were the only public SDK entry points for write/session/mutating flows. Before deleting or reshaping more old code, the new module-client API needs to preserve that capability surface. This batch moves the old method bodies onto domain clients while keeping direct `impl BpiClient` public async inventory at `COUNT=0`.
+
+**Scope:**
+
+- Reintroduce the old write/session/mutating capability on module clients only, preserving old method names and signatures for compatibility parity, for example `client.video().video_like(...)` and `client.fav().fav_folder_add(...)`.
+- Do not restore direct `BpiClient::...` flat methods.
+- Make domain-client internals accessible inside sibling modules where needed.
+- Keep helper functions required by the migrated write methods.
+- Do not execute mutating endpoints or Probe requests.
+- Keep `account.toml` local-only; it contains normal/vip credentials and must not be displayed or committed.
+- Keep `flightdeck/cockpit.md` unchanged.
+
+**Excluded:**
+
+- No live mutating execution.
+- No Probe run or contract promotion.
+- No rename pass to idiomatic short names such as `client.video().like(...)`; that should be a separate alias/design batch.
+- No `flightdeck/cockpit.md` update.
+
+**TDD evidence:**
+
+```text
+RED: cargo test --all-features --lib module_clients_expose_legacy_write_capability_futures --quiet
+  failed because `ArticleClient`, `VideoClient`, and `FavClient` did not expose representative old write methods.
+
+GREEN: cargo test --all-features --lib module_clients_expose_legacy_write_capability_futures --quiet
+  passed after moving the old write capability to module clients.
+```
+
+**Inventory evidence:**
+
+```text
+direct_bpi_client_public_async_count=0
+old module write/session/mutating public async count from 45400bb^ target files = 117
+new module write/session/mutating public async count in target files = 117
+```
+
+**Files:**
+
+- Modify: `src/**/client.rs` where module clients need crate-visible root client access.
+- Modify: write/session/mutating source modules under article, audio, bangumi, comment, creativecenter, danmaku, dynamic, electric, fav, historytoview, live, login, manga, message, note, user, video, and vip.
+- Modify: `src/client.rs` for the module-client capability RED/GREEN test.
+- Modify: `flightdeck/work/bpi-rs-0.2-migration/index.md`.
+- Modify: `flightdeck/work/bpi-rs-0.2-migration/plans/batch-todolist.md`.
+- Modify: `flightdeck/work/bpi-rs-0.2-migration/migration-status.md` local only, do not commit.
+
+**Verification plan:**
+
+```powershell
+cargo test --all-features --lib module_clients_expose_legacy_write_capability_futures --quiet
+cargo check --all-features
+cargo clippy --all-targets --all-features --locked -- -D warnings
+cargo fmt --check
+cargo test --all-features --lib --quiet
+cargo check --all-features --examples
+cargo check --all-features --bins
+cargo test --doc
+git diff --check
+git diff -- flightdeck/cockpit.md
+PowerShell direct BpiClient public async inventory count
+PowerShell old/new target-file public async inventory count
+```
+
+**Observed verification:**
+
+```text
+cargo test --all-features --lib module_clients_expose_legacy_write_capability_futures --quiet: pass
+cargo check --all-features: pass
+cargo clippy --all-targets --all-features --locked -- -D warnings: pass
+cargo fmt --check: pass
+cargo test --all-features --lib --quiet: pass (915 passed, 0 failed, 196 ignored)
+cargo check --all-features --examples: pass
+cargo check --all-features --bins: pass
+cargo test --doc: pass
+git diff --check: pass with only Windows LF/CRLF conversion warnings
+direct BpiClient public async inventory: COUNT=0
+old/new target-file public async inventory: 117/117
+```
+
+**Notes:**
+
+- This is a capability-preserving module-client migration, not a Probe-backed endpoint validation batch.
+- The method names intentionally remain old-style in this batch to reduce behavioral and review risk. A later alias batch can add cleaner idiomatic names and deprecate old-style module method names if desired.
+- `account.toml` exists locally with normal/vip profile keys, remains ignored, and was not displayed or committed.
 
 ## Batch 31: `flat-api/remove-remaining-legacy-flat-methods`
 
@@ -567,9 +658,16 @@ git show --stat --oneline --decorate --no-renames HEAD
 
 ### Candidate: `manga/download-read`
 
-**Type:** Probe-backed only if a valid current chapter/flow/handshake is identified.
+**Type:** Not implemented in the current migration.
 
-**Current state:** Probe-blocked by repeated API `code = 99`. Do not retry blindly.
+**Current state:** Deferred. Browser/Playwright proved the reader can fetch both the
+free and VIP-owned sample chapters, but the SDK cannot generate the required current
+reader proof fields (`m2` for `GetImageIndex`, `m1` for `ImageToken`). The old private
+helper implementation has been removed from `src/manga/download.rs`; that module now
+keeps response models only and documents the feature as not implemented.
+
+Do not select this as normal continuation work. Reopen it only as a dedicated
+proof-provider/API-design batch.
 
 ### Candidate: gated mutating batches
 

@@ -59,7 +59,7 @@ const WEB_HEART_BEAT_ENDPOINT: &str =
 /// Live API client.
 #[derive(Clone, Copy)]
 pub struct LiveClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> LiveClient<'a> {

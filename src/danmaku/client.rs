@@ -23,7 +23,7 @@ const XML_LIST_SO_ENDPOINT: &str = "https://api.bilibili.com/x/v1/dm/list.so";
 /// Danmaku API client.
 #[derive(Clone, Copy)]
 pub struct DanmakuClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> DanmakuClient<'a> {

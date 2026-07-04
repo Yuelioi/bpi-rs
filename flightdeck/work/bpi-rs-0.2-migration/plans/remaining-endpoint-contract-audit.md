@@ -37,9 +37,12 @@ top-level status rows:
 
 The remaining endpoint work falls into these buckets:
 
-- **Probe-blocked read:** `manga/download-read`, specifically private helper endpoints in
-  `src/manga/download.rs` (`GetImageIndex` and `ImageToken`). Repeated real Probe attempts
-  returned HTTP 200/API `code = 99`, so no contract should be promoted yet.
+- **Not implemented:** `manga/download-read`, specifically the current reader-backed
+  `GetImageIndex` and `ImageToken` path. Repeated old-shape real Probe attempts returned
+  HTTP 200/API `code = 99`; later browser/Playwright research proved the pages are
+  readable only when the frontend supplies generated `m2`/`m1` proof fields. The old
+  private helper implementation has been removed, and no contract should be promoted
+  without a dedicated proof-provider/API-design batch.
 - **Mutating or account-state-changing:** article actions, audio action/subscribe,
   bangumi follow, comment actions, creativecenter season/edit/upload/opus mutations,
   danmaku send/recall/thumb/report/edit/buy, dynamic publish/actions, electric B coin and
@@ -61,8 +64,7 @@ Do not start a guessed contract batch just to keep endpoint churn moving. The ne
 endpoint continuation still needs either:
 
 - a newly identified safe read endpoint not covered above;
-- a new valid `manga/download-read` chapter/flow/handshake that moves `code = 99` to a
-  successful Probe result; or
+- a dedicated `manga/download-read` proof-provider/API-design batch; or
 - explicit user selection of a gated mutating/flow-sensitive batch with the required
   safety controls.
 

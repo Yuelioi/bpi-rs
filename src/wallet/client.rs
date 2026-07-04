@@ -6,7 +6,7 @@ const INFO_ENDPOINT: &str = "https://pay.bilibili.com/paywallet/wallet/getUserWa
 /// Wallet API client.
 #[derive(Clone, Copy)]
 pub struct WalletClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> WalletClient<'a> {

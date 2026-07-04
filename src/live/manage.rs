@@ -1,9 +1,15 @@
+// --- 直播间管理 API 结构体 ---
+
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::live::LiveClient;
+use reqwest::multipart::Form;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-// --- 直播间管理 API 结构体 ---
-
 /// 开通直播间响应数据
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CreateRoomData {
     #[serde(rename = "roomID")]
@@ -76,6 +82,177 @@ pub struct PcLiveVersionData {
     pub content: String,
     pub download_url: String,
     pub hdiffpatch_switch: u8,
+}
+
+impl<'a> LiveClient<'a> {
+    /// 开通直播间
+    pub async fn live_create_room(&self) -> Result<BpiResponse<CreateRoomData>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let form = Form::new()
+            .text("platform", "web")
+            .text("visit_id", "")
+            .text("csrf", csrf.clone())
+            .text("csrf_token", csrf);
+
+        self.client
+            .post("https://api.live.bilibili.com/xlive/app-blink/v1/preLive/CreateRoom")
+            .multipart(form)
+            .send_bpi("开通直播间")
+            .await
+    }
+
+    /// 更新直播间信息
+    ///
+    /// # 参数
+    /// * `room_id` - 直播间 ID
+    /// * `title` - 标题，可选
+    /// * `area_id` - 分区 ID，可选
+    /// * `add_tag` - 要添加的标签，可选
+    /// * `del_tag` - 要删除的标签，可选
+    pub async fn live_update_room_info(
+        &self,
+        room_id: u64,
+        title: Option<&str>,
+        area_id: Option<u64>,
+        add_tag: Option<&str>,
+        del_tag: Option<&str>,
+    ) -> Result<BpiResponse<UpdateRoomData>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let mut form = Form::new()
+            .text("room_id", room_id.to_string())
+            .text("csrf", csrf.clone())
+            .text("csrf_token", csrf);
+
+        if let Some(t) = title {
+            form = form.text("title", t.to_string());
+        }
+        if let Some(a) = area_id {
+            form = form.text("area_id", a.to_string());
+        }
+        if let Some(a_tag) = add_tag {
+            form = form.text("add_tag", a_tag.to_string());
+        }
+        if let Some(d_tag) = del_tag {
+            form = form.text("del_tag", d_tag.to_string());
+        }
+
+        self.client
+            .post("https://api.live.bilibili.com/room/v1/Room/update")
+            .multipart(form)
+            .send_bpi("更新直播间信息")
+            .await
+    }
+
+    /// 开始直播 (目前仅支持直播姬开播)
+    ///
+    /// # 参数
+    /// * `room_id` - 直播间 ID
+    /// * `area_v2` - 直播分区 ID
+    /// * `platform` - 直播平台，如 "pc"
+    #[allow(dead_code)]
+    async fn live_start(
+        &self,
+        room_id: u64,
+        area_v2: u64,
+        platform: &str,
+    ) -> Result<BpiResponse<StartLiveData>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let form = Form::new()
+            .text("room_id", room_id.to_string())
+            .text("area_v2", area_v2.to_string())
+            .text("platform", platform.to_string())
+            .text("csrf", csrf.clone())
+            .text("csrf_token", csrf);
+
+        self.client
+            .post("https://api.live.bilibili.com/room/v1/Room/startLive")
+            .multipart(form)
+            .send_bpi("开始直播")
+            .await
+    }
+
+    /// 关闭直播
+    ///
+    /// # 参数
+    /// * `room_id` - 直播间 ID
+    /// * `platform` - 直播平台，如 "pc_link"
+    pub async fn live_stop(
+        &self,
+        room_id: u64,
+        platform: &str,
+    ) -> Result<BpiResponse<StopLiveData>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let form = Form::new()
+            .text("platform", platform.to_string())
+            .text("room_id", room_id.to_string())
+            .text("csrf", csrf.clone())
+            .text("csrf_token", csrf);
+
+        self.client
+            .post("https://api.live.bilibili.com/room/v1/Room/stopLive")
+            .multipart(form)
+            .send_bpi("关闭直播")
+            .await
+    }
+
+    /// 预更新直播间信息
+    ///
+    /// # 参数
+    /// * `title` - 标题，可选
+    /// * `cover` - 封面 URL，可选
+    pub async fn live_update_pre_live_info(
+        &self,
+        title: Option<&str>,
+        cover: Option<&str>,
+    ) -> Result<BpiResponse<UpdatePreLiveInfoData>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let mut form = Form::new()
+            .text("platform", "web")
+            .text("mobi_app", "web")
+            .text("build", "1")
+            .text("csrf", csrf.clone())
+            .text("csrf_token", csrf);
+
+        if let Some(t) = title {
+            form = form.text("title", t.to_string());
+        }
+        if let Some(c) = cover {
+            form = form.text("cover", c.to_string());
+        }
+
+        self.client
+            .post("https://api.live.bilibili.com/xlive/app-blink/v1/preLive/UpdatePreLiveInfo")
+            .multipart(form)
+            .send_bpi("预更新直播间信息")
+            .await
+    }
+
+    /// 更新直播间公告
+    ///
+    /// # 参数
+    /// * `room_id` - 直播间 ID
+    /// * `uid` - 用户ID
+    /// * `content` - 公告内容
+    pub async fn live_update_room_news(
+        &self,
+        room_id: u64,
+        uid: u64,
+        content: &str,
+    ) -> Result<BpiResponse<Value>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let form = Form::new()
+            .text("room_id", room_id.to_string())
+            .text("uid", uid.to_string())
+            .text("content", content.to_string())
+            .text("csrf", csrf.clone())
+            .text("csrf_token", csrf);
+
+        self.client
+            .post("https://api.live.bilibili.com/xlive/app-blink/v1/index/updateRoomNews")
+            .multipart(form)
+            .send_bpi("更新直播间公告")
+            .await
+    }
 }
 
 #[cfg(test)]

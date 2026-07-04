@@ -8,7 +8,7 @@ const LIST_ENDPOINT: &str = "https://api.bilibili.com/x/activity/page/list";
 /// Activity API client.
 #[derive(Clone, Copy)]
 pub struct ActivityClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> ActivityClient<'a> {

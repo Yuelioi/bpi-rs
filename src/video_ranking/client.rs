@@ -17,7 +17,7 @@ use crate::{BilibiliRequest, BpiClient, BpiResult};
 /// Video ranking API client.
 #[derive(Clone, Copy)]
 pub struct VideoRankingClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> VideoRankingClient<'a> {

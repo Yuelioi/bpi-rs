@@ -1,11 +1,17 @@
-//! B站用户空间相关接口
-//!
-//! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use serde::{Deserialize, Serialize};
+// B站用户空间相关接口
+//
+// [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
 
 // --- 响应数据结构体 ---
 
+use crate::BilibiliRequest;
+use crate::BpiError;
+use crate::BpiResponse;
+use crate::user::UserClient;
+use serde::{Deserialize, Serialize};
+
 /// 用户空间公告响应数据
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct SpaceNoticeResponseData(pub String);
 
@@ -206,6 +212,38 @@ pub struct BangumiFollowListResponseData {
 // --- API 实现 ---
 
 // --- 测试模块 ---
+
+impl<'a> UserClient<'a> {
+    /// 修改空间公告
+    ///
+    /// # 文档
+    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
+    ///
+    /// # 参数
+    /// | 名称    | 类型           | 说明                 |
+    /// | ------- | --------------| -------------------- |
+    /// | `notice`| `Option<&str>`  | 公告内容，少于150字  |
+    pub async fn user_space_notice_set(
+        &self,
+        notice: Option<&str>,
+    ) -> Result<BpiResponse<()>, BpiError> {
+        let csrf = self.client.csrf()?;
+        let mut form = reqwest::multipart::Form::new().text("csrf", csrf.to_string());
+
+        if let Some(n) = notice {
+            if n.len() > 150 {
+                return Err(BpiError::parse("公告内容超出150字符限制"));
+            }
+            form = form.text("notice", n.to_string());
+        }
+
+        self.client
+            .post("https://api.bilibili.com/x/space/notice/set")
+            .multipart(form)
+            .send_bpi("修改空间公告")
+            .await
+    }
+}
 
 #[cfg(test)]
 mod tests {

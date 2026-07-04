@@ -17,7 +17,7 @@ const HOTWORDS_ENDPOINT: &str = "https://s.search.bilibili.com/main/hotword";
 /// Search API client.
 #[derive(Clone, Copy)]
 pub struct SearchClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> SearchClient<'a> {

@@ -10,7 +10,7 @@ const TOVIEW_LIST_ENDPOINT: &str = "https://api.bilibili.com/x/v2/history/toview
 /// History and to-view API client.
 #[derive(Clone, Copy)]
 pub struct HistoryToViewClient<'a> {
-    client: &'a BpiClient,
+    pub(crate) client: &'a BpiClient,
 }
 
 impl<'a> HistoryToViewClient<'a> {
