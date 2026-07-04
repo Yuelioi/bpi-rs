@@ -1,6 +1,3 @@
-#[cfg(test)]
-use crate::historytoview::params::HistoryListParams;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 /// 历史记录列表的页面信息
@@ -119,78 +116,12 @@ pub struct HistoryListData {
     pub list: Vec<HistoryListItem>,
 }
 
-impl BpiClient {
-    /// 删除历史记录
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `kid` | &str | 记录目标 id |
-    pub async fn history_delete(
-        &self,
-        kid: &str,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.csrf()?;
-
-        let payload = [("kid", kid), ("csrf", &csrf)];
-
-        self.post("https://api.bilibili.com/x/v2/history/delete")
-            .form(&payload)
-            .send_bpi("删除历史记录")
-            .await
-    }
-
-    /// 清空历史记录
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
-    pub async fn history_clear(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.csrf()?;
-
-        let payload = [("csrf", &csrf)];
-
-        self.post("https://api.bilibili.com/x/v2/history/clear")
-            .form(&payload)
-            .send_bpi("清空历史记录")
-            .await
-    }
-
-    /// 停用历史记录
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `switch` | bool | 是否停用 |
-    pub async fn history_shadow_set(
-        &self,
-        switch: bool,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.csrf()?;
-
-        let payload = [("switch", switch.to_string()), ("csrf", csrf)];
-
-        self.post("https://api.bilibili.com/x/v2/history/shadow/set")
-            .form(&payload)
-            .send_bpi("停用历史记录")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
     use crate::{ApiEnvelope, BpiResult};
-    use tracing::info;
 
     fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
         let bytes = match endpoint {
@@ -206,53 +137,6 @@ mod tests {
         };
 
         EndpointContract::from_slice(bytes)
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_history_get_list() {
-        let bpi = BpiClient::new().expect("client should build");
-        let params = HistoryListParams::new()
-            .with_page_size(10)
-            .expect("fixture page size should be valid");
-        let resp = bpi.historytoview().history_list(params).await;
-
-        info!("{:?}", resp);
-        assert!(resp.is_ok());
-
-        let data = resp.unwrap();
-        info!("cursor: {:?}", data.cursor);
-        info!("tabs: {:?}", data.tab);
-        info!("first item: {:?}", data.list.first());
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_history_shadow_set_and_get() {
-        let bpi = BpiClient::new().expect("client should build");
-
-        // 获取当前状态
-        let current_status = bpi.historytoview().history_shadow().await.unwrap();
-
-        // 切换状态
-        let new_status = !current_status;
-        let set_resp = bpi.history_shadow_set(new_status).await;
-        info!("Set status to {}: {:?}", new_status, set_resp);
-        assert!(set_resp.is_ok());
-
-        // 再次获取状态，验证是否已切换
-        let new_status_resp = bpi.historytoview().history_shadow().await;
-        info!("New status: {:?}", new_status_resp);
-        assert!(new_status_resp.is_ok());
-        assert_eq!(new_status_resp.unwrap(), new_status);
-
-        // 恢复原始状态
-        let set_back_resp = bpi.history_shadow_set(current_status).await;
-        info!(
-            "Set back to original status {}: {:?}",
-            current_status, set_back_resp
-        );
-        assert!(set_back_resp.is_ok());
     }
 
     #[test]

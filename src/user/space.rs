@@ -1,7 +1,6 @@
 //! B站用户空间相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
@@ -206,136 +205,19 @@ pub struct BangumiFollowListResponseData {
 
 // --- API 实现 ---
 
-impl BpiClient {
-    /// 修改空间公告
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称    | 类型           | 说明                 |
-    /// | ------- | --------------| -------------------- |
-    /// | `notice`| `Option<&str>`  | 公告内容，少于150字  |
-    pub async fn user_space_notice_set(
-        &self,
-        notice: Option<&str>,
-    ) -> Result<BpiResponse<()>, BpiError> {
-        let csrf = self.csrf()?;
-        let mut form = reqwest::multipart::Form::new().text("csrf", csrf.to_string());
-
-        if let Some(n) = notice {
-            if n.len() > 150 {
-                return Err(BpiError::parse("公告内容超出150字符限制"));
-            }
-            form = form.text("notice", n.to_string());
-        }
-
-        self.post("https://api.bilibili.com/x/space/notice/set")
-            .multipart(form)
-            .send_bpi("修改空间公告")
-            .await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ids::Mid;
+
     use crate::probe::contract::HttpMethod;
     use crate::probe::endpoint_contract::EndpointContract;
-    use crate::user::params::{UserBangumiFollowListParams, UserSpaceNoticeParams};
-    use crate::{ApiEnvelope, BpiResult};
-    use tracing::info;
+
+    use crate::{ApiEnvelope, BpiError, BpiResult};
 
     // 请在运行测试前设置环境变量 `BPI_COOKIE`，以包含 SESSDATA 等登录信息
     // mid 根据实际情况修改
-
-    const TEST_MID: u64 = 4279370;
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_user_space_notice() -> Result<(), BpiError> {
-        if std::env::var_os("BPI_LIVE_TEST").is_none() {
-            return Ok(());
-        }
-
-        let bpi = BpiClient::new().expect("client should build");
-        let data = bpi
-            .user()
-            .space_notice(UserSpaceNoticeParams::new(Mid::new(TEST_MID)?))
-            .await?;
-
-        info!("空间公告: {:?}", data);
-
-        Ok(())
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_user_space_notice_set() -> Result<(), BpiError> {
-        if std::env::var_os("BPI_LIVE_TEST").is_none()
-            || std::env::var_os("BPI_MUTATING_TEST").is_none()
-            || std::env::var_os("BPI_COOKIE").is_none()
-        {
-            return Ok(());
-        }
-
-        let bpi = BpiClient::new().expect("client should build");
-        let notice = "这是一个通过 API 设置的测试公告。";
-        let resp = bpi.user_space_notice_set(Some(notice)).await?;
-
-        info!("设置空间公告结果: {:?}", resp);
-
-        // 验证设置后内容
-        let get_data = bpi
-            .user()
-            .space_notice(UserSpaceNoticeParams::new(Mid::new(TEST_MID)?))
-            .await?;
-        assert_eq!(get_data.content, notice);
-        info!("验证公告内容成功");
-
-        // 删除公告
-        let delete_resp = bpi.user_space_notice_set(None).await?;
-        info!("删除空间公告结果: {:?}", delete_resp);
-        assert_eq!(delete_resp.code, 0);
-
-        // 验证删除后内容
-        let get_data_after_delete = bpi
-            .user()
-            .space_notice(UserSpaceNoticeParams::new(Mid::new(TEST_MID)?))
-            .await?;
-        assert!(get_data_after_delete.content.is_empty());
-        info!("验证删除公告内容成功");
-
-        Ok(())
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_user_bangumi_follow_list() -> Result<(), BpiError> {
-        if std::env::var_os("BPI_LIVE_TEST").is_none() {
-            return Ok(());
-        }
-
-        let bpi = BpiClient::new().expect("client should build");
-        let data = bpi
-            .user()
-            .bangumi_follow_list(
-                UserBangumiFollowListParams::new(Mid::new(TEST_MID)?)
-                    .with_page(1)
-                    .with_page_size(15)?,
-            )
-            .await?;
-
-        info!("追番列表: {:?}", data);
-        assert_eq!(data.page, 1);
-        assert_eq!(data.page_size, 15);
-        assert!(!data.items.is_empty());
-
-        Ok(())
-    }
 
     fn public_read_contract(endpoint: &str) -> BpiResult<EndpointContract> {
         let bytes: &[u8] = match endpoint {

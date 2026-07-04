@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
-
 /// 发送充电留言的请求体
 #[derive(Debug, Clone, Serialize)]
 pub struct SendElecMessageBody<'a> {
@@ -84,72 +82,6 @@ pub struct ElecRemarkDetail {
     pub reply_time: u64,
 }
 
-impl BpiClient {
-    /// 发送充电留言
-    ///
-    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `order_id` | &str | 留言 token |
-    /// | `message` | &str | 留言内容 |
-    pub async fn electric_message_send(
-        &self,
-        order_id: &str,
-        message: &str,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.csrf()?;
-
-        let body = [
-            ("order_id", order_id),
-            ("message", message),
-            ("csrf", &csrf),
-        ];
-
-        self.post("https://api.bilibili.com/x/ugcpay/trade/elec/message")
-            .form(&body)
-            .send_bpi("发送充电留言")
-            .await
-    }
-
-    /// 回复充电留言
-    ///
-    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `id` | u64 | 留言 id |
-    /// | `msg` | &str | 回复内容 |
-    pub async fn electric_remark_reply(
-        &self,
-        id: u64,
-        msg: &str,
-    ) -> Result<BpiResponse<u64>, BpiError> {
-        let csrf = self.csrf()?;
-
-        let body = [
-            ("id", id.to_string()),
-            ("msg", msg.to_string()),
-            ("csrf", csrf.to_string()),
-        ];
-
-        self.post("https://member.bilibili.com/x/web/elec/remark/reply")
-            .form(&body)
-            .send_bpi("回复充电留言")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -157,7 +89,6 @@ mod tests {
     use crate::probe::endpoint_contract::EndpointContract;
     use crate::probe::flow::ProbeFlow;
     use crate::{ApiEnvelope, BpiResult};
-    use tracing::info;
 
     fn remark_list_contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
@@ -181,54 +112,6 @@ mod tests {
         ProbeFlow::from_slice(include_bytes!(
             "../../tests/contracts/electric/private-read/remark-detail/flow/vip.contract.json"
         ))
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    /// 未测试
-    async fn test_send_elec_message() {
-        let bpi = BpiClient::new().expect("client should build");
-        // 替换为有效的 order_id 和留言
-        let resp = bpi.electric_message_send("ORDER_ID_HERE", "测试留言").await;
-        info!("响应: {:?}", resp);
-        assert!(resp.is_ok());
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_get_elec_remark_list() {
-        let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .electric()
-            .remark_list(Some(1), Some(10), None, None)
-            .await;
-        info!("响应: {:?}", resp);
-        assert!(resp.is_ok());
-
-        if let Ok(data) = resp {
-            info!("留言总记录数: {}", data.pager.total);
-            info!("当前页留言记录数: {}", data.list.len());
-        }
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_get_elec_remark_detail() {
-        let bpi = BpiClient::new().expect("client should build");
-        // 替换为有效的留言id
-        let resp = bpi.electric().remark_detail(6507563).await;
-        info!("响应: {:?}", resp);
-        assert!(resp.is_ok());
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_reply_elec_remark() {
-        let bpi = BpiClient::new().expect("client should build");
-        // 替换为有效的留言id和回复内容
-        let resp = bpi.electric_remark_reply(6507563, "测试回复").await;
-        info!("响应: {:?}", resp);
-        assert!(resp.is_ok());
     }
 
     #[test]

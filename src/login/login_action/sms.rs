@@ -1,9 +1,6 @@
-use reqwest::header::SET_COOKIE;
-
 use serde::{Deserialize, Serialize};
-use tracing::{error, info};
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResult};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SMSSendData {
@@ -71,18 +68,6 @@ impl LoginSmsCodeParams {
         validate_required("seccode", &self.seccode)?;
         Ok(())
     }
-
-    fn form_pairs(&self) -> Vec<(&'static str, String)> {
-        vec![
-            ("cid", self.cid.to_string()),
-            ("tel", self.tel.clone()),
-            ("source", self.source.clone()),
-            ("token", self.token.clone()),
-            ("challenge", self.challenge.clone()),
-            ("validate", self.validate.clone()),
-            ("seccode", self.seccode.clone()),
-        ]
-    }
 }
 
 fn validate_required(field: &'static str, value: &str) -> BpiResult<()> {
@@ -93,157 +78,9 @@ fn validate_required(field: &'static str, value: &str) -> BpiResult<()> {
     Ok(())
 }
 
-impl BpiClient {
-    /// 发送短信验证码（Web端）
-    pub async fn login_send_sms_code(
-        &self,
-        params: LoginSmsCodeParams,
-    ) -> Result<BpiResponse<SMSSendData>, BpiError> {
-        let result = self
-            .post("https://passport.bilibili.com/x/passport-login/web/sms/send")
-            .form(&params.form_pairs())
-            .send_bpi("发送短信验证码")
-            .await?;
-
-        Ok(result)
-    }
-
-    /// 短信登录
-    ///
-    /// * `cid` - 国际冠字码
-    /// * `tel` - 手机号码
-    /// * `captcha_key` - 短信登录 token(基于login_send_sms_code)
-    /// * `code` - 短信验证码 5min过期
-    pub async fn login_with_sms(
-        &self,
-        cid: u32,
-        tel: u32,
-        captcha_key: &str,
-        code: &str,
-    ) -> Result<(), String> {
-        let form = vec![
-            ("cid", cid.to_string()),
-            ("tel", tel.to_string()),
-            ("code", code.to_string()),
-            ("source", "main_web".to_string()),
-            ("captcha_key", captcha_key.to_string()),
-            ("go_url", "https://www.bilibili.com".to_string()),
-            ("keep", true.to_string()),
-        ];
-
-        let response = BpiClient::new()
-            .expect("client should build")
-            .post("https://passport.bilibili.com/x/passport-login/web/login/sms")
-            .form(&form)
-            .send()
-            .await
-            .map_err(|e| e.to_string())?;
-
-        if let Some(cookies) = response
-            .headers()
-            .get_all(SET_COOKIE)
-            .iter()
-            .map(|v| v.to_str().unwrap_or(""))
-            .collect::<Vec<_>>()
-            .join("; ")
-            .into()
-        {
-            info!("登录返回的 Cookie: {}", cookies);
-        }
-
-        let resp = response
-            .json::<BpiResponse<SMSLoginData>>()
-            .await
-            .map_err(|e| {
-                error!("解析短信登录响应失败: {:?}", e);
-                e.to_string()
-            })?;
-
-        if resp.code != 0 {
-            error!("短信登录失败: code={}, message={}", resp.code, resp.message);
-            return Err(resp.message);
-        }
-
-        match resp.code {
-            0 => {
-                info!("短信登录成功");
-                Ok(())
-            }
-            code => {
-                error!("验证码发送失败: code={}, message={}", code, resp.message);
-                let msg = match code {
-                    -400 => "请求错误".to_string(),
-                    1006 => "请输入正确的短信验证码".to_string(),
-                    1007 => "短信验证码已过期".to_string(),
-
-                    _ => resp.message,
-                };
-                Err(msg)
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn login_sms_code_params_serializes_required_form() -> Result<(), BpiError> {
-        let params = LoginSmsCodeParams::new(
-            86,
-            "13800138000",
-            "token",
-            "challenge",
-            "validate",
-            "validate|jordan",
-        )?;
-
-        assert_eq!(
-            params.form_pairs(),
-            vec![
-                ("cid", "86".to_string()),
-                ("tel", "13800138000".to_string()),
-                ("source", "main_web".to_string()),
-                ("token", "token".to_string()),
-                ("challenge", "challenge".to_string()),
-                ("validate", "validate".to_string()),
-                ("seccode", "validate|jordan".to_string())
-            ]
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn login_sms_code_params_preserves_long_phone_numbers() -> Result<(), BpiError> {
-        let params = LoginSmsCodeParams::new(
-            86,
-            "13800138000",
-            "token",
-            "challenge",
-            "validate",
-            "validate|jordan",
-        )?;
-
-        assert_eq!(params.form_pairs()[1], ("tel", "13800138000".to_string()));
-        Ok(())
-    }
-
-    #[test]
-    fn login_sms_code_params_allows_source_override() -> Result<(), BpiError> {
-        let params = LoginSmsCodeParams::new(
-            86,
-            "13800138000",
-            "token",
-            "challenge",
-            "validate",
-            "validate|jordan",
-        )?
-        .source("main_mini")?;
-
-        assert_eq!(params.form_pairs()[2], ("source", "main_mini".to_string()));
-        Ok(())
-    }
 
     #[test]
     fn login_sms_code_params_rejects_blank_token() {

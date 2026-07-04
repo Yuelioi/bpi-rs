@@ -1,7 +1,6 @@
 use crate::ids::Aid;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResult};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 // --- 保存视频笔记 ---
 
 /// 保存视频笔记的响应数据
@@ -84,36 +83,6 @@ impl NoteAddParams {
         }
         Ok(())
     }
-
-    fn form_pairs(&self, csrf: impl Into<String>) -> Vec<(&'static str, String)> {
-        let content = json!([{"insert": self.content}]);
-        let mut form = vec![
-            ("oid", self.oid.to_string()),
-            ("oid_type", "0".to_string()),
-            ("title", self.title.clone()),
-            ("summary", self.summary.clone()),
-            ("content", content.to_string()),
-            ("cls", "1".to_string()),
-            ("from", "save".to_string()),
-            ("platform", "web".to_string()),
-            ("csrf", csrf.into()),
-        ];
-
-        if let Some(tags) = self.tags.as_ref() {
-            form.push(("tags", tags.clone()));
-        }
-        if let Some(note_id) = self.note_id.as_ref() {
-            form.push(("note_id", note_id.clone()));
-        }
-        if let Some(publish) = self.publish {
-            form.push(("publish", bool_flag(publish)));
-        }
-        if let Some(auto_comment) = self.auto_comment {
-            form.push(("auto_comment", bool_flag(auto_comment)));
-        }
-
-        form
-    }
 }
 
 fn validate_required(field: &'static str, value: &str) -> BpiResult<()> {
@@ -124,185 +93,11 @@ fn validate_required(field: &'static str, value: &str) -> BpiResult<()> {
     Ok(())
 }
 
-fn bool_flag(value: bool) -> String {
-    if value {
-        "1".to_string()
-    } else {
-        "0".to_string()
-    }
-}
-
 // --- 删除视频笔记 ---
-
-impl BpiClient {
-    /// 保存视频笔记
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    pub async fn note_add(
-        &self,
-        params: NoteAddParams,
-    ) -> Result<BpiResponse<NoteAddResponseData>, BpiError> {
-        let csrf = self.csrf()?;
-        let form = params.form_pairs(csrf);
-
-        self.post("https://api.bilibili.com/x/note/add")
-            .form(&form)
-            .send_bpi("保存视频笔记")
-            .await
-    }
-
-    /// 保存视频笔记（精简参数）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `oid` | u64 | 目标 ID（视频 avid） |
-    /// | `title` | &str | 笔记标题 |
-    /// | `summary` | &str | 笔记预览文本 |
-    /// | `content` | &str | 笔记正文 |
-    /// | `note_id` | `Option<&str>` | 笔记 ID（创建时可省略） |
-    pub async fn note_add_simple(
-        &self,
-        oid: u64,
-        title: &str,
-        summary: &str,
-        content: &str,
-        note_id: Option<&str>,
-    ) -> Result<BpiResponse<NoteAddResponseData>, BpiError> {
-        let mut params = NoteAddParams::new(Aid::new(oid)?, title, summary, content)?;
-        if let Some(note_id) = note_id {
-            params = params.note_id(note_id)?;
-        }
-
-        self.note_add(params).await
-    }
-
-    /// 删除视频笔记
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `oid` | u64 | 目标 ID（视频 avid） |
-    /// | `note_id` | `Option<String>` | 笔记 ID |
-    pub async fn note_del(
-        &self,
-        oid: u64,
-        note_id: Option<String>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.csrf()?;
-
-        let mut form = vec![("oid", oid.to_string()), ("csrf", csrf)];
-
-        if let Some(note_id) = note_id {
-            form.push(("note_id", note_id.to_string()));
-        }
-
-        self.post("https://api.bilibili.com/x/note/del")
-            .form(&form)
-            .send_bpi("删除视频笔记")
-            .await
-    }
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tracing::info;
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_note_add_and_del() {
-        let bpi = BpiClient::new().expect("client should build");
-        let oid = 464606672;
-        let title = "测试笔记";
-        let summary = "这是个测试摘要";
-        let content = "Lorem Ipsum is simply dummy text \
-        of the printing and typesetting industry. Lorem Ipsum\
-         has been the industry's standard dummy text ever since \
-         the 1500s, when an unknown printer took a galley of type \
-         and scrambled it to make a type specimen book. \
-         It has survived not only five centuries, but also the leap into electronic typesetting, \
-         remaining essentially unchanged. It was popularised \
-         in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, \
-         and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum";
-
-        // 1. 保存笔记
-        let params = NoteAddParams::new(
-            Aid::new(oid).expect("test aid should be valid"),
-            title,
-            summary,
-            content,
-        )
-        .expect("test note params should be valid")
-        .publish(false)
-        .auto_comment(false);
-        let add_resp = bpi.note_add(params).await;
-
-        info!("Add note result: {:?}", add_resp);
-        assert!(add_resp.is_ok());
-
-        let note_id = add_resp.unwrap().data.unwrap().note_id;
-        info!("New note ID: {}", note_id);
-
-        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-
-        // 2. 删除笔记
-        let del_resp = bpi.note_del(oid, Some(note_id)).await;
-        info!("Delete note result: {:?}", del_resp);
-        assert!(del_resp.is_ok());
-    }
-
-    #[test]
-    fn note_add_params_serializes_required_form() -> Result<(), BpiError> {
-        let params = NoteAddParams::new(Aid::new(170001)?, "title", "summary", "body")?;
-
-        assert_eq!(
-            params.form_pairs("csrf"),
-            vec![
-                ("oid", "170001".to_string()),
-                ("oid_type", "0".to_string()),
-                ("title", "title".to_string()),
-                ("summary", "summary".to_string()),
-                ("content", r#"[{"insert":"body"}]"#.to_string()),
-                ("cls", "1".to_string()),
-                ("from", "save".to_string()),
-                ("platform", "web".to_string()),
-                ("csrf", "csrf".to_string())
-            ]
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn note_add_params_serializes_optional_fields() -> Result<(), BpiError> {
-        let params = NoteAddParams::new(Aid::new(170001)?, "title", "summary", "body")?
-            .note_id("note-1")?
-            .tags("tag-1")
-            .expect("tags should be valid")
-            .publish(true)
-            .auto_comment(false);
-
-        assert_eq!(
-            params.form_pairs("csrf")[9..],
-            [
-                ("tags", "tag-1".to_string()),
-                ("note_id", "note-1".to_string()),
-                ("publish", "1".to_string()),
-                ("auto_comment", "0".to_string())
-            ]
-        );
-        Ok(())
-    }
 
     #[test]
     fn note_add_params_rejects_blank_content() {

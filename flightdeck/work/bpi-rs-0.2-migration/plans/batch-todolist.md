@@ -33,10 +33,95 @@
 ## Current Working State
 
 - Branch: `feat/bpi-rs-0.2-migration`
-- Last committed batch: `95b56d5 feat(live): add remaining read client bridge`
-- Current intended batch: `release/gated-flat-api-policy`
-- Current batch type: Non-Probe release policy documentation batch.
-- Current commit policy: no commit until explicit human approval.
+- Last committed batch: `472b145 feat(api): finalize module client migration cleanup`
+- Current intended batch: `flat-api/remove-remaining-legacy-flat-methods`
+- Current batch type: Explicit breaking API compatibility source batch.
+- Current commit policy: commit after the verified removal batch is staged with only intended files.
+
+## Batch 31: `flat-api/remove-remaining-legacy-flat-methods`
+
+**Type:** Explicit breaking API compatibility source batch.
+
+**Status:** Implemented and verified; commit pending.
+
+**Why this batch:** The human explicitly approved removing old code and accepting breaking changes. Batch 30 documented that the remaining direct `impl BpiClient` public async inventory is `COUNT=107` and that default source cleanup was blocked only by the compatibility decision. That decision is now made: remove the remaining legacy flat `BpiClient` methods rather than keeping them compatibility-only.
+
+**Scope:**
+
+- Remove every remaining direct `pub async fn` declared inside `impl BpiClient`.
+- Keep the module-client APIs and shared request/transport helpers.
+- Do not run mutating endpoints or Probe requests.
+- Keep `account.toml` local-only; it contains normal/vip credentials and must not be displayed or committed.
+- Keep `flightdeck/cockpit.md` unchanged.
+
+**Pre-check evidence:**
+
+```text
+COUNT=107
+article=4
+audio=4
+bangumi=2
+comment=6
+creativecenter=11
+danmaku=8
+dynamic=7
+electric=3
+fav=7
+historytoview=6
+live=12
+login=4
+manga=8
+message=1
+note=3
+user=9
+video=9
+vip=3
+```
+
+**Files:**
+
+- Modify: remaining `src/**` files that still declare flat `impl BpiClient` async methods.
+- Modify: affected ignored tests that referenced those flat methods.
+- Modify: `flightdeck/work/bpi-rs-0.2-migration/index.md`.
+- Modify: `flightdeck/work/bpi-rs-0.2-migration/plans/batch-todolist.md`.
+- Modify: `flightdeck/work/bpi-rs-0.2-migration/migration-status.md` local only, do not commit.
+
+**Verification plan:**
+
+```powershell
+rg -n "impl BpiClient|pub async fn" src
+cargo fmt --check
+cargo check --all-features
+cargo clippy --all-targets --all-features --locked -- -D warnings
+cargo test --all-features --lib --quiet
+cargo check --all-features --examples
+cargo check --all-features --bins
+cargo test --doc
+git diff --check
+git diff -- flightdeck/cockpit.md
+git status --short --ignored=matching account.toml flightdeck\work\bpi-rs-0.2-migration\migration-status.md target\bpi-contract-drafts target\bpi-probe-runs target\bpi-probe-notes
+```
+
+**Observed verification:**
+
+```text
+direct BpiClient public async inventory: COUNT=0
+cargo fmt --check: pass
+cargo check --all-features: pass
+cargo clippy --all-targets --all-features --locked -- -D warnings: pass
+cargo test --all-features --lib --quiet: pass (914 passed, 196 ignored)
+cargo check --all-features --examples: pass
+cargo check --all-features --bins: pass
+cargo test --doc: pass
+git diff --check: pass
+git diff -- flightdeck/cockpit.md: empty
+```
+
+**Notes:**
+
+- This is a breaking source/API cleanup batch. Remaining direct `BpiClient` flat async methods were removed instead of retained as compatibility shims.
+- Ignored legacy live tests that only exercised removed flat methods were removed or trimmed; promoted contract/model tests were retained where they still cover module-client-supported read behavior.
+- `account.toml` exists locally with normal/vip profile keys, remains ignored, and was not displayed or committed.
 
 ## Batch 30: `release/gated-flat-api-policy`
 

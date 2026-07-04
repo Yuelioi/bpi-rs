@@ -1,7 +1,6 @@
 //! 音频榜单
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -62,35 +61,6 @@ pub struct AudioRankMusicItem {
     pub song_type: u64,
 }
 
-impl BpiClient {
-    /// 订阅或退订榜单
-    ///
-    /// # 参数
-    /// | 名称      | 类型           | 说明                       |
-    /// | --------- | -------------- | -------------------------- |
-    /// | `state`   | u32            | 操作代码（1：订阅，2：退订）|
-    /// | `list_id` | `Option<u64>`    | 榜单 id（可选）            |
-    ///
-    /// # 文档
-    /// [订阅或退订榜单](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md#订阅或退订榜单)
-    pub async fn audio_rank_subscribe(
-        &self,
-        state: u32,
-        list_id: Option<u64>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.csrf()?;
-        let mut params = vec![("state", state.to_string()), ("csrf", csrf.to_string())];
-        if let Some(id) = list_id {
-            params.push(("list_id", id.to_string()));
-        }
-
-        self.post("https://api.bilibili.com/x/copyright-music-publicity/toplist/subscribe/update")
-            .form(&params)
-            .send_bpi("订阅或退订榜单")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -117,77 +87,6 @@ mod tests {
         };
 
         EndpointContract::from_slice(bytes)
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_audio_rank_period() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new().expect("client should build");
-        let data = bpi
-            .audio()
-            .rank_period(AudioRankPeriodParams::new(AudioRankListType::Original))
-            .await?;
-        tracing::info!("{:#?}", data);
-
-        // 检查年份数据
-        for (year, periods) in data.list {
-            assert!(!year.is_empty());
-            assert!(!periods.is_empty());
-            for period in periods {
-                assert!(period.id > 0);
-                assert!(period.priod > 0);
-                assert!(period.publish_time > 0);
-            }
-        }
-
-        Ok(())
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_audio_rank_detail() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new().expect("client should build");
-        let data = bpi
-            .audio()
-            .rank_detail(AudioRankListParams::new(TEST_LIST_ID)?)
-            .await?;
-        tracing::info!("{:#?}", data);
-
-        assert!(data.listen_fid > 0);
-        assert!(data.all_fid > 0);
-        assert!(data.fav_mid > 0);
-        assert!(!data.cover_url.is_empty());
-
-        Ok(())
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_audio_rank_music_list() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new().expect("client should build");
-        let data = bpi
-            .audio()
-            .rank_music_list(AudioRankListParams::new(TEST_LIST_ID)?)
-            .await?;
-        tracing::info!("{:#?}", data);
-
-        for item in &data.list {
-            assert!(!item.music_id.is_empty());
-            assert!(!item.music_title.is_empty());
-            assert!(!item.singer.is_empty());
-            assert!(!item.achievements.is_empty());
-        }
-
-        Ok(())
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_update_audio_rank_subscribe() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new().expect("client should build");
-        bpi.audio_rank_subscribe(1, Some(76)).await?;
-
-        Ok(())
     }
 
     #[test]

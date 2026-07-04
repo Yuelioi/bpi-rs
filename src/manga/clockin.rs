@@ -2,7 +2,7 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/ClockIn.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
+use crate::BpiResponse;
 use serde::{Deserialize, Serialize};
 
 // ================= 数据结构 =================
@@ -60,44 +60,6 @@ pub type ClockInInfoResponse = BpiResponse<ClockInInfoData>;
 
 // ================= 实现 =================
 
-impl BpiClient {
-    /// 漫画签到
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
-    pub async fn manga_clock_in(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let params = [("platform", "android")];
-        self.post("https://manga.bilibili.com/twirp/activity.v1.Activity/ClockIn")
-            .form(&params)
-            .send_bpi("漫画签到")
-            .await
-    }
-
-    /// 漫画补签
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `date` | &str | 补签日期，YYYY-MM-DD |
-    pub async fn manga_clock_in_makeup(
-        &self,
-        date: &str,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let params = ClockInMakeupRequest {
-            r#type: 0,
-            date: date.to_string(),
-        };
-        self.post("https://manga.bilibili.com/twirp/activity.v1.Activity/ClockIn?platform=android")
-            .json(&params)
-            .send_bpi("漫画补签")
-            .await
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -109,35 +71,6 @@ mod tests {
         EndpointContract::from_slice(include_bytes!(
             "../../tests/contracts/manga/read-core/clock-in-info/contract.json"
         ))
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_manga_clock_in() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new().expect("client should build");
-
-        let result = bpi.manga_clock_in().await;
-        match result {
-            Ok(_) => tracing::info!("签到成功"),
-            Err(error) => tracing::error!("{:#?}", error),
-        }
-
-        Ok(())
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_get_manga_clock_in_info() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new().expect("client should build");
-
-        let data = bpi.manga().clock_in_info().await?;
-
-        assert!(data.day_count >= 0);
-        assert!(data.status == 0 || data.status == 1);
-        assert_eq!(data.points.len(), 7); // 一周7天
-        assert!(!data.point_infos.is_empty());
-
-        Ok(())
     }
 
     #[test]

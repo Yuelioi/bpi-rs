@@ -2,7 +2,6 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/Comic.md)
 
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::Serialize;
 
 // ================= 数据结构 =================
@@ -44,101 +43,5 @@ pub struct BuyEpisodeRequest {
 
 // ================= 实现 =================
 
-impl BpiClient {
-    /// 购买漫画章节
-    ///
-    /// [网页入口](https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode)
-    pub async fn manga_buy_episode(
-        &self,
-        request: BuyEpisodeRequest,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let result = self
-            .post("https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode?platform=web")
-            .json(&request)
-            .send_bpi("购买漫画章节")
-            .await?;
-
-        Ok(result)
-    }
-
-    /// 使用漫读券购买漫画章节
-    ///
-    /// [网页入口](https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode)
-    pub async fn manga_buy_episode_with_coupon(
-        &self,
-        ep_id: i32,
-        coupon_id: i32,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let request = BuyEpisodeRequest {
-            ep_id,
-            buy_method: 2,
-            coupon_id,
-            comic_id: None,
-            auto_pay_gold_status: Some(2),
-            is_presale: Some(0),
-            pay_amount: None,
-        };
-
-        self.manga_buy_episode(request).await
-    }
-
-    /// 使用新人等免购买漫画章节
-    ///
-    /// [网页入口](https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode)
-    pub async fn manga_buy_episode_with_free(
-        &self,
-        comic_id: i32,
-        ep_id: i32,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let request = BuyEpisodeRequest {
-            ep_id,
-            buy_method: 4,
-            coupon_id: 0,
-            comic_id: Some(comic_id),
-            auto_pay_gold_status: None,
-            is_presale: None,
-            pay_amount: None,
-        };
-
-        self.manga_buy_episode(request).await
-    }
-
-    /// 使用通用券购买漫画章节
-    ///
-    /// [网页入口](https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode)
-    pub async fn manga_buy_episode_with_general_coupon(
-        &self,
-        ep_id: i32,
-        pay_amount: i32,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let request = BuyEpisodeRequest {
-            ep_id,
-            buy_method: 5,
-            coupon_id: 0,
-            comic_id: None,
-            auto_pay_gold_status: Some(2),
-            is_presale: Some(0),
-            pay_amount: Some(pay_amount),
-        };
-
-        self.manga_buy_episode(request).await
-    }
-}
-
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_manga_buy_episode_with_coupon() -> Result<(), Box<BpiError>> {
-        let bpi = BpiClient::new().expect("client should build");
-
-        let coupon_id = 12553634;
-        let ep_id = 484360;
-
-        let _result = bpi.manga_buy_episode_with_coupon(ep_id, coupon_id).await?;
-
-        Ok(())
-    }
-}
+mod tests {}

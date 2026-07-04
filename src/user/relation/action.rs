@@ -1,7 +1,6 @@
 //! B站用户关系操作相关接口
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 
 // --- 响应数据结构体 ---
@@ -80,95 +79,7 @@ pub enum RelationSource {
     VideoPlayerDanmaku = 245,
 }
 
-impl BpiClient {
-    /// 操作用户关系
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称      | 类型                | 说明                       |
-    /// | --------- | -------------------| -------------------------- |
-    /// | `fid`     | u64                | 目标用户 mid               |
-    /// | `action`  | RelationAction     | 操作代码，见 RelationAction 枚举 |
-    /// | `source`  | `Option<RelationSource>` | 关注来源代码，可选，见 RelationSource 枚举 |
-    pub async fn user_modify_relation(
-        &self,
-        fid: u64,
-        action: RelationAction,
-        source: Option<RelationSource>,
-    ) -> Result<BpiResponse<()>, BpiError> {
-        let csrf = self.csrf()?;
-        let mut form = reqwest::multipart::Form::new()
-            .text("fid", fid.to_string())
-            .text("act", (action as u8).to_string())
-            .text("csrf", csrf.to_string());
-
-        if let Some(s) = source {
-            form = form.text("re_src", (s as u32).to_string());
-        }
-
-        self.post("https://api.bilibili.com/x/relation/modify")
-            .multipart(form)
-            .send_bpi("操作用户关系")
-            .await
-    }
-}
-
 // --- 测试模块 ---
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use tracing::info;
-
-    const TEST_FID: u64 = 2;
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_modify_relation_follow() -> Result<(), BpiError> {
-        let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .user_modify_relation(
-                TEST_FID,
-                RelationAction::Follow,
-                Some(RelationSource::Space),
-            )
-            .await?;
-
-        info!("关注用户结果: {:?}", resp);
-
-        Ok(())
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_modify_relation_unfollow() -> Result<(), BpiError> {
-        let bpi = BpiClient::new().expect("client should build");
-
-        let resp = bpi
-            .user_modify_relation(TEST_FID, RelationAction::Unfollow, None)
-            .await?;
-
-        info!("取关用户结果: {:?}", resp);
-
-        Ok(())
-    }
-
-    #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]
-    #[tokio::test]
-    async fn test_modify_relation_blacklist() -> Result<(), BpiError> {
-        let bpi = BpiClient::new().expect("client should build");
-        let resp = bpi
-            .user_modify_relation(TEST_FID, RelationAction::Blacklist, None)
-            .await?;
-
-        info!("拉黑用户结果: {:?}", resp);
-
-        let _ = bpi
-            .user_modify_relation(TEST_FID, RelationAction::Unblacklist, None)
-            .await;
-
-        Ok(())
-    }
-}
+mod tests {}
