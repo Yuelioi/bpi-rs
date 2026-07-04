@@ -2,7 +2,6 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
 use crate::BpiResult;
 use crate::ids::Aid;
 use crate::note::NoteClient;
@@ -28,6 +27,34 @@ pub struct NoteAddParams {
     tags: Option<String>,
     publish: Option<bool>,
     auto_comment: Option<bool>,
+}
+
+/// Parameters for deleting a video note.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NoteDeleteParams {
+    oid: Aid,
+    note_id: Option<String>,
+}
+
+impl NoteDeleteParams {
+    pub fn new(oid: Aid) -> Self {
+        Self { oid, note_id: None }
+    }
+
+    pub fn note_id(mut self, note_id: impl Into<String>) -> BpiResult<Self> {
+        self.note_id = Some(normalize_non_blank("note_id", note_id.into())?);
+        Ok(self)
+    }
+
+    fn form_pairs(&self, csrf: impl Into<String>) -> Vec<(&'static str, String)> {
+        let mut form = vec![("oid", self.oid.to_string()), ("csrf", csrf.into())];
+
+        if let Some(note_id) = &self.note_id {
+            form.push(("note_id", note_id.clone()));
+        }
+
+        form
+    }
 }
 
 impl NoteAddParams {
@@ -79,14 +106,14 @@ impl NoteAddParams {
     }
 
     fn validate(&self) -> BpiResult<()> {
-        validate_required("title", &self.title)?;
-        validate_required("summary", &self.summary)?;
-        validate_required("content", &self.content)?;
+        normalize_non_blank("title", self.title.clone())?;
+        normalize_non_blank("summary", self.summary.clone())?;
+        normalize_non_blank("content", self.content.clone())?;
         if let Some(note_id) = self.note_id.as_deref() {
-            validate_required("note_id", note_id)?;
+            normalize_non_blank("note_id", note_id.to_string())?;
         }
         if let Some(tags) = self.tags.as_deref() {
-            validate_required("tags", tags)?;
+            normalize_non_blank("tags", tags.to_string())?;
         }
         Ok(())
     }
@@ -122,12 +149,13 @@ impl NoteAddParams {
     }
 }
 
-fn validate_required(field: &'static str, value: &str) -> BpiResult<()> {
-    if value.trim().is_empty() {
+fn normalize_non_blank(field: &'static str, value: String) -> BpiResult<String> {
+    let value = value.trim().to_string();
+    if value.is_empty() {
         return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
     }
 
-    Ok(())
+    Ok(value)
 }
 
 fn bool_flag(value: bool) -> String {
@@ -141,83 +169,27 @@ fn bool_flag(value: bool) -> String {
 // --- 删除视频笔记 ---
 
 impl<'a> NoteClient<'a> {
-    /// 保存视频笔记
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    pub async fn note_add(
-        &self,
-        params: NoteAddParams,
-    ) -> Result<BpiResponse<NoteAddResponseData>, BpiError> {
+    /// Saves a video note and returns the canonical payload result.
+    pub async fn add(&self, params: NoteAddParams) -> BpiResult<NoteAddResponseData> {
         let csrf = self.client.csrf()?;
         let form = params.form_pairs(csrf);
 
         self.client
             .post("https://api.bilibili.com/x/note/add")
             .form(&form)
-            .send_bpi("保存视频笔记")
+            .send_bpi_payload("note.add")
             .await
     }
 
-    /// 保存视频笔记（精简参数）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `oid` | u64 | 目标 ID（视频 avid） |
-    /// | `title` | &str | 笔记标题 |
-    /// | `summary` | &str | 笔记预览文本 |
-    /// | `content` | &str | 笔记正文 |
-    /// | `note_id` | `Option<&str>` | 笔记 ID（创建时可省略） |
-    pub async fn note_add_simple(
-        &self,
-        oid: u64,
-        title: &str,
-        summary: &str,
-        content: &str,
-        note_id: Option<&str>,
-    ) -> Result<BpiResponse<NoteAddResponseData>, BpiError> {
-        let mut params = NoteAddParams::new(Aid::new(oid)?, title, summary, content)?;
-        if let Some(note_id) = note_id {
-            params = params.note_id(note_id)?;
-        }
-
-        self.note_add(params).await
-    }
-
-    /// 删除视频笔记
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/note)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `oid` | u64 | 目标 ID（视频 avid） |
-    /// | `note_id` | `Option<String>` | 笔记 ID |
-    pub async fn note_del(
-        &self,
-        oid: u64,
-        note_id: Option<String>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    /// Deletes a video note and returns the canonical payload result.
+    pub async fn delete(&self, params: NoteDeleteParams) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-
-        let mut form = vec![("oid", oid.to_string()), ("csrf", csrf)];
-
-        if let Some(note_id) = note_id {
-            form.push(("note_id", note_id.to_string()));
-        }
+        let form = params.form_pairs(csrf);
 
         self.client
             .post("https://api.bilibili.com/x/note/del")
             .form(&form)
-            .send_bpi("删除视频笔记")
+            .send_bpi_optional_payload("note.delete")
             .await
     }
 }

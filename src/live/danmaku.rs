@@ -1,8 +1,7 @@
 // --- 弹幕发送响应数据结构体 ---
 
 use crate::BilibiliRequest;
-use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::live::LiveClient;
 use chrono::Utc;
 use reqwest::multipart::Form;
@@ -51,7 +50,7 @@ impl<'a> LiveClient<'a> {
         message: &str,
         color: Option<u32>,
         font_size: Option<u32>,
-    ) -> Result<BpiResponse<SendDanmuData>, BpiError> {
+    ) -> BpiResult<SendDanmuData> {
         let csrf = self.client.csrf()?;
         let now = Utc::now().timestamp();
 
@@ -81,7 +80,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/msg/send")
             .multipart(form)
-            .send_bpi("发送直播弹幕")
+            .send_bpi_payload("live.danmu.send")
             .await
     }
 }

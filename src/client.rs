@@ -335,6 +335,7 @@ impl BpiClient {
     }
 
     /// Creates a GET request that preserves raw compressed response bytes.
+    #[cfg(feature = "danmaku")]
     pub(crate) fn get_without_response_decoding(
         &self,
         url: &str,
@@ -749,6 +750,7 @@ mod tests {
         Ok(())
     }
 
+    #[cfg(feature = "danmaku")]
     #[test]
     fn raw_response_request_keeps_default_headers_and_cookie() -> Result<(), BpiError> {
         let client = BpiClient::builder()
@@ -1034,12 +1036,24 @@ mod tests {
 
     #[cfg(all(feature = "article", feature = "video", feature = "fav"))]
     #[test]
-    fn module_clients_expose_legacy_write_capability_futures() -> Result<(), BpiError> {
+    fn module_clients_expose_write_capability_futures() -> Result<(), BpiError> {
         let client = BpiClient::new()?;
 
-        std::mem::drop(client.article().article_like(1, true));
-        std::mem::drop(client.video().video_like(Some(1), None, 1));
-        std::mem::drop(client.fav().fav_folder_add("title", None, Some(1), None));
+        std::mem::drop(
+            client
+                .article()
+                .like(crate::article::ArticleLikeParams::new(1, true)?),
+        );
+        std::mem::drop(
+            client
+                .video()
+                .like(crate::video::VideoLikeParams::from_aid(1, 1)?),
+        );
+        std::mem::drop(
+            client
+                .fav()
+                .add_folder(crate::fav::FavFolderAddParams::new("title")?.privacy(1)?),
+        );
 
         Ok(())
     }

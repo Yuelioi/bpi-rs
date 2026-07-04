@@ -18,6 +18,103 @@ impl AudioSongParams {
     }
 }
 
+/// Parameters for audio favorite-folder add/remove operations.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AudioCollectionToFavParams {
+    rid: AudioId,
+    add_media_ids: Vec<String>,
+    del_media_ids: Vec<String>,
+}
+
+impl AudioCollectionToFavParams {
+    pub fn new(
+        rid: AudioId,
+        add_media_ids: impl IntoIterator<Item = impl Into<String>>,
+        del_media_ids: impl IntoIterator<Item = impl Into<String>>,
+    ) -> BpiResult<Self> {
+        let add_media_ids = normalize_id_list("add_media_ids", add_media_ids)?;
+        let del_media_ids = normalize_id_list("del_media_ids", del_media_ids)?;
+
+        if add_media_ids.is_empty() && del_media_ids.is_empty() {
+            return Err(BpiError::invalid_parameter(
+                "media_ids",
+                "at least one add or delete media id is required",
+            ));
+        }
+
+        Ok(Self {
+            rid,
+            add_media_ids,
+            del_media_ids,
+        })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        let mut pairs = vec![
+            ("rid", self.rid.to_string()),
+            ("type", "12".to_string()),
+            ("csrf", csrf.to_string()),
+        ];
+
+        if !self.add_media_ids.is_empty() {
+            pairs.push(("add_media_ids", self.add_media_ids.join(",")));
+        }
+        if !self.del_media_ids.is_empty() {
+            pairs.push(("del_media_ids", self.del_media_ids.join(",")));
+        }
+
+        pairs
+    }
+}
+
+/// Parameters for adding an audio song to a collection.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AudioCollectionToParams {
+    sid: AudioId,
+    cids: u64,
+}
+
+impl AudioCollectionToParams {
+    pub fn new(sid: AudioId, cids: u64) -> BpiResult<Self> {
+        Ok(Self {
+            sid,
+            cids: validate_nonzero("cids", cids)?,
+        })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("sid", self.sid.to_string()),
+            ("cids", self.cids.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+/// Parameters for `/audio/music-service-c/web/coin/add`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AudioCoinParams {
+    sid: AudioId,
+    multiply: u32,
+}
+
+impl AudioCoinParams {
+    pub fn new(sid: AudioId, multiply: u32) -> BpiResult<Self> {
+        Ok(Self {
+            sid,
+            multiply: validate_coin_multiply(multiply)?,
+        })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("sid", self.sid.to_string()),
+            ("multiply", self.multiply.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
 /// Pagination parameters for audio list endpoints.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AudioPageParams {
@@ -226,6 +323,35 @@ where
     Ok(value)
 }
 
+fn validate_coin_multiply(value: u32) -> BpiResult<u32> {
+    if matches!(value, 1 | 2) {
+        return Ok(value);
+    }
+
+    Err(BpiError::invalid_parameter(
+        "multiply",
+        "value must be 1 or 2",
+    ))
+}
+
+fn normalize_id_list(
+    field: &'static str,
+    values: impl IntoIterator<Item = impl Into<String>>,
+) -> BpiResult<Vec<String>> {
+    values
+        .into_iter()
+        .map(|value| {
+            let value = value.into();
+            let value = value.trim();
+            if value.is_empty() {
+                return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
+            }
+
+            Ok(value.to_string())
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -244,6 +370,50 @@ mod tests {
         let params = AudioSongParams::new(sid);
 
         assert_eq!(params.query_pairs(), vec![("sid", "15664".to_string())]);
+        Ok(())
+    }
+
+    #[test]
+    fn audio_collection_to_fav_params_requires_an_operation() -> BpiResult<()> {
+        let err = AudioCollectionToFavParams::new(
+            AudioId::new(13603)?,
+            Vec::<String>::new(),
+            Vec::<String>::new(),
+        )
+        .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "media_ids",
+                ..
+            }
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn audio_collection_to_params_rejects_zero_collection_id() -> BpiResult<()> {
+        let err = AudioCollectionToParams::new(AudioId::new(13603)?, 0).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "cids", .. }
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn audio_coin_params_rejects_invalid_multiply() -> BpiResult<()> {
+        let err = AudioCoinParams::new(AudioId::new(13603)?, 0).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "multiply",
+                ..
+            }
+        ));
         Ok(())
     }
 

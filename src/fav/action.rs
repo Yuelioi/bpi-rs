@@ -1,253 +1,89 @@
 use super::info::FavFolderInfo;
 use crate::BilibiliRequest;
-use crate::BpiError;
-use crate::BpiResponse;
 use crate::fav::FavClient;
+use crate::fav::params::{
+    FavFolderAddParams, FavFolderDeleteParams, FavFolderEditParams, FavResourceBatchDeleteParams,
+    FavResourceCleanParams, FavResourceTransferParams,
+};
+use crate::response::BpiResult;
+
+const FOLDER_ADD_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/folder/add";
+const FOLDER_EDIT_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/folder/edit";
+const FOLDER_DEL_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/folder/del";
+const RESOURCE_COPY_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/resource/copy";
+const RESOURCE_MOVE_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/resource/move";
+const RESOURCE_BATCH_DEL_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/resource/batch-del";
+const RESOURCE_CLEAN_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/resource/clean";
 
 impl<'a> FavClient<'a> {
-    /// 新建收藏夹
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `title` | &str | 收藏夹标题 |
-    /// | `intro` | `Option<&str>` | 介绍 |
-    /// | `privacy` | `Option<u8>` | 0 公开，1 私密 |
-    /// | `cover` | `Option<&str>` | 封面 URL |
-    pub async fn fav_folder_add(
-        &self,
-        title: &str,
-        intro: Option<&str>,
-        privacy: Option<u8>,
-        cover: Option<&str>,
-    ) -> Result<BpiResponse<FavFolderInfo>, BpiError> {
+    /// Creates a favorite folder and returns the canonical payload result.
+    pub async fn add_folder(&self, params: FavFolderAddParams) -> BpiResult<FavFolderInfo> {
         let csrf = self.client.csrf()?;
-
-        let mut form = vec![("title", title.to_string()), ("csrf", csrf)];
-        if let Some(intro) = intro {
-            form.push(("intro", intro.to_string()));
-        }
-        if let Some(privacy) = privacy {
-            form.push(("privacy", privacy.to_string()));
-        }
-        if let Some(cover) = cover {
-            form.push(("cover", cover.to_string()));
-        }
-
         self.client
-            .post("https://api.bilibili.com/x/v3/fav/folder/add")
-            .form(&form)
-            .send_bpi("新建收藏夹")
+            .post(FOLDER_ADD_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("fav.folder.add")
             .await
     }
 
-    /// 修改收藏夹
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `media_id` | u64 | 收藏夹 media_id |
-    /// | `title` | &str | 标题 |
-    /// | `intro` | `Option<&str>` | 介绍 |
-    /// | `privacy` | `Option<u8>` | 0 公开，1 私密 |
-    /// | `cover` | `Option<&str>` | 封面 URL |
-    pub async fn fav_folder_edit(
-        &self,
-        media_id: u64,
-        title: &str,
-        intro: Option<&str>,
-        privacy: Option<u8>,
-        cover: Option<&str>,
-    ) -> Result<BpiResponse<FavFolderInfo>, BpiError> {
+    /// Edits a favorite folder and returns the canonical payload result.
+    pub async fn edit_folder(&self, params: FavFolderEditParams) -> BpiResult<FavFolderInfo> {
         let csrf = self.client.csrf()?;
-
-        let mut form = vec![
-            ("media_id", media_id.to_string()),
-            ("title", title.to_string()),
-            ("csrf", csrf),
-        ];
-        if let Some(intro) = intro {
-            form.push(("intro", intro.to_string()));
-        }
-        if let Some(privacy) = privacy {
-            form.push(("privacy", privacy.to_string()));
-        }
-        if let Some(cover) = cover {
-            form.push(("cover", cover.to_string()));
-        }
-
         self.client
-            .post("https://api.bilibili.com/x/v3/fav/folder/edit")
-            .form(&form)
-            .send_bpi("修改收藏夹")
+            .post(FOLDER_EDIT_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("fav.folder.edit")
             .await
     }
 
-    /// 删除收藏夹
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `media_ids` | &`[u64]` | 多个收藏夹 media_id |
-    pub async fn fav_folder_del(&self, media_ids: &[u64]) -> Result<BpiResponse<i32>, BpiError> {
+    /// Deletes favorite folders and returns the canonical payload result.
+    pub async fn delete_folders(&self, params: FavFolderDeleteParams) -> BpiResult<i32> {
         let csrf = self.client.csrf()?;
-        let ids_str = media_ids
-            .iter()
-            .map(|&id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-
-        let form = [("media_ids", ids_str), ("csrf", csrf)];
-
         self.client
-            .post("https://api.bilibili.com/x/v3/fav/folder/del")
-            .form(&form)
-            .send_bpi("删除收藏夹")
+            .post(FOLDER_DEL_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("fav.folder.delete")
             .await
     }
 
-    /// 批量复制内容
-    /// `resources`: "{内容id}:{内容类型},..."
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `src_media_id` | u64 | 源收藏夹 media_id |
-    /// | `tar_media_id` | u64 | 目标收藏夹 media_id |
-    /// | `mid` | u64 | 用户 mid |
-    /// | `resources` | &str | 形如 "{内容id}:{内容类型},..." |
-    pub async fn fav_resource_copy(
-        &self,
-        src_media_id: u64,
-        tar_media_id: u64,
-        mid: u64,
-        resources: &str,
-    ) -> Result<BpiResponse<i32>, BpiError> {
+    /// Copies favorite resources and returns the canonical payload result.
+    pub async fn copy_resources(&self, params: FavResourceTransferParams) -> BpiResult<i32> {
         let csrf = self.client.csrf()?;
-
-        let form = [
-            ("src_media_id", src_media_id.to_string()),
-            ("tar_media_id", tar_media_id.to_string()),
-            ("mid", mid.to_string()),
-            ("resources", resources.to_string()),
-            ("platform", "web".to_string()),
-            ("csrf", csrf),
-        ];
-
         self.client
-            .post("https://api.bilibili.com/x/v3/fav/resource/copy")
-            .form(&form)
-            .send_bpi("批量复制内容")
+            .post(RESOURCE_COPY_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("fav.resource.copy")
             .await
     }
 
-    /// 批量移动内容
-    /// `resources`: "{内容id}:{内容类型},..."
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `src_media_id` | u64 | 源收藏夹 media_id |
-    /// | `tar_media_id` | u64 | 目标收藏夹 media_id |
-    /// | `mid` | u64 | 用户 mid |
-    /// | `resources` | &str | 形如 "{内容id}:{内容类型},..." |
-    pub async fn fav_resource_move(
-        &self,
-        src_media_id: u64,
-        tar_media_id: u64,
-        mid: u64,
-        resources: &str,
-    ) -> Result<BpiResponse<i32>, BpiError> {
+    /// Moves favorite resources and returns the canonical payload result.
+    pub async fn move_resources(&self, params: FavResourceTransferParams) -> BpiResult<i32> {
         let csrf = self.client.csrf()?;
-
-        let form = [
-            ("src_media_id", src_media_id.to_string()),
-            ("tar_media_id", tar_media_id.to_string()),
-            ("mid", mid.to_string()),
-            ("resources", resources.to_string()),
-            ("platform", "web".to_string()),
-            ("csrf", csrf),
-        ];
-
         self.client
-            .post("https://api.bilibili.com/x/v3/fav/resource/move")
-            .form(&form)
-            .send_bpi("批量移动内容")
+            .post(RESOURCE_MOVE_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("fav.resource.move")
             .await
     }
 
-    /// 批量删除内容
-    /// `resources`: "{内容id}:{内容类型},..."
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `media_id` | u64 | 收藏夹 media_id |
-    /// | `resources` | &str | 形如 "{内容id}:{内容类型},..." |
-    pub async fn fav_resource_batch_del(
-        &self,
-        media_id: u64,
-        resources: &str,
-    ) -> Result<BpiResponse<i32>, BpiError> {
+    /// Deletes favorite resources and returns the canonical payload result.
+    pub async fn delete_resources(&self, params: FavResourceBatchDeleteParams) -> BpiResult<i32> {
         let csrf = self.client.csrf()?;
-
-        let form = [
-            ("media_id", media_id.to_string()),
-            ("resources", resources.to_string()),
-            ("platform", "web".to_string()),
-            ("csrf", csrf),
-        ];
-
         self.client
-            .post("https://api.bilibili.com/x/v3/fav/resource/batch-del")
-            .form(&form)
-            .send_bpi("批量删除内容")
+            .post(RESOURCE_BATCH_DEL_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("fav.resource.batch_delete")
             .await
     }
 
-    /// 清空所有失效内容
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/fav)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `media_id` | u64 | 收藏夹 media_id |
-    pub async fn fav_resource_clean(&self, media_id: u64) -> Result<BpiResponse<i32>, BpiError> {
+    /// Cleans invalid favorite resources and returns the canonical payload result.
+    pub async fn clean_resources(&self, params: FavResourceCleanParams) -> BpiResult<i32> {
         let csrf = self.client.csrf()?;
 
-        let form = [("media_id", media_id.to_string()), ("csrf", csrf)];
-
         self.client
-            .post("https://api.bilibili.com/x/v3/fav/resource/clean")
-            .form(&form)
-            .send_bpi("清空所有失效内容")
+            .post(RESOURCE_CLEAN_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("fav.resource.clean")
             .await
     }
 }

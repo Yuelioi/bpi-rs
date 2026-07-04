@@ -1,8 +1,11 @@
 use crate::BilibiliRequest;
-use crate::BpiError;
-use crate::BpiResponse;
+use crate::response::BpiResult;
 use crate::vip::VipClient;
+use crate::vip::params::VipPrivilegeReceiveParams;
 use serde::{Deserialize, Serialize};
+
+const PRIVILEGE_RECEIVE_ENDPOINT: &str = "https://api.bilibili.com/x/vip/privilege/receive";
+const EXPERIENCE_ADD_ENDPOINT: &str = "https://api.bilibili.com/x/vip/experience/add";
 
 /// 大会员每日经验返回数据
 
@@ -14,41 +17,28 @@ pub struct VipExperienceData {
 }
 
 impl<'a> VipClient<'a> {
-    /// 兑换大会员卡券
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/vip/action.html#兑换大会员卡券)
-    ///
-    /// # 参数
-    /// | 名称    | 类型 | 说明         |
-    /// | ------- | ---- | ------------|
-    /// | `type_` | u8   | 卡券类型     |
-    pub async fn vip_receive_privilege(
+    /// Receives a VIP privilege coupon and returns the canonical payload result.
+    pub async fn receive_privilege(
         &self,
-        type_: u8,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: VipPrivilegeReceiveParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
-        let params = [("type", type_.to_string()), ("csrf", csrf)];
         self.client
-            .post("https://api.bilibili.com/x/vip/privilege/receive")
-            .form(&params)
-            .send_bpi("兑换大会员卡券")
+            .post(PRIVILEGE_RECEIVE_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("vip.privilege.receive")
             .await
     }
 
-    /// 领取大会员每日经验
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/vip/action.html#领取大会员每日经验)
-    ///
-    pub async fn vip_add_experience(&self) -> Result<BpiResponse<VipExperienceData>, BpiError> {
+    /// Adds daily VIP experience and returns the canonical payload result.
+    pub async fn add_experience(&self) -> BpiResult<VipExperienceData> {
         let csrf = self.client.csrf()?;
         let params = [("csrf", csrf)];
         self.client
-            .post("https://api.bilibili.com/x/vip/experience/add")
+            .post(EXPERIENCE_ADD_ENDPOINT)
             .form(&params)
-            .send_bpi("领取大会员每日经验")
+            .send_bpi_payload("vip.experience.add")
             .await
     }
 }

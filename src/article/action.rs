@@ -3,9 +3,14 @@
 // [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md)
 
 use crate::BilibiliRequest;
-use crate::BpiError;
-use crate::BpiResponse;
 use crate::article::ArticleClient;
+use crate::article::params::{ArticleCoinParams, ArticleFavoriteParams, ArticleLikeParams};
+use crate::response::BpiResult;
+
+const LIKE_ENDPOINT: &str = "https://api.bilibili.com/x/article/like";
+const COIN_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/coin/add";
+const FAVORITE_ADD_ENDPOINT: &str = "https://api.bilibili.com/x/article/favorites/add";
+const FAVORITE_DEL_ENDPOINT: &str = "https://api.bilibili.com/x/article/favorites/del";
 
 /// 投币响应数据
 
@@ -16,122 +21,54 @@ pub struct CoinResponseData {
 }
 
 impl<'a> ArticleClient<'a> {
-    /// 点赞文章
-    ///
-    /// # 参数
-    /// | 名称   | 类型  | 说明                     |
-    /// | ------ | ----- | ------------------------ |
-    /// | `id`   | u64   | 文章 cvid (必要)         |
-    /// | `like` | bool  | 是否点赞，`true` 点赞，`false` 取消点赞 |
-    ///
-    /// # 文档
-    /// [点赞文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#点赞文章)
-    pub async fn article_like(
-        &self,
-        id: u64,
-        like: bool,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    /// Likes or unlikes an article and returns the canonical payload result.
+    pub async fn like(&self, params: ArticleLikeParams) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let r#type = if like { 1 } else { 2 };
 
-        let result = self
-            .client
-            .post("https://api.bilibili.com/x/article/like")
-            .form(&[
-                ("id", id.to_string()),
-                ("type", r#type.to_string()),
-                ("csrf", csrf),
-            ])
-            .send_bpi("点赞文章")
-            .await?;
-
-        Ok(result)
+        self.client
+            .post(LIKE_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("article.like")
+            .await
     }
 
-    /// 投币文章
-    ///
-    /// # 参数
-    /// | 名称       | 类型  | 说明                        |
-    /// | ---------- | ----- | --------------------------- |
-    /// | `aid`      | i64   | 文章 cvid (必要)            |
-    /// | `upid`     | i64   | 文章作者 mid (必要)         |
-    /// | `multiply` | u32   | 投币数量 (必要，上限为 2)   |
-    ///
-    /// # 文档
-    /// [投币文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#投币文章)
-    pub async fn article_coin(
-        &self,
-        aid: u64,
-        upid: u64,
-        multiply: u32,
-    ) -> Result<BpiResponse<CoinResponseData>, BpiError> {
-        let multiply = multiply.min(2);
+    /// Gives coins to an article and returns the canonical payload result.
+    pub async fn coin(&self, params: ArticleCoinParams) -> BpiResult<CoinResponseData> {
         let csrf = self.client.csrf()?;
 
-        let result = self
-            .client
-            .post("https://api.bilibili.com/x/web-interface/coin/add")
-            .form(&[
-                ("aid", aid.to_string()),
-                ("upid", upid.to_string()),
-                ("multiply", multiply.to_string()),
-                ("avtype", "2".to_string()),
-                ("csrf", csrf),
-            ])
-            .send_bpi("投币文章")
-            .await?;
-
-        Ok(result)
+        self.client
+            .post(COIN_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("article.coin")
+            .await
     }
 
-    /// 收藏文章
-    ///
-    /// # 参数
-    /// | 名称   | 类型  | 说明             |
-    /// | ------ | ----- | ---------------- |
-    /// | `id`   | u64   | 文章 cvid (必要) |
-    ///
-    /// # 文档
-    /// [收藏文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#收藏文章)
-    pub async fn article_favorite(
+    /// Favorites an article and returns the canonical payload result.
+    pub async fn favorite(
         &self,
-        id: u64,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: ArticleFavoriteParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
-        let result = self
-            .client
-            .post("https://api.bilibili.com/x/article/favorites/add")
-            .form(&[("id", id.to_string()), ("csrf", csrf)])
-            .send_bpi("收藏文章")
-            .await?;
-
-        Ok(result)
+        self.client
+            .post(FAVORITE_ADD_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("article.favorite")
+            .await
     }
 
-    /// 收藏文章
-    ///
-    /// # 参数
-    /// | 名称   | 类型  | 说明             |
-    /// | ------ | ----- | ---------------- |
-    /// | `id`   | i64   | 文章 cvid (必要) |
-    ///
-    /// # 文档
-    /// [收藏文章](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/action.md#收藏文章)
-    pub async fn article_unfavorite(
+    /// Removes an article from favorites and returns the canonical payload result.
+    pub async fn unfavorite(
         &self,
-        id: i64,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: ArticleFavoriteParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
-        let result = self
-            .client
-            .post("https://api.bilibili.com/x/article/favorites/del")
-            .form(&[("id", id.to_string()), ("csrf", csrf)])
-            .send_bpi("收藏文章")
-            .await?;
-
-        Ok(result)
+        self.client
+            .post(FAVORITE_DEL_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("article.unfavorite")
+            .await
     }
 }
 

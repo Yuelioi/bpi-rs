@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::BpiResponse;
-
 // ================= 数据结构 =================
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -75,8 +73,6 @@ pub struct LotteryInfoData {
     #[serde(flatten)]
     pub extra: serde_json::Map<String, serde_json::Value>,
 }
-
-pub type LotteryInfoResponse = BpiResponse<LotteryInfoData>;
 
 #[cfg(test)]
 mod tests {

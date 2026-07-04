@@ -1,7 +1,7 @@
 use base64::{Engine as _, engine::general_purpose};
 use serde::{Deserialize, Serialize};
 
-use crate::{BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResult};
 
 // ================= 数据结构 =================
 
@@ -10,8 +10,6 @@ pub struct HeartBeatData {
     /// 下次心跳间隔
     pub next_interval: i32,
 }
-
-pub type HeartBeatResponse = BpiResponse<HeartBeatData>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LiveWebHeartBeatParams {

@@ -2,7 +2,6 @@
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
-use crate::BpiResponse;
 use crate::models::Account;
 use serde::{Deserialize, Serialize};
 
@@ -331,9 +330,6 @@ fn default_staff() -> Vec<StaffItem> {
     let v: Vec<StaffItem> = Vec::new();
     v
 }
-
-/// 获取视频详细信息响应类型
-pub type VideoInfoResponse = BpiResponse<VideoData>;
 
 #[cfg(test)]
 mod tests {

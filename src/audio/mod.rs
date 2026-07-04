@@ -19,6 +19,8 @@ pub mod status_number;
 
 pub use client::AudioClient;
 pub use params::{
-    AudioCollectionInfoParams, AudioPageParams, AudioRankListParams, AudioRankListType,
+    AudioCoinParams, AudioCollectionInfoParams, AudioCollectionToFavParams,
+    AudioCollectionToParams, AudioPageParams, AudioRankListParams, AudioRankListType,
     AudioRankPeriodParams, AudioSongParams, AudioStreamUrlParams, AudioStreamUrlWebParams,
 };
+pub use rank::AudioRankSubscribeParams;

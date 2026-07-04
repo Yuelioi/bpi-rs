@@ -16,5 +16,6 @@ pub mod view;
 
 pub use client::ArticleClient;
 pub use params::{
-    ArticleArticlesInfoParams, ArticleCardsParams, ArticleInfoParams, ArticleViewParams,
+    ArticleArticlesInfoParams, ArticleCardsParams, ArticleCoinParams, ArticleFavoriteParams,
+    ArticleInfoParams, ArticleLikeParams, ArticleViewParams,
 };

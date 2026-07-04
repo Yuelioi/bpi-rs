@@ -168,6 +168,125 @@ impl HistoryListParams {
     }
 }
 
+/// Parameters for `/x/v2/history/delete`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HistoryDeleteParams {
+    kid: String,
+}
+
+impl HistoryDeleteParams {
+    pub fn new(kid: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            kid: normalize_non_blank("kid", kid.into())?,
+        })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![("kid", self.kid.clone()), ("csrf", csrf.to_string())]
+    }
+}
+
+/// Parameters for `/x/v2/history/shadow/set`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct HistoryShadowSetParams {
+    switch: bool,
+}
+
+impl HistoryShadowSetParams {
+    pub fn new(switch: bool) -> Self {
+        Self { switch }
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("switch", self.switch.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+/// Parameters for `/x/v2/history/toview/add`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ToViewAddParams {
+    aid: Option<u64>,
+    bvid: Option<String>,
+}
+
+impl ToViewAddParams {
+    pub fn new(aid: Option<u64>, bvid: Option<String>) -> BpiResult<Self> {
+        let aid = match aid {
+            Some(0) => {
+                return Err(BpiError::invalid_parameter("aid", "id must be non-zero"));
+            }
+            Some(aid) => Some(aid),
+            None => None,
+        };
+        let bvid = match bvid {
+            Some(bvid) => Some(normalize_non_blank("bvid", bvid)?),
+            None => None,
+        };
+
+        if aid.is_none() && bvid.is_none() {
+            return Err(BpiError::invalid_parameter(
+                "video_id",
+                "aid or bvid is required",
+            ));
+        }
+
+        Ok(Self { aid, bvid })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        let mut pairs = vec![("csrf", csrf.to_string())];
+        if let Some(aid) = self.aid {
+            pairs.push(("aid", aid.to_string()));
+        }
+        if let Some(bvid) = &self.bvid {
+            pairs.push(("bvid", bvid.clone()));
+        }
+        pairs
+    }
+}
+
+/// Parameters for `/x/v2/history/toview/del`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ToViewDeleteParams {
+    aid: Option<u64>,
+    viewed: Option<bool>,
+}
+
+impl ToViewDeleteParams {
+    pub fn new(aid: Option<u64>, viewed: Option<bool>) -> BpiResult<Self> {
+        let aid = match aid {
+            Some(0) => {
+                return Err(BpiError::invalid_parameter("aid", "id must be non-zero"));
+            }
+            Some(aid) => Some(aid),
+            None => None,
+        };
+
+        if aid.is_none() && viewed.is_none() {
+            return Err(BpiError::invalid_parameter(
+                "selector",
+                "aid or viewed is required",
+            ));
+        }
+
+        Ok(Self { aid, viewed })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        let mut pairs = vec![("csrf", csrf.to_string())];
+        if let Some(aid) = self.aid {
+            pairs.push(("aid", aid.to_string()));
+        }
+        if let Some(viewed) = self.viewed {
+            pairs.push(("viewed", viewed.to_string()));
+        }
+        pairs
+    }
+}
+
 fn normalize_non_blank(field: &'static str, value: String) -> BpiResult<String> {
     let value = value.trim().to_string();
     if value.is_empty() {
@@ -296,5 +415,54 @@ mod tests {
             err,
             BpiError::InvalidParameter { field: "ps", .. }
         ));
+    }
+
+    #[test]
+    fn history_delete_params_rejects_blank_kid() {
+        let err = HistoryDeleteParams::new(" ").unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "kid", .. }
+        ));
+    }
+
+    #[test]
+    fn toview_add_params_requires_video_id() {
+        let err = ToViewAddParams::new(None, None).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "video_id",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn toview_delete_params_requires_delete_selector() {
+        let err = ToViewDeleteParams::new(None, None).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "selector",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn history_shadow_set_params_serializes_bool() {
+        let params = HistoryShadowSetParams::new(true);
+
+        assert_eq!(
+            params.form_pairs("csrf-token"),
+            vec![
+                ("switch", "true".to_string()),
+                ("csrf", "csrf-token".to_string()),
+            ]
+        );
     }
 }

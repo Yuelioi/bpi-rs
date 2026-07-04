@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::BpiResponse;
-
 // ================= 数据结构 =================
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -64,8 +62,6 @@ pub struct MyMedalsData {
     /// 页码信息
     pub page_info: PageInfo,
 }
-
-pub type MyMedalsResponse = BpiResponse<MyMedalsData>;
 
 #[cfg(test)]
 mod tests {

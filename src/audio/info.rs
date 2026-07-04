@@ -2,7 +2,6 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/info.md)
 
-use crate::BpiResponse;
 use serde::{Deserialize, Serialize};
 
 /// 歌曲基本信息数据
@@ -102,9 +101,6 @@ pub struct AudioTag {
     /// TAG名
     pub info: String,
 }
-
-/// 歌曲创作成员响应类型
-pub type AudioMemberResponse = BpiResponse<Vec<AudioMemberType>>;
 
 /// 歌曲创作成员类型
 #[derive(Debug, Clone, Serialize, Deserialize)]

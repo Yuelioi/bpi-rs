@@ -166,6 +166,212 @@ impl FavResourceIdsParams {
     }
 }
 
+/// Parameters for creating a favorite folder.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FavFolderAddParams {
+    title: String,
+    intro: Option<String>,
+    privacy: Option<u8>,
+    cover: Option<String>,
+}
+
+impl FavFolderAddParams {
+    pub fn new(title: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            title: normalize_non_blank("title", title.into())?,
+            intro: None,
+            privacy: None,
+            cover: None,
+        })
+    }
+
+    pub fn intro(mut self, intro: impl Into<String>) -> BpiResult<Self> {
+        self.intro = Some(normalize_non_blank("intro", intro.into())?);
+        Ok(self)
+    }
+
+    pub fn privacy(mut self, privacy: u8) -> BpiResult<Self> {
+        self.privacy = Some(validate_privacy(privacy)?);
+        Ok(self)
+    }
+
+    pub fn cover(mut self, cover: impl Into<String>) -> BpiResult<Self> {
+        self.cover = Some(normalize_non_blank("cover", cover.into())?);
+        Ok(self)
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        let mut pairs = vec![("title", self.title.clone()), ("csrf", csrf.to_string())];
+        push_optional(&mut pairs, "intro", &self.intro);
+        push_optional_value(&mut pairs, "privacy", self.privacy);
+        push_optional(&mut pairs, "cover", &self.cover);
+        pairs
+    }
+}
+
+/// Parameters for editing a favorite folder.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FavFolderEditParams {
+    media_id: MediaId,
+    title: String,
+    intro: Option<String>,
+    privacy: Option<u8>,
+    cover: Option<String>,
+}
+
+impl FavFolderEditParams {
+    pub fn new(media_id: MediaId, title: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            media_id,
+            title: normalize_non_blank("title", title.into())?,
+            intro: None,
+            privacy: None,
+            cover: None,
+        })
+    }
+
+    pub fn intro(mut self, intro: impl Into<String>) -> BpiResult<Self> {
+        self.intro = Some(normalize_non_blank("intro", intro.into())?);
+        Ok(self)
+    }
+
+    pub fn privacy(mut self, privacy: u8) -> BpiResult<Self> {
+        self.privacy = Some(validate_privacy(privacy)?);
+        Ok(self)
+    }
+
+    pub fn cover(mut self, cover: impl Into<String>) -> BpiResult<Self> {
+        self.cover = Some(normalize_non_blank("cover", cover.into())?);
+        Ok(self)
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        let mut pairs = vec![
+            ("media_id", self.media_id.to_string()),
+            ("title", self.title.clone()),
+            ("csrf", csrf.to_string()),
+        ];
+        push_optional(&mut pairs, "intro", &self.intro);
+        push_optional_value(&mut pairs, "privacy", self.privacy);
+        push_optional(&mut pairs, "cover", &self.cover);
+        pairs
+    }
+}
+
+/// Parameters for deleting favorite folders.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FavFolderDeleteParams {
+    media_ids: Vec<MediaId>,
+}
+
+impl FavFolderDeleteParams {
+    pub fn new(media_ids: impl IntoIterator<Item = MediaId>) -> BpiResult<Self> {
+        let media_ids = media_ids.into_iter().collect::<Vec<_>>();
+        if media_ids.is_empty() {
+            return Err(BpiError::invalid_parameter(
+                "media_ids",
+                "at least one media id is required",
+            ));
+        }
+
+        Ok(Self { media_ids })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            (
+                "media_ids",
+                self.media_ids
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(","),
+            ),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+/// Parameters for copying or moving favorite resources.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FavResourceTransferParams {
+    src_media_id: MediaId,
+    tar_media_id: MediaId,
+    mid: Mid,
+    resources: String,
+}
+
+impl FavResourceTransferParams {
+    pub fn new(
+        src_media_id: MediaId,
+        tar_media_id: MediaId,
+        mid: Mid,
+        resources: impl Into<String>,
+    ) -> BpiResult<Self> {
+        Ok(Self {
+            src_media_id,
+            tar_media_id,
+            mid,
+            resources: normalize_non_blank("resources", resources.into())?,
+        })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("src_media_id", self.src_media_id.to_string()),
+            ("tar_media_id", self.tar_media_id.to_string()),
+            ("mid", self.mid.to_string()),
+            ("resources", self.resources.clone()),
+            ("platform", "web".to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+/// Parameters for deleting favorite resources in batches.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FavResourceBatchDeleteParams {
+    media_id: MediaId,
+    resources: String,
+}
+
+impl FavResourceBatchDeleteParams {
+    pub fn new(media_id: MediaId, resources: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            media_id,
+            resources: normalize_non_blank("resources", resources.into())?,
+        })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("media_id", self.media_id.to_string()),
+            ("resources", self.resources.clone()),
+            ("platform", "web".to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+/// Parameters for cleaning invalid resources from a favorite folder.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FavResourceCleanParams {
+    media_id: MediaId,
+}
+
+impl FavResourceCleanParams {
+    pub fn new(media_id: MediaId) -> Self {
+        Self { media_id }
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("media_id", self.media_id.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
 fn validate_positive_u32(field: &'static str, value: u32) -> BpiResult<u32> {
     if value == 0 {
         return Err(BpiError::invalid_parameter(field, "value must be non-zero"));
@@ -189,6 +395,39 @@ fn normalize_non_blank(field: &'static str, value: String) -> BpiResult<String> 
     }
 
     Ok(value)
+}
+
+fn validate_privacy(value: u8) -> BpiResult<u8> {
+    if matches!(value, 0 | 1) {
+        return Ok(value);
+    }
+
+    Err(BpiError::invalid_parameter(
+        "privacy",
+        "value must be 0 or 1",
+    ))
+}
+
+fn push_optional(
+    pairs: &mut Vec<(&'static str, String)>,
+    field: &'static str,
+    value: &Option<String>,
+) {
+    if let Some(value) = value {
+        pairs.push((field, value.clone()));
+    }
+}
+
+fn push_optional_value<T>(
+    pairs: &mut Vec<(&'static str, String)>,
+    field: &'static str,
+    value: Option<T>,
+) where
+    T: ToString,
+{
+    if let Some(value) = value {
+        pairs.push((field, value.to_string()));
+    }
 }
 
 #[cfg(test)]
@@ -337,6 +576,61 @@ mod tests {
                 ("platform", "web".to_string())
             ]
         );
+        Ok(())
+    }
+
+    #[test]
+    fn fav_folder_add_params_rejects_blank_title() {
+        let err = FavFolderAddParams::new(" ").unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "title", .. }
+        ));
+    }
+
+    #[test]
+    fn fav_folder_edit_params_rejects_invalid_privacy() -> BpiResult<()> {
+        let err = FavFolderEditParams::new(MediaId::new(1052622027)?, "folder")?
+            .privacy(2)
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "privacy",
+                ..
+            }
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn fav_folder_delete_params_requires_media_ids() {
+        let err = FavFolderDeleteParams::new(Vec::<MediaId>::new()).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "media_ids",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn fav_resource_transfer_params_rejects_blank_resources() -> BpiResult<()> {
+        let err =
+            FavResourceTransferParams::new(MediaId::new(1)?, MediaId::new(2)?, Mid::new(3)?, " ")
+                .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "resources",
+                ..
+            }
+        ));
         Ok(())
     }
 }

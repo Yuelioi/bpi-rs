@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::BpiResponse;
-
 // ================= 数据结构 =================
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -97,8 +95,6 @@ pub struct EmoticonData {
     /// 购买链接
     pub purchase_url: Option<String>,
 }
-
-pub type EmoticonResponse = BpiResponse<EmoticonData>;
 
 #[cfg(test)]
 mod tests {

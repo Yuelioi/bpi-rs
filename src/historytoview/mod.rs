@@ -6,4 +6,7 @@ pub mod params;
 pub mod toview;
 
 pub use client::HistoryToViewClient;
-pub use params::{HistoryBusiness, HistoryListParams, HistoryListType};
+pub use params::{
+    HistoryBusiness, HistoryDeleteParams, HistoryListParams, HistoryListType,
+    HistoryShadowSetParams, ToViewAddParams, ToViewDeleteParams,
+};

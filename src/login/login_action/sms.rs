@@ -97,25 +97,19 @@ fn validate_required(field: &'static str, value: &str) -> BpiResult<()> {
 
 impl<'a> LoginClient<'a> {
     /// 发送短信验证码（Web端）
-    pub async fn login_send_sms_code(
-        &self,
-        params: LoginSmsCodeParams,
-    ) -> Result<BpiResponse<SMSSendData>, BpiError> {
-        let result = self
-            .client
+    pub async fn send_sms_code(&self, params: LoginSmsCodeParams) -> BpiResult<SMSSendData> {
+        self.client
             .post("https://passport.bilibili.com/x/passport-login/web/sms/send")
             .form(&params.form_pairs())
-            .send_bpi("发送短信验证码")
-            .await?;
-
-        Ok(result)
+            .send_bpi_payload("login.sms.send")
+            .await
     }
 
     /// 短信登录
     ///
     /// * `cid` - 国际冠字码
     /// * `tel` - 手机号码
-    /// * `captcha_key` - 短信登录 token(基于login_send_sms_code)
+    /// * `captcha_key` - 短信登录 token(基于send_sms_code)
     /// * `code` - 短信验证码 5min过期
     pub async fn login_with_sms(
         &self,

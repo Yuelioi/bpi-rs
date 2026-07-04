@@ -1,6 +1,5 @@
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
 use crate::BpiResult;
 use crate::ids::{Mid, RoomId};
 use crate::live::LiveClient;
@@ -241,7 +240,7 @@ impl<'a> LiveClient<'a> {
         tuid: i64,
         hour: i32,
         msg: Option<String>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let form = vec![
@@ -269,7 +268,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/AddSilentUser")
             .form(&form)
-            .send_bpi("禁言观众")
+            .send_bpi_optional_payload("live.silent_user.add")
             .await
     }
 
@@ -279,7 +278,7 @@ impl<'a> LiveClient<'a> {
         &self,
         roomid: i64,
         tuid: i64,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let form = vec![
@@ -292,7 +291,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/DelSilentUser")
             .form(&form)
-            .send_bpi("解除禁言")
+            .send_bpi_optional_payload("live.silent_user.delete")
             .await
     }
 
@@ -303,7 +302,7 @@ impl<'a> LiveClient<'a> {
         room_id: i64,
         anchor_id: i64,
         tuid: i64,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let form = vec![
@@ -319,7 +318,7 @@ impl<'a> LiveClient<'a> {
             .post("https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/AddBlack")
             .header("Referer", format!("https://live.bilibili.com/{}", room_id))
             .form(&form)
-            .send_bpi("拉黑观众")
+            .send_bpi_optional_payload("live.banned_user.add")
             .await
     }
 
@@ -330,7 +329,7 @@ impl<'a> LiveClient<'a> {
         room_id: i64,
         anchor_id: i64,
         tuid: i64,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let form = vec![
@@ -348,7 +347,7 @@ impl<'a> LiveClient<'a> {
             .post("https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/DelBlack")
             .header("Referer", format!("https://live.bilibili.com/{}", room_id))
             .form(&form)
-            .send_bpi("解除拉黑")
+            .send_bpi_optional_payload("live.banned_user.delete")
             .await
     }
 
@@ -358,7 +357,7 @@ impl<'a> LiveClient<'a> {
         &self,
         room_id: i64,
         keyword: String,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let form = vec![
@@ -375,7 +374,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/AddShieldKeyword")
             .form(&form)
-            .send_bpi("添加屏蔽词")
+            .send_bpi_optional_payload("live.shield_keyword.add")
             .await
     }
 
@@ -385,7 +384,7 @@ impl<'a> LiveClient<'a> {
         &self,
         room_id: i64,
         keyword: String,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let form = vec![
@@ -402,7 +401,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/DelShieldKeyword")
             .form(&form)
-            .send_bpi("删除屏蔽词")
+            .send_bpi_optional_payload("live.shield_keyword.delete")
             .await
     }
 }

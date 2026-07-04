@@ -3,7 +3,7 @@
 //! [文档入口](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
 
 use crate::ids::Cid;
-use crate::{BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResult};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DanmakuHistoryDatesParams {
@@ -65,8 +65,6 @@ fn validate_month(value: &str) -> BpiResult<()> {
 
     Ok(())
 }
-
-pub type HistoryDatesResponse = BpiResponse<Vec<String>>;
 
 #[cfg(test)]
 mod tests {

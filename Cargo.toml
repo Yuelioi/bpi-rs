@@ -12,7 +12,7 @@ readme = "README.md"
 keywords = ["bilibili", "api", "client", "rust", "http"]
 categories = ["api-bindings", "web-programming", "network-programming"]
 publish = true
-exclude = [".vscode", "assets"]
+exclude = [".vscode", "assets", "flightdeck"]
 [features]
 default = ["full"]
 full = [
@@ -61,7 +61,7 @@ live = []
 login = []
 manga = []
 message = ["dep:uuid"]
-misc = ["dep:hmac", "dep:sha2", "dep:hex"]
+misc = []
 note = []
 opus = []
 search = []
@@ -70,7 +70,7 @@ video = []
 video_ranking = []
 vip = []
 wallet = []
-web_widget = []
+web_widget = ["video"]
 
 [dependencies]
 config = "0.15"
@@ -101,9 +101,9 @@ bytes = { version = "1.8" }
 md5 = { version = "0.8" } # wbi
 
 base64 = { version = "0.22" }
-hmac = { version = "0.12", optional = true }
-sha2 = { version = "0.10", optional = true }
-hex = { version = "0.4", optional = true }
+hmac = "0.12"
+sha2 = "0.10"
+hex = "0.4"
 flate2 = { version = "1.1", optional = true }
 quick-xml = { version = "0.38", features = ["serialize"], optional = true }
 bitflags = { version = "2.9" }

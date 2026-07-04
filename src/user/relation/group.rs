@@ -6,7 +6,7 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::user::UserClient;
 use serde::{Deserialize, Serialize};
 
@@ -22,241 +22,271 @@ pub struct CreateTagResponseData {
 
 // --- 测试模块 ---
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UserGroupCreateParams {
+    group_name: String,
+}
+
+impl UserGroupCreateParams {
+    pub fn new(group_name: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            group_name: normalize_name("group_name", group_name.into())?,
+        })
+    }
+
+    fn into_multipart(self, csrf: &str) -> reqwest::multipart::Form {
+        reqwest::multipart::Form::new()
+            .text("tag", self.group_name)
+            .text("csrf", csrf.to_string())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UserGroupUpdateParams {
+    tag_id: i64,
+    new_name: String,
+}
+
+impl UserGroupUpdateParams {
+    pub fn new(tag_id: i64, new_name: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            tag_id: validate_positive_i64("tag_id", tag_id)?,
+            new_name: normalize_name("new_name", new_name.into())?,
+        })
+    }
+
+    fn into_multipart(self, csrf: &str) -> reqwest::multipart::Form {
+        reqwest::multipart::Form::new()
+            .text("tagid", self.tag_id.to_string())
+            .text("name", self.new_name)
+            .text("csrf", csrf.to_string())
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UserGroupDeleteParams {
+    tag_id: i64,
+}
+
+impl UserGroupDeleteParams {
+    pub fn new(tag_id: i64) -> BpiResult<Self> {
+        Ok(Self {
+            tag_id: validate_positive_i64("tag_id", tag_id)?,
+        })
+    }
+
+    fn into_multipart(self, csrf: &str) -> reqwest::multipart::Form {
+        reqwest::multipart::Form::new()
+            .text("tagid", self.tag_id.to_string())
+            .text("csrf", csrf.to_string())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UserGroupUsersParams {
+    fids: String,
+    tagids: String,
+}
+
+impl UserGroupUsersParams {
+    pub fn new(fids: &[u64], tagids: &[i64]) -> BpiResult<Self> {
+        Ok(Self {
+            fids: join_u64_ids("fids", fids)?,
+            tagids: join_i64_ids("tagids", tagids)?,
+        })
+    }
+
+    pub fn remove_from_all(fids: &[u64]) -> BpiResult<Self> {
+        Ok(Self {
+            fids: join_u64_ids("fids", fids)?,
+            tagids: "0".to_string(),
+        })
+    }
+
+    fn into_multipart(self, csrf: &str) -> reqwest::multipart::Form {
+        reqwest::multipart::Form::new()
+            .text("fids", self.fids)
+            .text("tagids", self.tagids)
+            .text("csrf", csrf.to_string())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UserGroupMoveUsersParams {
+    fids: String,
+    before_tag_ids: String,
+    after_tag_ids: String,
+}
+
+impl UserGroupMoveUsersParams {
+    pub fn new(fids: &[u64], before_tag_ids: &[i64], after_tag_ids: &[i64]) -> BpiResult<Self> {
+        Ok(Self {
+            fids: join_u64_ids("fids", fids)?,
+            before_tag_ids: join_i64_ids("before_tag_ids", before_tag_ids)?,
+            after_tag_ids: join_i64_ids("after_tag_ids", after_tag_ids)?,
+        })
+    }
+
+    fn into_multipart(self, csrf: &str) -> reqwest::multipart::Form {
+        reqwest::multipart::Form::new()
+            .text("fids", self.fids)
+            .text("beforeTagids", self.before_tag_ids)
+            .text("afterTagids", self.after_tag_ids)
+            .text("csrf", csrf.to_string())
+    }
+}
+
 impl<'a> UserClient<'a> {
-    /// 创建分组
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#创建分组)
-    ///
-    /// # 参数
-    /// | 名称      | 类型         | 说明           |
-    /// | --------- | ------------| -------------- |
-    /// | `group_name` | &str      | 分组名，最长16字|
-    pub async fn user_group_create_tag(
+    pub async fn create_group_tag(
         &self,
-        group_name: &str,
-    ) -> Result<BpiResponse<CreateTagResponseData>, BpiError> {
+        params: UserGroupCreateParams,
+    ) -> BpiResult<CreateTagResponseData> {
         let csrf = self.client.csrf()?;
-        let form = reqwest::multipart::Form::new()
-            .text("tag", group_name.to_string())
-            .text("csrf", csrf.to_string());
+        let form = params.into_multipart(&csrf);
 
         self.client
             .post("https://api.bilibili.com/x/relation/tag/create")
             .multipart(form)
-            .send_bpi("创建分组")
+            .send_bpi_payload("user.group.create")
             .await
     }
 
-    /// 重命名分组
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#重命名分组)
-    ///
-    /// # 参数
-    /// | 名称      | 类型         | 说明           |
-    /// | --------- | ------------| -------------- |
-    /// | `tag_id`  | i64         | 分组ID         |
-    /// | `new_name`| &str        | 新名称，最长16字|
-    pub async fn user_group_update_tag(
+    pub async fn update_group_tag(
         &self,
-        tag_id: i64,
-        new_name: &str,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: UserGroupUpdateParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let form = reqwest::multipart::Form::new()
-            .text("tagid", tag_id.to_string())
-            .text("name", new_name.to_string())
-            .text("csrf", csrf.to_string());
+        let form = params.into_multipart(&csrf);
 
         self.client
             .post("https://api.bilibili.com/x/relation/tag/update")
             .multipart(form)
-            .send_bpi("重命名分组")
+            .send_bpi_optional_payload("user.group.update")
             .await
     }
 
-    /// 删除分组
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#删除分组)
-    ///
-    /// # 参数
-    /// | 名称      | 类型         | 说明           |
-    /// | --------- | ------------| -------------- |
-    /// | `tag_id`  | i64         | 分组ID         |
-    pub async fn user_group_delete_tag(
+    pub async fn delete_group_tag(
         &self,
-        tag_id: i64,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: UserGroupDeleteParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let form = reqwest::multipart::Form::new()
-            .text("tagid", tag_id.to_string())
-            .text("csrf", csrf.to_string());
+        let form = params.into_multipart(&csrf);
 
         self.client
             .post("https://api.bilibili.com/x/relation/tag/del")
             .multipart(form)
-            .send_bpi("删除分组")
+            .send_bpi_optional_payload("user.group.delete")
             .await
     }
 
-    /// 修改分组成员（添加）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#修改分组成员)
-    ///
-    /// # 参数
-    /// | 名称      | 类型         | 说明           |
-    /// | --------- | ------------| -------------- |
-    /// | `fids`    | &`[u64]`      | 目标用户 mid 列表|
-    /// | `tagids`  | &`[i64]`      | 分组ID列表      |
-    pub async fn user_group_add_users_to_tags(
+    pub async fn add_group_users_to_tags(
         &self,
-        fids: &[u64],
-        tagids: &[i64],
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: UserGroupUsersParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let fids_str = fids
-            .iter()
-            .map(|id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-        let tagids_str = tagids
-            .iter()
-            .map(|id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-
-        let form = reqwest::multipart::Form::new()
-            .text("fids", fids_str)
-            .text("tagids", tagids_str)
-            .text("csrf", csrf.to_string());
+        let form = params.into_multipart(&csrf);
 
         self.client
             .post("https://api.bilibili.com/x/relation/tags/addUsers")
             .multipart(form)
-            .send_bpi("修改分组成员")
+            .send_bpi_optional_payload("user.group.users.add")
             .await
     }
 
-    // 修改分组成员（删除）
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#修改分组成员)
-    ///
-    /// # 参数
-    /// | 名称      | 类型         | 说明           |
-    /// | --------- | ------------| -------------- |
-    /// | `fids`    | &`[u64]`      | 目标用户 mid 列表|
-    pub async fn user_group_remove_users_(
+    pub async fn remove_group_users(
         &self,
-        fids: &[u64],
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: UserGroupUsersParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let fids_str = fids
-            .iter()
-            .map(|id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-
-        let form = reqwest::multipart::Form::new()
-            .text("fids", fids_str)
-            .text("tagids", "0".to_string())
-            .text("csrf", csrf.to_string());
+        let form = params.into_multipart(&csrf);
 
         self.client
             .post("https://api.bilibili.com/x/relation/tags/addUsers")
             .multipart(form)
-            .send_bpi("修改分组成员")
+            .send_bpi_optional_payload("user.group.users.remove")
             .await
     }
 
-    /// 复制关注到分组
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#复制关注到分组)
-    ///
-    /// # 参数
-    /// | 名称      | 类型         | 说明           |
-    /// | --------- | ------------| -------------- |
-    /// | `fids`    | &`[u64]`      | 用户 mid 列表   |
-    /// | `tagids`  | &`[i64]`      | 目标分组ID列表  |
-    pub async fn user_group_copy_users_to_tags(
+    pub async fn copy_group_users_to_tags(
         &self,
-        fids: &[u64],
-        tagids: &[i64],
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: UserGroupUsersParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let fids_str = fids
-            .iter()
-            .map(|id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-        let tagids_str = tagids
-            .iter()
-            .map(|id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-
-        let form = reqwest::multipart::Form::new()
-            .text("fids", fids_str)
-            .text("tagids", tagids_str)
-            .text("csrf", csrf.to_string());
+        let form = params.into_multipart(&csrf);
 
         self.client
             .post("https://api.bilibili.com/x/relation/tags/copyUsers")
             .multipart(form)
-            .send_bpi("复制关注到分组")
+            .send_bpi_optional_payload("user.group.users.copy")
             .await
     }
 
-    /// 移动关注到分组
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user/relation/group#移动关注到分组)
-    ///
-    /// # 参数
-    /// | 名称            | 类型         | 说明           |
-    /// | --------------- | ------------| -------------- |
-    /// | `fids`          | &`[u64]`      | 用户 mid 列表   |
-    /// | `before_tag_ids`| &`[i64]`      | 原分组ID列表    |
-    /// | `after_tag_ids` | &`[i64]`      | 新分组ID列表    |
-    pub async fn user_group_move_users_to_tags(
+    pub async fn move_group_users_to_tags(
         &self,
-        fids: &[u64],
-        before_tag_ids: &[i64],
-        after_tag_ids: &[i64],
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: UserGroupMoveUsersParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let fids_str = fids
-            .iter()
-            .map(|id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-        let before_tag_ids_str = before_tag_ids
-            .iter()
-            .map(|id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-        let after_tag_ids_str = after_tag_ids
-            .iter()
-            .map(|id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-
-        let form = reqwest::multipart::Form::new()
-            .text("fids", fids_str)
-            .text("beforeTagids", before_tag_ids_str)
-            .text("afterTagids", after_tag_ids_str)
-            .text("csrf", csrf.to_string());
+        let form = params.into_multipart(&csrf);
 
         self.client
             .post("https://api.bilibili.com/x/relation/tags/moveUsers")
             .multipart(form)
-            .send_bpi("移动关注到分组")
+            .send_bpi_optional_payload("user.group.users.move")
             .await
     }
+}
+
+fn normalize_name(field: &'static str, value: String) -> BpiResult<String> {
+    let value = value.trim().to_string();
+    if value.is_empty() {
+        return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
+    }
+    if value.len() > 16 {
+        return Err(BpiError::invalid_parameter(
+            field,
+            "length cannot exceed 16 bytes",
+        ));
+    }
+
+    Ok(value)
+}
+
+fn validate_positive_i64(field: &'static str, value: i64) -> BpiResult<i64> {
+    if value <= 0 {
+        return Err(BpiError::invalid_parameter(field, "id must be positive"));
+    }
+
+    Ok(value)
+}
+
+fn join_u64_ids(field: &'static str, values: &[u64]) -> BpiResult<String> {
+    if values.is_empty() || values.contains(&0) {
+        return Err(BpiError::invalid_parameter(
+            field,
+            "ids must be non-empty and non-zero",
+        ));
+    }
+
+    Ok(values
+        .iter()
+        .map(u64::to_string)
+        .collect::<Vec<_>>()
+        .join(","))
+}
+
+fn join_i64_ids(field: &'static str, values: &[i64]) -> BpiResult<String> {
+    if values.is_empty() || values.iter().any(|value| *value <= 0) {
+        return Err(BpiError::invalid_parameter(
+            field,
+            "ids must be non-empty and positive",
+        ));
+    }
+
+    Ok(values
+        .iter()
+        .map(i64::to_string)
+        .collect::<Vec<_>>()
+        .join(","))
 }
 
 #[cfg(test)]

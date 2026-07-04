@@ -3,10 +3,13 @@
 // [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/follow.md)
 
 use crate::BilibiliRequest;
-use crate::BpiError;
-use crate::BpiResponse;
 use crate::bangumi::BangumiClient;
+use crate::ids::SeasonId;
+use crate::response::BpiResult;
 use serde::{Deserialize, Serialize};
+
+const FOLLOW_ENDPOINT: &str = "https://api.bilibili.com/pgc/web/follow/add";
+const UNFOLLOW_ENDPOINT: &str = "https://api.bilibili.com/pgc/web/follow/del";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BangumiFollowResult {
@@ -16,52 +19,79 @@ pub struct BangumiFollowResult {
     pub toast: String,
 }
 
+/// Parameters for following or unfollowing a bangumi season.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BangumiFollowParams {
+    season_id: SeasonId,
+}
+
+impl BangumiFollowParams {
+    pub fn new(season_id: SeasonId) -> Self {
+        Self { season_id }
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("season_id", self.season_id.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
 impl<'a> BangumiClient<'a> {
-    /// 追番
-    ///
-    /// # 参数
-    /// * `season_id` - 剧集ssid
-    ///
-    /// # 文档
-    /// [追番](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/follow.md#追番)
-    pub async fn bangumi_follow(
-        &self,
-        season_id: u64,
-    ) -> Result<BpiResponse<BangumiFollowResult>, BpiError> {
+    /// Follows a bangumi season and returns the canonical payload result.
+    pub async fn follow(&self, params: BangumiFollowParams) -> BpiResult<BangumiFollowResult> {
         let csrf = self.client.csrf()?;
         self.client
-            .post("https://api.bilibili.com/pgc/web/follow/add")
+            .post(FOLLOW_ENDPOINT)
             .with_bilibili_headers()
-            .form(&[
-                ("season_id", season_id.to_string()),
-                ("csrf", csrf.to_string()),
-            ])
-            .send_bpi("追番")
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("bangumi.follow")
             .await
     }
 
-    /// 取消追番
-    ///
-    /// # 参数
-    /// * `season_id` - 剧集ssid
-    /// # 文档
-    /// [取消追番](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/bangumi/follow.md#取消追番)
-    pub async fn bangumi_unfollow(
-        &self,
-        season_id: u64,
-    ) -> Result<BpiResponse<BangumiFollowResult>, BpiError> {
+    /// Unfollows a bangumi season and returns the canonical payload result.
+    pub async fn unfollow(&self, params: BangumiFollowParams) -> BpiResult<BangumiFollowResult> {
         let csrf = self.client.csrf()?;
         self.client
-            .post("https://api.bilibili.com/pgc/web/follow/del")
+            .post(UNFOLLOW_ENDPOINT)
             .with_bilibili_headers()
-            .form(&[
-                ("season_id", season_id.to_string()),
-                ("csrf", csrf.to_string()),
-            ])
-            .send_bpi("取消追番")
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("bangumi.unfollow")
             .await
     }
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use crate::BpiError;
+    use crate::bangumi::BangumiFollowParams;
+    use crate::ids::SeasonId;
+
+    #[test]
+    fn bangumi_follow_params_serializes_season_id() -> Result<(), BpiError> {
+        let params = BangumiFollowParams::new(SeasonId::new(1172)?);
+
+        assert_eq!(
+            params.form_pairs("csrf-token"),
+            vec![
+                ("season_id", "1172".to_string()),
+                ("csrf", "csrf-token".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn season_id_rejects_zero_before_follow_params() {
+        let err = SeasonId::new(0).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "season_id",
+                ..
+            }
+        ));
+    }
+}

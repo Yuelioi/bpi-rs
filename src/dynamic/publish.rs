@@ -2,15 +2,19 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::dynamic::DynamicClient;
 use reqwest::Body;
 use reqwest::multipart::{Form, Part};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::path::Path;
+use std::path::PathBuf;
 use tokio::fs::File;
 use tokio_util::codec::{BytesCodec, FramedRead};
+
+const UPLOAD_PIC_ENDPOINT: &str = "https://api.bilibili.com/x/dynamic/feed/draw/upload_bfs";
+const CREATE_TEXT_ENDPOINT: &str = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/create";
+const CREATE_COMPLEX_ENDPOINT: &str = "https://api.bilibili.com/x/dynamic/feed/create/dyn";
 
 /// 图片上传响应数据
 
@@ -129,32 +133,123 @@ pub struct CreateComplexDynamicData {
     pub dyn_type: u8,
 }
 
+/// Parameters for uploading a dynamic image.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DynamicUploadPicParams {
+    file_path: PathBuf,
+    category: String,
+}
+
+impl DynamicUploadPicParams {
+    pub fn new(file_path: impl Into<PathBuf>) -> Self {
+        Self {
+            file_path: file_path.into(),
+            category: "daily".to_string(),
+        }
+    }
+
+    pub fn category(mut self, category: impl Into<String>) -> BpiResult<Self> {
+        self.category = normalize_non_blank("category", category.into())?;
+        Ok(self)
+    }
+}
+
+/// Parameters for publishing a plain-text dynamic.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DynamicTextCreateParams {
+    content: String,
+}
+
+impl DynamicTextCreateParams {
+    pub fn new(content: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            content: normalize_non_blank("content", content.into())?,
+        })
+    }
+}
+
+/// Parameters for publishing a complex dynamic.
+#[derive(Debug, Clone)]
+pub struct DynamicComplexCreateParams {
+    scene: u8,
+    contents: Vec<DynamicContentItem>,
+    pics: Option<Vec<DynamicPic>>,
+    topic: Option<DynamicTopic>,
+}
+
+impl DynamicComplexCreateParams {
+    pub fn new(scene: u8, contents: Vec<DynamicContentItem>) -> BpiResult<Self> {
+        if !matches!(scene, 1 | 2 | 4) {
+            return Err(BpiError::invalid_parameter(
+                "scene",
+                "value must be 1, 2, or 4",
+            ));
+        }
+        if contents.is_empty() {
+            return Err(BpiError::invalid_parameter(
+                "contents",
+                "at least one content item is required",
+            ));
+        }
+
+        Ok(Self {
+            scene,
+            contents,
+            pics: None,
+            topic: None,
+        })
+    }
+
+    pub fn pics(mut self, pics: Vec<DynamicPic>) -> BpiResult<Self> {
+        if pics.is_empty() {
+            return Err(BpiError::invalid_parameter(
+                "pics",
+                "at least one picture is required",
+            ));
+        }
+        self.pics = Some(pics);
+        Ok(self)
+    }
+
+    pub fn topic(mut self, topic: DynamicTopic) -> Self {
+        self.topic = Some(topic);
+        self
+    }
+
+    fn request_body(self) -> serde_json::Value {
+        let dyn_req = DynamicRequest {
+            attach_card: None,
+            content: DynamicContent {
+                contents: self.contents,
+            },
+            meta: Some(json!({
+                "app_meta": {
+                    "from": "create.dynamic.web",
+                    "mobi_app": "web"
+                }
+            })),
+            scene: self.scene,
+            pics: self.pics,
+            topic: self.topic,
+            option: None,
+        };
+
+        json!({ "dyn_req": dyn_req })
+    }
+}
+
 impl<'a> DynamicClient<'a> {
-    /// 为图片动态上传图片
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `file_path` | &Path | 图片文件路径 |
-    /// | `category` | `Option<&str>` | 图片类型，可选 `daily/draw/cos` |
-    pub async fn dynamic_upload_pic(
-        &self,
-        file_path: &Path,
-        category: Option<&str>,
-    ) -> Result<BpiResponse<UploadPicData>, BpiError> {
+    /// Uploads a dynamic image and returns the canonical payload result.
+    pub async fn upload_pic(&self, params: DynamicUploadPicParams) -> BpiResult<UploadPicData> {
         let csrf = self.client.csrf()?;
 
-        let file = File::open(file_path)
+        let file = File::open(&params.file_path)
             .await
             .map_err(|_| BpiError::parse("打开文件失败"))?;
         let stream = FramedRead::new(file, BytesCodec::new());
         let body = Body::wrap_stream(stream);
 
-        let file_name = file_path.file_name().ok_or_else(|| {
+        let file_name = params.file_path.file_name().ok_or_else(|| {
             BpiError::parse("Invalid file path, cannot get file name".to_string())
         })?;
 
@@ -162,105 +257,81 @@ impl<'a> DynamicClient<'a> {
             .file_name(file_name.to_string_lossy().into_owned())
             .mime_str("image/jpeg")?;
 
-        let mut form = Form::new()
+        let form = Form::new()
             .part("file_up", file_part)
-            .text("csrf", csrf.clone());
-
-        if let Some(cat) = category {
-            form = form.text("category", cat.to_string());
-        } else {
-            form = form.text("category", "daily".to_string());
-        }
-
-        form = form.text("biz", "new_dyn".to_string());
+            .text("csrf", csrf.clone())
+            .text("category", params.category)
+            .text("biz", "new_dyn".to_string());
 
         self.client
-            .post("https://api.bilibili.com/x/dynamic/feed/draw/upload_bfs")
+            .post(UPLOAD_PIC_ENDPOINT)
             .multipart(form)
-            .send_bpi("上传图片动态图片")
+            .send_bpi_payload("dynamic.pic.upload")
             .await
     }
 
-    /// 发布纯文本动态
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `content` | &str | 动态内容 |
-    pub async fn dynamic_create_text(
+    /// Publishes a plain-text dynamic and returns the canonical payload result.
+    pub async fn create_text(
         &self,
-        content: &str,
-    ) -> Result<BpiResponse<CreateDynamicData>, BpiError> {
+        params: DynamicTextCreateParams,
+    ) -> BpiResult<CreateDynamicData> {
         let csrf = self.client.csrf()?;
         let form = Form::new()
             .text("dynamic_id", "0")
             .text("type", "4")
             .text("rid", "0")
-            .text("content", content.to_string())
+            .text("content", params.content)
             .text("csrf", csrf.clone())
             .text("csrf_token", csrf);
 
         self.client
-            .post("https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/create")
+            .post(CREATE_TEXT_ENDPOINT)
             .multipart(form)
-            .send_bpi("发布纯文本动态")
+            .send_bpi_payload("dynamic.text.create")
             .await
     }
 
-    /// 发表复杂动态
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/dynamic)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `scene` | u8 | 动态类型：1 纯文本，2 带图，4 转发 |
-    /// | `contents` | `Vec<DynamicContentItem>` | 动态内容组件 |
-    /// | `pics` | `Option<Vec<DynamicPic>>`| 动态图片，最多 9 个 |
-    /// | `topic` | `Option<DynamicTopic>` | 话题 |
-    pub async fn dynamic_create_complex(
+    /// Publishes a complex dynamic and returns the canonical payload result.
+    pub async fn create_complex(
         &self,
-        scene: u8,
-        contents: Vec<DynamicContentItem>,
-        pics: Option<Vec<DynamicPic>>,
-        topic: Option<DynamicTopic>,
-    ) -> Result<BpiResponse<CreateComplexDynamicData>, BpiError> {
+        params: DynamicComplexCreateParams,
+    ) -> BpiResult<CreateComplexDynamicData> {
         let csrf = self.client.csrf()?;
-
-        let dyn_req = DynamicRequest {
-            attach_card: None,
-            content: DynamicContent { contents },
-            meta: Some(json!({
-                "app_meta": {
-                    "from": "create.dynamic.web",
-                    "mobi_app": "web"
-                }
-            })),
-            scene,
-            pics,
-            topic,
-            option: None,
-        };
-
-        let request_body = json!({
-            "dyn_req": dyn_req,
-        });
+        let request_body = params.request_body();
 
         self.client
-            .post("https://api.bilibili.com/x/dynamic/feed/create/dyn")
+            .post(CREATE_COMPLEX_ENDPOINT)
             .header("Content-Type", "application/json")
             .query(&[("csrf", csrf)])
             .body(request_body.to_string())
-            .send_bpi("发表复杂动态")
+            .send_bpi_payload("dynamic.complex.create")
             .await
     }
 }
 
+fn normalize_non_blank(field: &'static str, value: String) -> BpiResult<String> {
+    let value = value.trim().to_string();
+    if value.is_empty() {
+        return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
+    }
+
+    Ok(value)
+}
+
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dynamic_text_create_params_rejects_blank_content() {
+        let err = DynamicTextCreateParams::new("  ").unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "content",
+                ..
+            }
+        ));
+    }
+}

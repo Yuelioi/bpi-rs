@@ -9,7 +9,10 @@ pub mod snapshot;
 pub mod thumbup;
 pub mod web;
 
-pub use action::{DanmakuAdvStateParams, DanmakuSendParams};
+pub use action::{
+    DanmakuAdvStateParams, DanmakuBuyAdvParams, DanmakuEditPoolParams, DanmakuEditStateParams,
+    DanmakuRecallParams, DanmakuReportParams, DanmakuSendParams, DanmakuThumbupParams,
+};
 pub use client::DanmakuClient;
 pub use danmaku_xml::DanmakuXmlListParams;
 pub use history::DanmakuHistoryDatesParams;

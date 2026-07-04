@@ -3,10 +3,11 @@
 // [文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/login/exit.html#退出登录-web端)
 
 use crate::BilibiliRequest;
-use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::login::LoginClient;
 use serde::{Deserialize, Serialize};
+
+const LOGOUT_WEB_ENDPOINT: &str = "https://passport.bilibili.com/login/exit/v2";
 
 /// 退出登录成功后的数据体
 
@@ -34,33 +35,49 @@ pub struct LogoutResponse {
     pub data: Option<LogoutData>,
 }
 
+/// Parameters for web logout.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LogoutWebParams {
+    gourl: String,
+}
+
+impl Default for LogoutWebParams {
+    fn default() -> Self {
+        Self {
+            gourl: "javascript:history.go(-1)".to_string(),
+        }
+    }
+}
+
+impl LogoutWebParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn gourl(mut self, gourl: impl Into<String>) -> Self {
+        self.gourl = gourl.into();
+        self
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("biliCSRF", csrf.to_string()),
+            ("gourl", self.gourl.clone()),
+        ]
+    }
+}
+
 impl<'a> LoginClient<'a> {
-    /// 退出登录 (Web端)
-    ///
-    /// # 参数
-    /// - `gourl`：成功后跳转的 URL，可选，默认 `javascript:history.go(-1)`
-    pub async fn logout_web(
-        &self,
-        gourl: Option<&str>,
-    ) -> Result<BpiResponse<LogoutData>, BpiError> {
+    /// Logs out the current web session and returns the canonical payload result.
+    pub async fn logout(&self, params: LogoutWebParams) -> BpiResult<LogoutData> {
         let csrf = self.client.csrf()?;
+        let form = params.form_pairs(&csrf);
 
-        let form = vec![
-            ("biliCSRF", csrf),
-            (
-                "gourl",
-                gourl.unwrap_or("javascript:history.go(-1)").to_string(),
-            ),
-        ];
-
-        let result = self
-            .client
-            .post("https://passport.bilibili.com/login/exit/v2")
+        self.client
+            .post(LOGOUT_WEB_ENDPOINT)
             .form(&form)
-            .send_bpi("退出登录 (Web端)")
-            .await?;
-
-        Ok(result)
+            .send_bpi_payload("login.logout")
+            .await
     }
 }
 

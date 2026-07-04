@@ -11,3 +11,4 @@ pub use client::MessageClient;
 pub use params::{
     MessageReplyFeedParams, MessageSingleUnreadParams, MessageUnreadCountParams, SingleUnreadType,
 };
+pub use private_msg::MessageSendParams;

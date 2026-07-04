@@ -16,6 +16,7 @@ pub mod timeline;
 pub mod videostream_url;
 
 pub use client::BangumiClient;
+pub use follow::BangumiFollowParams;
 pub use params::{
     BangumiDetailId, BangumiDetailParams, BangumiInfoParams, BangumiSectionsParams,
     BangumiTimelineParams, BangumiVideoStreamId, BangumiVideoStreamParams,

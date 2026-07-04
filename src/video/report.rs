@@ -6,47 +6,77 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::response::BpiResult;
 use crate::video::VideoClient;
 
-impl<'a> VideoClient<'a> {
-    /// 上报视频观看进度（双端）
-    ///
-    /// # 文档
-    /// [查看API文档](https://socialsisteryi.github.io/bilibili-API-collect/docs/video/report.html#上报视频观看进度)
-    ///
-    /// # 参数
-    /// | 名称      | 类型         | 说明                 |
-    /// | --------- | ------------| -------------------- |
-    /// | `aid`     | u64         | 稿件 avid            |
-    /// | `cid`     | u64         | 视频 cid             |
-    /// | `progress`| `Option<u64>` | 观看进度，单位为秒，可选，默认0 |
-    pub async fn video_report_watch_progress(
-        &self,
-        aid: u64,
-        cid: u64,
-        progress: Option<u64>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.client.csrf()?;
+const WATCH_PROGRESS_ENDPOINT: &str = "https://api.bilibili.com/x/v2/history/report";
 
-        let mut form = reqwest::multipart::Form::new()
-            .text("aid", aid.to_string())
-            .text("cid", cid.to_string())
-            .text("csrf", csrf.to_string());
+/// Parameters for reporting video watch progress.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct VideoWatchProgressParams {
+    aid: u64,
+    cid: u64,
+    progress: u64,
+}
 
-        if let Some(p) = progress {
-            form = form.text("progress", p.to_string());
-        } else {
-            form = form.text("progress", "0");
+impl VideoWatchProgressParams {
+    pub fn new(aid: u64, cid: u64) -> BpiResult<Self> {
+        if aid == 0 {
+            return Err(BpiError::invalid_parameter("aid", "id must be non-zero"));
+        }
+        if cid == 0 {
+            return Err(BpiError::invalid_parameter("cid", "id must be non-zero"));
         }
 
+        Ok(Self {
+            aid,
+            cid,
+            progress: 0,
+        })
+    }
+
+    pub fn progress(mut self, progress: u64) -> Self {
+        self.progress = progress;
+        self
+    }
+
+    fn into_multipart(self, csrf: &str) -> reqwest::multipart::Form {
+        reqwest::multipart::Form::new()
+            .text("aid", self.aid.to_string())
+            .text("cid", self.cid.to_string())
+            .text("csrf", csrf.to_string())
+            .text("progress", self.progress.to_string())
+    }
+}
+
+impl<'a> VideoClient<'a> {
+    /// Reports video watch progress and returns the canonical payload result.
+    pub async fn report_watch_progress(
+        &self,
+        params: VideoWatchProgressParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
+        let csrf = self.client.csrf()?;
+        let form = params.into_multipart(&csrf);
+
         self.client
-            .post("https://api.bilibili.com/x/v2/history/report")
+            .post(WATCH_PROGRESS_ENDPOINT)
             .multipart(form)
-            .send_bpi("上报观看进度")
+            .send_bpi_optional_payload("video.watch_progress.report")
             .await
     }
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+
+    #[test]
+    fn watch_progress_params_rejects_zero_aid() {
+        let err = VideoWatchProgressParams::new(0, 100).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "aid", .. }
+        ));
+    }
+}

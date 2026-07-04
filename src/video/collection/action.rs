@@ -6,10 +6,16 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
 use crate::BpiResult;
 use crate::video::VideoClient;
 use serde::{Deserialize, Serialize};
+
+const CREATE_AND_ADD_ARCHIVES_ENDPOINT: &str =
+    "https://api.bilibili.com/x/series/series/createAndAddArchives";
+const DELETE_SERIES_ENDPOINT: &str = "https://api.bilibili.com/x/series/series/delete";
+const DELETE_ARCHIVES_ENDPOINT: &str = "https://api.bilibili.com/x/series/series/delArchives";
+const ADD_ARCHIVES_ENDPOINT: &str = "https://api.bilibili.com/x/series/series/addArchives";
+const UPDATE_SERIES_ENDPOINT: &str = "https://api.bilibili.com/x/series/series/update";
 
 /// 创建视频列表响应数据
 
@@ -17,6 +23,112 @@ use serde::{Deserialize, Serialize};
 pub struct CreateSeriesResponseData {
     /// 视频列表 ID
     pub series_id: u64,
+}
+
+/// Parameters for creating a video series and adding archives to it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CollectionCreateAndAddArchivesParams {
+    mid: u64,
+    name: String,
+    keywords: Option<String>,
+    description: Option<String>,
+    aids: Option<String>,
+}
+
+impl CollectionCreateAndAddArchivesParams {
+    pub fn new(mid: u64, name: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            mid: validate_nonzero_u64("mid", mid)?,
+            name: normalize_non_blank("name", name.into())?,
+            keywords: None,
+            description: None,
+            aids: None,
+        })
+    }
+
+    pub fn keywords(mut self, keywords: impl Into<String>) -> BpiResult<Self> {
+        self.keywords = Some(normalize_non_blank("keywords", keywords.into())?);
+        Ok(self)
+    }
+
+    pub fn description(mut self, description: impl Into<String>) -> BpiResult<Self> {
+        self.description = Some(normalize_non_blank("description", description.into())?);
+        Ok(self)
+    }
+
+    pub fn aids(mut self, aids: impl Into<String>) -> BpiResult<Self> {
+        self.aids = Some(normalize_non_blank("aids", aids.into())?);
+        Ok(self)
+    }
+
+    fn into_multipart(self) -> reqwest::multipart::Form {
+        let mut form = reqwest::multipart::Form::new()
+            .text("mid", self.mid.to_string())
+            .text("name", self.name);
+
+        if let Some(keywords) = self.keywords {
+            form = form.text("keywords", keywords);
+        }
+        if let Some(description) = self.description {
+            form = form.text("description", description);
+        }
+        if let Some(aids) = self.aids {
+            form = form.text("aids", aids);
+        }
+
+        form
+    }
+}
+
+/// Parameters for deleting a video series.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CollectionDeleteSeriesParams {
+    mid: u64,
+    series_id: u64,
+}
+
+impl CollectionDeleteSeriesParams {
+    pub fn new(mid: u64, series_id: u64) -> BpiResult<Self> {
+        Ok(Self {
+            mid: validate_nonzero_u64("mid", mid)?,
+            series_id: validate_nonzero_u64("series_id", series_id)?,
+        })
+    }
+
+    fn query_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("csrf", csrf.to_string()),
+            ("mid", self.mid.to_string()),
+            ("series_id", self.series_id.to_string()),
+            ("aids", String::new()),
+        ]
+    }
+}
+
+/// Parameters for adding or deleting archives in a video series.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CollectionArchivesMutationParams {
+    mid: u64,
+    series_id: u64,
+    aids: String,
+}
+
+impl CollectionArchivesMutationParams {
+    pub fn new(mid: u64, series_id: u64, aids: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            mid: validate_nonzero_u64("mid", mid)?,
+            series_id: validate_nonzero_u64("series_id", series_id)?,
+            aids: normalize_non_blank("aids", aids.into())?,
+        })
+    }
+
+    fn form_pairs(&self) -> Vec<(&'static str, String)> {
+        vec![
+            ("mid", self.mid.to_string()),
+            ("series_id", self.series_id.to_string()),
+            ("aids", self.aids.clone()),
+        ]
+    }
 }
 
 /// Parameters for editing an existing video series.
@@ -34,28 +146,10 @@ pub struct CollectionUpdateSeriesParams {
 impl CollectionUpdateSeriesParams {
     /// Creates parameters with the required account, series and title fields.
     pub fn new(mid: u64, series_id: u64, name: impl Into<String>) -> BpiResult<Self> {
-        if mid == 0 {
-            return Err(BpiError::invalid_parameter("mid", "mid must be non-zero"));
-        }
-        if series_id == 0 {
-            return Err(BpiError::invalid_parameter(
-                "series_id",
-                "series_id must be non-zero",
-            ));
-        }
-
-        let name = name.into();
-        if name.trim().is_empty() {
-            return Err(BpiError::invalid_parameter(
-                "name",
-                "series name cannot be blank",
-            ));
-        }
-
         Ok(Self {
-            mid,
-            series_id,
-            name,
+            mid: validate_nonzero_u64("mid", mid)?,
+            series_id: validate_nonzero_u64("series_id", series_id)?,
+            name: normalize_non_blank("name", name.into())?,
             keywords: None,
             description: None,
             add_aids: None,
@@ -64,27 +158,27 @@ impl CollectionUpdateSeriesParams {
     }
 
     /// Sets comma-separated keywords.
-    pub fn keywords(mut self, keywords: impl Into<String>) -> Self {
-        self.keywords = Some(keywords.into());
-        self
+    pub fn keywords(mut self, keywords: impl Into<String>) -> BpiResult<Self> {
+        self.keywords = Some(normalize_non_blank("keywords", keywords.into())?);
+        Ok(self)
     }
 
     /// Sets the series description.
-    pub fn description(mut self, description: impl Into<String>) -> Self {
-        self.description = Some(description.into());
-        self
+    pub fn description(mut self, description: impl Into<String>) -> BpiResult<Self> {
+        self.description = Some(normalize_non_blank("description", description.into())?);
+        Ok(self)
     }
 
     /// Sets comma-separated AIDs to add to the series.
-    pub fn add_aids(mut self, aids: impl Into<String>) -> Self {
-        self.add_aids = Some(aids.into());
-        self
+    pub fn add_aids(mut self, aids: impl Into<String>) -> BpiResult<Self> {
+        self.add_aids = Some(normalize_non_blank("add_aids", aids.into())?);
+        Ok(self)
     }
 
     /// Sets comma-separated AIDs to remove from the series.
-    pub fn del_aids(mut self, aids: impl Into<String>) -> Self {
-        self.del_aids = Some(aids.into());
-        self
+    pub fn del_aids(mut self, aids: impl Into<String>) -> BpiResult<Self> {
+        self.del_aids = Some(normalize_non_blank("del_aids", aids.into())?);
+        Ok(self)
     }
 
     fn form_pairs(&self) -> Vec<(&'static str, String)> {
@@ -122,164 +216,98 @@ impl CollectionUpdateSeriesParams {
 // --- 测试模块 ---
 
 impl<'a> VideoClient<'a> {
-    /// 创建视频列表并添加视频
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
-    ///
-    /// # 参数
-    /// | 名称         | 类型           | 说明                 |
-    /// | ------------ | --------------| -------------------- |
-    /// | `mid`        | u64           | 用户 mid             |
-    /// | `name`       | &str          | 标题                 |
-    /// | `keywords`   | `Option<&str>`  | 关键词，可选         |
-    /// | `description`| `Option<&str>`  | 简介，可选           |
-    /// | `aids`       | `Option<&str>`  | 视频 aid 列表，以`,`分隔，可选 |
-    pub async fn collection_create_and_add_archives(
+    /// Creates a video series and optionally adds archives to it.
+    pub async fn create_collection_series(
         &self,
-        mid: u64,
-        name: &str,
-        keywords: Option<&str>,
-        description: Option<&str>,
-        aids: Option<&str>,
-    ) -> Result<BpiResponse<CreateSeriesResponseData>, BpiError> {
-        let csrf = self.client.csrf()?;
-        let mut form = reqwest::multipart::Form::new()
-            .text("mid", mid.to_string())
-            .text("name", name.to_string());
-
-        if let Some(k) = keywords {
-            form = form.text("keywords", k.to_string());
-        }
-        if let Some(d) = description {
-            form = form.text("description", d.to_string());
-        }
-        if let Some(a) = aids {
-            form = form.text("aids", a.to_string());
-        }
-
-        self.client
-            .post("https://api.bilibili.com/x/series/series/createAndAddArchives")
-            .query(&[("csrf", csrf)])
-            .multipart(form)
-            .send_bpi("创建视频列表并添加视频")
-            .await
-    }
-
-    /// 删除视频列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
-    ///
-    /// # 参数
-    /// | 名称         | 类型           | 说明                 |
-    /// | ------------ | --------------| -------------------- |
-    /// | `mid`        | u64           | 用户 mid             |
-    /// | `series_id`  | u64           | 视频列表 ID          |
-    pub async fn collection_delete_series(
-        &self,
-        mid: u64,
-        series_id: u64,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.client.csrf()?;
-
-        self.client
-            .post("https://api.bilibili.com/x/series/series/delete")
-            .query(&[
-                ("csrf", csrf),
-                ("mid", mid.to_string()),
-                ("series_id", series_id.to_string()),
-                ("aids", "".to_string()),
-            ])
-            .send_bpi("删除视频列表")
-            .await
-    }
-
-    /// 从视频列表中删除稿件
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
-    ///
-    /// # 参数
-    /// | 名称         | 类型           | 说明                 |
-    /// | ------------ | --------------| -------------------- |
-    /// | `mid`        | u64           | 用户 mid             |
-    /// | `series_id`  | u64           | 视频列表 ID          |
-    /// | `aids`       | &str          | 视频 aid 列表，以`,`分隔 |
-    pub async fn collection_delete_archives_from_series(
-        &self,
-        mid: u64,
-        series_id: u64,
-        aids: &str,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.client.csrf()?;
-
-        let params = [
-            ("mid", mid.to_string()),
-            ("series_id", series_id.to_string()),
-            ("aids", aids.to_string()),
-        ];
-
-        self.client
-            .post("https://api.bilibili.com/x/series/series/delArchives")
-            .query(&[("csrf", csrf)])
-            .form(&params)
-            .send_bpi("从视频列表中删除稿件")
-            .await
-    }
-
-    /// 添加稿件至视频列表
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
-    ///
-    /// # 参数
-    /// | 名称         | 类型           | 说明                 |
-    /// | ------------ | --------------| -------------------- |
-    /// | `mid`        | u64           | 用户 mid             |
-    /// | `series_id`  | u64           | 视频列表 ID          |
-    /// | `aids`       | &str          | 视频 aid 列表，以`,`分隔 |
-    pub async fn collection_add_archives_to_series(
-        &self,
-        mid: u64,
-        series_id: u64,
-        aids: &str,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.client.csrf()?;
-
-        let params = [
-            ("mid", mid.to_string()),
-            ("series_id", series_id.to_string()),
-            ("aids", aids.to_string()),
-        ];
-
-        self.client
-            .post("https://api.bilibili.com/x/series/series/addArchives")
-            .query(&[("csrf", csrf)])
-            .form(&params)
-            .send_bpi("添加稿件至视频列表")
-            .await
-    }
-
-    /// 编辑视频列表信息
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/collection.md)
-    ///
-    pub async fn collection_update_series(
-        &self,
-        params: CollectionUpdateSeriesParams,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: CollectionCreateAndAddArchivesParams,
+    ) -> BpiResult<CreateSeriesResponseData> {
         let csrf = self.client.csrf()?;
         let form = params.into_multipart();
 
         self.client
-            .post("https://api.bilibili.com/x/series/series/update")
+            .post(CREATE_AND_ADD_ARCHIVES_ENDPOINT)
             .query(&[("csrf", csrf)])
             .multipart(form)
-            .send_bpi("编辑视频列表信息")
+            .send_bpi_payload("video.collection.series.create")
             .await
     }
+
+    /// Deletes a video series.
+    pub async fn delete_collection_series(
+        &self,
+        params: CollectionDeleteSeriesParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
+        let csrf = self.client.csrf()?;
+
+        self.client
+            .post(DELETE_SERIES_ENDPOINT)
+            .query(&params.query_pairs(&csrf))
+            .send_bpi_optional_payload("video.collection.series.delete")
+            .await
+    }
+
+    /// Deletes archives from a video series.
+    pub async fn delete_collection_archives(
+        &self,
+        params: CollectionArchivesMutationParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
+        let csrf = self.client.csrf()?;
+
+        self.client
+            .post(DELETE_ARCHIVES_ENDPOINT)
+            .query(&[("csrf", csrf)])
+            .form(&params.form_pairs())
+            .send_bpi_optional_payload("video.collection.archives.delete")
+            .await
+    }
+
+    /// Adds archives to a video series.
+    pub async fn add_collection_archives(
+        &self,
+        params: CollectionArchivesMutationParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
+        let csrf = self.client.csrf()?;
+
+        self.client
+            .post(ADD_ARCHIVES_ENDPOINT)
+            .query(&[("csrf", csrf)])
+            .form(&params.form_pairs())
+            .send_bpi_optional_payload("video.collection.archives.add")
+            .await
+    }
+
+    /// Updates a video series.
+    pub async fn update_collection_series(
+        &self,
+        params: CollectionUpdateSeriesParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
+        let csrf = self.client.csrf()?;
+        let form = params.into_multipart();
+
+        self.client
+            .post(UPDATE_SERIES_ENDPOINT)
+            .query(&[("csrf", csrf)])
+            .multipart(form)
+            .send_bpi_optional_payload("video.collection.series.update")
+            .await
+    }
+}
+
+fn validate_nonzero_u64(field: &'static str, value: u64) -> BpiResult<u64> {
+    if value == 0 {
+        return Err(BpiError::invalid_parameter(field, "value must be non-zero"));
+    }
+
+    Ok(value)
+}
+
+fn normalize_non_blank(field: &'static str, value: String) -> BpiResult<String> {
+    let value = value.trim().to_string();
+    if value.is_empty() {
+        return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
+    }
+
+    Ok(value)
 }
 
 #[cfg(test)]

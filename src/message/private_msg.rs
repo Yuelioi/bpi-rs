@@ -2,7 +2,7 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::message::MessageClient;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -70,26 +70,39 @@ pub enum MessageType {
     Image(Image),
 }
 
+/// Parameters for sending a private message.
+pub struct MessageSendParams {
+    receiver_id: u64,
+    receiver_type: u32,
+    message_type: MessageType,
+}
+
+impl MessageSendParams {
+    pub fn new(receiver_id: u64, receiver_type: u32, message_type: MessageType) -> BpiResult<Self> {
+        if receiver_id == 0 {
+            return Err(BpiError::invalid_parameter(
+                "receiver_id",
+                "id must be non-zero",
+            ));
+        }
+        if !matches!(receiver_type, 1 | 2) {
+            return Err(BpiError::invalid_parameter(
+                "receiver_type",
+                "value must be 1 or 2",
+            ));
+        }
+
+        Ok(Self {
+            receiver_id,
+            receiver_type,
+            message_type,
+        })
+    }
+}
+
 impl<'a> MessageClient<'a> {
-    /// 发送私信。
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/message)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `receiver_id` | u64 | 接收者 ID |
-    /// | `receiver_type` | u32 | 接收者类型：1 用户，2 粉丝团 |
-    /// | `message_type` | MessageType | 消息类型（文本/图片） |
-    pub async fn message_send(
-        &self,
-        receiver_id: u64,
-        receiver_type: u32,
-        message_type: MessageType,
-    ) -> Result<BpiResponse<SendMsgData>, BpiError> {
-        // 1. 获取必需的参数
+    /// Sends a private message and returns the canonical payload result.
+    pub async fn send(&self, params: MessageSendParams) -> BpiResult<SendMsgData> {
         let csrf = self.client.csrf()?;
         let sender_uid = &self
             .client
@@ -99,16 +112,15 @@ impl<'a> MessageClient<'a> {
         let dev_id = Uuid::new_v4().to_string();
         let timestamp = Utc::now().timestamp();
 
-        let msg_type = match message_type {
+        let msg_type = match &params.message_type {
             MessageType::Text(_) => 1,
             MessageType::Image(_) => 2,
         };
 
-        // 2. 准备请求体参数
         let mut form = vec![
             ("msg[sender_uid]", sender_uid.to_string()),
-            ("msg[receiver_id]", receiver_id.to_string()),
-            ("msg[receiver_type]", receiver_type.to_string()),
+            ("msg[receiver_id]", params.receiver_id.to_string()),
+            ("msg[receiver_type]", params.receiver_type.to_string()),
             ("msg[msg_type]", msg_type.to_string()),
             ("msg[msg_status]", "0".to_string()),
             ("msg[dev_id]", dev_id.clone()),
@@ -120,8 +132,7 @@ impl<'a> MessageClient<'a> {
             ("mobi_app", "web".to_string()),
         ];
 
-        // 3. 构造 msg[content] 参数
-        let content = match message_type {
+        let content = match params.message_type {
             MessageType::Text(text) => json!({ "content": text }).to_string(),
             MessageType::Image(image) => serde_json::to_string(&image)?,
         };
@@ -130,7 +141,7 @@ impl<'a> MessageClient<'a> {
 
         let params = vec![
             ("w_sender_uid", sender_uid.to_string()),
-            ("w_receiver_id", receiver_id.to_string()),
+            ("w_receiver_id", params.receiver_id.to_string()),
             ("w_dev_id", dev_id.clone()),
         ];
 
@@ -141,7 +152,7 @@ impl<'a> MessageClient<'a> {
             .post("https://api.vc.bilibili.com/web_im/v1/web_im/send_msg")
             .query(&signed_params)
             .form(&form)
-            .send_bpi("发送私信")
+            .send_bpi_payload("message.private.send")
             .await
     }
 }

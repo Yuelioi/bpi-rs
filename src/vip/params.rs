@@ -1,3 +1,5 @@
+use crate::{BpiError, BpiResult};
+
 /// Parameters for `/x/vip/web/vip_center/combine`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VipCenterInfoParams {
@@ -25,6 +27,29 @@ impl Default for VipCenterInfoParams {
     }
 }
 
+/// Parameters for `/x/vip/privilege/receive`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct VipPrivilegeReceiveParams {
+    typ: u8,
+}
+
+impl VipPrivilegeReceiveParams {
+    pub fn new(typ: u8) -> BpiResult<Self> {
+        if typ == 0 {
+            return Err(BpiError::invalid_parameter(
+                "type",
+                "value must be non-zero",
+            ));
+        }
+
+        Ok(Self { typ })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![("type", self.typ.to_string()), ("csrf", csrf.to_string())]
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -48,5 +73,29 @@ mod tests {
         let params = VipCenterInfoParams::new().with_build(0);
 
         assert_eq!(params.query_pairs(), vec![("build", "0".to_string())]);
+    }
+
+    #[test]
+    fn vip_privilege_receive_params_rejects_zero_type() {
+        let err = VipPrivilegeReceiveParams::new(0).unwrap_err();
+
+        assert!(matches!(
+            err,
+            crate::BpiError::InvalidParameter { field: "type", .. }
+        ));
+    }
+
+    #[test]
+    fn vip_privilege_receive_params_serializes_type() -> Result<(), crate::BpiError> {
+        let params = VipPrivilegeReceiveParams::new(1)?;
+
+        assert_eq!(
+            params.form_pairs("csrf-token"),
+            vec![
+                ("type", "1".to_string()),
+                ("csrf", "csrf-token".to_string()),
+            ]
+        );
+        Ok(())
     }
 }

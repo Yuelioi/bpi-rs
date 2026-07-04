@@ -3,14 +3,10 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/article/card.md)
 
 use super::models::{ArticleAuthor, ArticleCategory, ArticleMedia, ArticleStats};
-use crate::BpiResponse;
 use serde::{Deserialize, Serialize};
 
 /// 卡片信息响应类型
 pub type CardData = std::collections::HashMap<String, CardItem>;
-
-/// 卡片信息响应类型
-pub type CardResponse = BpiResponse<CardData>;
 
 /// 卡片项目（可以是视频、专栏或直播间）
 #[derive(Debug, Clone, Serialize, Deserialize)]

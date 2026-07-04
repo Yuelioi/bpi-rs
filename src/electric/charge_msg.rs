@@ -1,17 +1,11 @@
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::electric::ElectricClient;
 use serde::{Deserialize, Serialize};
 
-/// 发送充电留言的请求体
-
-#[derive(Debug, Clone, Serialize)]
-pub struct SendElecMessageBody<'a> {
-    pub order_id: &'a str,
-    pub message: &'a str,
-    pub csrf: &'a str,
-}
+const ELEC_MESSAGE_ENDPOINT: &str = "https://api.bilibili.com/x/ugcpay/trade/elec/message";
+const ELEC_REMARK_REPLY_ENDPOINT: &str = "https://member.bilibili.com/x/web/elec/remark/reply";
 
 /// 充电留言列表分页信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -87,72 +81,92 @@ pub struct ElecRemarkDetail {
     pub reply_time: u64,
 }
 
-impl<'a> ElectricClient<'a> {
-    /// 发送充电留言
-    ///
-    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `order_id` | &str | 留言 token |
-    /// | `message` | &str | 留言内容 |
-    pub async fn electric_message_send(
-        &self,
-        order_id: &str,
-        message: &str,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.client.csrf()?;
+/// Parameters for sending an electric charge message.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ElectricMessageSendParams {
+    order_id: String,
+    message: String,
+}
 
-        let body = [
-            ("order_id", order_id),
-            ("message", message),
-            ("csrf", &csrf),
-        ];
-
-        self.client
-            .post("https://api.bilibili.com/x/ugcpay/trade/elec/message")
-            .form(&body)
-            .send_bpi("发送充电留言")
-            .await
+impl ElectricMessageSendParams {
+    pub fn new(order_id: impl Into<String>, message: impl Into<String>) -> BpiResult<Self> {
+        Ok(Self {
+            order_id: normalize_non_blank("order_id", order_id.into())?,
+            message: normalize_non_blank("message", message.into())?,
+        })
     }
 
-    /// 回复充电留言
-    ///
-    /// 注意: 此接口需要登录态 (Cookie: SESSDATA)
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/electric)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `id` | u64 | 留言 id |
-    /// | `msg` | &str | 回复内容 |
-    pub async fn electric_remark_reply(
-        &self,
-        id: u64,
-        msg: &str,
-    ) -> Result<BpiResponse<u64>, BpiError> {
-        let csrf = self.client.csrf()?;
-
-        let body = [
-            ("id", id.to_string()),
-            ("msg", msg.to_string()),
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("order_id", self.order_id.clone()),
+            ("message", self.message.clone()),
             ("csrf", csrf.to_string()),
-        ];
+        ]
+    }
+}
+
+/// Parameters for replying to an electric charge remark.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ElectricRemarkReplyParams {
+    id: u64,
+    msg: String,
+}
+
+impl ElectricRemarkReplyParams {
+    pub fn new(id: u64, msg: impl Into<String>) -> BpiResult<Self> {
+        if id == 0 {
+            return Err(BpiError::invalid_parameter("id", "id must be non-zero"));
+        }
+
+        Ok(Self {
+            id,
+            msg: normalize_non_blank("msg", msg.into())?,
+        })
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("id", self.id.to_string()),
+            ("msg", self.msg.clone()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+impl<'a> ElectricClient<'a> {
+    /// Sends an electric charge message and returns the canonical payload result.
+    pub async fn send_message(
+        &self,
+        params: ElectricMessageSendParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
+        let csrf = self.client.csrf()?;
 
         self.client
-            .post("https://member.bilibili.com/x/web/elec/remark/reply")
-            .form(&body)
-            .send_bpi("回复充电留言")
+            .post(ELEC_MESSAGE_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("electric.message.send")
             .await
     }
+
+    /// Replies to an electric charge remark and returns the canonical payload result.
+    pub async fn reply_remark(&self, params: ElectricRemarkReplyParams) -> BpiResult<u64> {
+        let csrf = self.client.csrf()?;
+
+        self.client
+            .post(ELEC_REMARK_REPLY_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("electric.remark.reply")
+            .await
+    }
+}
+
+fn normalize_non_blank(field: &'static str, value: String) -> BpiResult<String> {
+    let value = value.trim().to_string();
+    if value.is_empty() {
+        return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
+    }
+
+    Ok(value)
 }
 
 #[cfg(test)]

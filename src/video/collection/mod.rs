@@ -5,7 +5,10 @@ pub mod action;
 mod info;
 mod params;
 
-pub use action::CollectionUpdateSeriesParams;
+pub use action::{
+    CollectionArchivesMutationParams, CollectionCreateAndAddArchivesParams,
+    CollectionDeleteSeriesParams, CollectionUpdateSeriesParams,
+};
 pub use info::{
     Archive, ArchiveStat, GetSeasonsArchivesData, GetSeasonsSeriesData, GetSeriesArchivesData,
     GetSeriesData, ItemsList, PageInfo, SeasonsArchivesMeta, SeasonsItem, SeasonsMeta, SeriesItem,

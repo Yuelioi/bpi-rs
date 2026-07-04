@@ -18,9 +18,11 @@ pub mod topic;
 mod module;
 mod serde_utils;
 
+pub use action::{DynamicDraftDeleteParams, DynamicLikeParams, DynamicTopParams};
 pub use client::DynamicClient;
 pub use params::{
     DynamicAllParams, DynamicCheckNewParams, DynamicDetailParams, DynamicForwardItemParams,
     DynamicForwardsParams, DynamicLiveUsersParams, DynamicLotteryNoticeParams,
     DynamicNavFeedParams, DynamicPicsParams, DynamicReactionsParams, DynamicUpUsersParams,
 };
+pub use publish::{DynamicComplexCreateParams, DynamicTextCreateParams, DynamicUploadPicParams};

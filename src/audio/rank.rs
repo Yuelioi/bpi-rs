@@ -4,9 +4,12 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
 use crate::audio::AudioClient;
+use crate::response::BpiResult;
 use serde::{Deserialize, Serialize};
+
+const RANK_SUBSCRIBE_ENDPOINT: &str =
+    "https://api.bilibili.com/x/copyright-music-publicity/toplist/subscribe/update";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AudioRankPeriodData {
@@ -66,32 +69,62 @@ pub struct AudioRankMusicItem {
     pub song_type: u64,
 }
 
-impl<'a> AudioClient<'a> {
-    /// 订阅或退订榜单
-    ///
-    /// # 参数
-    /// | 名称      | 类型           | 说明                       |
-    /// | --------- | -------------- | -------------------------- |
-    /// | `state`   | u32            | 操作代码（1：订阅，2：退订）|
-    /// | `list_id` | `Option<u64>`    | 榜单 id（可选）            |
-    ///
-    /// # 文档
-    /// [订阅或退订榜单](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/audio/rank.md#订阅或退订榜单)
-    pub async fn audio_rank_subscribe(
-        &self,
-        state: u32,
-        list_id: Option<u64>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let csrf = self.client.csrf()?;
-        let mut params = vec![("state", state.to_string()), ("csrf", csrf.to_string())];
-        if let Some(id) = list_id {
-            params.push(("list_id", id.to_string()));
+/// Parameters for subscribing or unsubscribing from an audio rank list.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AudioRankSubscribeParams {
+    state: u32,
+    list_id: Option<u64>,
+}
+
+impl AudioRankSubscribeParams {
+    pub fn new(state: u32) -> BpiResult<Self> {
+        if !matches!(state, 1 | 2) {
+            return Err(BpiError::invalid_parameter("state", "value must be 1 or 2"));
         }
 
+        Ok(Self {
+            state,
+            list_id: None,
+        })
+    }
+
+    pub fn list_id(mut self, list_id: u64) -> BpiResult<Self> {
+        if list_id == 0 {
+            return Err(BpiError::invalid_parameter(
+                "list_id",
+                "id must be non-zero",
+            ));
+        }
+
+        self.list_id = Some(list_id);
+        Ok(self)
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        let mut params = vec![
+            ("state", self.state.to_string()),
+            ("csrf", csrf.to_string()),
+        ];
+        if let Some(list_id) = self.list_id {
+            params.push(("list_id", list_id.to_string()));
+        }
+
+        params
+    }
+}
+
+impl<'a> AudioClient<'a> {
+    /// Subscribes or unsubscribes from an audio rank list.
+    pub async fn subscribe_rank(
+        &self,
+        params: AudioRankSubscribeParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
+        let csrf = self.client.csrf()?;
+
         self.client
-            .post("https://api.bilibili.com/x/copyright-music-publicity/toplist/subscribe/update")
-            .form(&params)
-            .send_bpi("订阅或退订榜单")
+            .post(RANK_SUBSCRIBE_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("audio.rank.subscribe")
             .await
     }
 }
@@ -236,6 +269,16 @@ mod tests {
         assert!(!payload.list.is_empty());
         assert_eq!(payload.list[0].rank, 1);
         Ok(())
+    }
+
+    #[test]
+    fn audio_rank_subscribe_params_rejects_invalid_state() {
+        let err = AudioRankSubscribeParams::new(3).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "state", .. }
+        ));
     }
 
     fn local_probe_body(endpoint: &str, profile: &str) -> Option<serde_json::Value> {

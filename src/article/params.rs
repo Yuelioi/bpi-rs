@@ -98,12 +98,101 @@ impl ArticleArticlesInfoParams {
     }
 }
 
+/// Parameters for `/x/article/like`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ArticleLikeParams {
+    id: i64,
+    like: bool,
+}
+
+impl ArticleLikeParams {
+    pub fn new(id: i64, like: bool) -> BpiResult<Self> {
+        Ok(Self {
+            id: validate_positive_i64("id", id)?,
+            like,
+        })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("id", self.id.to_string()),
+            ("type", if self.like { "1" } else { "2" }.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+/// Parameters for `/x/web-interface/coin/add` article coin operations.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ArticleCoinParams {
+    aid: u64,
+    upid: u64,
+    multiply: u32,
+}
+
+impl ArticleCoinParams {
+    pub fn new(aid: u64, upid: u64, multiply: u32) -> BpiResult<Self> {
+        Ok(Self {
+            aid: validate_positive_u64("aid", aid)?,
+            upid: validate_positive_u64("upid", upid)?,
+            multiply: validate_coin_multiply(multiply)?,
+        })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("aid", self.aid.to_string()),
+            ("upid", self.upid.to_string()),
+            ("multiply", self.multiply.to_string()),
+            ("avtype", "2".to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+/// Parameters for article favorite add/remove operations.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ArticleFavoriteParams {
+    id: i64,
+}
+
+impl ArticleFavoriteParams {
+    pub fn new(id: i64) -> BpiResult<Self> {
+        Ok(Self {
+            id: validate_positive_i64("id", id)?,
+        })
+    }
+
+    pub(crate) fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![("id", self.id.to_string()), ("csrf", csrf.to_string())]
+    }
+}
+
 fn validate_positive_i64(field: &'static str, value: i64) -> BpiResult<i64> {
     if value <= 0 {
         return Err(BpiError::invalid_parameter(field, "value must be positive"));
     }
 
     Ok(value)
+}
+
+fn validate_positive_u64(field: &'static str, value: u64) -> BpiResult<u64> {
+    if value == 0 {
+        return Err(BpiError::invalid_parameter(field, "value must be non-zero"));
+    }
+
+    Ok(value)
+}
+
+fn validate_coin_multiply(value: u32) -> BpiResult<u32> {
+    if matches!(value, 1 | 2) {
+        return Ok(value);
+    }
+
+    Err(BpiError::invalid_parameter(
+        "multiply",
+        "value must be 1 or 2",
+    ))
 }
 
 fn validate_non_blank(field: &'static str, value: &str) -> BpiResult<()> {
@@ -194,5 +283,43 @@ mod tests {
 
         assert_eq!(params.query_pairs(), vec![("id", "207146".to_string())]);
         Ok(())
+    }
+
+    #[test]
+    fn article_like_params_serializes_type() -> BpiResult<()> {
+        let params = ArticleLikeParams::new(2, true)?;
+
+        assert_eq!(
+            params.form_pairs("csrf-token"),
+            vec![
+                ("id", "2".to_string()),
+                ("type", "1".to_string()),
+                ("csrf", "csrf-token".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn article_coin_params_rejects_invalid_multiply() {
+        let err = ArticleCoinParams::new(2, 7792521, 3).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "multiply",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn article_favorite_params_rejects_zero_id() {
+        let err = ArticleFavoriteParams::new(0).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter { field: "id", .. }
+        ));
     }
 }

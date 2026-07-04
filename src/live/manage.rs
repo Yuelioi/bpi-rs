@@ -1,8 +1,7 @@
 // --- 直播间管理 API 结构体 ---
 
 use crate::BilibiliRequest;
-use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::live::LiveClient;
 use reqwest::multipart::Form;
 use serde::{Deserialize, Serialize};
@@ -86,7 +85,7 @@ pub struct PcLiveVersionData {
 
 impl<'a> LiveClient<'a> {
     /// 开通直播间
-    pub async fn live_create_room(&self) -> Result<BpiResponse<CreateRoomData>, BpiError> {
+    pub async fn live_create_room(&self) -> BpiResult<CreateRoomData> {
         let csrf = self.client.csrf()?;
         let form = Form::new()
             .text("platform", "web")
@@ -97,7 +96,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/xlive/app-blink/v1/preLive/CreateRoom")
             .multipart(form)
-            .send_bpi("开通直播间")
+            .send_bpi_payload("live.room.create")
             .await
     }
 
@@ -116,7 +115,7 @@ impl<'a> LiveClient<'a> {
         area_id: Option<u64>,
         add_tag: Option<&str>,
         del_tag: Option<&str>,
-    ) -> Result<BpiResponse<UpdateRoomData>, BpiError> {
+    ) -> BpiResult<UpdateRoomData> {
         let csrf = self.client.csrf()?;
         let mut form = Form::new()
             .text("room_id", room_id.to_string())
@@ -139,7 +138,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/room/v1/Room/update")
             .multipart(form)
-            .send_bpi("更新直播间信息")
+            .send_bpi_payload("live.room.update")
             .await
     }
 
@@ -155,7 +154,7 @@ impl<'a> LiveClient<'a> {
         room_id: u64,
         area_v2: u64,
         platform: &str,
-    ) -> Result<BpiResponse<StartLiveData>, BpiError> {
+    ) -> BpiResult<StartLiveData> {
         let csrf = self.client.csrf()?;
         let form = Form::new()
             .text("room_id", room_id.to_string())
@@ -167,7 +166,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/room/v1/Room/startLive")
             .multipart(form)
-            .send_bpi("开始直播")
+            .send_bpi_payload("live.start")
             .await
     }
 
@@ -176,11 +175,7 @@ impl<'a> LiveClient<'a> {
     /// # 参数
     /// * `room_id` - 直播间 ID
     /// * `platform` - 直播平台，如 "pc_link"
-    pub async fn live_stop(
-        &self,
-        room_id: u64,
-        platform: &str,
-    ) -> Result<BpiResponse<StopLiveData>, BpiError> {
+    pub async fn live_stop(&self, room_id: u64, platform: &str) -> BpiResult<StopLiveData> {
         let csrf = self.client.csrf()?;
         let form = Form::new()
             .text("platform", platform.to_string())
@@ -191,7 +186,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/room/v1/Room/stopLive")
             .multipart(form)
-            .send_bpi("关闭直播")
+            .send_bpi_payload("live.stop")
             .await
     }
 
@@ -204,7 +199,7 @@ impl<'a> LiveClient<'a> {
         &self,
         title: Option<&str>,
         cover: Option<&str>,
-    ) -> Result<BpiResponse<UpdatePreLiveInfoData>, BpiError> {
+    ) -> BpiResult<UpdatePreLiveInfoData> {
         let csrf = self.client.csrf()?;
         let mut form = Form::new()
             .text("platform", "web")
@@ -223,7 +218,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/xlive/app-blink/v1/preLive/UpdatePreLiveInfo")
             .multipart(form)
-            .send_bpi("预更新直播间信息")
+            .send_bpi_payload("live.pre_live_info.update")
             .await
     }
 
@@ -238,7 +233,7 @@ impl<'a> LiveClient<'a> {
         room_id: u64,
         uid: u64,
         content: &str,
-    ) -> Result<BpiResponse<Value>, BpiError> {
+    ) -> BpiResult<Value> {
         let csrf = self.client.csrf()?;
         let form = Form::new()
             .text("room_id", room_id.to_string())
@@ -250,7 +245,7 @@ impl<'a> LiveClient<'a> {
         self.client
             .post("https://api.live.bilibili.com/xlive/app-blink/v1/index/updateRoomNews")
             .multipart(form)
-            .send_bpi("更新直播间公告")
+            .send_bpi_payload("live.room_news.update")
             .await
     }
 }

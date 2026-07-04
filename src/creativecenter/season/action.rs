@@ -3,8 +3,7 @@
 // [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
 use crate::BilibiliRequest;
-use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::creativecenter::CreativeCenterClient;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -46,7 +45,7 @@ impl<'a> CreativeCenterClient<'a> {
         desc: Option<&str>,
         cover: &str,
         season_price: Option<u32>,
-    ) -> Result<BpiResponse<u64>, BpiError> {
+    ) -> BpiResult<u64> {
         // 校验 csrf
         let csrf = self.client.csrf()?;
 
@@ -66,7 +65,7 @@ impl<'a> CreativeCenterClient<'a> {
         self.client
             .post("https://member.bilibili.com/x2/creative/web/season/add")
             .form(&form)
-            .send_bpi("创建合集")
+            .send_bpi_payload("creativecenter.season.create")
             .await
     }
 
@@ -81,10 +80,7 @@ impl<'a> CreativeCenterClient<'a> {
     ///
     /// # 文档
     /// [删除合集](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season/del.md#删除合集)
-    pub async fn season_delete(
-        &self,
-        season_id: u64,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    pub async fn season_delete(&self, season_id: u64) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let form = vec![("id", season_id.to_string()), ("csrf", csrf)];
@@ -92,7 +88,7 @@ impl<'a> CreativeCenterClient<'a> {
         self.client
             .post("https://member.bilibili.com/x2/creative/web/season/del")
             .form(&form)
-            .send_bpi("删除合集")
+            .send_bpi_optional_payload("creativecenter.season.delete")
             .await
     }
 
@@ -112,7 +108,7 @@ impl<'a> CreativeCenterClient<'a> {
         &self,
         section_id: u64,
         episodes: Vec<EpisodeAdd>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         // 校验 csrf
         let csrf = self.client.csrf()?;
 
@@ -126,7 +122,7 @@ impl<'a> CreativeCenterClient<'a> {
             .with_bilibili_headers()
             .query(&[("csrf", csrf)])
             .json(&payload)
-            .send_bpi("添加视频到合集")
+            .send_bpi_optional_payload("creativecenter.season.episodes.add")
             .await
     }
 }

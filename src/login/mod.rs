@@ -12,6 +12,9 @@ pub mod model;
 pub mod params;
 
 pub use client::LoginClient;
+pub use exit::LogoutWebParams;
+pub use login_action::LoginSmsCodeParams;
+pub use member_center::sign::LoginUserSignParams;
 pub use model::{
     LoginAccountInfo, LoginCoinBalance, LoginDailyReward, LoginNav, LoginStats, LoginTodayCoinExp,
     LoginVipInfo, LoginWbiImg,

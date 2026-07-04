@@ -3,7 +3,7 @@
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/danmaku/thumbup.md)
 
 use crate::ids::Cid;
-use crate::{BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResult};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -17,8 +17,6 @@ pub struct ThumbupStatsItem {
 }
 
 pub type ThumbupStatsMap = HashMap<String, ThumbupStatsItem>;
-
-pub type ThumbupStatsResponse = BpiResponse<ThumbupStatsMap>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DanmakuThumbupStatsParams {

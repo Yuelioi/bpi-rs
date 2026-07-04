@@ -4,33 +4,50 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::login::LoginClient;
 
-impl<'a> LoginClient<'a> {
-    /// 修改个人签名
-    ///
-    /// # 参数
-    /// * `user_sign` - 要设置的签名内容，最多70个字符。留空表示删除签名
-    pub async fn member_center_update_user_sign(
-        &self,
-        user_sign: &str,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+const UPDATE_USER_SIGN_ENDPOINT: &str = "https://api.bilibili.com/x/member/web/sign/update";
+
+/// Parameters for updating the member-center user sign.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LoginUserSignParams {
+    user_sign: String,
+}
+
+impl LoginUserSignParams {
+    pub fn new(user_sign: impl Into<String>) -> BpiResult<Self> {
+        let user_sign = user_sign.into();
         if user_sign.len() > 70 {
-            return Err(BpiError::InvalidParameter {
-                field: "user_sign",
-                message: "签名长度不能超过70个字符",
-            });
+            return Err(BpiError::invalid_parameter(
+                "user_sign",
+                "length cannot exceed 70 bytes",
+            ));
         }
 
-        let csrf = self.client.csrf()?;
-        let result = self
-            .client
-            .post("https://api.bilibili.com/x/member/web/sign/update")
-            .form(&[("user_sign", user_sign.to_string()), ("csrf", csrf)])
-            .send_bpi("设置个人签名")
-            .await?;
+        Ok(Self { user_sign })
+    }
 
-        Ok(result)
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("user_sign", self.user_sign.clone()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+impl<'a> LoginClient<'a> {
+    /// Updates the member-center user sign and returns the canonical payload result.
+    pub async fn update_user_sign(
+        &self,
+        params: LoginUserSignParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
+        let csrf = self.client.csrf()?;
+
+        self.client
+            .post(UPDATE_USER_SIGN_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("login.member_center.user_sign.update")
+            .await
     }
 }

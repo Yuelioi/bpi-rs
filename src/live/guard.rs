@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::BpiResponse;
-
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct UserInfo {
     /// 用户UID
@@ -167,8 +165,6 @@ pub struct GuardListData {
     /// 大航海成员列表
     pub list: Vec<GuardMember>,
 }
-
-pub type GuardListResponse = BpiResponse<GuardListData>;
 
 #[cfg(test)]
 mod tests {

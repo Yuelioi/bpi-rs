@@ -2,7 +2,6 @@
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
 
-use crate::BpiResponse;
 use crate::models::{LevelInfo, Nameplate, Official, OfficialVerify, Pendant, VipLabel};
 use serde::{Deserialize, Serialize};
 
@@ -411,9 +410,6 @@ pub struct ViewAddit {
     #[serde(rename = "72")]
     pub field_72: bool,
 }
-
-/// 获取视频详细信息响应类型
-pub type VideoDetailResponse = BpiResponse<VideoDetailData>;
 
 #[cfg(test)]
 mod tests {

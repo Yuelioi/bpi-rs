@@ -2,10 +2,7 @@
 //!
 //! [文档入口](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
 
-use crate::BpiResponse;
 use crate::ids::{Aid, Bvid};
-
-pub type SnapshotResponse = BpiResponse<Vec<String>>;
 
 /// Parameters for `/x/v2/dm/ajax` danmaku snapshots.
 #[derive(Debug, Clone, PartialEq, Eq)]

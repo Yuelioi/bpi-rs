@@ -2,7 +2,7 @@
 //!
 //! [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/comment/list.md)
 
-use crate::{BpiError, BpiResponse, BpiResult};
+use crate::{BpiError, BpiResult};
 use serde::{Deserialize, Serialize};
 
 use super::types::{
@@ -14,9 +14,6 @@ use super::types::{
     Top,
     Upper,
 };
-
-/// 通用的评论列表响应
-pub type CommentListResponse = BpiResponse<CommentListData>;
 
 /// Target comment area.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

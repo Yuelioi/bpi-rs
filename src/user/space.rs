@@ -6,7 +6,7 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::user::UserClient;
 use serde::{Deserialize, Serialize};
 
@@ -209,38 +209,57 @@ pub struct BangumiFollowListResponseData {
     pub total: u64,
 }
 
+/// Parameters for setting the user space notice.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct UserSpaceNoticeSetParams {
+    notice: Option<String>,
+}
+
+impl UserSpaceNoticeSetParams {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn notice(mut self, notice: impl Into<String>) -> BpiResult<Self> {
+        let notice = notice.into();
+        if notice.len() > 150 {
+            return Err(BpiError::invalid_parameter(
+                "notice",
+                "length cannot exceed 150 bytes",
+            ));
+        }
+        self.notice = Some(notice);
+        Ok(self)
+    }
+
+    fn into_multipart(self, csrf: &str) -> reqwest::multipart::Form {
+        let mut form = reqwest::multipart::Form::new().text("csrf", csrf.to_string());
+
+        if let Some(notice) = self.notice {
+            form = form.text("notice", notice);
+        }
+
+        form
+    }
+}
+
 // --- API 实现 ---
 
 // --- 测试模块 ---
 
 impl<'a> UserClient<'a> {
-    /// 修改空间公告
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称    | 类型           | 说明                 |
-    /// | ------- | --------------| -------------------- |
-    /// | `notice`| `Option<&str>`  | 公告内容，少于150字  |
-    pub async fn user_space_notice_set(
+    /// Sets the user space notice and returns the canonical payload result.
+    pub async fn set_space_notice(
         &self,
-        notice: Option<&str>,
-    ) -> Result<BpiResponse<()>, BpiError> {
+        params: UserSpaceNoticeSetParams,
+    ) -> BpiResult<Option<()>> {
         let csrf = self.client.csrf()?;
-        let mut form = reqwest::multipart::Form::new().text("csrf", csrf.to_string());
-
-        if let Some(n) = notice {
-            if n.len() > 150 {
-                return Err(BpiError::parse("公告内容超出150字符限制"));
-            }
-            form = form.text("notice", n.to_string());
-        }
+        let form = params.into_multipart(&csrf);
 
         self.client
             .post("https://api.bilibili.com/x/space/notice/set")
             .multipart(form)
-            .send_bpi("修改空间公告")
+            .send_bpi_optional_payload("user.space_notice.set")
             .await
     }
 }

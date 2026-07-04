@@ -4,35 +4,13 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::response::BpiResult;
 use crate::video::VideoClient;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
-/// 点赞视频 - 请求参数
-
-#[derive(Debug, Clone, Serialize)]
-pub struct LikeRequest {
-    /// 稿件 avid （aid 与 bvid 任选一个）
-    pub aid: Option<u64>,
-    /// 稿件 bvid （aid 与 bvid 任选一个）
-    pub bvid: Option<String>,
-    /// 操作方式 (1: 点赞, 2: 取消赞)
-    pub like: u8,
-}
-
-/// 投币视频 - 请求参数
-#[derive(Debug, Clone, Serialize)]
-pub struct CoinRequest {
-    /// 稿件 avid
-    pub aid: Option<u64>,
-    /// 稿件 bvid
-    pub bvid: Option<String>,
-    /// 投币数量 (上限为 2)
-    pub multiply: u8,
-    /// 是否附加点赞 (0: 不点赞, 1: 点赞)，默认为 0
-    pub select_like: Option<u8>,
-}
+const LIKE_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/archive/like";
+const COIN_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/coin/add";
+const FAVORITE_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/resource/deal";
 
 /// 投币视频 - 响应结构体
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -54,138 +32,342 @@ pub struct FavoriteData {
     pub success_num: u32,
 }
 
-pub type FavoriteResponse = BpiResponse<FavoriteData>;
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct LegacyVideoIdForm {
+    aid: String,
+    bvid: String,
+}
 
-impl<'a> VideoClient<'a> {
-    /// 点赞/取消点赞
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/action.md)
-    ///
-    /// # 参数
-    /// | 名称   | 类型           | 说明                 |
-    /// | ------ | --------------| -------------------- |
-    /// | `aid`  | `Option<u64>`   | 稿件 avid，可选      |
-    /// | `bvid` | `Option<String>`| 稿件 bvid，可选      |
-    /// | `like` | u8            | 操作方式 (1:点赞, 2:取消) |
-    pub async fn video_like(
-        &self,
-        aid: Option<u64>,
-        bvid: Option<String>,
-        like: u8,
-    ) -> Result<BpiResponse<CoinData>, BpiError> {
-        let csrf = self.client.csrf()?;
+/// Parameters for video like/unlike operations.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoLikeParams {
+    video_id: LegacyVideoIdForm,
+    like: u8,
+}
 
-        let result = self
-            .client
-            .post("https://api.bilibili.com/x/web-interface/archive/like")
-            .with_bilibili_headers()
-            .form(&[
-                ("aid", aid.unwrap_or(0).to_string()),
-                ("bvid", bvid.unwrap_or("".to_string())),
-                ("like", like.to_string()),
-                ("csrf", csrf),
-            ])
-            .send_bpi("点赞")
-            .await?;
-
-        Ok(result)
+impl VideoLikeParams {
+    pub fn from_aid(aid: u64, like: u8) -> BpiResult<Self> {
+        Self::from_ids(Some(aid), None, like)
     }
 
-    /// 投币视频
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/action.md)
-    ///
-    /// # 参数
-    /// | 名称         | 类型           | 说明                 |
-    /// | ------------ | --------------| -------------------- |
-    /// | `aid`        | `Option<u64>`   | 稿件 avid，可选      |
-    /// | `bvid`       | `Option<String>`| 稿件 bvid，可选      |
-    /// | `multiply`   | u8            | 投币数量（上限2）    |
-    /// | `select_like`| `Option<u8>`    | 是否附加点赞，0:否，1:是，默认0 |
-    pub async fn video_coin(
-        &self,
-        aid: Option<u64>,
-        bvid: Option<String>,
-        multiply: u8,
-        select_like: Option<u8>,
-    ) -> Result<BpiResponse<CoinData>, BpiError> {
+    pub fn from_bvid(bvid: impl Into<String>, like: u8) -> BpiResult<Self> {
+        Self::from_ids(None, Some(bvid.into()), like)
+    }
+
+    pub fn from_ids(aid: Option<u64>, bvid: Option<String>, like: u8) -> BpiResult<Self> {
+        let video_id = legacy_video_id_form(aid, bvid)?;
+        validate_like_action(like)?;
+
+        Ok(Self { video_id, like })
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("aid", self.video_id.aid.clone()),
+            ("bvid", self.video_id.bvid.clone()),
+            ("like", self.like.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+/// Parameters for video coin operations.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoCoinParams {
+    video_id: LegacyVideoIdForm,
+    multiply: u8,
+    select_like: u8,
+}
+
+impl VideoCoinParams {
+    pub fn from_aid(aid: u64, multiply: u8) -> BpiResult<Self> {
+        Self::from_ids(Some(aid), None, multiply)
+    }
+
+    pub fn from_bvid(bvid: impl Into<String>, multiply: u8) -> BpiResult<Self> {
+        Self::from_ids(None, Some(bvid.into()), multiply)
+    }
+
+    pub fn from_ids(aid: Option<u64>, bvid: Option<String>, multiply: u8) -> BpiResult<Self> {
+        let video_id = legacy_video_id_form(aid, bvid)?;
+        validate_coin_multiply(multiply)?;
+
+        Ok(Self {
+            video_id,
+            multiply,
+            select_like: 0,
+        })
+    }
+
+    pub fn select_like(mut self, select_like: bool) -> Self {
+        self.select_like = u8::from(select_like);
+        self
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("aid", self.video_id.aid.clone()),
+            ("bvid", self.video_id.bvid.clone()),
+            ("multiply", self.multiply.to_string()),
+            ("select_like", self.select_like.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+/// Parameters for video favorite add/remove operations.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoFavoriteParams {
+    rid: u64,
+    add_media_ids: Vec<String>,
+    del_media_ids: Vec<String>,
+}
+
+impl VideoFavoriteParams {
+    pub fn new(
+        rid: u64,
+        add_media_ids: impl IntoIterator<Item = impl Into<String>>,
+        del_media_ids: impl IntoIterator<Item = impl Into<String>>,
+    ) -> BpiResult<Self> {
+        if rid == 0 {
+            return Err(BpiError::invalid_parameter("rid", "id must be non-zero"));
+        }
+
+        let add_media_ids = normalize_id_list("add_media_ids", add_media_ids)?;
+        let del_media_ids = normalize_id_list("del_media_ids", del_media_ids)?;
+
+        if add_media_ids.is_empty() && del_media_ids.is_empty() {
+            return Err(BpiError::invalid_parameter(
+                "media_ids",
+                "at least one add or delete media id is required",
+            ));
+        }
+
+        Ok(Self {
+            rid,
+            add_media_ids,
+            del_media_ids,
+        })
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        let mut pairs = vec![
+            ("rid", self.rid.to_string()),
+            ("type", "2".to_string()),
+            ("csrf", csrf.to_string()),
+        ];
+
+        if !self.add_media_ids.is_empty() {
+            pairs.push(("add_media_ids", self.add_media_ids.join(",")));
+        }
+        if !self.del_media_ids.is_empty() {
+            pairs.push(("del_media_ids", self.del_media_ids.join(",")));
+        }
+
+        pairs
+    }
+}
+
+impl<'a> VideoClient<'a> {
+    /// Likes or unlikes a video and returns the canonical payload result.
+    pub async fn like(&self, params: VideoLikeParams) -> BpiResult<CoinData> {
         let csrf = self.client.csrf()?;
 
         self.client
-            .post("https://api.bilibili.com/x/web-interface/coin/add")
+            .post(LIKE_ENDPOINT)
             .with_bilibili_headers()
-            .form(&[
-                ("aid", aid.unwrap_or(0).to_string()),
-                ("bvid", bvid.unwrap_or("".to_string())),
-                ("multiply", multiply.to_string()),
-                ("select_like", select_like.unwrap_or(0).to_string()),
-                ("csrf", csrf),
-            ])
-            .send_bpi("投币")
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("video.like")
             .await
     }
 
-    /// 收藏视频
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/video/action.md)
-    ///
-    /// # 参数
-    /// | 名称           | 类型                 | 说明                 |
-    /// | -------------- | --------------------| -------------------- |
-    /// | `rid`          | u64                 | 资源ID（视频avid）   |
-    /// | `add_media_ids`| Option<Vec<&str>>   | 要添加的收藏夹ID列表，可选 |
-    /// | `del_media_ids`| Option<Vec<&str>>   | 要删除的收藏夹ID列表，可选 |
-    pub async fn video_favorite(
-        &self,
-        rid: u64,
-        add_media_ids: Option<Vec<&str>>,
-        del_media_ids: Option<Vec<&str>>,
-    ) -> Result<FavoriteResponse, BpiError> {
-        if add_media_ids.is_none() && del_media_ids.is_none() {
-            return Err(BpiError::InvalidParameter {
-                field: "media_ids",
-                message: "请至少指定一个操作",
-            });
-        }
-
+    /// Gives coins to a video and returns the canonical payload result.
+    pub async fn coin(&self, params: VideoCoinParams) -> BpiResult<CoinData> {
         let csrf = self.client.csrf()?;
 
-        let mut params = HashMap::new();
+        self.client
+            .post(COIN_ENDPOINT)
+            .with_bilibili_headers()
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("video.coin")
+            .await
+    }
 
-        params.extend([
-            ("rid", rid.to_string()),
-            ("type", "2".to_string()),
-            ("csrf", csrf),
-        ]);
-
-        if let Some(ids) = add_media_ids {
-            let s = ids
-                .into_iter()
-                .map(|id| id.to_string())
-                .collect::<Vec<_>>()
-                .join(",");
-            params.insert("add_media_ids", s);
-        }
-        if let Some(ids) = del_media_ids {
-            let s = ids
-                .into_iter()
-                .map(|id| id.to_string())
-                .collect::<Vec<_>>()
-                .join(",");
-            params.insert("del_media_ids", s);
-        }
+    /// Favorites a video to, or removes it from, favorite folders.
+    pub async fn favorite(&self, params: VideoFavoriteParams) -> BpiResult<FavoriteData> {
+        let csrf = self.client.csrf()?;
 
         self.client
-            .post("https://api.bilibili.com/x/v3/fav/resource/deal")
+            .post(FAVORITE_ENDPOINT)
             .with_bilibili_headers()
-            .form(&params)
-            .send_bpi("收藏视频")
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("video.favorite")
             .await
     }
 }
 
+fn legacy_video_id_form(
+    aid: Option<u64>,
+    bvid: Option<String>,
+) -> Result<LegacyVideoIdForm, BpiError> {
+    let aid = match aid {
+        Some(0) => {
+            return Err(BpiError::invalid_parameter("aid", "id must be non-zero"));
+        }
+        Some(aid) => Some(aid.to_string()),
+        None => None,
+    };
+
+    let bvid = match bvid {
+        Some(bvid) if bvid.trim().is_empty() => {
+            return Err(BpiError::invalid_parameter("bvid", "bvid cannot be blank"));
+        }
+        Some(bvid) => Some(bvid),
+        None => None,
+    };
+
+    if aid.is_none() && bvid.is_none() {
+        return Err(BpiError::invalid_parameter(
+            "video_id",
+            "aid or bvid is required",
+        ));
+    }
+
+    Ok(LegacyVideoIdForm {
+        aid: aid.unwrap_or_else(|| "0".to_string()),
+        bvid: bvid.unwrap_or_default(),
+    })
+}
+
+fn validate_like_action(like: u8) -> Result<(), BpiError> {
+    if matches!(like, 1 | 2) {
+        return Ok(());
+    }
+
+    Err(BpiError::invalid_parameter("like", "value must be 1 or 2"))
+}
+
+fn validate_coin_multiply(multiply: u8) -> Result<(), BpiError> {
+    if matches!(multiply, 1 | 2) {
+        return Ok(());
+    }
+
+    Err(BpiError::invalid_parameter(
+        "multiply",
+        "value must be 1 or 2",
+    ))
+}
+
+fn normalize_id_list(
+    field: &'static str,
+    values: impl IntoIterator<Item = impl Into<String>>,
+) -> BpiResult<Vec<String>> {
+    values
+        .into_iter()
+        .map(|value| {
+            let value = value.into();
+            let value = value.trim();
+            if value.is_empty() {
+                return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
+            }
+
+            Ok(value.to_string())
+        })
+        .collect()
+}
+
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use crate::BpiError;
+
+    use super::{
+        VideoCoinParams, VideoFavoriteParams, VideoLikeParams, legacy_video_id_form,
+        validate_coin_multiply,
+    };
+
+    #[test]
+    fn legacy_video_id_form_rejects_missing_video_id() {
+        let err = legacy_video_id_form(None, None).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "video_id",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn validate_coin_multiply_rejects_oversized_value() {
+        let err = validate_coin_multiply(3).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "multiply",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn video_like_params_serializes_aid() -> Result<(), BpiError> {
+        let params = VideoLikeParams::from_aid(170001, 1)?;
+
+        assert_eq!(
+            params.form_pairs("csrf-token"),
+            vec![
+                ("aid", "170001".to_string()),
+                ("bvid", String::new()),
+                ("like", "1".to_string()),
+                ("csrf", "csrf-token".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn video_coin_params_defaults_select_like_to_false() -> Result<(), BpiError> {
+        let params = VideoCoinParams::from_bvid("BV1xx411c7mD", 2)?;
+
+        assert_eq!(
+            params.form_pairs("csrf-token"),
+            vec![
+                ("aid", "0".to_string()),
+                ("bvid", "BV1xx411c7mD".to_string()),
+                ("multiply", "2".to_string()),
+                ("select_like", "0".to_string()),
+                ("csrf", "csrf-token".to_string()),
+            ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn video_favorite_params_rejects_empty_operation() {
+        let err = VideoFavoriteParams::new(170001, Vec::<String>::new(), Vec::<String>::new())
+            .unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "media_ids",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn video_favorite_params_rejects_blank_media_id() {
+        let err = VideoFavoriteParams::new(170001, [" "], Vec::<String>::new()).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "add_media_ids",
+                ..
+            }
+        ));
+    }
+}

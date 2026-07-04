@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::BpiResponse;
-
 // ================= 数据结构 =================
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -52,8 +50,6 @@ pub struct RoomGiftData {
     pub global_config: Option<serde_json::Value>,
 }
 
-pub type RoomGiftResponse = BpiResponse<RoomGiftData>;
-
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct BlindGiftItem {
     /// 爆出的礼物id
@@ -79,8 +75,6 @@ pub struct BlindGiftData {
     /// 盲盒礼物列表
     pub gifts: Vec<BlindGiftItem>,
 }
-
-pub type BlindGiftResponse = BpiResponse<BlindGiftData>;
 
 #[cfg(test)]
 mod tests {

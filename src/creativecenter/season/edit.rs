@@ -3,8 +3,7 @@
 // [参考文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/creativecenter/season.md)
 
 use crate::BilibiliRequest;
-use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::creativecenter::CreativeCenterClient;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -110,7 +109,7 @@ impl<'a> CreativeCenterClient<'a> {
         &self,
         season: SeasonEdit,
         sorts: Vec<SeasonSectionSort>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let payload = json!({
@@ -122,7 +121,7 @@ impl<'a> CreativeCenterClient<'a> {
             .post("https://member.bilibili.com/x2/creative/web/season/edit")
             .query(&[("csrf", csrf)])
             .json(&payload)
-            .send_bpi("编辑合集信息")
+            .send_bpi_optional_payload("creativecenter.season.edit")
             .await
     }
     /// 编辑合集小节(需要开启小节功能)
@@ -141,7 +140,7 @@ impl<'a> CreativeCenterClient<'a> {
         &self,
         section: SeasonSectionEdit,
         sorts: Vec<SectionSort>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let payload = json!({
@@ -153,7 +152,7 @@ impl<'a> CreativeCenterClient<'a> {
             .post("https://member.bilibili.com/x2/creative/web/season/section/edit")
             .query(&[("csrf", csrf)])
             .json(&payload)
-            .send_bpi("编辑合集小节")
+            .send_bpi_optional_payload("creativecenter.season.section.edit")
             .await
     }
 
@@ -173,7 +172,7 @@ impl<'a> CreativeCenterClient<'a> {
         &self,
         section: EpisodeEdit,
         sorts: Vec<EpisodeSort>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let payload = EpisodeEditPayload { section, sorts };
@@ -182,7 +181,7 @@ impl<'a> CreativeCenterClient<'a> {
             .post("https://member.bilibili.com/x2/creative/web/season/section/episode/edit")
             .query(&[("csrf", csrf)])
             .json(&payload)
-            .send_bpi("编辑合集章节")
+            .send_bpi_optional_payload("creativecenter.season.section.episode.edit")
             .await
     }
 
@@ -194,7 +193,7 @@ impl<'a> CreativeCenterClient<'a> {
         &self,
         season_id: u64,
         enable: bool,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
         let params = vec![
             ("csrf", csrf),
@@ -205,7 +204,7 @@ impl<'a> CreativeCenterClient<'a> {
         self.client
             .post("https://member.bilibili.com/x2/creative/web/season/section/switch")
             .form(&params)
-            .send_bpi("切换 小节/正常 模式")
+            .send_bpi_optional_payload("creativecenter.season.section.switch")
             .await
     }
     /// 添加视频到小节(需要开启小节功能)
@@ -226,7 +225,7 @@ impl<'a> CreativeCenterClient<'a> {
         &self,
         section_id: u64,
         episodes: Vec<Episode>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let payload = SectionAddEpisodesRequest {
@@ -238,7 +237,7 @@ impl<'a> CreativeCenterClient<'a> {
             .post("https://member.bilibili.com/x2/creative/web/season/section/episodes/add")
             .json(&payload)
             .query(&[("csrf", csrf)])
-            .send_bpi("编辑投稿视频合集")
+            .send_bpi_optional_payload("creativecenter.season.section.episodes.add")
             .await
     }
 }

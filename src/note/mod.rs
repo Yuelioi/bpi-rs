@@ -6,7 +6,7 @@ pub mod info;
 pub mod list;
 pub mod params;
 
-pub use action::NoteAddParams;
+pub use action::{NoteAddParams, NoteDeleteParams};
 pub use client::NoteClient;
 pub use params::{
     NoteArchiveListParams, NoteIsForbidParams, NotePrivateInfoParams, NotePublicArchiveListParams,

@@ -9,6 +9,7 @@ pub mod params;
 pub use client::FavClient;
 pub use list::FavListDetailParams;
 pub use params::{
-    FavCollectedListParams, FavCreatedListParams, FavFolderInfoParams, FavResourceIdsParams,
-    FavResourceInfosParams,
+    FavCollectedListParams, FavCreatedListParams, FavFolderAddParams, FavFolderDeleteParams,
+    FavFolderEditParams, FavFolderInfoParams, FavResourceBatchDeleteParams, FavResourceCleanParams,
+    FavResourceIdsParams, FavResourceInfosParams, FavResourceTransferParams,
 };

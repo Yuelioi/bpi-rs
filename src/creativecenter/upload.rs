@@ -4,7 +4,7 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::creativecenter::CreativeCenterClient;
 use base64::{Engine as _, engine::general_purpose};
 use serde::{Deserialize, Serialize};
@@ -38,7 +38,7 @@ impl<'a> CreativeCenterClient<'a> {
         &self,
         mime_type: &str,
         cover: impl AsRef<str>,
-    ) -> Result<BpiResponse<UploadCoverData>, BpiError> {
+    ) -> BpiResult<UploadCoverData> {
         let csrf = self.client.csrf()?;
         let cover_str = cover.as_ref();
 
@@ -64,7 +64,7 @@ impl<'a> CreativeCenterClient<'a> {
         self.client
             .post("https://member.bilibili.com/x/vu/web/cover/up")
             .form(&form)
-            .send_bpi("上传视频封面")
+            .send_bpi_payload("creativecenter.cover.upload")
             .await
     }
 }

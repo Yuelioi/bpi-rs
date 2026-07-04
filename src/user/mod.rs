@@ -35,3 +35,9 @@ pub use params::{
     UserSpaceNoticeParams, UserSpaceParams, UserUpStatParams, UserUploadedVideoOrder,
     UserUploadedVideosParams,
 };
+pub use relation::{
+    RelationAction, RelationSource, UserGroupCreateParams, UserGroupDeleteParams,
+    UserGroupMoveUsersParams, UserGroupUpdateParams, UserGroupUsersParams,
+    UserModifyRelationParams,
+};
+pub use space::UserSpaceNoticeSetParams;

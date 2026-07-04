@@ -6,7 +6,7 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::user::UserClient;
 use serde::{Deserialize, Serialize};
 
@@ -85,40 +85,58 @@ pub enum RelationSource {
     VideoPlayerDanmaku = 245,
 }
 
+/// Parameters for modifying a user relation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct UserModifyRelationParams {
+    fid: u64,
+    action: RelationAction,
+    source: Option<RelationSource>,
+}
+
+impl UserModifyRelationParams {
+    pub fn new(fid: u64, action: RelationAction) -> BpiResult<Self> {
+        if fid == 0 {
+            return Err(BpiError::invalid_parameter("fid", "id must be non-zero"));
+        }
+
+        Ok(Self {
+            fid,
+            action,
+            source: None,
+        })
+    }
+
+    pub fn source(mut self, source: RelationSource) -> Self {
+        self.source = Some(source);
+        self
+    }
+
+    fn into_multipart(self, csrf: &str) -> reqwest::multipart::Form {
+        let mut form = reqwest::multipart::Form::new()
+            .text("fid", self.fid.to_string())
+            .text("act", (self.action as u8).to_string())
+            .text("csrf", csrf.to_string());
+
+        if let Some(source) = self.source {
+            form = form.text("re_src", (source as u32).to_string());
+        }
+
+        form
+    }
+}
+
 // --- 测试模块 ---
 
 impl<'a> UserClient<'a> {
-    /// 操作用户关系
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/user)
-    ///
-    /// # 参数
-    /// | 名称      | 类型                | 说明                       |
-    /// | --------- | -------------------| -------------------------- |
-    /// | `fid`     | u64                | 目标用户 mid               |
-    /// | `action`  | RelationAction     | 操作代码，见 RelationAction 枚举 |
-    /// | `source`  | `Option<RelationSource>` | 关注来源代码，可选，见 RelationSource 枚举 |
-    pub async fn user_modify_relation(
-        &self,
-        fid: u64,
-        action: RelationAction,
-        source: Option<RelationSource>,
-    ) -> Result<BpiResponse<()>, BpiError> {
+    /// Modifies a user relation and returns the canonical payload result.
+    pub async fn modify_relation(&self, params: UserModifyRelationParams) -> BpiResult<Option<()>> {
         let csrf = self.client.csrf()?;
-        let mut form = reqwest::multipart::Form::new()
-            .text("fid", fid.to_string())
-            .text("act", (action as u8).to_string())
-            .text("csrf", csrf.to_string());
-
-        if let Some(s) = source {
-            form = form.text("re_src", (s as u32).to_string());
-        }
+        let form = params.into_multipart(&csrf);
 
         self.client
             .post("https://api.bilibili.com/x/relation/modify")
             .multipart(form)
-            .send_bpi("操作用户关系")
+            .send_bpi_optional_payload("user.relation.modify")
             .await
     }
 }

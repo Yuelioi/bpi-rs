@@ -1,8 +1,12 @@
 use crate::BilibiliRequest;
-use crate::BpiError;
-use crate::BpiResponse;
 use crate::historytoview::HistoryToViewClient;
+use crate::historytoview::params::{HistoryDeleteParams, HistoryShadowSetParams};
+use crate::response::BpiResult;
 use serde::{Deserialize, Serialize};
+
+const HISTORY_DELETE_ENDPOINT: &str = "https://api.bilibili.com/x/v2/history/delete";
+const HISTORY_CLEAR_ENDPOINT: &str = "https://api.bilibili.com/x/v2/history/clear";
+const HISTORY_SHADOW_SET_ENDPOINT: &str = "https://api.bilibili.com/x/v2/history/shadow/set";
 
 /// 历史记录列表的页面信息
 
@@ -122,69 +126,44 @@ pub struct HistoryListData {
 }
 
 impl<'a> HistoryToViewClient<'a> {
-    /// 删除历史记录
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `kid` | &str | 记录目标 id |
-    pub async fn history_delete(
+    /// Deletes a history item and returns the canonical payload result.
+    pub async fn delete_history(
         &self,
-        kid: &str,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: HistoryDeleteParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
-        let payload = [("kid", kid), ("csrf", &csrf)];
-
         self.client
-            .post("https://api.bilibili.com/x/v2/history/delete")
-            .form(&payload)
-            .send_bpi("删除历史记录")
+            .post(HISTORY_DELETE_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("historytoview.history.delete")
             .await
     }
 
-    /// 清空历史记录
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
-    pub async fn history_clear(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+    /// Clears all history items and returns the canonical payload result.
+    pub async fn clear_history(&self) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         let payload = [("csrf", &csrf)];
 
         self.client
-            .post("https://api.bilibili.com/x/v2/history/clear")
+            .post(HISTORY_CLEAR_ENDPOINT)
             .form(&payload)
-            .send_bpi("清空历史记录")
+            .send_bpi_optional_payload("historytoview.history.clear")
             .await
     }
 
-    /// 停用历史记录
-    ///
-    /// # 文档
-    /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/historytoview)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `switch` | bool | 是否停用 |
-    pub async fn history_shadow_set(
+    /// Enables or disables history recording and returns the canonical payload result.
+    pub async fn set_history_shadow(
         &self,
-        switch: bool,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: HistoryShadowSetParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
-        let payload = [("switch", switch.to_string()), ("csrf", csrf)];
-
         self.client
-            .post("https://api.bilibili.com/x/v2/history/shadow/set")
-            .form(&payload)
-            .send_bpi("停用历史记录")
+            .post(HISTORY_SHADOW_SET_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("historytoview.history.shadow_set")
             .await
     }
 }

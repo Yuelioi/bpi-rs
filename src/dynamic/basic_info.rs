@@ -1,5 +1,4 @@
 use crate::models::Vip;
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 // 以下结构体为API文档中未完全列出的部分，根据描述进行了推断和简化。
@@ -244,16 +243,4 @@ pub struct SpecItemLikesResponseData {
 pub struct GetDraftsResponseData {
     /// 草稿列表
     pub drafts: Vec<Draft>,
-}
-
-impl BpiClient {
-    /// 获取草稿列表 (已失效?)
-    ///
-    /// 获取用户已保存的动态草稿列表。需要登录认证。
-    #[allow(dead_code)]
-    async fn get_drafts(&self) -> Result<BpiResponse<GetDraftsResponseData>, BpiError> {
-        let req = self.get("https://api.vc.bilibili.com/dynamic_draft/v1/dynamic_draft/get_drafts");
-
-        req.send_bpi("获取草稿列表").await
-    }
 }

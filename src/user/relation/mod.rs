@@ -7,3 +7,9 @@ pub mod following_group;
 
 mod action;
 mod group;
+
+pub use action::{RelationAction, RelationSource, UserModifyRelationParams};
+pub use group::{
+    UserGroupCreateParams, UserGroupDeleteParams, UserGroupMoveUsersParams, UserGroupUpdateParams,
+    UserGroupUsersParams,
+};

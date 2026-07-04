@@ -1,18 +1,11 @@
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
+use crate::BpiResult;
 use crate::electric::ElectricClient;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize)]
-pub struct BcoinQuickPayForm<'a> {
-    pub bp_num: i32,
-    pub is_bp_remains_prior: bool,
-    pub up_mid: i64,
-    pub otype: &'a str, // "up" | "archive"
-    pub oid: i64,
-    pub csrf: &'a str,
-}
+const BCOIN_QUICK_PAY_ENDPOINT: &str =
+    "https://api.bilibili.com/x/ugcpay/web/v2/trade/elec/pay/quick";
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct BcoinQuickPayData {
@@ -35,45 +28,96 @@ pub struct BcoinQuickPayData {
     pub msg: String,
 }
 
-impl<'a> ElectricClient<'a> {
-    /// 新版本B币充电
-    /// # 参数
-    /// - `bp_num`: 贝壳数量，必须在 2-9999 之间
-    /// - `is_bp_remains_prior`: 是否优先扣除 B 币余额
-    ///   - `true`: B 币充电时请选择 true
-    ///   - `false`: 否则从贝壳余额中扣除
-    /// - `up_mid`: 充电对象用户的 mid
-    /// - `otype`: 充电来源
-    ///   - `"up"`: 空间充电
-    ///   - `"archive"`: 视频充电
-    /// - `oid`: 充电来源代码
-    ///   - 空间充电：传充电对象用户 mid
-    ///   - 视频充电：传稿件 avid
-    pub async fn electric_bcoin_quick_pay(
-        &self,
+/// Parameters for B-coin quick electric charging.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BcoinQuickPayParams {
+    bp_num: i32,
+    is_bp_remains_prior: bool,
+    up_mid: i64,
+    otype: String,
+    oid: i64,
+}
+
+impl BcoinQuickPayParams {
+    pub fn new(
         bp_num: i32,
         is_bp_remains_prior: bool,
         up_mid: i64,
-        otype: &str,
+        otype: impl Into<String>,
         oid: i64,
-    ) -> Result<BpiResponse<BcoinQuickPayData>, BpiError> {
-        let csrf_owned = self.client.csrf()?;
-        let form = BcoinQuickPayForm {
+    ) -> BpiResult<Self> {
+        if !(2..=9999).contains(&bp_num) {
+            return Err(BpiError::invalid_parameter(
+                "bp_num",
+                "value must be between 2 and 9999",
+            ));
+        }
+        if up_mid <= 0 {
+            return Err(BpiError::invalid_parameter("up_mid", "id must be positive"));
+        }
+        if oid <= 0 {
+            return Err(BpiError::invalid_parameter("oid", "id must be positive"));
+        }
+
+        let otype = otype.into();
+        if !matches!(otype.as_str(), "up" | "archive") {
+            return Err(BpiError::invalid_parameter(
+                "otype",
+                "value must be 'up' or 'archive'",
+            ));
+        }
+
+        Ok(Self {
             bp_num,
             is_bp_remains_prior,
             up_mid,
             otype,
             oid,
-            csrf: &csrf_owned,
-        };
+        })
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("bp_num", self.bp_num.to_string()),
+            ("is_bp_remains_prior", self.is_bp_remains_prior.to_string()),
+            ("up_mid", self.up_mid.to_string()),
+            ("otype", self.otype.clone()),
+            ("oid", self.oid.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+impl<'a> ElectricClient<'a> {
+    /// Performs B-coin quick electric charging and returns the canonical payload result.
+    pub async fn bcoin_quick_pay(
+        &self,
+        params: BcoinQuickPayParams,
+    ) -> BpiResult<BcoinQuickPayData> {
+        let csrf = self.client.csrf()?;
 
         self.client
-            .post("https://api.bilibili.com/x/ugcpay/web/v2/trade/elec/pay/quick")
-            .form(&form)
-            .send_bpi("新版本B币充电")
+            .post(BCOIN_QUICK_PAY_ENDPOINT)
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_payload("electric.bcoin.quick_pay")
             .await
     }
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+
+    #[test]
+    fn bcoin_quick_pay_params_rejects_invalid_charge_amount() {
+        let err = BcoinQuickPayParams::new(1, true, 42, "up", 42).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "bp_num",
+                ..
+            }
+        ));
+    }
+}

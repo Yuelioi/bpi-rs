@@ -4,7 +4,6 @@
 
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
 use crate::BpiResult;
 use crate::danmaku::DanmakuClient;
 use crate::ids::{Aid, Bvid, Cid};
@@ -180,27 +179,189 @@ impl DanmakuAdvStateParams {
 // 点赞弹幕
 // -------------------
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DanmakuRecallParams {
+    cid: Cid,
+    dmid: u64,
+}
+
+impl DanmakuRecallParams {
+    pub fn new(cid: Cid, dmid: u64) -> BpiResult<Self> {
+        Ok(Self {
+            cid,
+            dmid: validate_nonzero_u64("dmid", dmid)?,
+        })
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("cid", self.cid.to_string()),
+            ("dmid", self.dmid.to_string()),
+            ("type", "1".to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DanmakuBuyAdvParams {
+    cid: Cid,
+}
+
+impl DanmakuBuyAdvParams {
+    pub fn new(cid: Cid) -> Self {
+        Self { cid }
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("cid", self.cid.to_string()),
+            ("mode", "sp".to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DanmakuThumbupParams {
+    oid: Cid,
+    dmid: u64,
+    op: u8,
+}
+
+impl DanmakuThumbupParams {
+    pub fn new(oid: Cid, dmid: u64, op: u8) -> BpiResult<Self> {
+        if !matches!(op, 1 | 2) {
+            return Err(BpiError::invalid_parameter("op", "value must be 1 or 2"));
+        }
+
+        Ok(Self {
+            oid,
+            dmid: validate_nonzero_u64("dmid", dmid)?,
+            op,
+        })
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("oid", self.oid.to_string()),
+            ("dmid", self.dmid.to_string()),
+            ("op", self.op.to_string()),
+            ("csrf", csrf.to_string()),
+            ("platform", "web_player".to_string()),
+        ]
+    }
+}
+
 // -------------------
 // 举报弹幕
 // -------------------
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DanmakuReportParams {
+    cid: Cid,
+    dmid: u64,
+    reason: u8,
+    content: Option<String>,
+}
+
+impl DanmakuReportParams {
+    pub fn new(cid: Cid, dmid: u64, reason: u8) -> BpiResult<Self> {
+        Ok(Self {
+            cid,
+            dmid: validate_nonzero_u64("dmid", dmid)?,
+            reason,
+            content: None,
+        })
+    }
+
+    pub fn content(mut self, content: impl Into<String>) -> BpiResult<Self> {
+        self.content = Some(normalize_non_blank("content", content.into())?);
+        Ok(self)
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        let mut form = vec![
+            ("cid", self.cid.to_string()),
+            ("dmid", self.dmid.to_string()),
+            ("reason", self.reason.to_string()),
+            ("csrf", csrf.to_string()),
+        ];
+        if let Some(content) = &self.content {
+            form.push(("content", content.clone()));
+        }
+        form
+    }
+}
 
 // -------------------
 // 保护&删除弹幕
 // -------------------
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DanmakuEditStateParams {
+    oid: Cid,
+    dmids: String,
+    state: u8,
+}
+
+impl DanmakuEditStateParams {
+    pub fn new(oid: Cid, dmids: &[u64], state: u8) -> BpiResult<Self> {
+        Ok(Self {
+            oid,
+            dmids: join_u64_ids("dmids", dmids)?,
+            state,
+        })
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("type", "1".to_string()),
+            ("oid", self.oid.to_string()),
+            ("dmids", self.dmids.clone()),
+            ("state", self.state.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
+
 // -------------------
 // 修改字幕池
 // -------------------
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DanmakuEditPoolParams {
+    oid: Cid,
+    dmids: String,
+    pool: u8,
+}
+
+impl DanmakuEditPoolParams {
+    pub fn new(oid: Cid, dmids: &[u64], pool: u8) -> BpiResult<Self> {
+        Ok(Self {
+            oid,
+            dmids: join_u64_ids("dmids", dmids)?,
+            pool,
+        })
+    }
+
+    fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
+        vec![
+            ("type", "1".to_string()),
+            ("oid", self.oid.to_string()),
+            ("dmids", self.dmids.clone()),
+            ("pool", self.pool.to_string()),
+            ("csrf", csrf.to_string()),
+        ]
+    }
+}
 
 impl<'a> DanmakuClient<'a> {
     /// 发送视频弹幕
     ///
     /// 文档: [弹幕相关](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
     ///
-    pub async fn danmaku_send(
-        &self,
-        params: DanmakuSendParams,
-    ) -> Result<BpiResponse<DanmakuPostData>, BpiError> {
+    pub async fn send(&self, params: DanmakuSendParams) -> BpiResult<DanmakuPostData> {
         let csrf = self.client.csrf()?;
 
         let form = params.form_pairs(csrf);
@@ -211,194 +372,123 @@ impl<'a> DanmakuClient<'a> {
         self.client
             .post("https://api.bilibili.com/x/v2/dm/post")
             .form(&signed_params)
-            .send_bpi("发送视频弹幕")
-            .await
-    }
-
-    /// 发送视频弹幕（精简参数版本）
-    ///
-    /// 文档: [弹幕相关](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/danmaku)
-    ///
-    /// # 参数
-    ///
-    /// | 名称 | 类型 | 说明 |
-    /// | ---- | ---- | ---- |
-    /// | `oid` | u64 | 视频 cid |
-    /// | `msg` | &str | 弹幕内容 |
-    /// | `avid` | `Option<u64>` | 稿件 aid（`avid` 与 `bvid` 二选一） |
-    /// | `bvid` | `Option<&str>` | 稿件 bvid（`avid` 与 `bvid` 二选一） |
-    pub async fn danmaku_send_default(
-        &self,
-        oid: u64,
-        msg: &str,
-        avid: Option<u64>,
-        bvid: Option<&str>,
-    ) -> Result<BpiResponse<DanmakuPostData>, BpiError> {
-        let csrf = self.client.csrf()?;
-
-        let mut form = vec![
-            ("type", "1".to_string()),
-            ("oid", oid.to_string()),
-            ("msg", msg.to_string()),
-            ("mode", "1".to_string()),
-            ("csrf", csrf),
-        ];
-
-        if let Some(b) = bvid {
-            form.push(("bvid", b.to_string()));
-        }
-        if let Some(a) = avid {
-            form.push(("avid", a.to_string()));
-        }
-
-        // 使用 get_wbi_sign2 自动生成 w_rid / wts
-        let signed_form = self.client.get_wbi_sign2(form).await?;
-
-        self.client
-            .post("https://api.bilibili.com/x/v2/dm/post")
-            .form(&signed_form)
-            .send_bpi("发送视频弹幕")
+            .send_bpi_payload("danmaku.send")
             .await
     }
 
     /// 撤回弹幕。
-    pub async fn danmaku_recall(
+    pub async fn recall(
         &self,
-        cid: u64,
-        dmid: u64,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: DanmakuRecallParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
         self.client
             .post("https://api.bilibili.com/x/dm/recall")
-            .form(&[
-                ("cid", &cid.to_string()),
-                ("dmid", &dmid.to_string()),
-                ("type", &"1".to_string()),
-                ("csrf", &csrf),
-            ])
-            .send_bpi("撤回弹幕")
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("danmaku.recall")
             .await
     }
 
     /// 购买高级弹幕发送权限。
-    pub async fn danmaku_buy_adv(
+    pub async fn buy_adv(
         &self,
-        cid: u64,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: DanmakuBuyAdvParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
         self.client
             .post("https://api.bilibili.com/x/dm/adv/buy")
-            .form(&[
-                ("cid", cid.to_string()),
-                ("mode", "sp".to_string()),
-                ("csrf", csrf),
-            ])
-            .send_bpi("购买高级弹幕发送权限")
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("danmaku.adv.buy")
             .await
     }
 
     /// 点赞弹幕。
-    pub async fn danmaku_thumbup(
+    pub async fn thumbup(
         &self,
-        oid: u64,
-        dmid: u64,
-        op: u8,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: DanmakuThumbupParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let mut form = vec![
-            ("oid", oid.to_string()),
-            ("dmid", dmid.to_string()),
-            ("op", op.to_string()),
-            ("csrf", csrf),
-        ];
-        form.push(("platform", "web_player".to_string()));
 
         self.client
             .post("https://api.bilibili.com/x/v2/dm/thumbup/add")
-            .form(&form)
-            .send_bpi("点赞弹幕")
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("danmaku.thumbup")
             .await
     }
 
     /// 举报弹幕。
-    pub async fn danmaku_report(
+    pub async fn report(
         &self,
-        cid: u64,
-        dmid: u64,
-        reason: u8,
-        content: Option<&str>,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: DanmakuReportParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let mut form = vec![
-            ("cid", cid.to_string()),
-            ("dmid", dmid.to_string()),
-            ("reason", reason.to_string()),
-            ("csrf", csrf),
-        ];
-        if let Some(content) = content {
-            form.push(("content", content.to_string()));
-        }
 
         self.client
             .post("https://api.bilibili.com/x/dm/report/add")
-            .form(&form)
-            .send_bpi("举报弹幕")
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("danmaku.report")
             .await
     }
 
     /// 保护或删除弹幕。
-    pub async fn danmaku_edit_state(
+    pub async fn edit_state(
         &self,
-        oid: u64,
-        dmids: &[u64],
-        state: u8,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: DanmakuEditStateParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let dmids_str = dmids
-            .iter()
-            .map(|id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
 
         self.client
             .post("https://api.bilibili.com/x/v2/dm/edit/state")
-            .form(&[
-                ("type", "1"),
-                ("oid", &oid.to_string()),
-                ("dmids", &dmids_str),
-                ("state", &state.to_string()),
-                ("csrf", &csrf),
-            ])
-            .send_bpi("保护&删除弹幕")
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("danmaku.edit.state")
             .await
     }
 
     /// 修改字幕池。
-    pub async fn danmaku_edit_pool(
+    pub async fn edit_pool(
         &self,
-        oid: u64,
-        dmids: &[u64],
-        pool: u8,
-    ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
+        params: DanmakuEditPoolParams,
+    ) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
-        let dmids_str = dmids
-            .iter()
-            .map(|id| id.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
 
         self.client
             .post("https://api.bilibili.com/x/v2/dm/edit/pool")
-            .form(&[
-                ("type", "1"),
-                ("oid", &oid.to_string()),
-                ("dmids", &dmids_str),
-                ("pool", &pool.to_string()),
-                ("csrf", &csrf),
-            ])
-            .send_bpi("修改字幕池")
+            .form(&params.form_pairs(&csrf))
+            .send_bpi_optional_payload("danmaku.edit.pool")
             .await
     }
+}
+
+fn validate_nonzero_u64(field: &'static str, value: u64) -> BpiResult<u64> {
+    if value == 0 {
+        return Err(BpiError::invalid_parameter(field, "id must be non-zero"));
+    }
+
+    Ok(value)
+}
+
+fn normalize_non_blank(field: &'static str, value: String) -> BpiResult<String> {
+    let value = value.trim().to_string();
+    if value.is_empty() {
+        return Err(BpiError::invalid_parameter(field, "value cannot be blank"));
+    }
+
+    Ok(value)
+}
+
+fn join_u64_ids(field: &'static str, values: &[u64]) -> BpiResult<String> {
+    if values.is_empty() || values.contains(&0) {
+        return Err(BpiError::invalid_parameter(
+            field,
+            "ids must be non-empty and non-zero",
+        ));
+    }
+
+    Ok(values
+        .iter()
+        .map(u64::to_string)
+        .collect::<Vec<_>>()
+        .join(","))
 }
 
 #[cfg(test)]
