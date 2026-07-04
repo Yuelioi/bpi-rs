@@ -55,12 +55,14 @@ pub struct UserSpaceInfo {
     pub theme: serde_json::Value,
     /// 系统通知
     pub sys_notice: SysNotice,
-    /// 直播间信息
-    pub live_room: LiveRoom,
+    /// 直播间信息（部分账号/接口返回为 `null`）
+    #[serde(default)]
+    pub live_room: Option<LiveRoom>,
     /// 生日 MM-DD 如设置隐私为空
     pub birthday: String,
-    /// 学校
-    pub school: School,
+    /// 学校（部分账号接口返回 `null`）
+    #[serde(default)]
+    pub school: Option<School>,
     /// 专业资质信息
     pub profession: Option<Profession>,
     /// 个人标签
@@ -387,6 +389,18 @@ mod tests {
 
     fn live_user_tests_enabled() -> bool {
         std::env::var("BPI_LIVE_TEST").ok().as_deref() == Some("1")
+    }
+
+    #[test]
+    fn user_space_info_accepts_null_school() {
+        #[derive(Deserialize)]
+        struct SchoolField {
+            #[serde(default)]
+            school: Option<School>,
+        }
+        let parsed: SchoolField =
+            serde_json::from_str(r#"{"school":null}"#).expect("null school should deserialize");
+        assert!(parsed.school.is_none());
     }
 
     #[ignore = "legacy live API test; requires explicit BPI_LIVE_TEST review"]

@@ -43,7 +43,7 @@ pub struct RoomPendants {
     /// 手机版头像框
     pub mobile_frame: Option<RoomPendantFrame>,
     /// 大v
-    pub badge: RoomPendantBadge,
+    pub badge: Option<RoomPendantBadge>,
     /// 手机版大v
     pub mobile_badge: Option<RoomPendantBadge>,
 }

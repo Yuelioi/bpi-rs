@@ -38,12 +38,22 @@ pub struct RtmpInfo {
     pub code: String,
 }
 
+/// 网页 link 中心推流地址（FetchWebUpStreamAddr）
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct WebUpStreamAddrData {
+    pub addr: RtmpInfo,
+    pub line: Value,
+    #[serde(default)]
+    pub srt_addr: Value,
+}
+
 /// 开始直播响应数据
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct StartLiveData {
     pub change: u8,
     pub status: String,
-    pub rtmp: RtmpInfo,
+    #[serde(default)]
+    pub rtmp: Option<RtmpInfo>,
     pub live_key: String,
     pub sub_session_key: String,
     pub need_face_auth: bool,
@@ -142,14 +152,51 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// 开始直播 (目前仅支持直播姬开播)
-    ///
-    /// # 参数
-    /// * `room_id` - 直播间 ID
-    /// * `area_v2` - 直播分区 ID
-    /// * `platform` - 直播平台，如 "pc"
+    /// 获取网页 link 中心推流地址
+    pub async fn live_fetch_web_up_stream_addr(
+        &self,
+    ) -> Result<BpiResponse<WebUpStreamAddrData>, BpiError> {
+        let csrf = self.csrf()?;
+        let form = [
+            ("platform", "pc".to_string()),
+            ("backup_stream", "0".to_string()),
+            ("csrf", csrf.clone()),
+            ("csrf_token", csrf),
+        ];
+        self.post("https://api.live.bilibili.com/xlive/app-blink/v1/live/FetchWebUpStreamAddr")
+            .form(&form)
+            .send_bpi("获取网页推流地址")
+            .await
+    }
+
+    /// 网页 link 中心开始直播（第三方软件开播，WBI 签名）
+    pub async fn live_web_center_start(
+        &self,
+        room_id: u64,
+        area_v2: u64,
+    ) -> Result<BpiResponse<StartLiveData>, BpiError> {
+        let csrf = self.csrf()?;
+        let form = vec![
+            ("room_id", room_id.to_string()),
+            ("platform", "pc".to_string()),
+            ("area_v2", area_v2.to_string()),
+            ("backup_stream", "0".to_string()),
+            ("csrf", csrf.clone()),
+            ("csrf_token", csrf),
+        ];
+        let signed = self.get_wbi_sign2(form).await?;
+        // 浏览器 link 中心：WBI 参数在 query string，POST body 为空
+        self.post(
+            "https://api.live.bilibili.com/xlive/app-blink/v1/streaming/WebLiveCenterStartLive",
+        )
+        .query(&signed)
+        .send_bpi("网页开播")
+        .await
+    }
+
+    /// 开始直播（直播姬旧接口）
     #[allow(dead_code)]
-    async fn live_start(
+    async fn live_start_legacy(
         &self,
         room_id: u64,
         area_v2: u64,
