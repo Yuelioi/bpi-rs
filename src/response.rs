@@ -70,48 +70,17 @@ impl<T> ApiEnvelope<T> {
         Ok(self.ensure_success()?.data)
     }
 
-    /// Converts this envelope into the legacy response type used by current endpoints.
-    pub fn into_legacy_response(self) -> BpiResponse<T> {
-        BpiResponse {
-            code: self.code,
-            data: self.data,
-            message: self.message,
-            status: self.status,
-        }
+    /// Extracts a required payload without checking the response code.
+    ///
+    /// This is kept for endpoints whose payload contains the business status,
+    /// such as QR polling.
+    pub fn into_data(self) -> Result<T, BpiError> {
+        self.data.ok_or(BpiError::missing_data())
     }
 }
 
-#[derive(Debug, Serialize, Clone)]
-pub struct BpiResponse<T> {
-    /// 返回值 0：成功
-    pub code: i32,
-
-    pub data: Option<T>,
-
-    /// 错误信息，默认为0
-    pub message: String,
-
-    /// 状态, 部分接口需要
-    pub status: bool,
-}
-
-impl<'de, T> Deserialize<'de> for BpiResponse<T>
-where
-    T: Deserialize<'de>,
-{
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let raw = RawEnvelope::<T>::deserialize(deserializer)?;
-        Ok(Self {
-            code: raw.code.or(raw.errno).unwrap_or_default(),
-            data: raw.data,
-            message: raw.message.or(raw.msg).or(raw.show_msg).unwrap_or_default(),
-            status: raw.status,
-        })
-    }
-}
+/// Compatibility alias for modules that still expose full Bilibili envelopes.
+pub type BpiResponse<T> = ApiEnvelope<T>;
 
 #[derive(Debug, Deserialize)]
 #[serde(bound(deserialize = "T: Deserialize<'de>"))]
@@ -130,12 +99,6 @@ struct RawEnvelope<T> {
     show_msg: Option<String>,
     #[serde(default)]
     status: bool,
-}
-
-impl<T> BpiResponse<T> {
-    pub fn into_data(self) -> Result<T, BpiError> {
-        self.data.ok_or(BpiError::missing_data())
-    }
 }
 
 #[cfg(test)]

@@ -4,10 +4,10 @@
 
 // ================= 数据结构 =================
 
-use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
 use crate::manga::MangaClient;
+use crate::request::send_bpi_envelope;
+use crate::response::BpiResponse;
 use serde::Serialize;
 
 /// 购买漫画章节请求参数
@@ -56,12 +56,12 @@ impl<'a> MangaClient<'a> {
         &self,
         request: BuyEpisodeRequest,
     ) -> Result<BpiResponse<serde_json::Value>, BpiError> {
-        let result = self
+        let request = self
             .client
             .post("https://manga.bilibili.com/twirp/comic.v1.Comic/BuyEpisode?platform=web")
-            .json(&request)
-            .send_bpi("购买漫画章节")
-            .await?;
+            .json(&request);
+
+        let result = send_bpi_envelope(request, "购买漫画章节").await?;
 
         Ok(result)
     }

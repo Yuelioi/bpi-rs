@@ -8,8 +8,8 @@ impl From<reqwest::Error> for BpiError {
 }
 
 // 从API响应转换
-impl<T> From<crate::response::BpiResponse<T>> for BpiError {
-    fn from(resp: crate::response::BpiResponse<T>) -> Self {
+impl<T> From<crate::response::ApiEnvelope<T>> for BpiError {
+    fn from(resp: crate::response::ApiEnvelope<T>) -> Self {
         BpiError::from_api_response(resp)
     }
 }

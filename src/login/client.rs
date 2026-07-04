@@ -1,4 +1,4 @@
-use crate::{BilibiliRequest, BpiClient, BpiError, BpiResponse, BpiResult};
+use crate::{ApiEnvelope, BilibiliRequest, BpiClient, BpiError, BpiResult};
 
 use super::login_action::captcha::{GeetestData, GenerateCaptcha};
 use super::login_action::qr::{CheckQrCodeStatusData, GenerateQrCodeData};
@@ -212,7 +212,7 @@ impl<'a> LoginClient<'a> {
             .cookies()
             .map(|cookie| (cookie.name().to_string(), cookie.value().to_string()))
             .collect();
-        let envelope: BpiResponse<CheckQrCodeStatusData> = response
+        let envelope: ApiEnvelope<CheckQrCodeStatusData> = response
             .json()
             .await
             .map_err(|err| BpiError::parse(err.to_string()))?;

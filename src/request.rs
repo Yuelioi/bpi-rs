@@ -1,6 +1,6 @@
 use crate::{
     BpiError,
-    response::BpiResponse,
+    response::ApiEnvelope,
     transport::{ReqwestTransport, TransportEnvelope, TransportResponse},
 };
 use reqwest::RequestBuilder;
@@ -29,14 +29,6 @@ pub trait BilibiliRequest {
         self,
         operation_name: &str,
     ) -> impl std::future::Future<Output = Result<bytes::Bytes, BpiError>> + Send;
-
-    fn send_bpi<T>(
-        self,
-        operation_name: &str,
-    ) -> impl std::future::Future<Output = Result<BpiResponse<T>, BpiError>> + Send
-    where
-        Self: Sized + Send,
-        T: DeserializeOwned;
 
     fn send_bpi_payload<T>(
         self,
@@ -78,20 +70,6 @@ impl BilibiliRequest for RequestBuilder {
             .map(|response| response.body)
     }
 
-    async fn send_bpi<T>(self, operation_name: &str) -> Result<BpiResponse<T>, BpiError>
-    where
-        T: DeserializeOwned,
-    {
-        let start = Instant::now();
-        let response =
-            ReqwestTransport::send_request_builder(self.log_url(operation_name), operation_name)
-                .await?;
-        let result = decode_bpi_legacy_response(operation_name, &response)?;
-
-        log_success(operation_name, start);
-        Ok(result)
-    }
-
     async fn send_bpi_payload<T>(self, operation_name: &str) -> Result<T, BpiError>
     where
         T: DeserializeOwned,
@@ -127,15 +105,32 @@ impl BilibiliRequest for RequestBuilder {
     }
 }
 
-fn decode_bpi_legacy_response<T>(
+pub(crate) async fn send_bpi_envelope<T>(
+    request: RequestBuilder,
+    operation_name: &str,
+) -> Result<ApiEnvelope<T>, BpiError>
+where
+    T: DeserializeOwned,
+{
+    let start = Instant::now();
+    let response =
+        ReqwestTransport::send_request_builder(request.log_url(operation_name), operation_name)
+            .await?;
+    let result = decode_bpi_envelope_response(operation_name, &response)?;
+
+    log_success(operation_name, start);
+    Ok(result)
+}
+
+fn decode_bpi_envelope_response<T>(
     operation_name: &str,
     response: &TransportResponse,
-) -> Result<BpiResponse<T>, BpiError>
+) -> Result<ApiEnvelope<T>, BpiError>
 where
     T: DeserializeOwned,
 {
     decode_bpi_transport_response(operation_name, response, |decoded| {
-        decoded.into_legacy_response()
+        decoded.into_api_envelope()
     })
 }
 

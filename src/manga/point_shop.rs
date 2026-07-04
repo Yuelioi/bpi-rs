@@ -4,10 +4,10 @@
 
 // ================= 数据结构 =================
 
-use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
 use crate::manga::MangaClient;
+use crate::request::send_bpi_envelope;
+use crate::response::BpiResponse;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -116,11 +116,12 @@ impl<'a> MangaClient<'a> {
             point,
         };
 
-        self.client
+        let request = self
+            .client
             .post("https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/Exchange")
-            .form(&req)
-            .send_bpi("兑换物品")
-            .await
+            .form(&req);
+
+        send_bpi_envelope(request, "兑换物品").await
     }
 }
 

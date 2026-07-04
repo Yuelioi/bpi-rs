@@ -105,4 +105,4 @@ pub use auth::Account;
 pub use client::BpiClient;
 pub use err::error::BpiError;
 pub use request::BilibiliRequest;
-pub use response::{ApiEnvelope, BpiResponse, BpiResult};
+pub use response::{ApiEnvelope, BpiResult};

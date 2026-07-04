@@ -1,6 +1,6 @@
+use crate::ApiEnvelope;
 use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
 use crate::BpiResult;
 use crate::login::LoginClient;
 use reqwest::header::SET_COOKIE;
@@ -149,7 +149,7 @@ impl<'a> LoginClient<'a> {
         }
 
         let resp = response
-            .json::<BpiResponse<SMSLoginData>>()
+            .json::<ApiEnvelope<SMSLoginData>>()
             .await
             .map_err(|e| {
                 error!("解析短信登录响应失败: {:?}", e);

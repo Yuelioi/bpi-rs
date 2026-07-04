@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(test)]
 use crate::login::LoginQrPollParams;
 #[cfg(test)]
-use crate::{BpiClient, BpiError, BpiResponse};
+use crate::{BpiClient, BpiError};
 
 #[cfg(test)]
 const QR_GENERATE_ENDPOINT: &str =
@@ -159,7 +159,7 @@ mod tests {
             return Ok(());
         };
 
-        let response = serde_json::from_value::<BpiResponse<CheckQrCodeStatusData>>(body)?;
+        let response = serde_json::from_value::<ApiEnvelope<CheckQrCodeStatusData>>(body)?;
         let data = response.into_data()?;
 
         assert_eq!(data.code, 86101);

@@ -4,10 +4,10 @@
 
 // ================= 数据结构 =================
 
-use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
 use crate::manga::MangaClient;
+use crate::request::send_bpi_envelope;
+use crate::response::BpiResponse;
 use serde::{Deserialize, Serialize};
 
 /// 补签请求参数
@@ -71,11 +71,12 @@ impl<'a> MangaClient<'a> {
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_clock_in(&self) -> Result<BpiResponse<serde_json::Value>, BpiError> {
         let params = [("platform", "android")];
-        self.client
+        let request = self
+            .client
             .post("https://manga.bilibili.com/twirp/activity.v1.Activity/ClockIn")
-            .form(&params)
-            .send_bpi("漫画签到")
-            .await
+            .form(&params);
+
+        send_bpi_envelope(request, "漫画签到").await
     }
 
     /// 漫画补签
@@ -96,11 +97,12 @@ impl<'a> MangaClient<'a> {
             r#type: 0,
             date: date.to_string(),
         };
-        self.client
+        let request = self
+            .client
             .post("https://manga.bilibili.com/twirp/activity.v1.Activity/ClockIn?platform=android")
-            .json(&params)
-            .send_bpi("漫画补签")
-            .await
+            .json(&params);
+
+        send_bpi_envelope(request, "漫画补签").await
     }
 }
 

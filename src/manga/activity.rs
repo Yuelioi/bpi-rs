@@ -4,10 +4,10 @@
 
 // ================= 数据结构 =================
 
-use crate::BilibiliRequest;
 use crate::BpiError;
-use crate::BpiResponse;
 use crate::manga::MangaClient;
+use crate::request::send_bpi_envelope;
+use crate::response::BpiResponse;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
@@ -27,11 +27,12 @@ impl<'a> MangaClient<'a> {
     /// [查看API文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/manga)
     pub async fn manga_share_comic(&self) -> Result<ShareComicResponse, BpiError> {
         let params = [("platform", "android")];
-        self.client
+        let request = self
+            .client
             .post("https://manga.bilibili.com/twirp/activity.v1.Activity/ShareComic")
-            .form(&params)
-            .send_bpi("分享漫画")
-            .await
+            .form(&params);
+
+        send_bpi_envelope(request, "分享漫画").await
     }
 }
 

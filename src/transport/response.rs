@@ -68,9 +68,9 @@ impl<T> TransportEnvelope<T> {
         })
     }
 
-    /// Converts the decoded transport envelope into the legacy response type.
-    pub fn into_legacy_response(self) -> BpiResult<crate::response::BpiResponse<T>> {
-        Ok(self.ensure_success()?.envelope.into_legacy_response())
+    /// Returns the decoded API envelope after success validation.
+    pub fn into_api_envelope(self) -> BpiResult<crate::response::ApiEnvelope<T>> {
+        Ok(self.ensure_success()?.envelope)
     }
 }
 

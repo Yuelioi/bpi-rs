@@ -126,7 +126,7 @@ impl BpiError {
     }
 
     /// 从API响应创建BpiError
-    pub fn from_api_response<T>(resp: crate::response::BpiResponse<T>) -> Self {
+    pub fn from_api_response<T>(resp: crate::response::ApiEnvelope<T>) -> Self {
         if resp.code == 0 {
             return BpiError::Api {
                 code: 0,
