@@ -76,7 +76,6 @@ use bpi_rs::{Account, BpiClient};
 
 let account = Account {
     dede_user_id: "123".into(),
-    dede_user_id_ckmd5: "...".into(),
     sessdata: "...".into(),
     bili_jct: "...".into(),
     buvid3: "...".into(),
@@ -241,14 +240,12 @@ target/bpi-probe-notes/...
 [probe.normal]
 bili_jct = "..."
 dede_user_id = 123
-dede_user_id_ckmd5 = "..."
 sessdata = "..."
 buvid3 = "..."
 
 [probe.vip]
 bili_jct = "..."
 dede_user_id = 456
-dede_user_id_ckmd5 = "..."
 sessdata = "..."
 buvid3 = "..."
 ```

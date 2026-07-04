@@ -10,7 +10,6 @@ use super::cookie::{CookiePair, parse_cookie_header};
 #[derive(Clone, Default, Deserialize)]
 pub struct Account {
     pub dede_user_id: String,
-    pub dede_user_id_ckmd5: String,
     pub sessdata: String,
     pub bili_jct: String,
     pub buvid3: String,
@@ -41,16 +40,9 @@ impl TestAccountProfile {
 }
 
 impl Account {
-    pub fn new(
-        dede_user_id: String,
-        dede_user_id_ckmd5: String,
-        sessdata: String,
-        bili_jct: String,
-        buvid3: String,
-    ) -> Self {
+    pub fn new(dede_user_id: String, sessdata: String, bili_jct: String, buvid3: String) -> Self {
         Self {
             dede_user_id,
-            dede_user_id_ckmd5,
             sessdata,
             bili_jct,
             buvid3,
@@ -74,11 +66,6 @@ impl Account {
                 .copied()
                 .unwrap_or_default()
                 .to_string(),
-            dede_user_id_ckmd5: map
-                .get("DedeUserID__ckMd5")
-                .copied()
-                .unwrap_or_default()
-                .to_string(),
             sessdata: map.get("SESSDATA").copied().unwrap_or_default().to_string(),
             bili_jct: map.get("bili_jct").copied().unwrap_or_default().to_string(),
             buvid3: map.get("buvid3").copied().unwrap_or_default().to_string(),
@@ -88,7 +75,6 @@ impl Account {
     pub fn cookie_pairs(&self) -> Vec<CookiePair> {
         [
             ("DedeUserID", self.dede_user_id.as_str()),
-            ("DedeUserID__ckMd5", self.dede_user_id_ckmd5.as_str()),
             ("SESSDATA", self.sessdata.as_str()),
             ("bili_jct", self.bili_jct.as_str()),
             ("buvid3", self.buvid3.as_str()),
@@ -130,10 +116,6 @@ impl fmt::Debug for Account {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Account")
             .field("dede_user_id", &redact_if_present(&self.dede_user_id))
-            .field(
-                "dede_user_id_ckmd5",
-                &redact_if_present(&self.dede_user_id_ckmd5),
-            )
             .field("sessdata", &redact_if_present(&self.sessdata))
             .field("bili_jct", &redact_if_present(&self.bili_jct))
             .field("buvid3", &redact_if_present(&self.buvid3))
@@ -236,24 +218,15 @@ fn read_suffixed_account(
     suffix: &'static str,
 ) -> BpiResult<Option<Account>> {
     let dede_user_id = read_config_string(settings, &format!("dede_user_id{suffix}"))?;
-    let dede_user_id_ckmd5 = read_config_string(settings, &format!("dede_user_id_ckmd5{suffix}"))?;
     let sessdata = read_config_string(settings, &format!("sessdata{suffix}"))?;
     let bili_jct = read_config_string(settings, &format!("bili_jct{suffix}"))?;
     let buvid3 = read_config_string(settings, &format!("buvid3{suffix}"))?;
 
-    if dede_user_id.is_none()
-        && dede_user_id_ckmd5.is_none()
-        && sessdata.is_none()
-        && bili_jct.is_none()
-        && buvid3.is_none()
-    {
+    if dede_user_id.is_none() && sessdata.is_none() && bili_jct.is_none() && buvid3.is_none() {
         return Ok(None);
     }
 
     let Some(dede_user_id) = dede_user_id else {
-        return Err(incomplete_account_profile());
-    };
-    let Some(dede_user_id_ckmd5) = dede_user_id_ckmd5 else {
         return Err(incomplete_account_profile());
     };
     let Some(sessdata) = sessdata else {
@@ -266,13 +239,7 @@ fn read_suffixed_account(
         return Err(incomplete_account_profile());
     };
 
-    Ok(Some(Account::new(
-        dede_user_id,
-        dede_user_id_ckmd5,
-        sessdata,
-        bili_jct,
-        buvid3,
-    )))
+    Ok(Some(Account::new(dede_user_id, sessdata, bili_jct, buvid3)))
 }
 
 #[cfg(any(test, debug_assertions))]
@@ -300,11 +267,10 @@ mod tests {
     #[test]
     fn account_from_cookie_header_extracts_known_fields() -> Result<(), BpiError> {
         let account = Account::from_cookie_header(
-            "DedeUserID=42; DedeUserID__ckMd5=ck; SESSDATA=session; bili_jct=csrf; buvid3=buvid",
+            "DedeUserID=42; SESSDATA=session; bili_jct=csrf; buvid3=buvid",
         )?;
 
         assert_eq!(account.dede_user_id, "42");
-        assert_eq!(account.dede_user_id_ckmd5, "ck");
         assert_eq!(account.sessdata, "session");
         assert_eq!(account.bili_jct, "csrf");
         assert_eq!(account.buvid3, "buvid");
@@ -375,7 +341,6 @@ mod tests {
             r#"
             bili_jct = "csrf"
             dede_user_id = "42"
-            dede_user_id_ckmd5 = "ck"
             sessdata = "session"
             buvid3 = "buvid"
             "#,
@@ -398,13 +363,11 @@ mod tests {
             r#"
             bili_jct_vip = "csrf-vip"
             dede_user_id_vip = "42"
-            dede_user_id_ckmd5_vip = "ck-vip"
             sessdata_vip = "session-vip"
             buvid3_vip = "buvid-vip"
 
             bili_jct_normal = "csrf-normal"
             dede_user_id_normal = "84"
-            dede_user_id_ckmd5_normal = "ck-normal"
             sessdata_normal = "session-normal"
             buvid3_normal = "buvid-normal"
             "#,
@@ -428,7 +391,6 @@ mod tests {
             [vip]
             bili_jct = "csrf-vip"
             dede_user_id = "42"
-            dede_user_id_ckmd5 = "ck-vip"
             sessdata = "session-vip"
             buvid3 = "buvid-vip"
             "#,
@@ -452,7 +414,6 @@ mod tests {
             [account_normal]
             bili_jct = "csrf-normal"
             dede_user_id = "84"
-            dede_user_id_ckmd5 = "ck-normal"
             sessdata = "session-normal"
             buvid3 = "buvid-normal"
             "#,

@@ -119,7 +119,6 @@ impl ProbeAccountProfile {
     fn to_account(&self) -> Account {
         Account::new(
             self.dede_user_id.clone(),
-            self.dede_user_id_ckmd5.clone(),
             self.sessdata.clone(),
             self.bili_jct.clone(),
             self.buvid3.clone(),
@@ -355,9 +354,7 @@ mod tests {
         let normal = raw.account("normal")?.expect("normal profile should exist");
 
         assert_eq!(vip.dede_user_id, "42");
-        assert_eq!(vip.dede_user_id_ckmd5, "vip-ck");
         assert_eq!(normal.dede_user_id, "43");
-        assert_eq!(normal.dede_user_id_ckmd5, "");
         Ok(())
     }
 

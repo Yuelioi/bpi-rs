@@ -665,6 +665,22 @@ mod tests {
     }
 
     #[test]
+    fn cookie_string_preserves_dede_user_id_ckmd5_cookie() -> Result<(), BpiError> {
+        let client = BpiClient::builder()
+            .cookie(
+                "DedeUserID=42; DedeUserID__ckMd5=ck; SESSDATA=session; bili_jct=csrf; buvid3=buvid",
+            )
+            .build()?;
+
+        let cookie_header = client
+            .cookie_header_for_test()
+            .ok_or_else(|| BpiError::unsupported_response("missing cookie header"))?;
+
+        assert!(cookie_header.contains("DedeUserID__ckMd5=ck"));
+        Ok(())
+    }
+
+    #[test]
     fn builder_rejects_cookie_strings_without_pairs() {
         let result = BpiClient::builder().cookie("not-a-cookie").build();
 
