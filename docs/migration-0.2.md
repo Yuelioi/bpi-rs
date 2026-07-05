@@ -1,25 +1,18 @@
-# Migrating to bpi-rs 0.2
+# 迁移到 bpi-rs 0.2
 
-This guide tracks the current 0.2 migration surface in this repository. The
-crate is moving from a broad flat API wrapper toward an idiomatic Rust SDK with
-independent clients, explicit sessions, module clients, typed parameters,
-payload-returning methods, and offline contract-backed tests.
+这份文档记录当前仓库的 0.2 迁移面。`bpi-rs` 正在从宽泛的扁平 API 包装，迁移到更符合 Rust 习惯的 SDK：独立模块客户端、显式登录态、类型化参数、直接返回业务 payload，以及由离线契约支撑的测试。
 
-The migration is intentionally breaking. Prefer updating call sites to the new
-module-client style instead of wrapping the old flat method names.
+0.2 是有意设计的破坏性迁移。请优先把调用方改到新的模块客户端风格，不要继续包一层旧扁平方法名。
 
-## Client Construction
+## 客户端构造
 
-### 0.1 style
+### 0.1 风格
 
-Older examples treated `BpiClient::new()` as a side-effecting constructor and
-often assumed local account state could be loaded implicitly.
+旧示例通常把 `BpiClient::new()` 当作带副作用的构造函数，并默认本地账号状态会被隐式加载。
 
-### 0.2 style
+### 0.2 风格
 
-`BpiClient::new()` and `BpiClient::builder().build()` return a `BpiResult`.
-Construction is explicit and does not read `account.toml` or install a global
-tracing subscriber.
+`BpiClient::new()` 和 `BpiClient::builder().build()` 返回 `BpiResult`。构造过程是显式的，不会读取 `account.toml`，也不会安装全局 tracing subscriber。
 
 ```rust
 use bpi_rs::{BpiClient, BpiResult};
@@ -29,7 +22,7 @@ fn anonymous_client() -> BpiResult<BpiClient> {
 }
 ```
 
-Use the builder when you need HTTP/session customization:
+需要自定义 HTTP/session 行为时使用 builder：
 
 ```rust
 use std::time::Duration;
@@ -47,11 +40,11 @@ fn configured_client() -> BpiResult<BpiClient> {
 }
 ```
 
-## Session And Credentials
+## 登录态和凭据
 
-Credentials are explicit. Do not rely on constructor side effects.
+凭据必须显式传入。不要依赖构造函数副作用。
 
-### Cookie string
+### Cookie 字符串
 
 ```rust
 use bpi_rs::{BpiClient, BpiResult};
@@ -61,7 +54,7 @@ fn logged_in_client(cookie: &str) -> BpiResult<BpiClient> {
 }
 ```
 
-### Account struct
+### Account 结构体
 
 ```rust
 use bpi_rs::{Account, BpiClient, BpiResult};
@@ -71,7 +64,7 @@ fn client_from_account(account: Account) -> BpiResult<BpiClient> {
 }
 ```
 
-### Updating an existing client
+### 更新已有客户端
 
 ```rust
 client.set_account_from_cookie_str(
@@ -79,11 +72,11 @@ client.set_account_from_cookie_str(
 )?;
 ```
 
-Use `client.clear_account()` when a client should return to guest state.
+客户端需要回到游客状态时，调用 `client.clear_account()`。
 
-## Flat Methods To Module Clients
+## 从扁平方法迁移到模块客户端
 
-The preferred 0.2 API groups endpoints by domain:
+0.2 推荐按领域分组调用接口：
 
 ```rust
 let view = client.video().view(params).await?;
@@ -91,7 +84,7 @@ let nav = client.login().nav().await?;
 let info = client.bangumi().info(params).await?;
 ```
 
-Examples:
+示例：
 
 ```rust
 use bpi_rs::ids::{Bvid, MediaId};
@@ -107,7 +100,7 @@ let bangumi = client
     .await?;
 ```
 
-Available module clients currently include:
+当前模块客户端包括：
 
 ```text
 activity, article, audio, bangumi, cheese, clientinfo, comment,
@@ -116,36 +109,30 @@ live, login, manga, message, misc, note, opus, search, user,
 video, video_ranking, vip, wallet, web_widget
 ```
 
-Mutating and flow-sensitive operations are still gated or intentionally kept out
-of default examples.
+变更类和流程敏感接口仍然需要门控，或者有意不放进默认示例。
 
-## Response Handling
+## 返回值处理
 
-Migrated module-client methods generally return the decoded payload:
+已迁移的模块客户端方法通常直接返回解码后的业务 payload：
 
 ```rust
 let view = client.video().view(params).await?;
 println!("{}", view.title);
 ```
 
-The public result alias is:
+公共结果别名是：
 
 ```rust
 pub type BpiResult<T> = Result<T, BpiError>;
 ```
 
-When a full Bilibili response envelope is required, use `ApiEnvelope<T>`.
-When you are migrating a call site, prefer a module-client method that returns
-`BpiResult<T>` directly. Remaining manga envelope aliases are compatibility
-names over `ApiEnvelope<T>`.
+需要完整 B 站响应外壳时使用 `ApiEnvelope<T>`。迁移调用点时，优先选择直接返回 `BpiResult<T>` 的模块客户端方法。漫画模块里剩余的 envelope 别名只是 `ApiEnvelope<T>` 的兼容名称。
 
-If an endpoint can legitimately return success with `data: null`, its module
-client method may return `BpiResult<Option<T>>`.
+如果接口确实可能在成功时返回 `data: null`，对应模块客户端方法可以返回 `BpiResult<Option<T>>`。
 
-## Error Handling
+## 错误处理
 
-Handle `BpiError` by category or semantic helper instead of matching only on
-raw messages.
+处理 `BpiError` 时，优先按类别或语义 helper 分支，不要只匹配原始消息。
 
 ```rust
 match result {
@@ -153,16 +140,16 @@ match result {
         println!("ok: {payload:?}");
     }
     Err(error) if error.requires_login() => {
-        eprintln!("login required");
+        eprintln!("需要登录");
     }
     Err(error) if error.is_risk_control() => {
-        eprintln!("request was blocked by risk control");
+        eprintln!("请求被风控拦截");
     }
     Err(error) => return Err(error),
 }
 ```
 
-Useful helpers include:
+常用 helper：
 
 ```text
 requires_login()
@@ -172,10 +159,9 @@ is_risk_control()
 semantic_error()
 ```
 
-## QR Login
+## 二维码登录
 
-The crate exposes QR login primitives. Applications own QR rendering, polling
-policy, timeouts, and session persistence.
+SDK 暴露二维码登录基础接口。应用侧负责二维码渲染、轮询策略、超时控制和 session 持久化。
 
 ```rust
 use bpi_rs::login::LoginQrPollParams;
@@ -193,14 +179,11 @@ if status.code == 0 {
 }
 ```
 
-The promoted `login.qr.flow` contract is a Probe flow that composes
-`qr_generate` and `qr_poll` with a runtime `qrcode_key`; it is not a separate
-module-client method.
+已提升的 `login.qr.flow` 契约是一个 Probe flow，会把 `qr_generate` 和带运行时 `qrcode_key` 的 `qr_poll` 组合起来；它不是单独的模块客户端方法。
 
-## Custom Requests
+## 自定义请求
 
-For endpoints not yet wrapped by a module client, use the shared request
-helpers. Prefer payload-returning helpers for normal JSON envelope endpoints.
+尚未由模块客户端封装的接口，可以使用共享请求 helper。普通 JSON envelope 接口优先使用 payload 返回 helper。
 
 ```rust
 use bpi_rs::{BilibiliRequest, BpiClient, BpiResult};
@@ -219,12 +202,11 @@ async fn custom_read(client: &BpiClient) -> BpiResult<Payload> {
 }
 ```
 
-Use `send_bpi_optional_payload` when an observed success response may omit or
-null out the payload.
+观察到成功响应可能省略 payload 或返回 `null` 时，使用 `send_bpi_optional_payload`。
 
-## Tests, Probe, And Local Credentials
+## 测试、探针和本地凭据
 
-Default development checks are intended to stay offline:
+默认开发检查应保持离线：
 
 ```powershell
 cargo fmt --check
@@ -233,8 +215,7 @@ cargo check --all-features
 cargo test --all-features --lib
 ```
 
-Live Probe work is separate. Raw Probe output and drafts stay local under
-`target/`:
+Live Probe 是独立工作流。原始 Probe 输出和草稿只保存在本地 `target/`：
 
 ```text
 target/bpi-contract-drafts/...
@@ -242,25 +223,24 @@ target/bpi-probe-runs/...
 target/bpi-probe-notes/...
 ```
 
-Committed endpoint evidence belongs under:
+可提交的接口证据放在：
 
 ```text
 tests/contracts/<domain>/<endpoint>/contract.json
 tests/contracts/<domain>/<endpoint>/responses/<case>.json
 ```
 
-Do not commit `account.toml`, cookies, `SESSDATA`, `bili_jct`, `buvid`, raw
-Probe output, or account-specific response data.
+不要提交 `account.toml`、Cookie、`SESSDATA`、`bili_jct`、`buvid3`、原始 Probe 输出或账号相关响应数据。
 
-## Migration Checklist
+新增或迁移接口前，先按 [API 风险分类](api-risk-classification.md) 判断属于 `public-read`、`authenticated-read`、`private-read`、`mutating`、`spending` 还是 `login-session`。`mutating` 和 `spending` 测试必须使用 `#[ignore]` 和显式环境变量门控。
 
-- Replace flat calls with `client.<domain>().<method>(...)`.
-- Change `BpiClient::new()` call sites to handle `BpiResult`.
-- Seed credentials explicitly through the builder, `Account`, or
-  `set_account_from_cookie_str`.
-- Prefer typed IDs such as `Aid`, `Bvid`, `Cid`, `Mid`, `MediaId`, `SeasonId`,
-  and `EpisodeId`.
-- Prefer payload-returning `BpiResult<T>` methods over envelope-returning legacy
-  helpers.
-- Keep live and mutating behavior behind explicit opt-in controls.
-- Run the offline verification gates before publishing changes.
+## 迁移检查清单
+
+- 把扁平调用替换为 `client.<domain>().<method>(...)`。
+- 修改 `BpiClient::new()` 调用点，处理 `BpiResult`。
+- 通过 builder、`Account` 或 `set_account_from_cookie_str` 显式注入凭据。
+- 优先使用类型化 ID，例如 `Aid`、`Bvid`、`Cid`、`Mid`、`MediaId`、`SeasonId` 和 `EpisodeId`。
+- 优先使用直接返回 payload 的 `BpiResult<T>` 方法，不继续依赖旧 envelope helper。
+- 只有文档或真实响应证明字段可能缺失/为 `null` 时才使用 `Option<T>`。
+- live、变更类和消费资产行为必须放在显式 opt-in 门控后。
+- 发布改动前运行离线验证门禁。

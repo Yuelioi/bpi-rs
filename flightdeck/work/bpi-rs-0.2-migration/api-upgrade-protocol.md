@@ -18,7 +18,7 @@
 - Real Probe results are the primary evidence for API behavior.
 - Raw Probe outputs must stay local under `target/bpi-probe-runs/...`.
 - Do not store raw Probe outputs in `flightdeck/work`.
-- Do not commit raw Probe outputs, cookies, `SESSDATA`, `bili_jct`, `buvid`, account-specific response headers, or account-identifying data when avoidable.
+- Do not commit raw Probe outputs, cookies, `SESSDATA`, `bili_jct`, `buvid3`, account-specific response headers, or account-identifying data when avoidable.
 - Confirmed request contracts may be committed under `tests/contracts/...`.
 - Sanitized endpoint fixtures may be committed under `tests/contracts/<domain>/<endpoint>/responses/...` only after review.
 - Default commit unit is one module batch, not one endpoint.
@@ -65,35 +65,22 @@ The supported Probe account states are:
 `account.toml` may provide profiles in structured form:
 
 ```toml
-[probe.vip]
+[vip]
 bili_jct = "..."
-dede_user_id = 123
+dede_user_id = "123"
 dede_user_id_ckmd5 = "..."
 sessdata = "..."
 buvid3 = "..."
 
-[probe.normal]
+[normal]
 bili_jct = "..."
-dede_user_id = 456
+dede_user_id = "456"
 dede_user_id_ckmd5 = "..."
 sessdata = "..."
 buvid3 = "..."
 ```
 
-Flat semantic suffixes are allowed:
-
-```toml
-bili_jct_vip = "..."
-dede_user_id_vip = 123
-sessdata_vip = "..."
-buvid3_vip = "..."
-
-bili_jct_normal = "..."
-dede_user_id_normal = 456
-sessdata_normal = "..."
-buvid3_normal = "..."
-```
-
+Flat semantic suffixes such as `*_vip` / `*_normal` are not supported.
 Arbitrary names such as `account2`, `*_2`, or numbered fields must not be treated as profiles.
 
 ## Artifact Locations

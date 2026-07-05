@@ -2,9 +2,9 @@
 
 面向 Rust 的 Bilibili API SDK，基于 `reqwest` 和 `tokio`。
 
-`bpi-rs` 0.2 主打模块化 API、显式登录态、类型化参数、直接返回业务 payload，以及可离线验证的接口合同。它适合需要在 Rust 项目里批量接入 B 站接口的工具、自动化程序、数据采集程序和服务端应用。
+`bpi-rs` 0.2 主打模块化 API、显式登录态、类型化参数、直接返回业务 payload，以及可离线验证的接口契约。它适合需要在 Rust 项目里批量接入 B 站接口的工具、自动化程序、数据采集程序和服务端应用。
 
-[English README](./README.en.md)
+维护入口：[`CONTRIBUTING.md`](CONTRIBUTING.md)、[`SECURITY.md`](SECURITY.md)、[`CHANGELOG.md`](CHANGELOG.md)、[`docs/api-probe-development.md`](docs/api-probe-development.md)、[`docs/api-risk-classification.md`](docs/api-risk-classification.md)、[`docs/release-checklist.md`](docs/release-checklist.md)。
 
 ## 项目优势
 
@@ -15,7 +15,7 @@
 | 类型化参数 | 常见 ID 和请求参数有专门类型，例如 `Bvid`、`Aid`、`Mid`、`MediaId`、`VideoViewParams`，能提前挡住一部分无效调用。 |
 | 直接返回业务数据 | 迁移后的模块 API 返回 `BpiResult<T>`，`T` 是解码后的业务 payload。需要完整响应外壳时再使用 `ApiEnvelope<T>`。 |
 | 登录态显式可控 | 不会在构造客户端时偷偷读取本地账号。Cookie、`Account` 和测试账号配置都需要显式传入。 |
-| 有合同和探针证据 | 已迁移接口配有 `tests/contracts/**` 下的合同和脱敏响应样例，便于回归测试和后续升级。 |
+| 有契约和探针证据 | 已迁移接口配有 `tests/contracts/**` 下的契约和脱敏响应样例，便于回归测试和后续升级。 |
 | 发布前验证完整 | 默认检查覆盖格式化、clippy、全 feature 编译、库测试、文档测试和 crates.io dry run。 |
 
 ## 安装
@@ -222,6 +222,8 @@ cargo clippy --all-targets --all-features --locked -- -D warnings
 cargo check --all-features
 cargo test --all-features --lib
 cargo test --doc
+cargo check --examples --all-features
+cargo check --no-default-features --lib
 ```
 
 Live Probe 是显式 opt-in 工作流，原始输出保存在 `target/`：
@@ -232,20 +234,23 @@ target/bpi-probe-runs/...
 target/bpi-probe-notes/...
 ```
 
-本地凭据可放在 `account.toml` 供 Probe/开发使用。不要提交 `account.toml`、Cookie、`SESSDATA`、`bili_jct`、`buvid`、原始 Probe 输出或账号相关响应数据。
+本地凭据可放在 `account.toml` 供 Probe/开发使用。不要提交 `account.toml`、Cookie、`SESSDATA`、`bili_jct`、`buvid3`、原始 Probe 输出或账号相关响应数据。
+开发新接口前请先阅读 [新 API 探针开发指南](docs/api-probe-development.md)。
+
+变更类接口包括点赞、投币、收藏、关注、评论、发弹幕、开播/关播、发布/删除内容、支付或兑换等。相关示例和 live 测试默认不运行；确需执行时必须确认账号和目标资源，并显式设置 `BPI_MUTATING_TEST=1`。
 
 示例本地配置：
 
 ```toml
-[probe.normal]
+[normal]
 bili_jct = "..."
-dede_user_id = 123
+dede_user_id = "123"
 sessdata = "..."
 buvid3 = "..."
 
-[probe.vip]
+[vip]
 bili_jct = "..."
-dede_user_id = 456
+dede_user_id = "456"
 sessdata = "..."
 buvid3 = "..."
 ```
@@ -253,9 +258,10 @@ buvid3 = "..."
 ## 迁移说明
 
 - 旧扁平 API 不再是主文档路径。
-- 新模块客户端在合同支持时直接返回业务 payload。
-- `tests/contracts/**` 下的接口合同和脱敏 fixtures 是迁移后的行为依据。
+- 新模块客户端在契约支持时直接返回业务 payload。
+- `tests/contracts/**` 下的接口契约和脱敏 fixtures 是迁移后的行为依据。
 - 变更类接口和敏感登录/session 流程默认不运行 live 测试。
+- 本地账号配置只支持 `[vip]` / `[normal]` profile，不再兼容 `*_vip` / `*_normal` 旧格式。
 
 更多调用迁移示例见 [docs/migration-0.2.md](docs/migration-0.2.md)。
 

@@ -250,7 +250,7 @@ impl BpiError {
         matches!(self.category(), ErrorCategory::Business)
     }
 
-    /// 获取可写入合同的稳定语义错误标签
+    /// 获取可写入契约的稳定语义错误标签
     pub fn semantic_error(&self) -> Option<&'static str> {
         if self.requires_login() {
             Some("requires_login")

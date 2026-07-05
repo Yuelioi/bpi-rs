@@ -535,22 +535,22 @@ fn video_client_exposes_collection_and_player_read_methods() -> BpiResult<()> {
 
     std::mem::drop(
         video.seasons_archives_list(VideoCollectionSeasonsArchivesParams::new(
-            Mid::new(4279370)?,
+            Mid::new(1000001)?,
             SeasonId::new(4294056)?,
         )),
     );
     std::mem::drop(
         video.home_seasons_series(VideoCollectionHomeSeasonsSeriesParams::new(Mid::new(
-            4279370,
+            1000001,
         )?)),
     );
     std::mem::drop(
-        video.seasons_series_list(VideoCollectionSeasonsSeriesParams::new(Mid::new(4279370)?)),
+        video.seasons_series_list(VideoCollectionSeasonsSeriesParams::new(Mid::new(1000001)?)),
     );
     std::mem::drop(video.series_info(VideoCollectionSeriesInfoParams::new(250285)?));
     std::mem::drop(
         video.series_archives(VideoCollectionSeriesArchivesParams::new(
-            Mid::new(4279370)?,
+            Mid::new(1000001)?,
             250285,
         )?),
     );

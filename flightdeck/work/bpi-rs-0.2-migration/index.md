@@ -208,7 +208,7 @@ Verified:
 ## Local-only Constraints
 
 - Do not commit `migration-status.md`.
-- Do not commit raw Probe outputs, account-specific response data, cookies, `SESSDATA`, `bili_jct`, `buvid`, or local account notes.
+- Do not commit raw Probe outputs, account-specific response data, cookies, `SESSDATA`, `bili_jct`, `buvid3`, or local account notes.
 - Keep raw Probe output under `target/bpi-probe-runs/...`.
 - Keep request drafts under `target/bpi-contract-drafts/...`.
 - Commit only reviewed endpoint contracts and sanitized response fixtures under `tests/contracts/...`.

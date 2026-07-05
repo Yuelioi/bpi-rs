@@ -28,7 +28,20 @@ tasks:
       - cargo fmt --check
       - cargo clippy --all-targets --all-features --locked -- -D warnings
       - cargo check --all-features
-      - cargo test --all-features --lib
+      - cargo test --all-features
+      - cargo test --doc
+      - cargo check --examples --all-features
+      - cargo check --no-default-features --lib
+
+  ci:
+    desc: Run the same checks as GitHub Actions CI.
+    cmds:
+      - task: check_all
+
+  package_check:
+    desc: Verify the crate package without publishing.
+    cmds:
+      - cargo package --allow-dirty
 
   check_feature_matrix:
     desc: Check that no-default and single-feature library builds stay healthy.
