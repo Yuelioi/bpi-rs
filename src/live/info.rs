@@ -176,6 +176,31 @@ mod tests {
         Ok(())
     }
 
+    #[test]
+    fn room_pendants_accepts_null_badge() -> BpiResult<()> {
+        let pendants = serde_json::from_str::<RoomPendants>(
+            r#"{
+                "frame": {
+                    "name": "",
+                    "value": "",
+                    "position": 0,
+                    "desc": "",
+                    "area": 0,
+                    "area_old": 0,
+                    "bg_color": "",
+                    "bg_pic": "",
+                    "use_old_area": false
+                },
+                "mobile_frame": null,
+                "badge": null,
+                "mobile_badge": null
+            }"#,
+        )?;
+
+        assert!(pendants.badge.is_none());
+        Ok(())
+    }
+
     fn local_probe_body(profile: &str) -> Option<serde_json::Value> {
         let path =
             format!("target/bpi-probe-runs/live/public-core/room-info/{profile}.response.json");

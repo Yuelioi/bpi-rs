@@ -381,6 +381,7 @@ pub struct UserOfficial {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::BpiClient;
     use crate::ids::Mid;
     use crate::user::params::{
@@ -392,14 +393,24 @@ mod tests {
     }
 
     #[test]
-    fn user_space_info_accepts_null_school() {
-        #[derive(Deserialize)]
-        struct SchoolField {
+    fn user_space_info_accepts_null_live_room_and_school() {
+        #[derive(serde::Deserialize)]
+        struct NullableFields {
+            #[serde(default)]
+            live_room: Option<LiveRoom>,
             #[serde(default)]
             school: Option<School>,
         }
-        let parsed: SchoolField =
-            serde_json::from_str(r#"{"school":null}"#).expect("null school should deserialize");
+
+        let parsed: NullableFields = serde_json::from_str(
+            r#"{
+                "live_room": null,
+                "school": null
+            }"#,
+        )
+        .expect("nullable user-space fields should deserialize");
+
+        assert!(parsed.live_room.is_none());
         assert!(parsed.school.is_none());
     }
 

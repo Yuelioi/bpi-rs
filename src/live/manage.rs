@@ -7,6 +7,11 @@ use reqwest::multipart::Form;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+const FETCH_WEB_UP_STREAM_ADDR_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/app-blink/v1/live/FetchWebUpStreamAddr";
+const WEB_LIVE_CENTER_START_ENDPOINT: &str =
+    "https://api.live.bilibili.com/xlive/app-blink/v1/streaming/WebLiveCenterStartLive";
+
 /// 开通直播间响应数据
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -153,19 +158,14 @@ impl<'a> LiveClient<'a> {
     }
 
     /// 获取网页 link 中心推流地址
-    pub async fn live_fetch_web_up_stream_addr(
-        &self,
-    ) -> Result<BpiResponse<WebUpStreamAddrData>, BpiError> {
-        let csrf = self.csrf()?;
-        let form = [
-            ("platform", "pc".to_string()),
-            ("backup_stream", "0".to_string()),
-            ("csrf", csrf.clone()),
-            ("csrf_token", csrf),
-        ];
-        self.post("https://api.live.bilibili.com/xlive/app-blink/v1/live/FetchWebUpStreamAddr")
+    pub async fn live_fetch_web_up_stream_addr(&self) -> BpiResult<WebUpStreamAddrData> {
+        let csrf = self.client.csrf()?;
+        let form = web_up_stream_addr_form(&csrf);
+
+        self.client
+            .post(FETCH_WEB_UP_STREAM_ADDR_ENDPOINT)
             .form(&form)
-            .send_bpi("获取网页推流地址")
+            .send_bpi_payload("live.web_up_stream_addr")
             .await
     }
 
@@ -174,24 +174,17 @@ impl<'a> LiveClient<'a> {
         &self,
         room_id: u64,
         area_v2: u64,
-    ) -> Result<BpiResponse<StartLiveData>, BpiError> {
-        let csrf = self.csrf()?;
-        let form = vec![
-            ("room_id", room_id.to_string()),
-            ("platform", "pc".to_string()),
-            ("area_v2", area_v2.to_string()),
-            ("backup_stream", "0".to_string()),
-            ("csrf", csrf.clone()),
-            ("csrf_token", csrf),
-        ];
-        let signed = self.get_wbi_sign2(form).await?;
+    ) -> BpiResult<StartLiveData> {
+        let csrf = self.client.csrf()?;
+        let form = web_live_center_start_query(room_id, area_v2, &csrf);
+        let signed = self.client.get_wbi_sign2(form).await?;
+
         // 浏览器 link 中心：WBI 参数在 query string，POST body 为空
-        self.post(
-            "https://api.live.bilibili.com/xlive/app-blink/v1/streaming/WebLiveCenterStartLive",
-        )
-        .query(&signed)
-        .send_bpi("网页开播")
-        .await
+        self.client
+            .post(WEB_LIVE_CENTER_START_ENDPOINT)
+            .query(&signed)
+            .send_bpi_payload("live.web_center_start")
+            .await
     }
 
     /// 开始直播（直播姬旧接口）
@@ -297,6 +290,30 @@ impl<'a> LiveClient<'a> {
     }
 }
 
+fn web_up_stream_addr_form(csrf: &str) -> Vec<(&'static str, String)> {
+    vec![
+        ("platform", "pc".to_string()),
+        ("backup_stream", "0".to_string()),
+        ("csrf", csrf.to_string()),
+        ("csrf_token", csrf.to_string()),
+    ]
+}
+
+fn web_live_center_start_query(
+    room_id: u64,
+    area_v2: u64,
+    csrf: &str,
+) -> Vec<(&'static str, String)> {
+    vec![
+        ("room_id", room_id.to_string()),
+        ("platform", "pc".to_string()),
+        ("area_v2", area_v2.to_string()),
+        ("backup_stream", "0".to_string()),
+        ("csrf", csrf.to_string()),
+        ("csrf_token", csrf.to_string()),
+    ]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -367,6 +384,84 @@ mod tests {
                 assert!(!payload.curr_version.is_empty());
             }
         }
+        Ok(())
+    }
+
+    #[test]
+    fn web_up_stream_addr_form_contains_web_defaults_and_csrf_aliases() {
+        assert_eq!(
+            web_up_stream_addr_form("csrf-token"),
+            vec![
+                ("platform", "pc".to_string()),
+                ("backup_stream", "0".to_string()),
+                ("csrf", "csrf-token".to_string()),
+                ("csrf_token", "csrf-token".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn web_center_start_query_contains_wbi_signed_inputs() {
+        assert_eq!(
+            web_live_center_start_query(4_354_019, 309, "csrf-token"),
+            vec![
+                ("room_id", "4354019".to_string()),
+                ("platform", "pc".to_string()),
+                ("area_v2", "309".to_string()),
+                ("backup_stream", "0".to_string()),
+                ("csrf", "csrf-token".to_string()),
+                ("csrf_token", "csrf-token".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn web_up_stream_addr_response_accepts_srt_addr_missing() -> BpiResult<()> {
+        let payload = ApiEnvelope::<WebUpStreamAddrData>::from_slice(
+            br#"{
+                "code": 0,
+                "message": "0",
+                "data": {
+                    "addr": { "addr": "rtmp://example/live/", "code": "stream-key" },
+                    "line": []
+                }
+            }"#,
+        )?
+        .into_payload()?;
+
+        assert_eq!(payload.addr.addr, "rtmp://example/live/");
+        assert_eq!(payload.addr.code, "stream-key");
+        assert!(payload.srt_addr.is_null());
+        Ok(())
+    }
+
+    #[test]
+    fn start_live_response_accepts_null_rtmp() -> BpiResult<()> {
+        let payload = ApiEnvelope::<StartLiveData>::from_slice(
+            br#"{
+                "code": 0,
+                "message": "0",
+                "data": {
+                    "change": 1,
+                    "status": "LIVE",
+                    "rtmp": null,
+                    "live_key": "live-key",
+                    "sub_session_key": "sub-session",
+                    "need_face_auth": false,
+                    "room_type": 0,
+                    "protocols": [],
+                    "notice": {},
+                    "qr": "",
+                    "service_source": "",
+                    "rtmp_backup": [],
+                    "up_stream_extra": {}
+                }
+            }"#,
+        )?
+        .into_payload()?;
+
+        assert!(payload.rtmp.is_none());
+        assert_eq!(payload.live_key, "live-key");
         Ok(())
     }
 }
