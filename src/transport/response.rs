@@ -5,7 +5,7 @@ use serde::de::DeserializeOwned;
 
 use crate::{BpiResult, response::ApiEnvelope};
 
-/// Metadata safe to emit in response logs.
+/// 可安全写入响应日志的元数据。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ResponseMetadata {
     pub status: u16,
@@ -13,14 +13,14 @@ pub struct ResponseMetadata {
     pub api_code: Option<i32>,
 }
 
-/// Raw HTTP response bytes plus safe response metadata.
+/// 原始 HTTP 响应字节和安全响应元数据。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TransportResponse {
     pub metadata: ResponseMetadata,
     pub body: Bytes,
 }
 
-/// Decoded JSON API envelope plus the response metadata observed before parsing.
+/// 已解码的 JSON API envelope，以及解析前观察到的响应元数据。
 #[derive(Debug, Clone)]
 pub struct TransportEnvelope<T> {
     pub metadata: ResponseMetadata,
@@ -28,7 +28,7 @@ pub struct TransportEnvelope<T> {
 }
 
 impl TransportResponse {
-    /// Decodes this response as a Bilibili JSON API envelope.
+    /// 将此响应解码为 Bilibili JSON API envelope。
     pub fn decode_api_envelope<T>(&self) -> BpiResult<TransportEnvelope<T>>
     where
         T: DeserializeOwned,
@@ -42,7 +42,7 @@ impl TransportResponse {
 }
 
 impl<T> TransportEnvelope<T> {
-    /// Returns this envelope if it represents a successful API response.
+    /// 如果此 envelope 表示成功的 API 响应，则返回它。
     pub fn ensure_success(self) -> BpiResult<Self> {
         Ok(Self {
             metadata: self.metadata,
@@ -50,7 +50,7 @@ impl<T> TransportEnvelope<T> {
         })
     }
 
-    /// Extracts a required payload from a successful API response.
+    /// 从成功的 API 响应中提取必需 payload。
     pub fn into_payload(self) -> BpiResult<TransportPayload<T>> {
         let Self { metadata, envelope } = self.ensure_success()?;
         let payload = envelope.data.ok_or(crate::BpiError::MissingData)?;
@@ -58,7 +58,7 @@ impl<T> TransportEnvelope<T> {
         Ok(TransportPayload { metadata, payload })
     }
 
-    /// Extracts an optional payload from a successful API response.
+    /// 从成功的 API 响应中提取可选 payload。
     pub fn into_optional_payload(self) -> BpiResult<TransportOptionalPayload<T>> {
         let Self { metadata, envelope } = self.ensure_success()?;
 
@@ -68,20 +68,20 @@ impl<T> TransportEnvelope<T> {
         })
     }
 
-    /// Returns the decoded API envelope after success validation.
+    /// 成功校验后返回已解码的 API envelope。
     pub fn into_api_envelope(self) -> BpiResult<crate::response::ApiEnvelope<T>> {
         Ok(self.ensure_success()?.envelope)
     }
 }
 
-/// Required API payload plus the response metadata observed before extraction.
+/// 必需 API payload，以及提取前观察到的响应元数据。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TransportPayload<T> {
     pub metadata: ResponseMetadata,
     pub payload: T,
 }
 
-/// Optional API payload plus the response metadata observed before extraction.
+/// 可选 API payload，以及提取前观察到的响应元数据。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TransportOptionalPayload<T> {
     pub metadata: ResponseMetadata,

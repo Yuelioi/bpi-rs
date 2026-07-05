@@ -1,7 +1,7 @@
 use crate::ids::{Aid, Cvid, NoteId};
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/x/note/is_forbid`.
+/// `/x/note/is_forbid` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NoteIsForbidParams {
     aid: Aid,
@@ -17,7 +17,7 @@ impl NoteIsForbidParams {
     }
 }
 
-/// Parameters for `/x/note/info`.
+/// `/x/note/info` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NotePrivateInfoParams {
     aid: Aid,
@@ -38,7 +38,7 @@ impl NotePrivateInfoParams {
     }
 }
 
-/// Parameters for `/x/note/publish/info`.
+/// `/x/note/publish/info` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NotePublicInfoParams {
     cvid: Cvid,
@@ -54,7 +54,7 @@ impl NotePublicInfoParams {
     }
 }
 
-/// Parameters for `/x/note/list/archive`.
+/// `/x/note/list/archive` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NoteArchiveListParams {
     aid: Aid,
@@ -70,7 +70,7 @@ impl NoteArchiveListParams {
     }
 }
 
-/// Parameters for `/x/note/list`.
+/// `/x/note/list` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NoteUserPrivateListParams {
     pagination: NotePagination,
@@ -104,7 +104,7 @@ impl Default for NoteUserPrivateListParams {
     }
 }
 
-/// Parameters for `/x/note/publish/list/archive`.
+/// `/x/note/publish/list/archive` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NotePublicArchiveListParams {
     aid: Aid,
@@ -136,7 +136,7 @@ impl NotePublicArchiveListParams {
     }
 }
 
-/// Parameters for `/x/note/publish/list/user`.
+/// `/x/note/publish/list/user` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NoteUserPublicListParams {
     pagination: NotePagination,

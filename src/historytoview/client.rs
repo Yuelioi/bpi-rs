@@ -7,7 +7,7 @@ const HISTORY_LIST_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/hi
 const HISTORY_SHADOW_ENDPOINT: &str = "https://api.bilibili.com/x/v2/history/shadow";
 const TOVIEW_LIST_ENDPOINT: &str = "https://api.bilibili.com/x/v2/history/toview";
 
-/// History and to-view API client.
+/// 历史记录和稍后再看 API 客户端。
 #[derive(Clone, Copy)]
 pub struct HistoryToViewClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -33,7 +33,7 @@ impl<'a> HistoryToViewClient<'a> {
         TOVIEW_LIST_ENDPOINT
     }
 
-    /// Gets account history records.
+    /// 获取账号历史记录。
     pub async fn history_list(&self, params: HistoryListParams) -> BpiResult<HistoryListData> {
         self.client
             .get(HISTORY_LIST_ENDPOINT)
@@ -42,7 +42,7 @@ impl<'a> HistoryToViewClient<'a> {
             .await
     }
 
-    /// Gets whether history recording is disabled.
+    /// 获取历史记录是否已禁用。
     pub async fn history_shadow(&self) -> BpiResult<bool> {
         self.client
             .get(HISTORY_SHADOW_ENDPOINT)
@@ -50,7 +50,7 @@ impl<'a> HistoryToViewClient<'a> {
             .await
     }
 
-    /// Gets account to-view videos.
+    /// 获取账号稍后再看视频。
     pub async fn toview_list(&self) -> BpiResult<ToViewListData> {
         self.client
             .get(TOVIEW_LIST_ENDPOINT)

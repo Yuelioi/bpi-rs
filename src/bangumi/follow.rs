@@ -19,7 +19,7 @@ pub struct BangumiFollowResult {
     pub toast: String,
 }
 
-/// Parameters for following or unfollowing a bangumi season.
+/// 追番或取消追番 bangumi season 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BangumiFollowParams {
     season_id: SeasonId,
@@ -39,7 +39,7 @@ impl BangumiFollowParams {
 }
 
 impl<'a> BangumiClient<'a> {
-    /// Follows a bangumi season and returns the canonical payload result.
+    /// 追番 bangumi season 并返回标准 payload 结果。
     pub async fn follow(&self, params: BangumiFollowParams) -> BpiResult<BangumiFollowResult> {
         let csrf = self.client.csrf()?;
         self.client
@@ -50,7 +50,7 @@ impl<'a> BangumiClient<'a> {
             .await
     }
 
-    /// Unfollows a bangumi season and returns the canonical payload result.
+    /// 取消追番 bangumi season 并返回标准 payload 结果。
     pub async fn unfollow(&self, params: BangumiFollowParams) -> BpiResult<BangumiFollowResult> {
         let csrf = self.client.csrf()?;
         self.client

@@ -5,7 +5,7 @@ use crate::{BilibiliRequest, BpiClient, BpiResult};
 const INFO_ENDPOINT: &str = "https://api.bilibili.com/x/activity/subject/info";
 const LIST_ENDPOINT: &str = "https://api.bilibili.com/x/activity/page/list";
 
-/// Activity API client.
+/// 活动 API 客户端。
 #[derive(Clone, Copy)]
 pub struct ActivityClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -26,7 +26,7 @@ impl<'a> ActivityClient<'a> {
         LIST_ENDPOINT
     }
 
-    /// Gets activity subject information.
+    /// 获取活动主题信息。
     pub async fn info(&self, params: ActivityInfoParams) -> BpiResult<ActivityInfoData> {
         self.client
             .get(INFO_ENDPOINT)
@@ -35,7 +35,7 @@ impl<'a> ActivityClient<'a> {
             .await
     }
 
-    /// Gets the activity list.
+    /// 获取活动列表。
     pub async fn list(&self, params: ActivityListParams) -> BpiResult<ActivityListData> {
         self.client
             .get(LIST_ENDPOINT)
@@ -44,7 +44,7 @@ impl<'a> ActivityClient<'a> {
             .await
     }
 
-    /// Gets the activity list with Bilibili's web defaults.
+    /// 使用 Bilibili Web 默认值获取活动列表。
     pub async fn list_default(&self) -> BpiResult<ActivityListData> {
         self.list(ActivityListParams::default()).await
     }

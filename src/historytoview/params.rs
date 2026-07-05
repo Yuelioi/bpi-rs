@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::{BpiError, BpiResult};
 
-/// Business category accepted by `/x/web-interface/history/cursor`.
+/// `/x/web-interface/history/cursor` 接受的业务分类。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HistoryBusiness {
     Archive,
@@ -42,7 +42,7 @@ impl FromStr for HistoryBusiness {
     }
 }
 
-/// Tab filter accepted by `/x/web-interface/history/cursor`.
+/// `/x/web-interface/history/cursor` 接受的 tab 过滤器。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HistoryListType {
     All,
@@ -79,7 +79,7 @@ impl FromStr for HistoryListType {
     }
 }
 
-/// Parameters for `/x/web-interface/history/cursor`.
+/// `/x/web-interface/history/cursor` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct HistoryListParams {
     max: Option<u64>,
@@ -94,45 +94,45 @@ impl HistoryListParams {
         Self::default()
     }
 
-    /// Sets the pagination target id returned by the previous cursor.
+    /// 设置上一游标返回的分页目标 id。
     pub fn with_max(mut self, max: u64) -> Self {
         self.max = Some(max);
         self
     }
 
-    /// Sets a known Bilibili business category.
+    /// 设置已知的 Bilibili 业务分类。
     pub fn with_business(mut self, business: HistoryBusiness) -> Self {
         self.business = Some(business.as_str().to_string());
         self
     }
 
-    /// Sets a raw business category for forward-compatible callers.
+    /// 为前向兼容调用方设置原始业务分类。
     pub fn with_raw_business(mut self, business: impl Into<String>) -> BpiResult<Self> {
         let business = normalize_non_blank("business", business.into())?;
         self.business = Some(business);
         Ok(self)
     }
 
-    /// Sets the pagination timestamp returned by the previous cursor.
+    /// 设置上一游标返回的分页时间戳。
     pub fn with_view_at(mut self, view_at: u64) -> Self {
         self.view_at = Some(view_at);
         self
     }
 
-    /// Sets a known tab filter.
+    /// 设置已知 tab 过滤器。
     pub fn with_type(mut self, typ: HistoryListType) -> Self {
         self.typ = Some(typ.as_str().to_string());
         self
     }
 
-    /// Sets a raw tab filter for forward-compatible callers.
+    /// 为前向兼容调用方设置原始 tab 过滤器。
     pub fn with_raw_type(mut self, typ: impl Into<String>) -> BpiResult<Self> {
         let typ = normalize_non_blank("type", typ.into())?;
         self.typ = Some(typ);
         Ok(self)
     }
 
-    /// Sets the requested page size.
+    /// 设置请求的每页数量。
     pub fn with_page_size(mut self, page_size: u32) -> BpiResult<Self> {
         if page_size == 0 {
             return Err(BpiError::invalid_parameter(
@@ -168,7 +168,7 @@ impl HistoryListParams {
     }
 }
 
-/// Parameters for `/x/v2/history/delete`.
+/// `/x/v2/history/delete` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HistoryDeleteParams {
     kid: String,
@@ -186,7 +186,7 @@ impl HistoryDeleteParams {
     }
 }
 
-/// Parameters for `/x/v2/history/shadow/set`.
+/// `/x/v2/history/shadow/set` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HistoryShadowSetParams {
     switch: bool,
@@ -205,7 +205,7 @@ impl HistoryShadowSetParams {
     }
 }
 
-/// Parameters for `/x/v2/history/toview/add`.
+/// `/x/v2/history/toview/add` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ToViewAddParams {
     aid: Option<u64>,
@@ -248,7 +248,7 @@ impl ToViewAddParams {
     }
 }
 
-/// Parameters for `/x/v2/history/toview/del`.
+/// `/x/v2/history/toview/del` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ToViewDeleteParams {
     aid: Option<u64>,

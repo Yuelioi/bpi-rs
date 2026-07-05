@@ -22,7 +22,7 @@ const UPOWER_MEMBER_RANK_ENDPOINT: &str = "https://api.bilibili.com/x/upower/up/
 const REMARK_LIST_ENDPOINT: &str = "https://member.bilibili.com/x/web/elec/remark/list";
 const REMARK_DETAIL_ENDPOINT: &str = "https://member.bilibili.com/x/web/elec/remark/detail";
 
-/// Electric charging API client.
+/// 充电 API 客户端。
 #[derive(Clone, Copy)]
 pub struct ElectricClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -83,7 +83,7 @@ impl<'a> ElectricClient<'a> {
         REMARK_DETAIL_ENDPOINT
     }
 
-    /// Gets the monthly charging public list for an UP user.
+    /// 获取 UP 用户的月度公开充电列表。
     pub async fn month_up_list(&self, up_mid: i64) -> BpiResult<ChargeMonthUpData> {
         self.client
             .get(MONTH_UP_LIST_ENDPOINT)
@@ -92,7 +92,7 @@ impl<'a> ElectricClient<'a> {
             .await
     }
 
-    /// Gets video charging acknowledgements.
+    /// 获取视频充电鸣谢。
     pub async fn video_show(
         &self,
         mid: i64,
@@ -111,7 +111,7 @@ impl<'a> ElectricClient<'a> {
         request.send_bpi_payload("electric.video_show").await
     }
 
-    /// Gets the authenticated account's received charging records.
+    /// 获取已认证账号收到的充电记录。
     pub async fn recharge_list(
         &self,
         page: u64,
@@ -135,7 +135,7 @@ impl<'a> ElectricClient<'a> {
         request.send_bpi_payload("electric.recharge_list").await
     }
 
-    /// Gets recent charging rank history.
+    /// 获取近期充电排行历史。
     pub async fn rank_recent(&self, pn: Option<u64>, ps: Option<u64>) -> BpiResult<ElecRankData> {
         let mut request = self.client.get(RANK_RECENT_ENDPOINT);
 
@@ -149,7 +149,7 @@ impl<'a> ElectricClient<'a> {
         request.send_bpi_payload("electric.rank_recent").await
     }
 
-    /// Gets the authenticated account's monthly charging records.
+    /// 获取已认证账号的月度充电记录。
     pub async fn charge_record(&self, page: u64, charge_type: u32) -> BpiResult<ChargeRecordData> {
         self.client
             .get(CHARGE_RECORD_ENDPOINT)
@@ -159,7 +159,7 @@ impl<'a> ElectricClient<'a> {
             .await
     }
 
-    /// Gets monthly charging item details for an UP user.
+    /// 获取 UP 用户的月度充电项目详情。
     pub async fn upower_item_detail(&self, up_mid: u64) -> BpiResult<UpowerItemDetail> {
         self.client
             .get(UPOWER_ITEM_DETAIL_ENDPOINT)
@@ -168,7 +168,7 @@ impl<'a> ElectricClient<'a> {
             .await
     }
 
-    /// Gets the authenticated account's monthly charging relationship with an UP user.
+    /// 获取已认证账号与 UP 用户的月度充电关系。
     pub async fn charge_follow_info(&self, up_mid: u64) -> BpiResult<ChargeFollowInfo> {
         self.client
             .get(CHARGE_FOLLOW_INFO_ENDPOINT)
@@ -177,7 +177,7 @@ impl<'a> ElectricClient<'a> {
             .await
     }
 
-    /// Gets the monthly charging member rank for an UP user.
+    /// 获取 UP 用户的月度充电成员排行。
     pub async fn upower_member_rank(
         &self,
         up_mid: u64,
@@ -200,7 +200,7 @@ impl<'a> ElectricClient<'a> {
             .await
     }
 
-    /// Lists charging remarks received by the authenticated account.
+    /// 列出已认证账号收到的充电留言。
     pub async fn remark_list(
         &self,
         pn: Option<u64>,
@@ -226,7 +226,7 @@ impl<'a> ElectricClient<'a> {
         request.send_bpi_payload("electric.remark_list").await
     }
 
-    /// Gets one charging remark by id.
+    /// 按 id 获取一条充电留言。
     pub async fn remark_detail(&self, id: u64) -> BpiResult<ElecRemarkDetail> {
         self.client
             .get(REMARK_DETAIL_ENDPOINT)

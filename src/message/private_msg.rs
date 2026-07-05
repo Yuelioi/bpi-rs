@@ -70,7 +70,7 @@ pub enum MessageType {
     Image(Image),
 }
 
-/// Parameters for sending a private message.
+/// 发送私信的参数。
 pub struct MessageSendParams {
     receiver_id: u64,
     receiver_type: u32,
@@ -101,7 +101,7 @@ impl MessageSendParams {
 }
 
 impl<'a> MessageClient<'a> {
-    /// Sends a private message and returns the canonical payload result.
+    /// 发送私信并返回标准 payload 结果。
     pub async fn send(&self, params: MessageSendParams) -> BpiResult<SendMsgData> {
         let csrf = self.client.csrf()?;
         let sender_uid = &self

@@ -85,7 +85,7 @@ pub enum RelationSource {
     VideoPlayerDanmaku = 245,
 }
 
-/// Parameters for modifying a user relation.
+/// 修改用户关系的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UserModifyRelationParams {
     fid: u64,
@@ -128,7 +128,7 @@ impl UserModifyRelationParams {
 // --- 测试模块 ---
 
 impl<'a> UserClient<'a> {
-    /// Modifies a user relation and returns the canonical payload result.
+    /// 修改用户关系并返回标准 payload 结果。
     pub async fn modify_relation(&self, params: UserModifyRelationParams) -> BpiResult<Option<()>> {
         let csrf = self.client.csrf()?;
         let form = params.into_multipart(&csrf);

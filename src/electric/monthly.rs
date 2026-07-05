@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-// --- Structs for `getChargeRecord` ---
+// --- `getChargeRecord` 的结构体 ---
 
 /// 充电自动续费详情
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -83,7 +83,7 @@ pub struct ChargeRecordData {
     pub is_more: u8,
 }
 
-// --- Structs for `upower/item/detail` ---
+// --- `upower/item/detail` 的结构体 ---
 
 /// 充电用户排名
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -157,7 +157,7 @@ pub struct UpowerItemDetail {
     pub privilege_type: u64,
 }
 
-// --- Structs for `charge/follow/info` ---
+// --- `charge/follow/info` 的结构体 ---
 
 /// UP主信息卡片
 #[derive(Debug, Clone, Deserialize, Serialize)]

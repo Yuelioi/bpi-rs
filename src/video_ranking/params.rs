@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/x/web-interface/popular`.
+/// `/x/web-interface/popular` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct VideoPopularListParams {
     page: Option<u32>,
@@ -38,7 +38,7 @@ impl VideoPopularListParams {
     }
 }
 
-/// Parameters for `/x/web-interface/popular/series/one`.
+/// `/x/web-interface/popular/series/one` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PopularSeriesOneParams {
     number: u32,
@@ -56,7 +56,7 @@ impl PopularSeriesOneParams {
     }
 }
 
-/// Ranking type accepted by `/x/web-interface/ranking/v2`.
+/// `/x/web-interface/ranking/v2` 接受的排行类型。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VideoRankingType {
     All,
@@ -90,7 +90,7 @@ impl FromStr for VideoRankingType {
     }
 }
 
-/// Parameters for `/x/web-interface/ranking/v2`.
+/// `/x/web-interface/ranking/v2` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct VideoRankingListParams {
     rid: Option<u32>,
@@ -126,7 +126,7 @@ impl VideoRankingListParams {
     }
 }
 
-/// Parameters for `/x/web-interface/dynamic/region`.
+/// `/x/web-interface/dynamic/region` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoRegionDynamicParams {
     rid: u32,
@@ -160,7 +160,7 @@ impl VideoRegionDynamicParams {
     }
 }
 
-/// Parameters for `/x/web-interface/dynamic/tag`.
+/// `/x/web-interface/dynamic/tag` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoRegionTagDynamicParams {
     rid: u32,
@@ -199,7 +199,7 @@ impl VideoRegionTagDynamicParams {
     }
 }
 
-/// Parameters for `/x/web-interface/newlist`.
+/// `/x/web-interface/newlist` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoRegionNewListParams {
     rid: u32,
@@ -243,7 +243,7 @@ impl VideoRegionNewListParams {
     }
 }
 
-/// Ordering accepted by `/x/web-interface/newlist_rank`.
+/// `/x/web-interface/newlist_rank` 接受的排序方式。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VideoNewListRankOrder {
     Click,
@@ -277,7 +277,7 @@ impl FromStr for VideoNewListRankOrder {
     }
 }
 
-/// Parameters for `/x/web-interface/newlist_rank`.
+/// `/x/web-interface/newlist_rank` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoRegionNewListRankParams {
     cate_id: u32,

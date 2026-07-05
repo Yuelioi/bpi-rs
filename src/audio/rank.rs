@@ -69,7 +69,7 @@ pub struct AudioRankMusicItem {
     pub song_type: u64,
 }
 
-/// Parameters for subscribing or unsubscribing from an audio rank list.
+/// 订阅或取消订阅音频榜单的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AudioRankSubscribeParams {
     state: u32,
@@ -114,7 +114,7 @@ impl AudioRankSubscribeParams {
 }
 
 impl<'a> AudioClient<'a> {
-    /// Subscribes or unsubscribes from an audio rank list.
+    /// 订阅或取消订阅音频榜单。
     pub async fn subscribe_rank(
         &self,
         params: AudioRankSubscribeParams,

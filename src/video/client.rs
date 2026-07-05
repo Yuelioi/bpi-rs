@@ -30,7 +30,7 @@ const DETAIL_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/view/det
 const PAGELIST_ENDPOINT: &str = "https://api.bilibili.com/x/player/pagelist";
 const VIEW_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/view";
 
-/// Video domain API client.
+/// 视频领域 API 客户端。
 #[derive(Clone, Copy)]
 pub struct VideoClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -61,7 +61,7 @@ impl<'a> VideoClient<'a> {
         DESC_ENDPOINT
     }
 
-    /// Fetches web video detail by AV ID or BV ID.
+    /// 按 AV ID 或 BV ID 获取 Web 视频详情。
     pub async fn view(&self, params: VideoViewParams) -> BpiResult<VideoView> {
         self.client
             .get(VIEW_ENDPOINT)
@@ -70,7 +70,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches web video detail, including tags and related videos.
+    /// 获取 Web 视频详情，包括标签和相关视频。
     pub async fn detail(&self, params: VideoDetailParams) -> BpiResult<VideoDetail> {
         self.client
             .get(DETAIL_ENDPOINT)
@@ -79,7 +79,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches the page/content IDs for a video.
+    /// 获取视频的分 P/内容 ID。
     pub async fn page_list(&self, params: VideoPageListParams) -> BpiResult<Vec<VideoPage>> {
         self.client
             .get(PAGELIST_ENDPOINT)
@@ -88,7 +88,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches the plain text video description.
+    /// 获取纯文本视频简介。
     pub async fn desc(&self, params: VideoDescParams) -> BpiResult<String> {
         self.client
             .get(DESC_ENDPOINT)
@@ -97,7 +97,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches signed web playback URLs by AV ID or BV ID plus page/content ID.
+    /// 按 AV ID 或 BV ID 以及分 P/内容 ID 获取已签名的 Web 播放 URL。
     pub async fn play_url(&self, params: VideoPlayUrlParams) -> BpiResult<PlayUrlResponseData> {
         let params = self.client.get_wbi_sign2(params.query_pairs()).await?;
 
@@ -109,7 +109,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches the videos in a specific video season.
+    /// 获取指定视频合集中的视频。
     pub async fn seasons_archives_list(
         &self,
         params: VideoCollectionSeasonsArchivesParams,
@@ -124,7 +124,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches a user's home season and series lists.
+    /// 获取用户主页的合集和系列列表。
     pub async fn home_seasons_series(
         &self,
         params: VideoCollectionHomeSeasonsSeriesParams,
@@ -138,7 +138,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches a user's season and series list with pagination.
+    /// 分页获取用户的合集和系列列表。
     pub async fn seasons_series_list(
         &self,
         params: VideoCollectionSeasonsSeriesParams,
@@ -152,7 +152,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches metadata for a specific video series.
+    /// 获取指定视频系列的元数据。
     pub async fn series_info(
         &self,
         params: VideoCollectionSeriesInfoParams,
@@ -164,7 +164,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches videos in a specific video series.
+    /// 获取指定视频系列中的视频。
     pub async fn series_archives(
         &self,
         params: VideoCollectionSeriesArchivesParams,
@@ -176,7 +176,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches the online viewer counters for a video page.
+    /// 获取视频分 P 的在线人数计数。
     pub async fn online_total(
         &self,
         params: VideoOnlineTotalParams,
@@ -188,7 +188,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches web player metadata for a video page.
+    /// 获取视频分 P 的 Web 播放器元数据。
     pub async fn player_info_v2(
         &self,
         params: VideoPlayerInfoParams,
@@ -202,7 +202,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches videos related to a video.
+    /// 获取与某个视频相关的视频。
     pub async fn related_videos(&self, params: VideoRelatedParams) -> BpiResult<Vec<RelatedVideo>> {
         self.client
             .get(RELATED_VIDEOS_ENDPOINT)
@@ -211,7 +211,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches homepage video recommendations.
+    /// 获取首页视频推荐。
     pub async fn homepage_recommendations(
         &self,
         params: VideoHomepageRecommendationsParams,
@@ -225,7 +225,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches the AI summary for a video.
+    /// 获取视频的 AI 总结。
     pub async fn ai_summary(
         &self,
         params: VideoAiSummaryParams,
@@ -239,7 +239,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches tags attached to a video.
+    /// 获取视频关联的标签。
     pub async fn tags(&self, params: VideoTagsParams) -> BpiResult<Vec<VideoTag>> {
         self.client
             .get(TAGS_ENDPOINT)
@@ -248,7 +248,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Fetches metadata for an interactive video node.
+    /// 获取互动视频节点的元数据。
     pub async fn interactive_video_info(
         &self,
         params: InteractiveVideoInfoParams,

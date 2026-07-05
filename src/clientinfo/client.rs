@@ -5,7 +5,7 @@ use super::{ClientInfoIpParams, IpInfo};
 
 const IP_ENDPOINT: &str = "https://api.live.bilibili.com/ip_service/v1/ip_service/get_ip_addr";
 
-/// Client information API client.
+/// 客户端信息 API 客户端。
 #[derive(Clone, Copy)]
 pub struct ClientInfoClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -21,7 +21,7 @@ impl<'a> ClientInfoClient<'a> {
         IP_ENDPOINT
     }
 
-    /// Queries IP geolocation information.
+    /// 查询 IP 地理位置信息。
     pub async fn ip(&self, params: ClientInfoIpParams) -> BpiResult<IpInfo> {
         self.client
             .get(IP_ENDPOINT)

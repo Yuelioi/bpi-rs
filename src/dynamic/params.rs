@@ -5,7 +5,7 @@ const DEFAULT_ALL_FEATURES: &str = "itemOpusStyle,listOnlyfans,opusBigCover,only
 const DEFAULT_ALL_WEB_LOCATION: &str = "333.1365";
 const DEFAULT_DETAIL_FEATURES: &str = "htmlNewStyle,itemOpusStyle,decorationCard";
 
-/// Parameters for `/x/polymer/web-dynamic/v1/feed/all`.
+/// `/x/polymer/web-dynamic/v1/feed/all` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicAllParams {
     features: String,
@@ -80,7 +80,7 @@ impl DynamicAllParams {
     }
 }
 
-/// Parameters for `/x/polymer/web-dynamic/v1/feed/all/update`.
+/// `/x/polymer/web-dynamic/v1/feed/all/update` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicCheckNewParams {
     update_baseline: String,
@@ -110,7 +110,7 @@ impl DynamicCheckNewParams {
     }
 }
 
-/// Parameters for `/x/polymer/web-dynamic/v1/feed/nav`.
+/// `/x/polymer/web-dynamic/v1/feed/nav` 的参数。
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct DynamicNavFeedParams {
     update_baseline: Option<String>,
@@ -140,7 +140,7 @@ impl DynamicNavFeedParams {
     }
 }
 
-/// Parameters for `/dynamic_svr/v1/dynamic_svr/w_live_users`.
+/// `/dynamic_svr/v1/dynamic_svr/w_live_users` 的参数。
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct DynamicLiveUsersParams {
     size: Option<u32>,
@@ -170,7 +170,7 @@ impl DynamicLiveUsersParams {
     }
 }
 
-/// Parameters for `/dynamic_svr/v1/dynamic_svr/w_dyn_uplist`.
+/// `/dynamic_svr/v1/dynamic_svr/w_dyn_uplist` 的参数。
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct DynamicUpUsersParams {
     teenagers_mode: bool,
@@ -191,7 +191,7 @@ impl DynamicUpUsersParams {
     }
 }
 
-/// Parameters for `/x/polymer/web-dynamic/v1/detail`.
+/// `/x/polymer/web-dynamic/v1/detail` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicDetailParams {
     id: DynamicId,
@@ -219,7 +219,7 @@ impl DynamicDetailParams {
     }
 }
 
-/// Parameters for `/x/polymer/web-dynamic/v1/detail/reaction`.
+/// `/x/polymer/web-dynamic/v1/detail/reaction` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicReactionsParams {
     id: DynamicId,
@@ -241,7 +241,7 @@ impl DynamicReactionsParams {
     }
 }
 
-/// Parameters for `/lottery_svr/v1/lottery_svr/lottery_notice`.
+/// `/lottery_svr/v1/lottery_svr/lottery_notice` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicLotteryNoticeParams {
     business_id: DynamicId,
@@ -261,7 +261,7 @@ impl DynamicLotteryNoticeParams {
     }
 }
 
-/// Parameters for `/x/polymer/web-dynamic/v1/detail/forward`.
+/// `/x/polymer/web-dynamic/v1/detail/forward` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicForwardsParams {
     id: DynamicId,
@@ -283,7 +283,7 @@ impl DynamicForwardsParams {
     }
 }
 
-/// Parameters for `/x/polymer/web-dynamic/v1/detail/pic`.
+/// `/x/polymer/web-dynamic/v1/detail/pic` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicPicsParams {
     id: DynamicId,
@@ -299,7 +299,7 @@ impl DynamicPicsParams {
     }
 }
 
-/// Parameters for `/x/polymer/web-dynamic/v1/detail/forward/item`.
+/// `/x/polymer/web-dynamic/v1/detail/forward/item` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicForwardItemParams {
     id: DynamicId,

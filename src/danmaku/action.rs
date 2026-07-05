@@ -16,7 +16,7 @@ pub struct DanmakuPostData {
     pub dmid_str: String,
 }
 
-/// Parameters for sending a video danmaku.
+/// 发送视频弹幕的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DanmakuSendParams {
     oid: Cid,
@@ -32,7 +32,7 @@ pub struct DanmakuSendParams {
 }
 
 impl DanmakuSendParams {
-    /// Creates parameters with Bilibili web defaults.
+    /// 使用 Bilibili Web 默认值创建参数。
     pub fn new(oid: Cid, msg: impl Into<String>) -> BpiResult<Self> {
         let msg = msg.into();
         if msg.trim().is_empty() {
@@ -56,49 +56,49 @@ impl DanmakuSendParams {
         })
     }
 
-    /// Sets the optional AV numeric video ID.
+    /// 设置可选的 AV 数字视频 ID。
     pub fn aid(mut self, aid: Aid) -> Self {
         self.aid = Some(aid);
         self
     }
 
-    /// Sets the optional BV string video ID.
+    /// 设置可选的 BV 字符串视频 ID。
     pub fn bvid(mut self, bvid: Bvid) -> Self {
         self.bvid = Some(bvid);
         self
     }
 
-    /// Sets the danmaku display mode.
+    /// 设置弹幕显示模式。
     pub fn mode(mut self, mode: u8) -> Self {
         self.mode = mode;
         self
     }
 
-    /// Sets the danmaku type.
+    /// 设置弹幕类型。
     pub fn danmaku_type(mut self, typ: u8) -> Self {
         self.typ = typ;
         self
     }
 
-    /// Sets the danmaku timestamp in milliseconds.
+    /// 设置弹幕时间戳，单位为毫秒。
     pub fn progress(mut self, progress: u32) -> Self {
         self.progress = progress;
         self
     }
 
-    /// Sets the RGB888 color value.
+    /// 设置 RGB888 颜色值。
     pub fn color(mut self, color: u32) -> Self {
         self.color = color;
         self
     }
 
-    /// Sets the font size.
+    /// 设置字号。
     pub fn font_size(mut self, font_size: u8) -> Self {
         self.font_size = font_size;
         self
     }
 
-    /// Sets the danmaku pool.
+    /// 设置弹幕池。
     pub fn pool(mut self, pool: u8) -> Self {
         self.pool = pool;
         self

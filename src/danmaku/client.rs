@@ -20,7 +20,7 @@ const WEB_HISTORY_SEG_ENDPOINT: &str = "https://api.bilibili.com/x/v2/dm/web/his
 const HISTORY_XML_ENDPOINT: &str = "https://api.bilibili.com/x/v2/dm/history";
 const XML_LIST_SO_ENDPOINT: &str = "https://api.bilibili.com/x/v1/dm/list.so";
 
-/// Danmaku API client.
+/// 弹幕 API 客户端。
 #[derive(Clone, Copy)]
 pub struct DanmakuClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -86,7 +86,7 @@ impl<'a> DanmakuClient<'a> {
         XML_LIST_SO_ENDPOINT
     }
 
-    /// Queries the dates that have historical danmaku for a month.
+    /// 查询某个月内有历史弹幕的日期。
     pub async fn history_dates(
         &self,
         params: DanmakuHistoryDatesParams,
@@ -98,7 +98,7 @@ impl<'a> DanmakuClient<'a> {
             .await
     }
 
-    /// Gets recent danmaku snapshot lines for an archive.
+    /// 获取稿件的近期弹幕快照行。
     pub async fn snapshot(&self, params: DanmakuSnapshotParams) -> BpiResult<Vec<String>> {
         self.client
             .get(SNAPSHOT_ENDPOINT)
@@ -107,7 +107,7 @@ impl<'a> DanmakuClient<'a> {
             .await
     }
 
-    /// Queries like statistics for specific danmaku IDs.
+    /// 查询指定弹幕 ID 的点赞统计。
     pub async fn thumbup_stats(
         &self,
         params: DanmakuThumbupStatsParams,
@@ -119,7 +119,7 @@ impl<'a> DanmakuClient<'a> {
             .await
     }
 
-    /// Checks advanced danmaku purchase/send state.
+    /// 检查高级弹幕购买/发送状态。
     pub async fn adv_state(&self, params: DanmakuAdvStateParams) -> BpiResult<DanmakuAdvState> {
         self.client
             .get(ADV_STATE_ENDPOINT)
@@ -128,7 +128,7 @@ impl<'a> DanmakuClient<'a> {
             .await
     }
 
-    /// Gets realtime web protobuf danmaku segment bytes.
+    /// 获取实时 Web protobuf 弹幕分段字节。
     pub async fn web_seg_proto(&self, params: DanmakuSegmentParams) -> BpiResult<Bytes> {
         self.client
             .get(WEB_SEG_ENDPOINT)
@@ -138,7 +138,7 @@ impl<'a> DanmakuClient<'a> {
             .await
     }
 
-    /// Gets WBI-signed realtime web protobuf danmaku segment bytes.
+    /// 获取 WBI 签名的实时 Web protobuf 弹幕分段字节。
     pub async fn web_seg_wbi_proto(&self, params: DanmakuSegmentParams) -> BpiResult<Bytes> {
         let signed = self.client.get_wbi_sign2(params.query_pairs()).await?;
 
@@ -150,7 +150,7 @@ impl<'a> DanmakuClient<'a> {
             .await
     }
 
-    /// Gets protobuf danmaku web-view metadata bytes.
+    /// 获取 protobuf 弹幕 web-view 元数据字节。
     pub async fn web_view_proto(&self, params: DanmakuWebViewParams) -> BpiResult<Bytes> {
         self.client
             .get(WEB_VIEW_ENDPOINT)
@@ -160,7 +160,7 @@ impl<'a> DanmakuClient<'a> {
             .await
     }
 
-    /// Gets mobile protobuf danmaku segment bytes.
+    /// 获取移动端 protobuf 弹幕分段字节。
     pub async fn mobile_seg_proto(&self, params: DanmakuSegmentParams) -> BpiResult<Bytes> {
         self.client
             .get(MOBILE_SEG_ENDPOINT)
@@ -170,7 +170,7 @@ impl<'a> DanmakuClient<'a> {
             .await
     }
 
-    /// Gets dated historical protobuf danmaku segment bytes.
+    /// 获取指定日期的历史 protobuf 弹幕分段字节。
     pub async fn web_history_seg_proto(
         &self,
         params: DanmakuHistoryBytesParams,
@@ -183,7 +183,7 @@ impl<'a> DanmakuClient<'a> {
             .await
     }
 
-    /// Gets raw compressed dated historical XML danmaku bytes.
+    /// 获取指定日期的原始压缩历史 XML 弹幕字节。
     pub async fn history_xml_bytes(&self, params: DanmakuHistoryBytesParams) -> BpiResult<Bytes> {
         self.client
             .get_without_response_decoding(HISTORY_XML_ENDPOINT)?
@@ -192,7 +192,7 @@ impl<'a> DanmakuClient<'a> {
             .await
     }
 
-    /// Gets and parses realtime XML danmaku from `/x/v1/dm/list.so`.
+    /// 从 `/x/v1/dm/list.so` 获取并解析实时 XML 弹幕。
     pub async fn xml_list_so(&self, params: DanmakuXmlListParams) -> BpiResult<DanmakuXml> {
         let response = self
             .client
@@ -205,7 +205,7 @@ impl<'a> DanmakuClient<'a> {
         parse_deflate_danmaku_xml(&bytes)
     }
 
-    /// Gets and parses realtime XML danmaku from the comment host.
+    /// 从 comment host 获取并解析实时 XML 弹幕。
     pub async fn xml_list(&self, params: DanmakuXmlListParams) -> BpiResult<DanmakuXml> {
         let response = self
             .client

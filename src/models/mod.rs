@@ -12,7 +12,7 @@ pub mod vip;
 
 pub use vip::{Vip, VipLabel};
 
-// re-export
+// 重新导出
 pub use label::LabelGoto;
 pub use level::{LevelInfo, NextExp};
 pub use nameplate::Nameplate;

@@ -17,7 +17,7 @@ pub struct VipExperienceData {
 }
 
 impl<'a> VipClient<'a> {
-    /// Receives a VIP privilege coupon and returns the canonical payload result.
+    /// 领取 VIP 特权券并返回标准 payload 结果。
     pub async fn receive_privilege(
         &self,
         params: VipPrivilegeReceiveParams,
@@ -31,7 +31,7 @@ impl<'a> VipClient<'a> {
             .await
     }
 
-    /// Adds daily VIP experience and returns the canonical payload result.
+    /// 增加每日 VIP 经验并返回标准 payload 结果。
     pub async fn add_experience(&self) -> BpiResult<VipExperienceData> {
         let csrf = self.client.csrf()?;
         let params = [("csrf", csrf)];

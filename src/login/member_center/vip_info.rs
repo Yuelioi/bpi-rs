@@ -9,7 +9,7 @@ use crate::login::LoginVipInfo;
 #[cfg(test)]
 const VIP_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/vip/web/user/info";
 
-/// Legacy member-center VIP info type.
+/// 旧版会员中心 VIP 信息类型。
 pub type VipInfo = LoginVipInfo;
 
 #[cfg(test)]

@@ -1,16 +1,16 @@
 use crate::ids::Mid;
 use crate::{BpiError, BpiResult};
 
-/// Controls whether `/x/web-interface/card` should include the user's space header image.
+/// 控制 `/x/web-interface/card` 是否包含用户空间头图。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserCardPhoto {
-    /// Include the user's space header image when Bilibili returns it.
+    /// Bilibili 返回时包含用户空间头图。
     Include,
-    /// Exclude the user's space header image.
+    /// 不包含用户空间头图。
     Exclude,
 }
 
-/// Parameters for `/x/web-interface/card`.
+/// `/x/web-interface/card` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UserCardParams {
     mid: Mid,
@@ -18,12 +18,12 @@ pub struct UserCardParams {
 }
 
 impl UserCardParams {
-    /// Creates card parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建卡片参数。
     pub fn new(mid: Mid) -> Self {
         Self { mid, photo: None }
     }
 
-    /// Sets whether the response should include the user's space header image.
+    /// 设置响应是否包含用户空间头图。
     pub fn with_photo(mut self, photo: UserCardPhoto) -> Self {
         self.photo = Some(photo);
         self
@@ -44,14 +44,14 @@ impl UserCardParams {
     }
 }
 
-/// Parameters for `/account/v1/user/cards`.
+/// `/account/v1/user/cards` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserCardsParams {
     mids: Vec<Mid>,
 }
 
 impl UserCardsParams {
-    /// Creates batch-card parameters for one or more validated user IDs.
+    /// 为一个或多个已验证的用户 ID 创建批量卡片参数。
     pub fn new<I>(mids: I) -> BpiResult<Self>
     where
         I: IntoIterator<Item = Mid>,
@@ -80,14 +80,14 @@ impl UserCardsParams {
     }
 }
 
-/// Parameters for `/x/im/user_infos`.
+/// `/x/im/user_infos` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserInfosParams {
     mids: Vec<Mid>,
 }
 
 impl UserInfosParams {
-    /// Creates batch-info parameters for one or more validated user IDs.
+    /// 为一个或多个已验证的用户 ID 创建批量信息参数。
     pub fn new<I>(mids: I) -> BpiResult<Self>
     where
         I: IntoIterator<Item = Mid>,
@@ -116,14 +116,14 @@ impl UserInfosParams {
     }
 }
 
-/// Parameters for `/x/space/wbi/acc/info`.
+/// `/x/space/wbi/acc/info` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UserSpaceParams {
     mid: Mid,
 }
 
 impl UserSpaceParams {
-    /// Creates space-info parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建空间信息参数。
     pub fn new(mid: Mid) -> Self {
         Self { mid }
     }
@@ -133,14 +133,14 @@ impl UserSpaceParams {
     }
 }
 
-/// Parameters for `/x/space/notice`.
+/// `/x/space/notice` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UserSpaceNoticeParams {
     mid: Mid,
 }
 
 impl UserSpaceNoticeParams {
-    /// Creates space-notice parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建空间公告参数。
     pub fn new(mid: Mid) -> Self {
         Self { mid }
     }
@@ -150,12 +150,12 @@ impl UserSpaceNoticeParams {
     }
 }
 
-/// Follow-list category for `/x/space/bangumi/follow/list`.
+/// `/x/space/bangumi/follow/list` 的追番列表分类。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserBangumiFollowKind {
-    /// Followed bangumi/anime seasons.
+    /// 已追番剧或动画 season。
     Bangumi,
-    /// Followed cinema/drama seasons.
+    /// 已追影视或剧集 season。
     Cinema,
 }
 
@@ -168,7 +168,7 @@ impl UserBangumiFollowKind {
     }
 }
 
-/// Parameters for `/x/space/bangumi/follow/list`.
+/// `/x/space/bangumi/follow/list` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UserBangumiFollowListParams {
     mid: Mid,
@@ -178,7 +178,7 @@ pub struct UserBangumiFollowListParams {
 }
 
 impl UserBangumiFollowListParams {
-    /// Creates bangumi follow-list parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建番剧追番列表参数。
     pub fn new(mid: Mid) -> Self {
         Self {
             mid,
@@ -188,19 +188,19 @@ impl UserBangumiFollowListParams {
         }
     }
 
-    /// Sets whether to fetch followed bangumi or cinema seasons.
+    /// 设置获取已追番剧还是影视 season。
     pub fn with_kind(mut self, kind: UserBangumiFollowKind) -> Self {
         self.kind = kind;
         self
     }
 
-    /// Sets the 1-based page number.
+    /// 设置从 1 开始的页码。
     pub fn with_page(mut self, page: u32) -> Self {
         self.page = page;
         self
     }
 
-    /// Sets the page size. Bilibili accepts values from 1 to 30.
+    /// 设置每页数量。Bilibili 接受 1 到 30。
     pub fn with_page_size(mut self, page_size: u32) -> BpiResult<Self> {
         if !(1..=30).contains(&page_size) {
             return Err(BpiError::invalid_parameter(
@@ -223,14 +223,14 @@ impl UserBangumiFollowListParams {
     }
 }
 
-/// Parameters for `/x/relation/stat`.
+/// `/x/relation/stat` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UserRelationStatParams {
     mid: Mid,
 }
 
 impl UserRelationStatParams {
-    /// Creates relation-stat parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建关系统计参数。
     pub fn new(mid: Mid) -> Self {
         Self { mid }
     }
@@ -240,7 +240,7 @@ impl UserRelationStatParams {
     }
 }
 
-/// Parameters for `/x/relation/followings`.
+/// `/x/relation/followings` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserFollowingsParams {
     mid: Mid,
@@ -250,7 +250,7 @@ pub struct UserFollowingsParams {
 }
 
 impl UserFollowingsParams {
-    /// Creates following-list parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建关注列表参数。
     pub fn new(mid: Mid) -> Self {
         Self {
             mid,
@@ -260,7 +260,7 @@ impl UserFollowingsParams {
         }
     }
 
-    /// Sets the raw Bilibili order type, such as `attention`.
+    /// 设置 Bilibili 原始排序类型，例如 `attention`。
     pub fn with_order_type(mut self, order_type: impl Into<String>) -> Self {
         let order_type = order_type.into();
         if !order_type.trim().is_empty() {
@@ -269,13 +269,13 @@ impl UserFollowingsParams {
         self
     }
 
-    /// Sets the page size.
+    /// 设置每页数量。
     pub fn with_page_size(mut self, page_size: u32) -> Self {
         self.page_size = Some(page_size);
         self
     }
 
-    /// Sets the 1-based page number.
+    /// 设置从 1 开始的页码。
     pub fn with_page(mut self, page: u32) -> Self {
         self.page = Some(page);
         self
@@ -298,7 +298,7 @@ impl UserFollowingsParams {
     }
 }
 
-/// Parameters for `/x/relation/fans`.
+/// `/x/relation/fans` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserFollowersParams {
     mid: Mid,
@@ -310,7 +310,7 @@ pub struct UserFollowersParams {
 }
 
 impl UserFollowersParams {
-    /// Creates follower-list parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建粉丝列表参数。
     pub fn new(mid: Mid) -> Self {
         Self {
             mid,
@@ -322,19 +322,19 @@ impl UserFollowersParams {
         }
     }
 
-    /// Sets the page size.
+    /// 设置每页数量。
     pub fn with_page_size(mut self, page_size: u32) -> Self {
         self.page_size = Some(page_size);
         self
     }
 
-    /// Sets the 1-based page number.
+    /// 设置从 1 开始的页码。
     pub fn with_page(mut self, page: u32) -> Self {
         self.page = Some(page);
         self
     }
 
-    /// Sets the pagination offset returned by Bilibili.
+    /// 设置 Bilibili 返回的分页 offset。
     pub fn with_offset(mut self, offset: impl Into<String>) -> Self {
         let offset = offset.into();
         if !offset.trim().is_empty() {
@@ -343,13 +343,13 @@ impl UserFollowersParams {
         self
     }
 
-    /// Sets the last-access timestamp in seconds.
+    /// 设置最后访问时间戳，单位秒。
     pub fn with_last_access_ts(mut self, last_access_ts: u64) -> Self {
         self.last_access_ts = Some(last_access_ts);
         self
     }
 
-    /// Sets the raw Bilibili source marker, such as `main`.
+    /// 设置 Bilibili 原始来源标记，例如 `main`。
     pub fn with_from(mut self, from: impl Into<String>) -> Self {
         let from = from.into();
         if !from.trim().is_empty() {
@@ -381,14 +381,14 @@ impl UserFollowersParams {
     }
 }
 
-/// Parameters for `/xlive/web-ucenter/user/MedalWall`.
+/// `/xlive/web-ucenter/user/MedalWall` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UserMedalWallParams {
     target_id: Mid,
 }
 
 impl UserMedalWallParams {
-    /// Creates medal-wall parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建勋章墙参数。
     pub fn new(target_id: Mid) -> Self {
         Self { target_id }
     }
@@ -398,14 +398,14 @@ impl UserMedalWallParams {
     }
 }
 
-/// Parameters for `/x/space/upstat`.
+/// `/x/space/upstat` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UserUpStatParams {
     mid: Mid,
 }
 
 impl UserUpStatParams {
-    /// Creates up-stat parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建 UP 主统计参数。
     pub fn new(mid: Mid) -> Self {
         Self { mid }
     }
@@ -415,14 +415,14 @@ impl UserUpStatParams {
     }
 }
 
-/// Parameters for `/x/space/navnum`.
+/// `/x/space/navnum` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UserNavStatParams {
     mid: Mid,
 }
 
 impl UserNavStatParams {
-    /// Creates nav-stat parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建导航统计参数。
     pub fn new(mid: Mid) -> Self {
         Self { mid }
     }
@@ -432,14 +432,14 @@ impl UserNavStatParams {
     }
 }
 
-/// Parameters for `/link_draw/v1/doc/upload_count`.
+/// `/link_draw/v1/doc/upload_count` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UserAlbumCountParams {
     mid: Mid,
 }
 
 impl UserAlbumCountParams {
-    /// Creates album-count parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建相簿计数参数。
     pub fn new(mid: Mid) -> Self {
         Self { mid }
     }
@@ -449,14 +449,14 @@ impl UserAlbumCountParams {
     }
 }
 
-/// Parameters for `/x/polymer/web-dynamic/v1/name-to-uid`.
+/// `/x/polymer/web-dynamic/v1/name-to-uid` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserNameToUidParams {
     names: Vec<String>,
 }
 
 impl UserNameToUidParams {
-    /// Creates name-to-UID parameters from one or more non-blank display names.
+    /// 从一个或多个非空显示名称创建 name-to-UID 参数。
     pub fn new<I, S>(names: I) -> BpiResult<Self>
     where
         I: IntoIterator<Item = S>,
@@ -490,14 +490,14 @@ impl UserNameToUidParams {
     }
 }
 
-/// Sort order for uploaded videos in a user's space.
+/// 用户空间投稿视频的排序方式。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UserUploadedVideoOrder {
-    /// Sort by publish time.
+    /// 按发布时间排序。
     Pubdate,
-    /// Sort by view count.
+    /// 按播放数排序。
     Click,
-    /// Sort by favorite count.
+    /// 按收藏数排序。
     Stow,
 }
 
@@ -527,7 +527,7 @@ impl TryFrom<&str> for UserUploadedVideoOrder {
     }
 }
 
-/// Parameters for `/x/space/wbi/arc/search`.
+/// `/x/space/wbi/arc/search` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserUploadedVideosParams {
     mid: Mid,
@@ -539,7 +539,7 @@ pub struct UserUploadedVideosParams {
 }
 
 impl UserUploadedVideosParams {
-    /// Creates uploaded-video parameters for a validated user ID.
+    /// 为已验证的用户 ID 创建投稿视频参数。
     pub fn new(mid: Mid) -> Self {
         Self {
             mid,
@@ -551,19 +551,19 @@ impl UserUploadedVideosParams {
         }
     }
 
-    /// Sets the video sort order.
+    /// 设置视频排序方式。
     pub fn with_order(mut self, order: UserUploadedVideoOrder) -> Self {
         self.order = order;
         self
     }
 
-    /// Sets the partition filter. `0` means all partitions.
+    /// 设置分区过滤条件。`0` 表示全部分区。
     pub fn with_tid(mut self, tid: u64) -> Self {
         self.tid = tid;
         self
     }
 
-    /// Sets a keyword filter.
+    /// 设置关键词过滤条件。
     pub fn with_keyword(mut self, keyword: impl Into<String>) -> Self {
         let keyword = keyword.into().trim().to_string();
         if !keyword.is_empty() {
@@ -572,7 +572,7 @@ impl UserUploadedVideosParams {
         self
     }
 
-    /// Sets the 1-based page number.
+    /// 设置从 1 开始的页码。
     pub fn with_page(mut self, page: u32) -> BpiResult<Self> {
         if page == 0 {
             return Err(BpiError::invalid_parameter(
@@ -585,7 +585,7 @@ impl UserUploadedVideosParams {
         Ok(self)
     }
 
-    /// Sets the page size.
+    /// 设置每页数量。
     pub fn with_page_size(mut self, page_size: u32) -> BpiResult<Self> {
         if page_size == 0 {
             return Err(BpiError::invalid_parameter(

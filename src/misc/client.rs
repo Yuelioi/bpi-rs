@@ -13,7 +13,7 @@ const B23_SHORT_LINK_ENDPOINT: &str = "https://api.biliapi.net/x/share/click";
 const BILI_TICKET_ENDPOINT: &str =
     "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket";
 
-/// Misc API client.
+/// 杂项 API 客户端。
 #[derive(Clone, Copy)]
 pub struct MiscClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -44,7 +44,7 @@ impl<'a> MiscClient<'a> {
         BILI_TICKET_ENDPOINT
     }
 
-    /// Gets a web buvid3 value.
+    /// 获取 Web buvid3 值。
     pub async fn buvid3(&self) -> BpiResult<Buvid3Data> {
         self.client
             .get(BUVID3_ENDPOINT)
@@ -52,7 +52,7 @@ impl<'a> MiscClient<'a> {
             .await
     }
 
-    /// Gets web buvid3 and buvid4 values.
+    /// 获取 Web buvid3 和 buvid4 值。
     pub async fn buvid(&self) -> BpiResult<BuvidData> {
         self.client
             .get(BUVID_ENDPOINT)
@@ -60,7 +60,7 @@ impl<'a> MiscClient<'a> {
             .await
     }
 
-    /// Generates a b23.tv short link.
+    /// 生成 b23.tv 短链接。
     pub async fn b23_short_link(&self, params: MiscB23ShortLinkParams) -> BpiResult<ShortLinkData> {
         let mut data = self
             .client
@@ -72,7 +72,7 @@ impl<'a> MiscClient<'a> {
         Ok(data)
     }
 
-    /// Generates a bili_ticket payload.
+    /// 生成 bili_ticket payload。
     pub async fn bili_ticket(&self) -> BpiResult<TicketData> {
         let csrf = self.client.csrf().unwrap_or_default();
         let timestamp = SystemTime::now()
@@ -88,7 +88,7 @@ impl<'a> MiscClient<'a> {
             .await
     }
 
-    /// Generates a bili_ticket and returns only the ticket string.
+    /// 生成 bili_ticket，并只返回 ticket 字符串。
     pub async fn bili_ticket_string(&self) -> BpiResult<String> {
         self.bili_ticket().await.map(|data| data.ticket)
     }

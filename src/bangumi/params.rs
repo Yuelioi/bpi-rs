@@ -4,7 +4,7 @@ use crate::{BpiError, BpiResult};
 
 use super::timeline::BangumiTimelineType;
 
-/// Parameters for `/pgc/review/user`.
+/// `/pgc/review/user` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BangumiInfoParams {
     media_id: MediaId,
@@ -20,14 +20,14 @@ impl BangumiInfoParams {
     }
 }
 
-/// Identifies a bangumi detail request by season ID or episode ID.
+/// 通过 season ID 或 episode ID 标识 bangumi 详情请求。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BangumiDetailId {
     Season(SeasonId),
     Episode(EpisodeId),
 }
 
-/// Parameters for `/pgc/view/web/season`.
+/// `/pgc/view/web/season` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BangumiDetailParams {
     id: BangumiDetailId,
@@ -58,7 +58,7 @@ impl BangumiDetailParams {
     }
 }
 
-/// Parameters for `/pgc/web/season/section`.
+/// `/pgc/web/season/section` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BangumiSectionsParams {
     season_id: SeasonId,
@@ -74,14 +74,14 @@ impl BangumiSectionsParams {
     }
 }
 
-/// Identifies a bangumi play URL request by episode ID or content ID.
+/// 通过 episode ID 或内容 ID 标识 bangumi 播放 URL 请求。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BangumiVideoStreamId {
     Episode(EpisodeId),
     Content(Cid),
 }
 
-/// Parameters for `/pgc/player/web/playurl`.
+/// `/pgc/player/web/playurl` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BangumiVideoStreamParams {
     id: BangumiVideoStreamId,
@@ -144,7 +144,7 @@ impl BangumiVideoStreamParams {
     }
 }
 
-/// Parameters for `/pgc/web/timeline`.
+/// `/pgc/web/timeline` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BangumiTimelineParams {
     timeline_type: BangumiTimelineType,

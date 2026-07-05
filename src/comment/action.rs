@@ -63,7 +63,7 @@ pub struct CommentData {
     pub success_toast: Option<String>,
 }
 
-/// Parameters for publishing a comment.
+/// 发布评论的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CommentAddParams {
     r#type: CommentType,
@@ -118,7 +118,7 @@ impl CommentAddParams {
     }
 }
 
-/// Parameters for binary comment actions such as like, dislike, and top.
+/// 点赞、点踩、置顶等二元评论操作的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentActionParams {
     r#type: CommentType,
@@ -150,7 +150,7 @@ impl CommentActionParams {
     }
 }
 
-/// Parameters for deleting a comment.
+/// 删除评论的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentDeleteParams {
     r#type: CommentType,
@@ -179,7 +179,7 @@ impl CommentDeleteParams {
     }
 }
 
-/// Parameters for reporting a comment.
+/// 举报评论的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CommentReportParams {
     r#type: CommentType,
@@ -225,7 +225,7 @@ impl CommentReportParams {
 }
 
 impl<'a> CommentClient<'a> {
-    /// Publishes a comment and returns the canonical payload result.
+    /// 发布评论并返回标准 payload 结果。
     pub async fn add(&self, params: CommentAddParams) -> BpiResult<CommentData> {
         let csrf = self.client.csrf()?;
         self.client
@@ -235,7 +235,7 @@ impl<'a> CommentClient<'a> {
             .await
     }
 
-    /// Likes or unlikes a comment and returns the canonical payload result.
+    /// 点赞或取消点赞评论，并返回标准 payload 结果。
     pub async fn like(&self, params: CommentActionParams) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
         self.client
@@ -245,7 +245,7 @@ impl<'a> CommentClient<'a> {
             .await
     }
 
-    /// Dislikes or undislikes a comment and returns the canonical payload result.
+    /// 点踩或取消点踩评论，并返回标准 payload 结果。
     pub async fn dislike(
         &self,
         params: CommentActionParams,
@@ -258,7 +258,7 @@ impl<'a> CommentClient<'a> {
             .await
     }
 
-    /// Deletes a comment and returns the canonical payload result.
+    /// 删除评论并返回标准 payload 结果。
     pub async fn delete(
         &self,
         params: CommentDeleteParams,
@@ -271,7 +271,7 @@ impl<'a> CommentClient<'a> {
             .await
     }
 
-    /// Tops or untops a comment and returns the canonical payload result.
+    /// 置顶或取消置顶评论，并返回标准 payload 结果。
     pub async fn top(&self, params: CommentActionParams) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
         self.client
@@ -281,7 +281,7 @@ impl<'a> CommentClient<'a> {
             .await
     }
 
-    /// Reports a comment and returns the canonical payload result.
+    /// 举报评论并返回标准 payload 结果。
     pub async fn report(
         &self,
         params: CommentReportParams,

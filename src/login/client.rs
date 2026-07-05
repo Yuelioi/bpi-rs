@@ -24,7 +24,7 @@ const QR_GENERATE_ENDPOINT: &str =
     "https://passport.bilibili.com/x/passport-login/web/qrcode/generate";
 const QR_POLL_ENDPOINT: &str = "https://passport.bilibili.com/x/passport-login/web/qrcode/poll";
 
-/// Login domain API client.
+/// 登录领域 API 客户端。
 #[derive(Clone, Copy)]
 pub struct LoginClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -95,7 +95,7 @@ impl<'a> LoginClient<'a> {
         QR_POLL_ENDPOINT
     }
 
-    /// Fetches the current session's navigation/login state.
+    /// 获取当前会话的导航/登录状态。
     pub async fn nav(&self) -> BpiResult<LoginNav> {
         self.client
             .get(NAV_ENDPOINT)
@@ -103,7 +103,7 @@ impl<'a> LoginClient<'a> {
             .await
     }
 
-    /// Fetches the current authenticated user's following, follower, and dynamic counts.
+    /// 获取当前已认证用户的关注数、粉丝数和动态数。
     pub async fn stat(&self) -> BpiResult<LoginStats> {
         self.client
             .get(STAT_ENDPOINT)
@@ -111,7 +111,7 @@ impl<'a> LoginClient<'a> {
             .await
     }
 
-    /// Fetches the current authenticated account's coin balance.
+    /// 获取当前已认证账号的硬币余额。
     pub async fn coin(&self) -> BpiResult<LoginCoinBalance> {
         self.client
             .get(COIN_ENDPOINT)
@@ -119,7 +119,7 @@ impl<'a> LoginClient<'a> {
             .await
     }
 
-    /// Fetches today's experience gained from coin operations.
+    /// 获取今天通过投币操作获得的经验值。
     pub async fn today_coin_exp(&self) -> BpiResult<LoginTodayCoinExp> {
         self.client
             .get(TODAY_COIN_EXP_ENDPOINT)
@@ -127,7 +127,7 @@ impl<'a> LoginClient<'a> {
             .await
     }
 
-    /// Fetches the current authenticated account's daily reward completion state.
+    /// 获取当前已认证账号的每日奖励完成状态。
     pub async fn daily_reward(&self) -> BpiResult<LoginDailyReward> {
         self.client
             .get(DAILY_REWARD_ENDPOINT)
@@ -135,7 +135,7 @@ impl<'a> LoginClient<'a> {
             .await
     }
 
-    /// Fetches the current authenticated account's profile.
+    /// 获取当前已认证账号的个人资料。
     pub async fn account_info(&self) -> BpiResult<LoginAccountInfo> {
         self.client
             .get(ACCOUNT_INFO_ENDPOINT)
@@ -143,7 +143,7 @@ impl<'a> LoginClient<'a> {
             .await
     }
 
-    /// Fetches the current authenticated account's VIP state.
+    /// 获取当前已认证账号的 VIP 状态。
     pub async fn vip_info(&self) -> BpiResult<LoginVipInfo> {
         self.client
             .get(VIP_INFO_ENDPOINT)
@@ -151,7 +151,7 @@ impl<'a> LoginClient<'a> {
             .await
     }
 
-    /// Fetches a specific login notice for an authenticated account.
+    /// 获取已认证账号的指定登录通知。
     pub async fn notice(&self, params: LoginNoticeParams) -> BpiResult<LoginNoticeData> {
         self.client
             .get(NOTICE_ENDPOINT)
@@ -161,7 +161,7 @@ impl<'a> LoginClient<'a> {
             .await
     }
 
-    /// Fetches recent login log entries for an authenticated account.
+    /// 获取已认证账号的近期登录日志条目。
     pub async fn log(&self, params: LoginLogParams) -> BpiResult<LoginLogData> {
         self.client
             .get(LOG_ENDPOINT)
@@ -171,7 +171,7 @@ impl<'a> LoginClient<'a> {
             .await
     }
 
-    /// Generates a Geetest captcha challenge for login flows.
+    /// 为登录流程生成 Geetest 验证码挑战。
     pub async fn generate_captcha(&self) -> BpiResult<GenerateCaptcha> {
         let data: GeetestData = self
             .client
@@ -189,7 +189,7 @@ impl<'a> LoginClient<'a> {
         })
     }
 
-    /// Generates a QR login URL and temporary polling key.
+    /// 生成 QR 登录 URL 和临时轮询 key。
     pub async fn qr_generate(&self) -> BpiResult<GenerateQrCodeData> {
         self.client
             .get(QR_GENERATE_ENDPOINT)
@@ -198,7 +198,7 @@ impl<'a> LoginClient<'a> {
             .await
     }
 
-    /// Polls the QR login state.
+    /// 轮询 QR 登录状态。
     pub async fn qr_poll(&self, params: LoginQrPollParams) -> BpiResult<CheckQrCodeStatusData> {
         let response = self
             .client

@@ -9,7 +9,7 @@ use crate::login::LoginDailyReward;
 #[cfg(test)]
 const DAILY_REWARD_ENDPOINT: &str = "https://api.bilibili.com/x/member/web/exp/reward";
 
-/// Legacy member-center daily reward type.
+/// 旧版会员中心每日奖励类型。
 pub type DailyReward = LoginDailyReward;
 
 #[cfg(test)]

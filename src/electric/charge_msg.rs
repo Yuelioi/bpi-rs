@@ -81,7 +81,7 @@ pub struct ElecRemarkDetail {
     pub reply_time: u64,
 }
 
-/// Parameters for sending an electric charge message.
+/// 发送充电留言的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ElectricMessageSendParams {
     order_id: String,
@@ -105,7 +105,7 @@ impl ElectricMessageSendParams {
     }
 }
 
-/// Parameters for replying to an electric charge remark.
+/// 回复充电留言的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ElectricRemarkReplyParams {
     id: u64,
@@ -134,7 +134,7 @@ impl ElectricRemarkReplyParams {
 }
 
 impl<'a> ElectricClient<'a> {
-    /// Sends an electric charge message and returns the canonical payload result.
+    /// 发送充电留言并返回标准 payload 结果。
     pub async fn send_message(
         &self,
         params: ElectricMessageSendParams,
@@ -148,7 +148,7 @@ impl<'a> ElectricClient<'a> {
             .await
     }
 
-    /// Replies to an electric charge remark and returns the canonical payload result.
+    /// 回复充电留言并返回标准 payload 结果。
     pub async fn reply_remark(&self, params: ElectricRemarkReplyParams) -> BpiResult<u64> {
         let csrf = self.client.csrf()?;
 

@@ -1,7 +1,7 @@
 use crate::ids::Mid;
 use crate::{BpiError, BpiResult};
 
-/// Opus items included in a space feed request.
+/// 空间 feed 请求中包含的 opus 条目。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OpusSpaceFeedKind {
     All,
@@ -19,7 +19,7 @@ impl OpusSpaceFeedKind {
     }
 }
 
-/// Parameters for `/x/polymer/web-dynamic/v1/opus/feed/space`.
+/// `/x/polymer/web-dynamic/v1/opus/feed/space` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpusSpaceFeedParams {
     mid: Mid,

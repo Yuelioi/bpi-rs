@@ -19,7 +19,7 @@ struct SMSLoginData {
     url: String,  // 跳转url
 }
 
-/// Parameters for sending a web SMS login verification code.
+/// 发送 Web SMS 登录验证码的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoginSmsCodeParams {
     cid: u32,
@@ -32,7 +32,7 @@ pub struct LoginSmsCodeParams {
 }
 
 impl LoginSmsCodeParams {
-    /// Creates SMS-code request parameters.
+    /// 创建 SMS 验证码请求参数。
     pub fn new(
         cid: u32,
         tel: impl Into<String>,
@@ -54,7 +54,7 @@ impl LoginSmsCodeParams {
         Ok(params)
     }
 
-    /// Sets the Bilibili login source marker. Defaults to `main_web`.
+    /// 设置 Bilibili 登录 source 标记。默认值为 `main_web`。
     pub fn source(mut self, source: impl Into<String>) -> BpiResult<Self> {
         self.source = source.into();
         self.validate()?;

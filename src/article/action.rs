@@ -21,7 +21,7 @@ pub struct CoinResponseData {
 }
 
 impl<'a> ArticleClient<'a> {
-    /// Likes or unlikes an article and returns the canonical payload result.
+    /// 点赞或取消点赞专栏，并返回标准 payload 结果。
     pub async fn like(&self, params: ArticleLikeParams) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
@@ -32,7 +32,7 @@ impl<'a> ArticleClient<'a> {
             .await
     }
 
-    /// Gives coins to an article and returns the canonical payload result.
+    /// 给专栏投币并返回标准 payload 结果。
     pub async fn coin(&self, params: ArticleCoinParams) -> BpiResult<CoinResponseData> {
         let csrf = self.client.csrf()?;
 
@@ -43,7 +43,7 @@ impl<'a> ArticleClient<'a> {
             .await
     }
 
-    /// Favorites an article and returns the canonical payload result.
+    /// 收藏专栏并返回标准 payload 结果。
     pub async fn favorite(
         &self,
         params: ArticleFavoriteParams,
@@ -57,7 +57,7 @@ impl<'a> ArticleClient<'a> {
             .await
     }
 
-    /// Removes an article from favorites and returns the canonical payload result.
+    /// 从收藏中移除专栏，并返回标准 payload 结果。
     pub async fn unfavorite(
         &self,
         params: ArticleFavoriteParams,

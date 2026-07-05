@@ -4,7 +4,7 @@
 
 use crate::ids::{Aid, Bvid};
 
-/// Parameters for `/x/v2/dm/ajax` danmaku snapshots.
+/// `/x/v2/dm/ajax` 弹幕快照的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DanmakuSnapshotParams {
     target: DanmakuSnapshotTarget,

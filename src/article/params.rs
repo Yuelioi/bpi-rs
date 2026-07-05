@@ -1,6 +1,6 @@
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/x/article/viewinfo`.
+/// `/x/article/viewinfo` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ArticleInfoParams {
     id: i64,
@@ -18,7 +18,7 @@ impl ArticleInfoParams {
     }
 }
 
-/// Parameters for `/x/article/view`.
+/// `/x/article/view` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ArticleViewParams {
     id: i64,
@@ -48,7 +48,7 @@ impl ArticleViewParams {
     }
 }
 
-/// Parameters for `/x/article/cards`.
+/// `/x/article/cards` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ArticleCardsParams {
     ids: String,
@@ -80,7 +80,7 @@ impl ArticleCardsParams {
     }
 }
 
-/// Parameters for `/x/article/list/web/articles`.
+/// `/x/article/list/web/articles` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ArticleArticlesInfoParams {
     id: i64,
@@ -98,7 +98,7 @@ impl ArticleArticlesInfoParams {
     }
 }
 
-/// Parameters for `/x/article/like`.
+/// `/x/article/like` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ArticleLikeParams {
     id: i64,
@@ -122,7 +122,7 @@ impl ArticleLikeParams {
     }
 }
 
-/// Parameters for `/x/web-interface/coin/add` article coin operations.
+/// `/x/web-interface/coin/add` 专栏投币操作的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ArticleCoinParams {
     aid: u64,
@@ -150,7 +150,7 @@ impl ArticleCoinParams {
     }
 }
 
-/// Parameters for article favorite add/remove operations.
+/// 专栏收藏添加/移除操作的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ArticleFavoriteParams {
     id: i64,

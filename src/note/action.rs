@@ -16,7 +16,7 @@ pub struct NoteAddResponseData {
     pub note_id: String,
 }
 
-/// Parameters for saving a video note.
+/// 保存视频笔记的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NoteAddParams {
     oid: Aid,
@@ -29,7 +29,7 @@ pub struct NoteAddParams {
     auto_comment: Option<bool>,
 }
 
-/// Parameters for deleting a video note.
+/// 删除视频笔记的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NoteDeleteParams {
     oid: Aid,
@@ -58,7 +58,7 @@ impl NoteDeleteParams {
 }
 
 impl NoteAddParams {
-    /// Creates note-save parameters for a video AV ID.
+    /// 为视频 AV ID 创建笔记保存参数。
     pub fn new(
         oid: Aid,
         title: impl Into<String>,
@@ -79,27 +79,27 @@ impl NoteAddParams {
         Ok(params)
     }
 
-    /// Sets the note ID when updating an existing note.
+    /// 更新现有笔记时设置笔记 ID。
     pub fn note_id(mut self, note_id: impl Into<String>) -> BpiResult<Self> {
         self.note_id = Some(note_id.into());
         self.validate()?;
         Ok(self)
     }
 
-    /// Sets the note jump tags.
+    /// 设置笔记跳转 tag。
     pub fn tags(mut self, tags: impl Into<String>) -> BpiResult<Self> {
         self.tags = Some(tags.into());
         self.validate()?;
         Ok(self)
     }
 
-    /// Controls whether the note should be public.
+    /// 控制笔记是否公开。
     pub fn publish(mut self, publish: bool) -> Self {
         self.publish = Some(publish);
         self
     }
 
-    /// Controls whether the note should be added to comments.
+    /// 控制是否将笔记添加到评论。
     pub fn auto_comment(mut self, auto_comment: bool) -> Self {
         self.auto_comment = Some(auto_comment);
         self
@@ -169,7 +169,7 @@ fn bool_flag(value: bool) -> String {
 // --- 删除视频笔记 ---
 
 impl<'a> NoteClient<'a> {
-    /// Saves a video note and returns the canonical payload result.
+    /// 保存视频笔记并返回标准 payload 结果。
     pub async fn add(&self, params: NoteAddParams) -> BpiResult<NoteAddResponseData> {
         let csrf = self.client.csrf()?;
         let form = params.form_pairs(csrf);
@@ -181,7 +181,7 @@ impl<'a> NoteClient<'a> {
             .await
     }
 
-    /// Deletes a video note and returns the canonical payload result.
+    /// 删除视频笔记并返回标准 payload 结果。
     pub async fn delete(&self, params: NoteDeleteParams) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
         let form = params.form_pairs(csrf);

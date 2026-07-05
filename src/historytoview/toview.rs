@@ -144,7 +144,7 @@ pub struct ToViewListData {
 }
 
 impl<'a> HistoryToViewClient<'a> {
-    /// Adds a video to the watch-later list and returns the canonical payload result.
+    /// 将视频添加到稍后再看列表，并返回标准 payload 结果。
     pub async fn add_toview(
         &self,
         params: ToViewAddParams,
@@ -158,7 +158,7 @@ impl<'a> HistoryToViewClient<'a> {
             .await
     }
 
-    /// Deletes videos from the watch-later list and returns the canonical payload result.
+    /// 从稍后再看列表删除视频，并返回标准 payload 结果。
     pub async fn delete_toview(
         &self,
         params: ToViewDeleteParams,
@@ -172,7 +172,7 @@ impl<'a> HistoryToViewClient<'a> {
             .await
     }
 
-    /// Clears the watch-later list and returns the canonical payload result.
+    /// 清空稍后再看列表并返回标准 payload 结果。
     pub async fn clear_toview(&self) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 

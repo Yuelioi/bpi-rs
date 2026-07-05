@@ -1,22 +1,22 @@
 use crate::err::error::BpiError;
 use serde::{Deserialize, Deserializer, Serialize, de::DeserializeOwned};
 
-/// Crate-wide result type for bpi-rs operations.
+/// bpi-rs 操作的 crate 级结果类型。
 pub type BpiResult<T> = Result<T, BpiError>;
 
-/// Canonical Bilibili JSON envelope used by most web API endpoints.
+/// 大多数 Web API endpoint 使用的标准 Bilibili JSON envelope。
 #[derive(Debug, Serialize, Clone)]
 pub struct ApiEnvelope<T> {
-    /// API return code. `0` means success.
+    /// API 返回码。`0` 表示成功。
     pub code: i32,
 
-    /// Payload returned by successful endpoints.
+    /// 成功 endpoint 返回的 payload。
     pub data: Option<T>,
 
-    /// API message. Bilibili often returns `"0"` for success.
+    /// API 消息。Bilibili 成功时常返回 `"0"`。
     pub message: String,
 
-    /// Optional status flag returned by some endpoints.
+    /// 部分 endpoint 返回的可选状态标记。
     pub status: bool,
 }
 
@@ -39,7 +39,7 @@ where
 }
 
 impl<T> ApiEnvelope<T> {
-    /// Parses a JSON envelope from bytes.
+    /// 从字节解析 JSON envelope。
     pub fn from_slice(bytes: &[u8]) -> BpiResult<Self>
     where
         T: DeserializeOwned,
@@ -47,7 +47,7 @@ impl<T> ApiEnvelope<T> {
         serde_json::from_slice(bytes).map_err(BpiError::from)
     }
 
-    /// Returns this envelope if it represents a successful API response.
+    /// 如果此 envelope 表示成功的 API 响应，则返回它。
     pub fn ensure_success(self) -> BpiResult<Self> {
         if self.code == 0 {
             return Ok(self);
@@ -60,26 +60,25 @@ impl<T> ApiEnvelope<T> {
         }
     }
 
-    /// Extracts a required payload from a successful response.
+    /// 从成功响应中提取必需 payload。
     pub fn into_payload(self) -> BpiResult<T> {
         self.ensure_success()?.data.ok_or(BpiError::MissingData)
     }
 
-    /// Extracts an optional payload from a successful response.
+    /// 从成功响应中提取可选 payload。
     pub fn into_optional_payload(self) -> BpiResult<Option<T>> {
         Ok(self.ensure_success()?.data)
     }
 
-    /// Extracts a required payload without checking the response code.
+    /// 不检查响应码，直接提取必需 payload。
     ///
-    /// This is kept for endpoints whose payload contains the business status,
-    /// such as QR polling.
+    /// 这是为 payload 包含业务状态的 endpoint 保留的，例如 QR 轮询。
     pub fn into_data(self) -> Result<T, BpiError> {
         self.data.ok_or(BpiError::missing_data())
     }
 }
 
-/// Compatibility alias for modules that still expose full Bilibili envelopes.
+/// 仍暴露完整 Bilibili envelope 的模块使用的兼容别名。
 pub type BpiResponse<T> = ApiEnvelope<T>;
 
 #[derive(Debug, Deserialize)]

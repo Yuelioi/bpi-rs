@@ -25,7 +25,7 @@ pub struct CreateSeriesResponseData {
     pub series_id: u64,
 }
 
-/// Parameters for creating a video series and adding archives to it.
+/// 创建视频系列并向其中添加稿件的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CollectionCreateAndAddArchivesParams {
     mid: u64,
@@ -80,7 +80,7 @@ impl CollectionCreateAndAddArchivesParams {
     }
 }
 
-/// Parameters for deleting a video series.
+/// 删除视频系列的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CollectionDeleteSeriesParams {
     mid: u64,
@@ -105,7 +105,7 @@ impl CollectionDeleteSeriesParams {
     }
 }
 
-/// Parameters for adding or deleting archives in a video series.
+/// 在视频系列中添加或删除稿件的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CollectionArchivesMutationParams {
     mid: u64,
@@ -131,7 +131,7 @@ impl CollectionArchivesMutationParams {
     }
 }
 
-/// Parameters for editing an existing video series.
+/// 编辑现有视频系列的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CollectionUpdateSeriesParams {
     mid: u64,
@@ -144,7 +144,7 @@ pub struct CollectionUpdateSeriesParams {
 }
 
 impl CollectionUpdateSeriesParams {
-    /// Creates parameters with the required account, series and title fields.
+    /// 使用必需的账号、系列和标题字段创建参数。
     pub fn new(mid: u64, series_id: u64, name: impl Into<String>) -> BpiResult<Self> {
         Ok(Self {
             mid: validate_nonzero_u64("mid", mid)?,
@@ -157,25 +157,25 @@ impl CollectionUpdateSeriesParams {
         })
     }
 
-    /// Sets comma-separated keywords.
+    /// 设置逗号分隔的关键词。
     pub fn keywords(mut self, keywords: impl Into<String>) -> BpiResult<Self> {
         self.keywords = Some(normalize_non_blank("keywords", keywords.into())?);
         Ok(self)
     }
 
-    /// Sets the series description.
+    /// 设置系列简介。
     pub fn description(mut self, description: impl Into<String>) -> BpiResult<Self> {
         self.description = Some(normalize_non_blank("description", description.into())?);
         Ok(self)
     }
 
-    /// Sets comma-separated AIDs to add to the series.
+    /// 设置要添加到系列中的逗号分隔 AID。
     pub fn add_aids(mut self, aids: impl Into<String>) -> BpiResult<Self> {
         self.add_aids = Some(normalize_non_blank("add_aids", aids.into())?);
         Ok(self)
     }
 
-    /// Sets comma-separated AIDs to remove from the series.
+    /// 设置要从系列中移除的逗号分隔 AID。
     pub fn del_aids(mut self, aids: impl Into<String>) -> BpiResult<Self> {
         self.del_aids = Some(normalize_non_blank("del_aids", aids.into())?);
         Ok(self)
@@ -216,7 +216,7 @@ impl CollectionUpdateSeriesParams {
 // --- 测试模块 ---
 
 impl<'a> VideoClient<'a> {
-    /// Creates a video series and optionally adds archives to it.
+    /// 创建视频系列，并可选择向其中添加稿件。
     pub async fn create_collection_series(
         &self,
         params: CollectionCreateAndAddArchivesParams,
@@ -232,7 +232,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Deletes a video series.
+    /// 删除视频系列。
     pub async fn delete_collection_series(
         &self,
         params: CollectionDeleteSeriesParams,
@@ -246,7 +246,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Deletes archives from a video series.
+    /// 从视频系列中删除稿件。
     pub async fn delete_collection_archives(
         &self,
         params: CollectionArchivesMutationParams,
@@ -261,7 +261,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Adds archives to a video series.
+    /// 向视频系列中添加稿件。
     pub async fn add_collection_archives(
         &self,
         params: CollectionArchivesMutationParams,
@@ -276,7 +276,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Updates a video series.
+    /// 更新视频系列。
     pub async fn update_collection_series(
         &self,
         params: CollectionUpdateSeriesParams,

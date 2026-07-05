@@ -12,7 +12,7 @@ pub struct HeaderData {
     pub name: String,
     /// 静态头图 URL
     pub pic: String,
-    /// Bilibili logo URL
+    /// Bilibili 标志 URL
     pub litpic: String,
     /// 空
     pub url: String,

@@ -29,7 +29,7 @@ const SPACE_NOTICE_ENDPOINT: &str = "https://api.bilibili.com/x/space/notice";
 const UP_STAT_ENDPOINT: &str = "https://api.bilibili.com/x/space/upstat";
 const UPLOADED_VIDEOS_ENDPOINT: &str = "https://api.bilibili.com/x/space/wbi/arc/search";
 
-/// User domain API client.
+/// 用户领域 API 客户端。
 #[derive(Clone, Copy)]
 pub struct UserClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -120,7 +120,7 @@ impl<'a> UserClient<'a> {
         UP_STAT_ENDPOINT
     }
 
-    /// Fetches public user card information.
+    /// 获取公开用户名片信息。
     pub async fn card(&self, params: UserCardParams) -> BpiResult<UserCardProfile> {
         self.client
             .get(CARD_ENDPOINT)
@@ -129,7 +129,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches compact public card information for one or more users.
+    /// 获取一个或多个用户的精简公开名片信息。
     pub async fn cards(&self, params: UserCardsParams) -> BpiResult<Vec<UserBatchCard>> {
         self.client
             .get(CARDS_ENDPOINT)
@@ -138,7 +138,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches detailed public batch information for one or more users.
+    /// 获取一个或多个用户的详细公开批量信息。
     pub async fn infos(&self, params: UserInfosParams) -> BpiResult<Vec<UserBatchInfo>> {
         self.client
             .get(INFOS_ENDPOINT)
@@ -147,7 +147,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches public album submission counters for a user.
+    /// 获取用户公开相簿投稿计数。
     pub async fn album_count(&self, params: UserAlbumCountParams) -> BpiResult<UserAlbumCount> {
         self.client
             .get(ALBUM_COUNT_ENDPOINT)
@@ -156,7 +156,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches followed bangumi or cinema seasons for a public user.
+    /// 获取公开用户追番或追剧的 season。
     pub async fn bangumi_follow_list(
         &self,
         params: UserBangumiFollowListParams,
@@ -169,7 +169,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches users followed by a public member.
+    /// 获取公开会员关注的用户。
     pub async fn followings(&self, params: UserFollowingsParams) -> BpiResult<UserFollowings> {
         self.client
             .get(FOLLOWINGS_ENDPOINT)
@@ -179,7 +179,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches users following a public member.
+    /// 获取关注公开会员的用户。
     pub async fn followers(&self, params: UserFollowersParams) -> BpiResult<UserFollowers> {
         self.client
             .get(FOLLOWERS_ENDPOINT)
@@ -189,7 +189,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches follow groups for the current authenticated session.
+    /// 获取当前已认证会话的关注分组。
     pub async fn follow_tags(&self) -> BpiResult<Vec<UserFollowTag>> {
         self.client
             .get(FOLLOW_TAGS_ENDPOINT)
@@ -198,7 +198,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches a public fan-medal wall for a user.
+    /// 获取用户的公开粉丝勋章墙。
     pub async fn medal_wall(&self, params: UserMedalWallParams) -> BpiResult<UserMedalWall> {
         self.client
             .get(MEDAL_WALL_ENDPOINT)
@@ -208,7 +208,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Looks up member IDs by public display names.
+    /// 按公开显示名称查找会员 ID。
     pub async fn name_to_uid(&self, params: UserNameToUidParams) -> BpiResult<UserNameToUid> {
         self.client
             .get(NAME_TO_UID_ENDPOINT)
@@ -217,7 +217,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches public relation counts for a user.
+    /// 获取用户公开关系计数。
     pub async fn relation_stat(
         &self,
         params: UserRelationStatParams,
@@ -229,7 +229,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches public space navigation counters for a user.
+    /// 获取用户公开空间导航计数。
     pub async fn nav_stat(&self, params: UserNavStatParams) -> BpiResult<UserNavStat> {
         self.client
             .get(NAV_STAT_ENDPOINT)
@@ -238,7 +238,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches public creator statistics for a user.
+    /// 获取用户公开创作者统计。
     pub async fn up_stat(&self, params: UserUpStatParams) -> BpiResult<UserUpStat> {
         self.client
             .get(UP_STAT_ENDPOINT)
@@ -247,7 +247,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches public user space information.
+    /// 获取公开用户空间信息。
     pub async fn space_info(&self, params: UserSpaceParams) -> BpiResult<UserSpaceProfile> {
         let signed_params = self.client.sign_wbi_params(params.query_pairs()).await?;
 
@@ -258,7 +258,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches the public space notice for a user.
+    /// 获取用户公开空间公告。
     pub async fn space_notice(&self, params: UserSpaceNoticeParams) -> BpiResult<UserSpaceNotice> {
         self.client
             .get(SPACE_NOTICE_ENDPOINT)
@@ -267,7 +267,7 @@ impl<'a> UserClient<'a> {
             .await
     }
 
-    /// Fetches videos uploaded to a user's public space.
+    /// 获取用户公开空间中上传的视频。
     pub async fn uploaded_videos(
         &self,
         params: UserUploadedVideosParams,

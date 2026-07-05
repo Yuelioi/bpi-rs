@@ -13,7 +13,7 @@ macro_rules! numeric_id {
         pub struct $name(u64);
 
         impl $name {
-            /// Creates a non-zero numeric ID.
+            /// 创建非零数字 ID。
             pub fn new(value: u64) -> BpiResult<Self> {
                 if value == 0 {
                     return Err(BpiError::invalid_parameter($field, "id must be non-zero"));
@@ -22,7 +22,7 @@ macro_rules! numeric_id {
                 Ok(Self(value))
             }
 
-            /// Returns the raw numeric value.
+            /// 返回原始数字值。
             pub fn get(self) -> u64 {
                 self.0
             }
@@ -108,14 +108,14 @@ macro_rules! string_id {
         pub struct $name(String);
 
         impl $name {
-            /// Creates a validated string ID.
+            /// 创建已验证的字符串 ID。
             pub fn new(value: impl Into<String>) -> BpiResult<Self> {
                 let value = value.into();
                 $validate(&value)?;
                 Ok(Self(value))
             }
 
-            /// Returns the raw string value.
+            /// 返回原始字符串值。
             pub fn as_str(&self) -> &str {
                 &self.0
             }

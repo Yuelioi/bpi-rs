@@ -10,7 +10,7 @@ const REPLY_FEED_ENDPOINT: &str = "https://api.bilibili.com/x/msgfeed/reply";
 const SINGLE_UNREAD_ENDPOINT: &str =
     "https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread";
 
-/// Message API client.
+/// 消息 API 客户端。
 #[derive(Clone, Copy)]
 pub struct MessageClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -36,7 +36,7 @@ impl<'a> MessageClient<'a> {
         SINGLE_UNREAD_ENDPOINT
     }
 
-    /// Gets unread message counters.
+    /// 获取未读消息计数。
     pub async fn unread_count(
         &self,
         params: MessageUnreadCountParams,
@@ -48,7 +48,7 @@ impl<'a> MessageClient<'a> {
             .await
     }
 
-    /// Gets reply notification feed items.
+    /// 获取回复通知流条目。
     pub async fn reply_feed(&self, params: MessageReplyFeedParams) -> BpiResult<ReplyFeedData> {
         self.client
             .get(REPLY_FEED_ENDPOINT)
@@ -57,7 +57,7 @@ impl<'a> MessageClient<'a> {
             .await
     }
 
-    /// Gets unread private-message counters.
+    /// 获取未读私信计数。
     pub async fn single_unread(
         &self,
         params: MessageSingleUnreadParams,

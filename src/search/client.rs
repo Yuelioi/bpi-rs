@@ -14,7 +14,7 @@ const DEFAULT_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/wbi/sea
 const SUGGEST_ENDPOINT: &str = "https://s.search.bilibili.com/main/suggest";
 const HOTWORDS_ENDPOINT: &str = "https://s.search.bilibili.com/main/hotword";
 
-/// Search API client.
+/// 搜索 API 客户端。
 #[derive(Clone, Copy)]
 pub struct SearchClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -45,7 +45,7 @@ impl<'a> SearchClient<'a> {
         HOTWORDS_ENDPOINT
     }
 
-    /// Searches article results.
+    /// 搜索专栏结果。
     pub async fn article(
         &self,
         params: SearchArticleParams,
@@ -54,7 +54,7 @@ impl<'a> SearchClient<'a> {
             .await
     }
 
-    /// Searches bangumi results.
+    /// 搜索番剧结果。
     pub async fn bangumi(
         &self,
         params: SearchBangumiParams,
@@ -63,7 +63,7 @@ impl<'a> SearchClient<'a> {
             .await
     }
 
-    /// Searches Bilibili user results.
+    /// 搜索 Bilibili 用户结果。
     pub async fn bili_user(
         &self,
         params: SearchBiliUserParams,
@@ -72,12 +72,12 @@ impl<'a> SearchClient<'a> {
             .await
     }
 
-    /// Searches combined live room and live user results.
+    /// 搜索合并的直播间和直播用户结果。
     pub async fn live(&self, params: SearchLiveParams) -> BpiResult<SearchData<LiveData>> {
         self.typed_search(params.query_pairs(), "search.live").await
     }
 
-    /// Searches live room results.
+    /// 搜索直播间结果。
     pub async fn live_room(
         &self,
         params: SearchLiveRoomParams,
@@ -86,7 +86,7 @@ impl<'a> SearchClient<'a> {
             .await
     }
 
-    /// Searches live user results.
+    /// 搜索直播用户结果。
     pub async fn live_user(
         &self,
         params: SearchLiveUserParams,
@@ -95,19 +95,19 @@ impl<'a> SearchClient<'a> {
             .await
     }
 
-    /// Searches movie and film results.
+    /// 搜索影视结果。
     pub async fn movie(&self, params: SearchMovieParams) -> BpiResult<SearchData<Vec<Movie>>> {
         self.typed_search(params.query_pairs(), "search.movie")
             .await
     }
 
-    /// Searches video results.
+    /// 搜索视频结果。
     pub async fn video(&self, params: SearchVideoParams) -> BpiResult<SearchData<Vec<Video>>> {
         self.typed_search(params.query_pairs(), "search.video")
             .await
     }
 
-    /// Gets the default web search content.
+    /// 获取默认 Web 搜索内容。
     pub async fn default(&self) -> BpiResult<DefaultSearchData> {
         let signed_params = self.client.get_wbi_sign2(vec![("foo", "bar")]).await?;
 
@@ -118,7 +118,7 @@ impl<'a> SearchClient<'a> {
             .await
     }
 
-    /// Gets search suggestions for a term.
+    /// 获取搜索词建议。
     pub async fn suggest(&self, params: SearchSuggestParams) -> BpiResult<SearchSuggest> {
         self.client
             .get(SUGGEST_ENDPOINT)
@@ -127,7 +127,7 @@ impl<'a> SearchClient<'a> {
             .await
     }
 
-    /// Gets the web hotword list.
+    /// 获取 Web 热词列表。
     pub async fn hotwords(&self) -> BpiResult<HotWordDataResponse> {
         let response = self.client.get(HOTWORDS_ENDPOINT).send().await?;
 

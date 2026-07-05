@@ -4,7 +4,7 @@ use crate::{BilibiliRequest, BpiClient, BpiResult};
 const SPACE_FEED_ENDPOINT: &str =
     "https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space";
 
-/// Opus API client.
+/// Opus API 客户端。
 #[derive(Clone, Copy)]
 pub struct OpusClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -20,7 +20,7 @@ impl<'a> OpusClient<'a> {
         SPACE_FEED_ENDPOINT
     }
 
-    /// Gets opus items from a user's space feed.
+    /// 获取用户空间 feed 中的 opus 条目。
     pub async fn space_feed(&self, params: OpusSpaceFeedParams) -> BpiResult<SpaceData> {
         self.client
             .get(SPACE_FEED_ENDPOINT)

@@ -9,7 +9,7 @@ use crate::login::LoginAccountInfo;
 #[cfg(test)]
 const ACCOUNT_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/member/web/account";
 
-/// Legacy member-center account info type.
+/// 旧版会员中心账号信息类型。
 pub type AccountInfo = LoginAccountInfo;
 
 #[cfg(test)]

@@ -104,7 +104,7 @@ pub struct FavResourceIdItem {
     pub bvid: Option<String>,
 }
 
-/// Parameters for fetching a favorite folder's detailed resource list.
+/// 获取收藏夹详细资源列表的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FavListDetailParams {
     media_id: MediaId,
@@ -117,7 +117,7 @@ pub struct FavListDetailParams {
 }
 
 impl FavListDetailParams {
-    /// Creates favorite-list detail parameters with the default page size.
+    /// 使用默认每页数量创建收藏列表详情参数。
     pub fn new(media_id: MediaId) -> Self {
         Self {
             media_id,
@@ -130,13 +130,13 @@ impl FavListDetailParams {
         }
     }
 
-    /// Sets the optional partition filter.
+    /// 设置可选分区过滤器。
     pub fn tid(mut self, tid: u32) -> Self {
         self.tid = Some(tid);
         self
     }
 
-    /// Sets the keyword filter.
+    /// 设置关键词过滤器。
     pub fn keyword(mut self, keyword: impl Into<String>) -> BpiResult<Self> {
         let keyword = keyword.into();
         validate_non_blank("keyword", &keyword)?;
@@ -144,7 +144,7 @@ impl FavListDetailParams {
         Ok(self)
     }
 
-    /// Sets the ordering key, such as `mtime`.
+    /// 设置排序 key，例如 `mtime`。
     pub fn order(mut self, order: impl Into<String>) -> BpiResult<Self> {
         let order = order.into();
         validate_non_blank("order", &order)?;
@@ -152,13 +152,13 @@ impl FavListDetailParams {
         Ok(self)
     }
 
-    /// Sets the content type filter.
+    /// 设置内容类型过滤器。
     pub fn content_type(mut self, typ: u8) -> Self {
         self.typ = Some(typ);
         self
     }
 
-    /// Sets the page size.
+    /// 设置每页数量。
     pub fn page_size(mut self, ps: u32) -> BpiResult<Self> {
         if ps == 0 {
             return Err(BpiError::invalid_parameter(
@@ -170,7 +170,7 @@ impl FavListDetailParams {
         Ok(self)
     }
 
-    /// Sets the page number.
+    /// 设置页码。
     pub fn page(mut self, pn: u32) -> BpiResult<Self> {
         if pn == 0 {
             return Err(BpiError::invalid_parameter(

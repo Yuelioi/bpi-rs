@@ -4,7 +4,7 @@ use crate::{BilibiliRequest, BpiClient, BpiResult};
 
 const CENTER_INFO_ENDPOINT: &str = "https://api.bilibili.com/x/vip/web/vip_center/combine";
 
-/// VIP API client.
+/// VIP API 客户端。
 #[derive(Clone, Copy)]
 pub struct VipClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -20,7 +20,7 @@ impl<'a> VipClient<'a> {
         CENTER_INFO_ENDPOINT
     }
 
-    /// Gets VIP center information.
+    /// 获取 VIP 中心信息。
     pub async fn center_info(&self, params: VipCenterInfoParams) -> BpiResult<VipCenterData> {
         self.client
             .get(CENTER_INFO_ENDPOINT)

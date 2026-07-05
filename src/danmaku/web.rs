@@ -5,7 +5,7 @@
 
 use crate::{BpiError, BpiResult};
 
-/// Parameters for realtime protobuf danmaku segment endpoints.
+/// 实时 protobuf 弹幕分段 endpoint 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DanmakuSegmentParams {
     typ: u8,
@@ -18,7 +18,7 @@ pub struct DanmakuSegmentParams {
 }
 
 impl DanmakuSegmentParams {
-    /// Creates parameters for a realtime danmaku segment request.
+    /// 为实时弹幕分段请求创建参数。
     pub fn new(typ: u8, oid: u64, segment_index: u32) -> BpiResult<Self> {
         if typ == 0 {
             return Err(BpiError::invalid_parameter(
@@ -50,7 +50,7 @@ impl DanmakuSegmentParams {
         })
     }
 
-    /// Sets the optional archive avid.
+    /// 设置可选稿件 avid。
     pub fn pid(mut self, pid: u64) -> BpiResult<Self> {
         if pid == 0 {
             return Err(BpiError::invalid_parameter(
@@ -62,13 +62,13 @@ impl DanmakuSegmentParams {
         Ok(self)
     }
 
-    /// Sets the optional pull mode.
+    /// 设置可选拉取模式。
     pub fn pull_mode(mut self, pull_mode: u32) -> Self {
         self.pull_mode = Some(pull_mode);
         self
     }
 
-    /// Sets the optional millisecond range for segment content.
+    /// 设置分段内容的可选毫秒范围。
     pub fn range(mut self, ps: u32, pe: u32) -> BpiResult<Self> {
         if pe < ps {
             return Err(BpiError::invalid_parameter(
@@ -105,7 +105,7 @@ impl DanmakuSegmentParams {
     }
 }
 
-/// Parameters for protobuf danmaku web-view metadata.
+/// protobuf 弹幕 web-view 元数据的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DanmakuWebViewParams {
     typ: u8,
@@ -148,7 +148,7 @@ impl DanmakuWebViewParams {
     }
 }
 
-/// Parameters for dated danmaku history byte endpoints.
+/// 指定日期弹幕历史字节 endpoint 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DanmakuHistoryBytesParams {
     typ: u8,

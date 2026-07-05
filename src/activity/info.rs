@@ -38,7 +38,7 @@ pub struct ActivityInfoData {
     pub lid: Option<i64>,
 }
 
-/// Parameters for fetching activity subject information.
+/// 获取活动主题信息的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ActivityInfoParams {
     sid: u64,
@@ -46,7 +46,7 @@ pub struct ActivityInfoParams {
 }
 
 impl ActivityInfoParams {
-    /// Creates activity subject parameters from a non-zero activity ID.
+    /// 使用非零活动 ID 创建活动主题参数。
     pub fn new(sid: u64) -> BpiResult<Self> {
         if sid == 0 {
             return Err(BpiError::invalid_parameter("sid", "sid must be non-zero"));
@@ -55,7 +55,7 @@ impl ActivityInfoParams {
         Ok(Self { sid, bvid: None })
     }
 
-    /// Sets the optional source video ID.
+    /// 设置可选来源视频 ID。
     pub fn with_bvid(mut self, bvid: Bvid) -> Self {
         self.bvid = Some(bvid);
         self

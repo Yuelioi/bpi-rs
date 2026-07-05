@@ -16,7 +16,7 @@ pub struct SearchSuggestItem {
     pub item_type: Option<String>,
 }
 
-/// Parameters for the search suggestion endpoint.
+/// 搜索建议 endpoint 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchSuggestParams {
     term: String,

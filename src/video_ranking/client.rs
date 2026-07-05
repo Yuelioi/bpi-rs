@@ -14,7 +14,7 @@ use crate::video_ranking::{
 };
 use crate::{BilibiliRequest, BpiClient, BpiResult};
 
-/// Video ranking API client.
+/// 视频排行 API 客户端。
 #[derive(Clone, Copy)]
 pub struct VideoRankingClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -70,7 +70,7 @@ impl<'a> VideoRankingClient<'a> {
         REGION_NEWLIST_RANK_ENDPOINT
     }
 
-    /// Gets the current popular video list.
+    /// 获取当前热门视频列表。
     pub async fn popular_list(&self, params: VideoPopularListParams) -> BpiResult<PopularListData> {
         self.client
             .get(POPULAR_LIST_ENDPOINT)
@@ -79,7 +79,7 @@ impl<'a> VideoRankingClient<'a> {
             .await
     }
 
-    /// Gets all weekly popular series entries.
+    /// 获取全部每周热门系列条目。
     pub async fn popular_series_list(&self) -> BpiResult<PopularSeriesListData> {
         self.client
             .get(POPULAR_SERIES_LIST_ENDPOINT)
@@ -87,7 +87,7 @@ impl<'a> VideoRankingClient<'a> {
             .await
     }
 
-    /// Gets one weekly popular series detail.
+    /// 获取单个每周热门系列详情。
     pub async fn popular_series_one(
         &self,
         params: PopularSeriesOneParams,
@@ -101,7 +101,7 @@ impl<'a> VideoRankingClient<'a> {
             .await
     }
 
-    /// Gets the curated must-watch popular videos.
+    /// 获取精选必看热门视频。
     pub async fn popular_precious(&self) -> BpiResult<PreciousVideoData> {
         self.client
             .get(POPULAR_PRECIOUS_ENDPOINT)
@@ -109,7 +109,7 @@ impl<'a> VideoRankingClient<'a> {
             .await
     }
 
-    /// Gets a video ranking list.
+    /// 获取视频排行列表。
     pub async fn ranking_list(&self, params: VideoRankingListParams) -> BpiResult<RankingListData> {
         self.client
             .get(RANKING_LIST_ENDPOINT)
@@ -118,7 +118,7 @@ impl<'a> VideoRankingClient<'a> {
             .await
     }
 
-    /// Gets the latest video list for a region.
+    /// 获取分区最新视频列表。
     pub async fn region_dynamic(
         &self,
         params: VideoRegionDynamicParams,
@@ -130,7 +130,7 @@ impl<'a> VideoRankingClient<'a> {
             .await
     }
 
-    /// Gets recent interactive videos for a region tag.
+    /// 获取分区 tag 下的近期互动视频。
     pub async fn region_tag_dynamic(
         &self,
         params: VideoRegionTagDynamicParams,
@@ -142,7 +142,7 @@ impl<'a> VideoRankingClient<'a> {
             .await
     }
 
-    /// Gets recent submissions for a region.
+    /// 获取分区近期投稿。
     pub async fn region_newlist(
         &self,
         params: VideoRegionNewListParams,
@@ -154,7 +154,7 @@ impl<'a> VideoRankingClient<'a> {
             .await
     }
 
-    /// Gets ranked recent submissions for a region.
+    /// 获取分区近期投稿排行。
     pub async fn region_newlist_rank(
         &self,
         params: VideoRegionNewListRankParams,

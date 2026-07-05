@@ -9,7 +9,7 @@ const REPLIES_ENDPOINT: &str = "https://api.bilibili.com/x/v2/reply/reply";
 const HOT_ENDPOINT: &str = "https://api.bilibili.com/x/v2/reply/hot";
 const COUNT_ENDPOINT: &str = "https://api.bilibili.com/x/v2/reply/count";
 
-/// Comment API client.
+/// 评论 API 客户端。
 #[derive(Clone, Copy)]
 pub struct CommentClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -40,7 +40,7 @@ impl<'a> CommentClient<'a> {
         COUNT_ENDPOINT
     }
 
-    /// Gets the main comment list for a target comment area.
+    /// 获取目标评论区的主评论列表。
     pub async fn list(&self, params: CommentListParams) -> BpiResult<CommentListData> {
         self.client
             .get(LIST_ENDPOINT)
@@ -49,7 +49,7 @@ impl<'a> CommentClient<'a> {
             .await
     }
 
-    /// Gets replies under a root comment.
+    /// 获取根评论下的回复。
     pub async fn replies(&self, params: CommentRepliesParams) -> BpiResult<CommentListData> {
         self.client
             .get(REPLIES_ENDPOINT)
@@ -58,7 +58,7 @@ impl<'a> CommentClient<'a> {
             .await
     }
 
-    /// Gets hot comments under a root comment when the API returns a payload.
+    /// 当 API 返回 payload 时，获取根评论下的热评。
     pub async fn hot(&self, params: CommentHotParams) -> BpiResult<Option<HotCommentData>> {
         self.client
             .get(HOT_ENDPOINT)
@@ -67,7 +67,7 @@ impl<'a> CommentClient<'a> {
             .await
     }
 
-    /// Gets the total comment count for a target comment area.
+    /// 获取目标评论区的评论总数。
     pub async fn count(&self, params: CommentCountParams) -> BpiResult<CountData> {
         self.client
             .get(COUNT_ENDPOINT)

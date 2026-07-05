@@ -11,7 +11,7 @@ use crate::video::VideoClient;
 
 const WATCH_PROGRESS_ENDPOINT: &str = "https://api.bilibili.com/x/v2/history/report";
 
-/// Parameters for reporting video watch progress.
+/// 上报视频观看进度的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VideoWatchProgressParams {
     aid: u64,
@@ -50,7 +50,7 @@ impl VideoWatchProgressParams {
 }
 
 impl<'a> VideoClient<'a> {
-    /// Reports video watch progress and returns the canonical payload result.
+    /// 上报视频观看进度并返回标准 payload 结果。
     pub async fn report_watch_progress(
         &self,
         params: VideoWatchProgressParams,

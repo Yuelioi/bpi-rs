@@ -2,12 +2,11 @@
 //!
 //! [查看 API 文档](https://github.com/Yuelioi/bilibili-API-collect/tree/cfc5fddcc8a94b74d91970bb5b4eaeb349addc47/docs/manga/Comic.md)
 //!
-//! Status: not implemented.
+//! 状态：未实现。
 //!
-//! The current web reader requires browser-generated proof fields (`m2` for
-//! `GetImageIndex` and `m1` for `ImageToken`). The legacy request shape returns
-//! API `code = 99`, so this module intentionally exposes data models only until
-//! the SDK has an explicit proof-provider boundary.
+//! 当前 Web 阅读器需要浏览器生成的 proof 字段（`GetImageIndex` 使用 `m2`，
+//! `ImageToken` 使用 `m1`）。旧请求形态会返回 API `code = 99`，
+//! 因此在 SDK 具备明确的 proof-provider 边界前，此模块有意只暴露数据模型。
 
 use serde::{Deserialize, Serialize};
 

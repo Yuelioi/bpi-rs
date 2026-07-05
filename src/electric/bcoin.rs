@@ -28,7 +28,7 @@ pub struct BcoinQuickPayData {
     pub msg: String,
 }
 
-/// Parameters for B-coin quick electric charging.
+/// B 币快速充电的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BcoinQuickPayParams {
     bp_num: i32,
@@ -89,7 +89,7 @@ impl BcoinQuickPayParams {
 }
 
 impl<'a> ElectricClient<'a> {
-    /// Performs B-coin quick electric charging and returns the canonical payload result.
+    /// 执行 B 币快速充电并返回标准 payload 结果。
     pub async fn bcoin_quick_pay(
         &self,
         params: BcoinQuickPayParams,

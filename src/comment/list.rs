@@ -15,7 +15,7 @@ use super::types::{
     Upper,
 };
 
-/// Target comment area.
+/// 目标评论区。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentTarget {
     r#type: i32,
@@ -47,7 +47,7 @@ impl CommentTarget {
     }
 }
 
-/// Sort order for `/x/v2/reply`.
+/// `/x/v2/reply` 的排序方式。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CommentSort {
     Time,
@@ -65,7 +65,7 @@ impl CommentSort {
     }
 }
 
-/// Parameters for `/x/v2/reply`.
+/// `/x/v2/reply` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentListParams {
     target: CommentTarget,
@@ -131,7 +131,7 @@ impl CommentListParams {
     }
 }
 
-/// Parameters for `/x/v2/reply/reply`.
+/// `/x/v2/reply/reply` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentRepliesParams {
     target: CommentTarget,
@@ -179,7 +179,7 @@ impl CommentRepliesParams {
     }
 }
 
-/// Parameters for `/x/v2/reply/hot`.
+/// `/x/v2/reply/hot` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentHotParams {
     target: CommentTarget,
@@ -227,7 +227,7 @@ impl CommentHotParams {
     }
 }
 
-/// Parameters for `/x/v2/reply/count`.
+/// `/x/v2/reply/count` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentCountParams {
     target: CommentTarget,

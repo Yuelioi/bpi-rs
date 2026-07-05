@@ -24,7 +24,7 @@ pub enum BpiError {
     #[error("网络请求失败: {message}")]
     Network { message: String },
 
-    /// Transport-level request failure.
+    /// transport 层请求失败。
     #[error("transport request failed: {source}")]
     Transport {
         #[serde(skip)]
@@ -35,7 +35,7 @@ pub enum BpiError {
     #[error("HTTP请求失败，状态码: {status}")]
     Http { status: u16 },
 
-    /// HTTP status error.
+    /// HTTP 状态错误。
     #[error("HTTP request failed with status {status}")]
     HttpStatus { status: u16 },
 
@@ -43,7 +43,7 @@ pub enum BpiError {
     #[error("数据解析失败: {message}")]
     Parse { message: String },
 
-    /// Response decode failure.
+    /// 响应解码失败。
     #[error("failed to decode response: {source}")]
     Decode {
         #[serde(skip)]
@@ -62,7 +62,7 @@ pub enum BpiError {
     #[error("验证失败: {message}")]
     Authentication { message: String },
 
-    /// Authentication or authorization error.
+    /// 认证或授权错误。
     #[error("authentication failed: {message}")]
     Auth { message: String },
 
@@ -73,11 +73,11 @@ pub enum BpiError {
         message: &'static str,
     },
 
-    /// API response succeeded but did not include required payload data.
+    /// API 响应成功，但未包含必需的 payload 数据。
     #[error("missing response data")]
     MissingData,
 
-    /// Response format is not supported by the current parser.
+    /// 当前解析器不支持该响应格式。
     #[error("unsupported response: {message}")]
     UnsupportedResponse { message: String },
 }
@@ -212,7 +212,7 @@ impl BpiError {
         }
     }
 
-    /// Creates an unsupported response error.
+    /// 创建不支持响应错误。
     pub fn unsupported_response(message: impl Into<String>) -> Self {
         BpiError::UnsupportedResponse {
             message: message.into(),

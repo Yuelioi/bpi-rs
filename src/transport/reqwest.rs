@@ -6,7 +6,7 @@ use crate::{BpiError, BpiResult};
 
 use super::{RequestMetadata, ResponseMetadata, TransportResponse};
 
-/// Reqwest-backed transport placeholder used while endpoint modules are migrated.
+/// endpoint 模块迁移期间使用的基于 reqwest 的 transport 占位类型。
 #[derive(Debug, Clone)]
 pub struct ReqwestTransport {
     client: Client,

@@ -1,7 +1,7 @@
 use crate::video::video_zone_v2::VideoPartitionV2;
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/x/web-show/page/header`.
+/// `/x/web-show/page/header` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WebWidgetHeaderPageParams {
     resource_id: u32,
@@ -35,7 +35,7 @@ impl WebWidgetHeaderPageParams {
     }
 }
 
-/// Parameters for `/x/web-show/region/banner`.
+/// `/x/web-show/region/banner` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WebWidgetRegionBannerParams {
     region_id: u32,

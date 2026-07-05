@@ -16,7 +16,7 @@ const USER_PRIVATE_LIST_ENDPOINT: &str = "https://api.bilibili.com/x/note/list";
 const PUBLIC_ARCHIVE_LIST_ENDPOINT: &str = "https://api.bilibili.com/x/note/publish/list/archive";
 const USER_PUBLIC_LIST_ENDPOINT: &str = "https://api.bilibili.com/x/note/publish/list/user";
 
-/// Note API client.
+/// 笔记 API 客户端。
 #[derive(Clone, Copy)]
 pub struct NoteClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -62,7 +62,7 @@ impl<'a> NoteClient<'a> {
         USER_PUBLIC_LIST_ENDPOINT
     }
 
-    /// Checks whether notes are forbidden for an archive.
+    /// 检查稿件是否禁止笔记。
     pub async fn is_forbid(&self, params: NoteIsForbidParams) -> BpiResult<NoteIsForbidData> {
         self.client
             .get(IS_FORBID_ENDPOINT)
@@ -71,7 +71,7 @@ impl<'a> NoteClient<'a> {
             .await
     }
 
-    /// Gets private note content.
+    /// 获取私有笔记内容。
     pub async fn private_info(
         &self,
         params: NotePrivateInfoParams,
@@ -83,7 +83,7 @@ impl<'a> NoteClient<'a> {
             .await
     }
 
-    /// Gets public note content.
+    /// 获取公开笔记内容。
     pub async fn public_info(&self, params: NotePublicInfoParams) -> BpiResult<PublicNoteInfoData> {
         self.client
             .get(PUBLIC_INFO_ENDPOINT)
@@ -92,7 +92,7 @@ impl<'a> NoteClient<'a> {
             .await
     }
 
-    /// Gets private note IDs for an archive.
+    /// 获取稿件的私有笔记 ID。
     pub async fn archive_list(
         &self,
         params: NoteArchiveListParams,
@@ -104,7 +104,7 @@ impl<'a> NoteClient<'a> {
             .await
     }
 
-    /// Gets private notes owned by the current user.
+    /// 获取当前用户拥有的私有笔记。
     pub async fn user_private_list(
         &self,
         params: NoteUserPrivateListParams,
@@ -116,7 +116,7 @@ impl<'a> NoteClient<'a> {
             .await
     }
 
-    /// Gets public notes for an archive.
+    /// 获取稿件的公开笔记。
     pub async fn public_archive_list(
         &self,
         params: NotePublicArchiveListParams,
@@ -128,7 +128,7 @@ impl<'a> NoteClient<'a> {
             .await
     }
 
-    /// Gets public notes authored by a user.
+    /// 获取某个用户创作的公开笔记。
     pub async fn user_public_list(
         &self,
         params: NoteUserPublicListParams,

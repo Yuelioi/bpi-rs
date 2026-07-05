@@ -22,7 +22,7 @@ pub struct PromptData {
 }
 
 impl<'a> AudioClient<'a> {
-    /// Favorites an audio song to, or removes it from, favorite folders.
+    /// 将音频歌曲添加到收藏夹，或从收藏夹中移除。
     pub async fn favorite(&self, params: AudioCollectionToFavParams) -> BpiResult<PromptData> {
         let csrf = self.client.csrf()?;
 
@@ -33,7 +33,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Adds an audio song to a collection.
+    /// 将音频歌曲添加到合集。
     pub async fn collect(&self, params: AudioCollectionToParams) -> BpiResult<bool> {
         let csrf = self.client.csrf()?;
 
@@ -44,7 +44,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gives coins to an audio song and returns the canonical payload result.
+    /// 给音频歌曲投币并返回标准 payload 结果。
     pub async fn coin(&self, params: AudioCoinParams) -> BpiResult<String> {
         let csrf = self.client.csrf()?;
 

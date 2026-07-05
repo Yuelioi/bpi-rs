@@ -2,7 +2,7 @@ use crate::audio::musicstream_url::AudioQuality;
 use crate::ids::AudioId;
 use crate::{BpiError, BpiResult};
 
-/// Parameters for audio endpoints that identify a single song by `sid`.
+/// 通过 `sid` 标识单首歌曲的音频 endpoint 参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AudioSongParams {
     sid: AudioId,
@@ -18,7 +18,7 @@ impl AudioSongParams {
     }
 }
 
-/// Parameters for audio favorite-folder add/remove operations.
+/// 音频收藏夹添加/移除操作的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AudioCollectionToFavParams {
     rid: AudioId,
@@ -67,7 +67,7 @@ impl AudioCollectionToFavParams {
     }
 }
 
-/// Parameters for adding an audio song to a collection.
+/// 将音频歌曲添加到合集的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AudioCollectionToParams {
     sid: AudioId,
@@ -91,7 +91,7 @@ impl AudioCollectionToParams {
     }
 }
 
-/// Parameters for `/audio/music-service-c/web/coin/add`.
+/// `/audio/music-service-c/web/coin/add` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AudioCoinParams {
     sid: AudioId,
@@ -115,7 +115,7 @@ impl AudioCoinParams {
     }
 }
 
-/// Pagination parameters for audio list endpoints.
+/// 音频列表 endpoint 的分页参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AudioPageParams {
     page: u32,
@@ -138,7 +138,7 @@ impl AudioPageParams {
     }
 }
 
-/// Parameters for `/audio/music-service-c/web/collections/info`.
+/// `/audio/music-service-c/web/collections/info` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AudioCollectionInfoParams {
     sid: u64,
@@ -156,7 +156,7 @@ impl AudioCollectionInfoParams {
     }
 }
 
-/// Audio rank list categories accepted by Bilibili's rank period endpoint.
+/// Bilibili 榜单期数 endpoint 接受的音频榜单分类。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AudioRankListType {
     Hot,
@@ -174,7 +174,7 @@ impl AudioRankListType {
     }
 }
 
-/// Parameters for `/x/copyright-music-publicity/toplist/all_period`.
+/// `/x/copyright-music-publicity/toplist/all_period` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AudioRankPeriodParams {
     list_type: AudioRankListType,
@@ -199,7 +199,7 @@ impl AudioRankPeriodParams {
     }
 }
 
-/// Parameters for audio rank endpoints that identify a single rank list.
+/// 标识单个榜单的音频榜单 endpoint 参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AudioRankListParams {
     list_id: u64,
@@ -220,7 +220,7 @@ impl AudioRankListParams {
     }
 }
 
-/// Parameters for `/audio/music-service-c/web/url`.
+/// `/audio/music-service-c/web/url` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AudioStreamUrlWebParams {
     sid: AudioId,
@@ -256,7 +256,7 @@ impl AudioStreamUrlWebParams {
     }
 }
 
-/// Parameters for `/audio/music-service-c/url`.
+/// `/audio/music-service-c/url` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AudioStreamUrlParams {
     song_id: AudioId,

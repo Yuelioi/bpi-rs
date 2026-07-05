@@ -14,9 +14,9 @@ const QR_POLL_ENDPOINT: &str = "https://passport.bilibili.com/x/passport-login/w
 /// 生成 QRCode 数据
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct GenerateQrCodeData {
-    /// QR login URL rendered by callers.
+    /// 调用方渲染的 QR 登录 URL。
     pub url: String,
-    /// Temporary key used to poll QR login state.
+    /// 用于轮询 QR 登录状态的临时 key。
     pub qrcode_key: String,
 }
 
@@ -29,7 +29,7 @@ pub struct CheckQrCodeStatusData {
     pub code: i32,             // 状态码
     pub message: String,       // 扫码状态信息
 
-    /// Cookies returned only after a successful QR login.
+    /// 仅在 QR 登录成功后返回的 cookie。
     #[serde(default)]
     pub cookies: Vec<(String, String)>,
 }

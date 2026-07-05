@@ -75,12 +75,12 @@ impl Default for ActivityListParams {
 }
 
 impl ActivityListParams {
-    /// Creates activity-list parameters with Bilibili's web defaults.
+    /// 使用 Bilibili Web 默认值创建活动列表参数。
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Sets the platform filter, for example `1,3`.
+    /// 设置平台过滤器，例如 `1,3`。
     pub fn platform_filter(mut self, plat: impl Into<String>) -> BpiResult<Self> {
         let plat = plat.into();
         validate_non_blank("plat", &plat)?;
@@ -88,25 +88,25 @@ impl ActivityListParams {
         Ok(self)
     }
 
-    /// Sets the API mold marker. Defaults to `0`.
+    /// 设置 API mold 标记。默认值为 `0`。
     pub fn mold(mut self, mold: u32) -> Self {
         self.mold = mold;
         self
     }
 
-    /// Sets the API HTTP mode marker. Defaults to `3`.
+    /// 设置 API HTTP mode 标记。默认值为 `3`。
     pub fn http_mode(mut self, http: u32) -> Self {
         self.http = http;
         self
     }
 
-    /// Sets the page number.
+    /// 设置页码。
     pub fn page(mut self, page: u32) -> BpiResult<Self> {
         self.pn = validate_positive("pn", page)?;
         Ok(self)
     }
 
-    /// Sets the page size.
+    /// 设置每页数量。
     pub fn page_size(mut self, page_size: u32) -> BpiResult<Self> {
         self.ps = validate_positive("ps", page_size)?;
         Ok(self)

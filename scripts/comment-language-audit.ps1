@@ -1,5 +1,5 @@
 param(
-    [string[]] $Paths = @("src", "tests", "examples", "scripts"),
+    [string[]] $Paths = @("src"),
     [switch] $ShowExamples,
     [int] $ExampleLimit = 50
 )

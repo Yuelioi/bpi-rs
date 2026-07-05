@@ -2,14 +2,14 @@ use crate::ids::{Aid, Cid, EpisodeId, SeasonId};
 use crate::models::{Fnval, VideoQuality};
 use crate::{BpiError, BpiResult};
 
-/// Identifies a cheese course request by season ID or episode ID.
+/// 通过 season ID 或 episode ID 标识课堂课程请求。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CheeseInfoId {
     Season(SeasonId),
     Episode(EpisodeId),
 }
 
-/// Parameters for `/pugv/view/web/season`.
+/// `/pugv/view/web/season` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CheeseInfoParams {
     id: CheeseInfoId,
@@ -36,7 +36,7 @@ impl CheeseInfoParams {
     }
 }
 
-/// Parameters for `/pugv/view/web/ep/list`.
+/// `/pugv/view/web/ep/list` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CheeseEpListParams {
     season_id: SeasonId,
@@ -78,7 +78,7 @@ impl CheeseEpListParams {
     }
 }
 
-/// Parameters for `/pugv/player/web/playurl`.
+/// `/pugv/player/web/playurl` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CheeseVideoStreamParams {
     aid: Aid,

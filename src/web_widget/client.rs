@@ -8,7 +8,7 @@ const REGION_BANNER_ENDPOINT: &str = "https://api.bilibili.com/x/web-show/region
 const HEADER_PAGE_ENDPOINT: &str = "https://api.bilibili.com/x/web-show/page/header";
 const ONLINE_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/online";
 
-/// Web widget API client.
+/// Web 组件 API 客户端。
 #[derive(Clone, Copy)]
 pub struct WebWidgetClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -34,7 +34,7 @@ impl<'a> WebWidgetClient<'a> {
         ONLINE_ENDPOINT
     }
 
-    /// Gets the region carousel banner data.
+    /// 获取分区轮播 banner 数据。
     pub async fn region_banner(
         &self,
         params: WebWidgetRegionBannerParams,
@@ -46,7 +46,7 @@ impl<'a> WebWidgetClient<'a> {
             .await
     }
 
-    /// Gets the home page header image data.
+    /// 获取首页头图数据。
     pub async fn header_page(&self, params: WebWidgetHeaderPageParams) -> BpiResult<HeaderData> {
         let mut header = self
             .client
@@ -58,7 +58,7 @@ impl<'a> WebWidgetClient<'a> {
         Ok(header)
     }
 
-    /// Gets the current online upload counts by region.
+    /// 获取当前按分区统计的在线投稿数。
     pub async fn online(&self) -> BpiResult<OnlineData> {
         self.client
             .get(ONLINE_ENDPOINT)

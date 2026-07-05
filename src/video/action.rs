@@ -33,10 +33,10 @@ pub struct FavoriteData {
     pub success_num: u32,
 }
 
-/// Current account coin status for a video.
+/// 当前账号对某个视频的投币状态。
 #[derive(Debug, Serialize, Clone, Deserialize, PartialEq, Eq)]
 pub struct VideoCoinStatusData {
-    /// Number of coins the current account has already given to this video.
+    /// 当前账号已给此视频投出的硬币数量。
     pub multiply: u8,
 }
 
@@ -59,7 +59,7 @@ impl LegacyVideoIdForm {
     }
 }
 
-/// Parameters for checking whether the current account has coined a video.
+/// 检查当前账号是否已给视频投币的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoCoinStatusParams {
     video_id: LegacyVideoIdForm,
@@ -85,7 +85,7 @@ impl VideoCoinStatusParams {
     }
 }
 
-/// Parameters for video like/unlike operations.
+/// 视频点赞/取消点赞操作的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoLikeParams {
     video_id: LegacyVideoIdForm,
@@ -116,7 +116,7 @@ impl VideoLikeParams {
     }
 }
 
-/// Parameters for video coin operations.
+/// 视频投币操作的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoCoinParams {
     video_id: LegacyVideoIdForm,
@@ -158,7 +158,7 @@ impl VideoCoinParams {
     }
 }
 
-/// Parameters for video favorite add/remove operations.
+/// 视频添加/移除收藏操作的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoFavoriteParams {
     rid: u64,
@@ -212,9 +212,9 @@ impl VideoFavoriteParams {
 }
 
 impl<'a> VideoClient<'a> {
-    /// Checks how many coins the current account has given to a video.
+    /// 检查当前账号已给视频投出多少硬币。
     ///
-    /// The upstream endpoint may lag briefly immediately after [`Self::coin`] succeeds.
+    /// [`Self::coin`] 成功后，上游 endpoint 可能会短暂滞后。
     pub async fn coin_status(
         &self,
         params: VideoCoinStatusParams,
@@ -227,7 +227,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Likes or unlikes a video and returns the optional canonical payload result.
+    /// 点赞或取消点赞视频，并返回可选的标准 payload 结果。
     pub async fn like(&self, params: VideoLikeParams) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
@@ -239,10 +239,10 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Gives coins to a video and returns the canonical payload result.
+    /// 给视频投币，并返回标准 payload 结果。
     ///
-    /// Bilibili's web endpoint expects a normal login cookie set, including `buvid3`; accounts
-    /// without it may hit risk control even when `SESSDATA` and `bili_jct` are present.
+    /// Bilibili 的 Web endpoint 需要包含 `buvid3` 的正常登录 cookie 集合；
+    /// 即使存在 `SESSDATA` 和 `bili_jct`，缺少它的账号也可能触发风控。
     pub async fn coin(&self, params: VideoCoinParams) -> BpiResult<CoinData> {
         let csrf = self.client.csrf()?;
 
@@ -254,7 +254,7 @@ impl<'a> VideoClient<'a> {
             .await
     }
 
-    /// Favorites a video to, or removes it from, favorite folders.
+    /// 将视频添加到收藏夹，或从收藏夹中移除。
     pub async fn favorite(&self, params: VideoFavoriteParams) -> BpiResult<FavoriteData> {
         let csrf = self.client.csrf()?;
 

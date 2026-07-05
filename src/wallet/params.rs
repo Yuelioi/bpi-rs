@@ -2,7 +2,7 @@ use serde_json::{Value, json};
 
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/paywallet/wallet/getUserWallet`.
+/// `/paywallet/wallet/getUserWallet` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WalletInfoParams {
     platform_type: u32,
@@ -12,12 +12,12 @@ pub struct WalletInfoParams {
 }
 
 impl WalletInfoParams {
-    /// Creates wallet-info parameters using the current UTC timestamp in milliseconds.
+    /// 使用当前 UTC 毫秒时间戳创建钱包信息参数。
     pub fn new() -> Self {
         Self::at_timestamp(chrono::Utc::now().timestamp_millis())
     }
 
-    /// Creates wallet-info parameters with a fixed timestamp for deterministic callers/tests.
+    /// 使用固定时间戳创建钱包信息参数，方便确定性调用方/测试。
     pub fn at_timestamp(timestamp_ms: i64) -> Self {
         Self {
             platform_type: 3,

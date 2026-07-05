@@ -1,7 +1,7 @@
 use crate::ids::{Aid, SeasonId};
 use crate::{BpiError, BpiResult};
 
-/// Sort field for `/x2/creative/web/seasons`.
+/// `/x2/creative/web/seasons` 的排序字段。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SeasonListOrder {
     CreatedAt,
@@ -17,7 +17,7 @@ impl SeasonListOrder {
     }
 }
 
-/// Sort direction for `/x2/creative/web/seasons`.
+/// `/x2/creative/web/seasons` 的排序方向。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SeasonListSort {
     Asc,
@@ -33,7 +33,7 @@ impl SeasonListSort {
     }
 }
 
-/// Parameters for `/x2/creative/web/seasons`.
+/// `/x2/creative/web/seasons` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SeasonListParams {
     page: u32,
@@ -80,7 +80,7 @@ impl SeasonListParams {
     }
 }
 
-/// Parameters for `/x2/creative/web/season/aid`.
+/// `/x2/creative/web/season/aid` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SeasonByAidParams {
     aid: Aid,
@@ -96,7 +96,7 @@ impl SeasonByAidParams {
     }
 }
 
-/// Parameters for `/x2/creative/web/season`.
+/// `/x2/creative/web/season` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SeasonInfoParams {
     season_id: SeasonId,
@@ -112,7 +112,7 @@ impl SeasonInfoParams {
     }
 }
 
-/// Parameters for `/x2/creative/web/season/section`.
+/// `/x2/creative/web/season/section` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SeasonSectionEpisodesParams {
     season_id: SeasonId,

@@ -56,7 +56,7 @@ const SHIELD_KEYWORDS_ENDPOINT: &str =
 const WEB_HEART_BEAT_ENDPOINT: &str =
     "https://live-trace.bilibili.com/xlive/rdata-interface/v1/heartbeat/webHeartBeat";
 
-/// Live API client.
+/// 直播 API 客户端。
 #[derive(Clone, Copy)]
 pub struct LiveClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -92,7 +92,7 @@ impl<'a> LiveClient<'a> {
         VERSION_ENDPOINT
     }
 
-    /// Fetches all live area categories.
+    /// 获取全部直播分区分类。
     pub async fn area_list(&self) -> BpiResult<Vec<LiveParentArea>> {
         self.client
             .get(AREA_LIST_ENDPOINT)
@@ -101,7 +101,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches public room information by real room ID.
+    /// 按真实房间 ID 获取公开房间信息。
     pub async fn room_info(&self, room_id: i64) -> BpiResult<RoomInfoData> {
         self.client
             .get(ROOM_INFO_ENDPOINT)
@@ -111,7 +111,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches live stream URLs by real room ID.
+    /// 按真实房间 ID 获取直播流 URL。
     pub async fn stream(
         &self,
         cid: i64,
@@ -139,7 +139,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches the web homepage live recommendation list.
+    /// 获取 Web 首页直播推荐列表。
     pub async fn recommend(&self) -> BpiResult<RecommendData> {
         self.client
             .get(RECOMMEND_ENDPOINT)
@@ -149,7 +149,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches the current PC live client version metadata.
+    /// 获取当前 PC 直播客户端版本元数据。
     pub async fn version(&self) -> BpiResult<PcLiveVersionData> {
         self.client
             .get(VERSION_ENDPOINT)
@@ -159,7 +159,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches the authenticated live gift type list.
+    /// 获取已登录账号的直播礼物类型列表。
     pub async fn gift_types(&self) -> BpiResult<Vec<GiftTypeItem>> {
         self.client
             .get(GIFT_TYPES_ENDPOINT)
@@ -168,7 +168,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches the gift panel for a live room.
+    /// 获取直播间礼物面板。
     pub async fn room_gift_list(
         &self,
         room_id: i64,
@@ -196,7 +196,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches blind gift probability details.
+    /// 获取盲盒礼物概率详情。
     pub async fn blind_gift_info(&self, gift_id: i64) -> BpiResult<BlindGiftData> {
         self.client
             .get(BLIND_GIFT_INFO_ENDPOINT)
@@ -206,7 +206,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches live WebSocket danmu token and host information.
+    /// 获取直播 WebSocket 弹幕 token 和主机信息。
     pub async fn danmu_info(&self, room_id: u64, info_type: u8) -> BpiResult<LiveDanmuInfoData> {
         let query = self
             .client
@@ -224,7 +224,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches live room emoticon packages.
+    /// 获取直播间表情包。
     pub async fn emoticons(&self, room_id: i64, platform: &str) -> BpiResult<EmoticonData> {
         self.client
             .get(EMOTICONS_ENDPOINT)
@@ -237,7 +237,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches live room lottery information.
+    /// 获取直播间抽奖信息。
     pub async fn lottery_info(&self, room_id: i64) -> BpiResult<LotteryInfoData> {
         let query = self
             .client
@@ -252,7 +252,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches the current account's live fan medals.
+    /// 获取当前账号的直播粉丝勋章。
     pub async fn my_medals(&self, page: i32, page_size: i32) -> BpiResult<MyMedalsData> {
         self.client
             .get(MY_MEDALS_ENDPOINT)
@@ -265,7 +265,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches followed streamers and their live status.
+    /// 获取已关注主播及其直播状态。
     pub async fn follow_up_list(
         &self,
         page: Option<i32>,
@@ -296,7 +296,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches followed streamers that are currently live.
+    /// 获取当前正在直播的已关注主播。
     pub async fn follow_up_web_list(&self, hit_ab: Option<bool>) -> BpiResult<LiveWebListData> {
         let mut query = Vec::new();
 
@@ -312,7 +312,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches the current account's live replay list.
+    /// 获取当前账号的直播回放列表。
     pub async fn replay_list(
         &self,
         page: Option<i32>,
@@ -335,7 +335,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches live guard members for a room.
+    /// 获取直播间的大航海成员。
     pub async fn guard_list(
         &self,
         room_id: i64,
@@ -360,7 +360,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches silent users for a live room.
+    /// 获取直播间禁言用户。
     pub async fn silent_users(
         &self,
         params: LiveSilentUserListParams,
@@ -376,7 +376,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches banned users for a live anchor.
+    /// 获取直播主播的封禁用户。
     pub async fn banned_users(
         &self,
         params: LiveBannedUserListParams,
@@ -392,7 +392,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Fetches shield keywords for a live room.
+    /// 获取直播间屏蔽关键词。
     pub async fn shield_keywords(
         &self,
         params: LiveShieldKeywordListParams,
@@ -408,7 +408,7 @@ impl<'a> LiveClient<'a> {
             .await
     }
 
-    /// Sends a web heartbeat for live telemetry.
+    /// 发送用于直播遥测的 Web 心跳。
     pub async fn web_heart_beat(&self, params: LiveWebHeartBeatParams) -> BpiResult<HeartBeatData> {
         self.client
             .get(WEB_HEART_BEAT_ENDPOINT)

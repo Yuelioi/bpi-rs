@@ -1,6 +1,6 @@
 use reqwest::{Method, RequestBuilder, Url};
 
-/// Metadata safe to emit in request logs.
+/// 可安全写入请求日志的元数据。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RequestMetadata {
     pub method: Method,
@@ -9,7 +9,7 @@ pub struct RequestMetadata {
 }
 
 impl RequestMetadata {
-    /// Builds safe request metadata from a cloneable reqwest request builder.
+    /// 从可克隆的 reqwest request builder 构建安全请求元数据。
     pub fn from_builder(builder: &RequestBuilder, endpoint: impl Into<String>) -> Option<Self> {
         let request = builder.try_clone()?.build().ok()?;
 
@@ -21,7 +21,7 @@ impl RequestMetadata {
     }
 }
 
-/// Returns a URL string safe for logs.
+/// 返回可安全用于日志的 URL 字符串。
 pub fn sanitize_url_for_logging(url: &str) -> String {
     let Ok(mut parsed) = Url::parse(url) else {
         return "<invalid-url>".to_string();
@@ -47,7 +47,7 @@ pub fn sanitize_url_for_logging(url: &str) -> String {
     parsed.to_string()
 }
 
-/// Returns a header pair safe for logs, or `None` when the header is sensitive.
+/// 返回可安全用于日志的请求头键值对；请求头敏感时返回 `None`。
 pub fn sanitize_header_for_logging(name: &str, value: &str) -> Option<(String, String)> {
     if is_sensitive_header_name(name) {
         return None;

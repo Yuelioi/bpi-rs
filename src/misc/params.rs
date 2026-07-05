@@ -8,7 +8,7 @@ const DEFAULT_SHARE_MODE: u32 = 4;
 const DEFAULT_BUVID: &str = "qwq";
 const DEFAULT_BUILD: u64 = 6_114_514;
 
-/// Parameters for `/x/share/click` b23.tv short link generation.
+/// `/x/share/click` b23.tv 短链接生成参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MiscB23ShortLinkParams {
     aid: Aid,

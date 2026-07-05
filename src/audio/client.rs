@@ -34,7 +34,7 @@ const RANK_DETAIL_ENDPOINT: &str =
 const RANK_MUSIC_LIST_ENDPOINT: &str =
     "https://api.bilibili.com/x/copyright-music-publicity/toplist/music_list";
 
-/// Audio API client.
+/// 音频 API 客户端。
 #[derive(Clone, Copy)]
 pub struct AudioClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -125,7 +125,7 @@ impl<'a> AudioClient<'a> {
         RANK_MUSIC_LIST_ENDPOINT
     }
 
-    /// Gets basic information for an audio track.
+    /// 获取音频条目的基本信息。
     pub async fn info(&self, params: AudioSongParams) -> BpiResult<AudioInfoData> {
         self.client
             .get(INFO_ENDPOINT)
@@ -134,7 +134,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets tags for an audio track.
+    /// 获取音频条目的标签。
     pub async fn tags(&self, params: AudioSongParams) -> BpiResult<Vec<AudioTag>> {
         self.client
             .get(TAGS_ENDPOINT)
@@ -143,7 +143,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets creator members for an audio track.
+    /// 获取音频条目的创作成员。
     pub async fn members(&self, params: AudioSongParams) -> BpiResult<Vec<AudioMemberType>> {
         self.client
             .get(MEMBERS_ENDPOINT)
@@ -152,7 +152,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets the lyric body for an audio track.
+    /// 获取音频条目的歌词正文。
     pub async fn lyric(&self, params: AudioSongParams) -> BpiResult<String> {
         self.client
             .get(LYRIC_ENDPOINT)
@@ -161,7 +161,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets status counters for an audio track.
+    /// 获取音频条目的状态计数。
     pub async fn status_number(&self, params: AudioSongParams) -> BpiResult<AudioStatusNumberData> {
         self.client
             .get(STATUS_NUMBER_ENDPOINT)
@@ -170,7 +170,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets whether the current account has collected an audio track.
+    /// 获取当前账号是否已收藏某个音频条目。
     pub async fn collection_status(&self, params: AudioSongParams) -> BpiResult<bool> {
         self.client
             .get(COLLECTION_STATUS_ENDPOINT)
@@ -179,7 +179,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets the current account's coin count for an audio track.
+    /// 获取当前账号对某个音频条目的投币数量。
     pub async fn coin_count(&self, params: AudioSongParams) -> BpiResult<i32> {
         self.client
             .get(COIN_COUNT_ENDPOINT)
@@ -188,7 +188,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets the web audio stream URL payload.
+    /// 获取 Web 音频流 URL payload。
     pub async fn stream_url_web(
         &self,
         params: AudioStreamUrlWebParams,
@@ -200,7 +200,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets the app-style audio stream URL payload.
+    /// 获取 app 风格的音频流 URL payload。
     pub async fn stream_url(&self, params: AudioStreamUrlParams) -> BpiResult<AudioStreamUrlData> {
         self.client
             .get(STREAM_URL_ENDPOINT)
@@ -210,7 +210,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets the current account's created audio collections.
+    /// 获取当前账号创建的音频收藏夹。
     pub async fn collections_list(
         &self,
         params: AudioPageParams,
@@ -222,7 +222,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets information for an audio collection.
+    /// 获取音频收藏夹信息。
     pub async fn collection_info(
         &self,
         params: AudioCollectionInfoParams,
@@ -234,7 +234,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets popular audio collections.
+    /// 获取热门音频收藏夹。
     pub async fn hot_menu(&self, params: AudioPageParams) -> BpiResult<AudioHotMenuData> {
         self.client
             .get(HOT_MENU_ENDPOINT)
@@ -243,7 +243,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets ranked audio collection menus.
+    /// 获取音频榜单菜单。
     pub async fn rank_menu(&self, params: AudioPageParams) -> BpiResult<AudioRankMenuData> {
         self.client
             .get(RANK_MENU_ENDPOINT)
@@ -252,7 +252,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets available periods for an audio rank list.
+    /// 获取音频榜单可用期数。
     pub async fn rank_period(
         &self,
         params: AudioRankPeriodParams,
@@ -266,7 +266,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets detail for a single audio rank list period.
+    /// 获取单个音频榜单期数详情。
     pub async fn rank_detail(&self, params: AudioRankListParams) -> BpiResult<AudioRankDetailData> {
         let csrf = self.client.csrf().unwrap_or_default();
 
@@ -277,7 +277,7 @@ impl<'a> AudioClient<'a> {
             .await
     }
 
-    /// Gets music entries for a single audio rank list period.
+    /// 获取单个音频榜单期数的音乐条目。
     pub async fn rank_music_list(
         &self,
         params: AudioRankListParams,

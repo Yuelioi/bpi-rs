@@ -218,7 +218,7 @@ pub struct SectionEpisode {
     pub pages: Vec<Page>,
 }
 
-/// ugc_season section
+/// ugc_season 分区
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Section {
     pub season_id: u64,

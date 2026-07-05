@@ -9,7 +9,7 @@ use crate::login::LoginClient;
 
 const UPDATE_USER_SIGN_ENDPOINT: &str = "https://api.bilibili.com/x/member/web/sign/update";
 
-/// Parameters for updating the member-center user sign.
+/// 更新会员中心用户签名的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoginUserSignParams {
     user_sign: String,
@@ -37,7 +37,7 @@ impl LoginUserSignParams {
 }
 
 impl<'a> LoginClient<'a> {
-    /// Updates the member-center user sign and returns the canonical payload result.
+    /// 更新会员中心用户签名并返回标准 payload 结果。
     pub async fn update_user_sign(
         &self,
         params: LoginUserSignParams,

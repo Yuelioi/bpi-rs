@@ -1,7 +1,7 @@
 use crate::ids::Aid;
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/x2/creative/web/archives/sp`.
+/// `/x2/creative/web/archives/sp` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UpArchivesListParams {
     page: u32,
@@ -32,7 +32,7 @@ impl UpArchivesListParams {
     }
 }
 
-/// Parameters for `/x/web/archive/videos`.
+/// `/x/web/archive/videos` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UpArchiveVideosParams {
     aid: Aid,
@@ -48,7 +48,7 @@ impl UpArchiveVideosParams {
     }
 }
 
-/// Parameters for `/x/web/data/archive_diagnose/compare`.
+/// `/x/web/data/archive_diagnose/compare` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct UpArchiveCompareParams {
     timestamp: Option<u64>,
@@ -85,7 +85,7 @@ impl UpArchiveCompareParams {
     }
 }
 
-/// Metric for `/x/web/data/pandect` video trend queries.
+/// `/x/web/data/pandect` 视频趋势查询的指标。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UpVideoTrendMetric {
     Play,
@@ -113,7 +113,7 @@ impl UpVideoTrendMetric {
     }
 }
 
-/// Parameters for `/x/web/data/pandect`.
+/// `/x/web/data/pandect` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UpVideoTrendParams {
     metric: UpVideoTrendMetric,
@@ -129,7 +129,7 @@ impl UpVideoTrendParams {
     }
 }
 
-/// Metric for `/x/web/data/article/thirty` article trend queries.
+/// `/x/web/data/article/thirty` 专栏趋势查询的指标。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UpArticleTrendMetric {
     Read,
@@ -153,7 +153,7 @@ impl UpArticleTrendMetric {
     }
 }
 
-/// Parameters for `/x/web/data/article/thirty`.
+/// `/x/web/data/article/thirty` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UpArticleTrendParams {
     metric: UpArticleTrendMetric,

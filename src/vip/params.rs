@@ -1,6 +1,6 @@
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/x/vip/web/vip_center/combine`.
+/// `/x/vip/web/vip_center/combine` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VipCenterInfoParams {
     build: u32,
@@ -27,7 +27,7 @@ impl Default for VipCenterInfoParams {
     }
 }
 
-/// Parameters for `/x/vip/privilege/receive`.
+/// `/x/vip/privilege/receive` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VipPrivilegeReceiveParams {
     typ: u8,

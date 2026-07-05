@@ -34,7 +34,7 @@ const UP_USERS_ENDPOINT: &str =
     "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/w_dyn_uplist";
 const RECENT_UP_ENDPOINT: &str = "https://api.bilibili.com/x/polymer/web-dynamic/v1/portal";
 
-/// Dynamic API client.
+/// 动态 API 客户端。
 #[derive(Clone, Copy)]
 pub struct DynamicClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -110,7 +110,7 @@ impl<'a> DynamicClient<'a> {
         RECENT_UP_ENDPOINT
     }
 
-    /// Gets the followed dynamic feed.
+    /// 获取已关注动态流。
     pub async fn all(&self, params: DynamicAllParams) -> BpiResult<DynamicAllData> {
         self.client
             .get(ALL_ENDPOINT)
@@ -119,7 +119,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Checks whether the dynamic feed has new items.
+    /// 检查动态流是否有新内容。
     pub async fn check_new(&self, params: DynamicCheckNewParams) -> BpiResult<DynamicUpdateData> {
         self.client
             .get(CHECK_NEW_ENDPOINT)
@@ -128,7 +128,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets dynamic items shown in the navigation feed.
+    /// 获取导航动态流展示的动态条目。
     pub async fn nav_feed(&self, params: DynamicNavFeedParams) -> BpiResult<DynamicNavData> {
         self.client
             .get(NAV_FEED_ENDPOINT)
@@ -137,7 +137,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets the dynamic feed banner.
+    /// 获取动态流 banner。
     pub async fn feed_banner(&self) -> BpiResult<DynamicBannerData> {
         self.client
             .get(FEED_BANNER_ENDPOINT)
@@ -150,7 +150,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets a dynamic item detail.
+    /// 获取动态条目详情。
     pub async fn detail(&self, params: DynamicDetailParams) -> BpiResult<DynamicDetailData> {
         self.client
             .get(DETAIL_ENDPOINT)
@@ -159,7 +159,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets reaction users for a dynamic item.
+    /// 获取动态条目的互动用户。
     pub async fn reactions(
         &self,
         params: DynamicReactionsParams,
@@ -171,7 +171,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets lottery notice detail for a dynamic item.
+    /// 获取动态条目的抽奖通知详情。
     pub async fn lottery_notice(
         &self,
         params: DynamicLotteryNoticeParams,
@@ -185,7 +185,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets forwards for a dynamic item.
+    /// 获取动态条目的转发列表。
     pub async fn forwards(&self, params: DynamicForwardsParams) -> BpiResult<DynamicForwardData> {
         self.client
             .get(FORWARDS_ENDPOINT)
@@ -194,7 +194,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets pictures for a dynamic item.
+    /// 获取动态条目的图片。
     pub async fn pics(&self, params: DynamicPicsParams) -> BpiResult<Vec<DynamicPic>> {
         self.client
             .get(PICS_ENDPOINT)
@@ -203,7 +203,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets a forwarded dynamic item.
+    /// 获取被转发的动态条目。
     pub async fn forward_item(
         &self,
         params: DynamicForwardItemParams,
@@ -215,7 +215,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets followed users who are currently live.
+    /// 获取当前正在直播的已关注用户。
     pub async fn live_users(&self, params: DynamicLiveUsersParams) -> BpiResult<LiveUsersData> {
         self.client
             .get(LIVE_USERS_ENDPOINT)
@@ -224,7 +224,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets followed users with new dynamic content.
+    /// 获取有新动态内容的已关注用户。
     pub async fn up_users(&self, params: DynamicUpUsersParams) -> BpiResult<DynUpUsersData> {
         self.client
             .get(UP_USERS_ENDPOINT)
@@ -233,7 +233,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Gets recently updated followed users.
+    /// 获取最近更新的已关注用户。
     pub async fn recent_up(&self) -> BpiResult<RecentUpData> {
         self.client
             .get(RECENT_UP_ENDPOINT)

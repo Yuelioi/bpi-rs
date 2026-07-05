@@ -1,30 +1,30 @@
 use crate::ids::{Aid, Bvid, Cid};
 use crate::{BpiError, BpiResult};
 
-/// Identifies a Bilibili video by either AV numeric ID or BV string ID.
+/// 用 AV 数字 ID 或 BV 字符串 ID 标识一个 Bilibili 视频。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum VideoId {
-    /// AV numeric video ID.
+    /// AV 数字视频 ID。
     Aid(Aid),
-    /// BV string video ID.
+    /// BV 字符串视频 ID。
     Bvid(Bvid),
 }
 
-/// Parameters for `/x/web-interface/view`.
+/// `/x/web-interface/view` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoViewParams {
     id: VideoId,
 }
 
 impl VideoViewParams {
-    /// Creates view parameters from a validated AV ID.
+    /// 使用已验证的 AV ID 创建视频详情参数。
     pub fn from_aid(aid: Aid) -> Self {
         Self {
             id: VideoId::Aid(aid),
         }
     }
 
-    /// Creates view parameters from a validated BV ID.
+    /// 使用已验证的 BV ID 创建视频详情参数。
     pub fn from_bvid(bvid: Bvid) -> Self {
         Self {
             id: VideoId::Bvid(bvid),
@@ -36,7 +36,7 @@ impl VideoViewParams {
     }
 }
 
-/// Parameters for `/x/web-interface/view/detail`.
+/// `/x/web-interface/view/detail` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoDetailParams {
     id: VideoId,
@@ -44,12 +44,12 @@ pub struct VideoDetailParams {
 }
 
 impl VideoDetailParams {
-    /// Creates detail parameters from a validated AV ID.
+    /// 使用已验证的 AV ID 创建详情参数。
     pub fn from_aid(aid: Aid) -> Self {
         Self::new(VideoId::Aid(aid))
     }
 
-    /// Creates detail parameters from a validated BV ID.
+    /// 使用已验证的 BV ID 创建详情参数。
     pub fn from_bvid(bvid: Bvid) -> Self {
         Self::new(VideoId::Bvid(bvid))
     }
@@ -61,7 +61,7 @@ impl VideoDetailParams {
         }
     }
 
-    /// Controls whether the detail endpoint should include electric charging data.
+    /// 控制详情接口是否包含充电数据。
     pub fn need_elec(mut self, need_elec: bool) -> Self {
         self.need_elec = Some(u8::from(need_elec));
         self
@@ -78,21 +78,21 @@ impl VideoDetailParams {
     }
 }
 
-/// Parameters for `/x/player/pagelist`.
+/// `/x/player/pagelist` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoPageListParams {
     id: VideoId,
 }
 
 impl VideoPageListParams {
-    /// Creates page-list parameters from a validated AV ID.
+    /// 使用已验证的 AV ID 创建分 P 列表参数。
     pub fn from_aid(aid: Aid) -> Self {
         Self {
             id: VideoId::Aid(aid),
         }
     }
 
-    /// Creates page-list parameters from a validated BV ID.
+    /// 使用已验证的 BV ID 创建分 P 列表参数。
     pub fn from_bvid(bvid: Bvid) -> Self {
         Self {
             id: VideoId::Bvid(bvid),
@@ -104,21 +104,21 @@ impl VideoPageListParams {
     }
 }
 
-/// Parameters for `/x/web-interface/archive/desc`.
+/// `/x/web-interface/archive/desc` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoDescParams {
     id: VideoId,
 }
 
 impl VideoDescParams {
-    /// Creates description parameters from a validated AV ID.
+    /// 使用已验证的 AV ID 创建简介参数。
     pub fn from_aid(aid: Aid) -> Self {
         Self {
             id: VideoId::Aid(aid),
         }
     }
 
-    /// Creates description parameters from a validated BV ID.
+    /// 使用已验证的 BV ID 创建简介参数。
     pub fn from_bvid(bvid: Bvid) -> Self {
         Self {
             id: VideoId::Bvid(bvid),
@@ -130,7 +130,7 @@ impl VideoDescParams {
     }
 }
 
-/// Parameters for `/x/player/wbi/playurl`.
+/// `/x/player/wbi/playurl` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoPlayUrlParams {
     id: VideoId,
@@ -145,12 +145,12 @@ pub struct VideoPlayUrlParams {
 }
 
 impl VideoPlayUrlParams {
-    /// Creates play URL parameters from a validated AV ID and page/content ID.
+    /// 使用已验证的 AV ID 和分 P/内容 ID 创建播放 URL 参数。
     pub fn from_aid(aid: Aid, cid: Cid) -> Self {
         Self::new(VideoId::Aid(aid), cid)
     }
 
-    /// Creates play URL parameters from a validated BV ID and page/content ID.
+    /// 使用已验证的 BV ID 和分 P/内容 ID 创建播放 URL 参数。
     pub fn from_bvid(bvid: Bvid, cid: Cid) -> Self {
         Self::new(VideoId::Bvid(bvid), cid)
     }
@@ -169,43 +169,43 @@ impl VideoPlayUrlParams {
         }
     }
 
-    /// Sets the requested quality code.
+    /// 设置请求的清晰度代码。
     pub fn quality(mut self, qn: u64) -> Self {
         self.qn = Some(qn);
         self
     }
 
-    /// Sets the Bilibili stream format bitmask.
+    /// 设置 Bilibili 流格式位掩码。
     pub fn format_flags(mut self, fnval: u64) -> Self {
         self.fnval = Some(fnval);
         self
     }
 
-    /// Sets the stream format version.
+    /// 设置流格式版本。
     pub fn format_version(mut self, fnver: u64) -> Self {
         self.fnver = Some(fnver);
         self
     }
 
-    /// Controls whether 4K streams are allowed.
+    /// 控制是否允许 4K 流。
     pub fn fourk(mut self, enabled: bool) -> Self {
         self.fourk = Some(u8::from(enabled));
         self
     }
 
-    /// Sets the API platform marker. Defaults to `pc`.
+    /// 设置 API 平台标记。默认值为 `pc`。
     pub fn platform(mut self, platform: impl Into<String>) -> Self {
         self.platform = platform.into();
         self
     }
 
-    /// Sets the high-quality playback flag.
+    /// 设置高画质播放标记。
     pub fn high_quality(mut self, enabled: bool) -> Self {
         self.high_quality = Some(u8::from(enabled));
         self
     }
 
-    /// Controls whether trial viewing should be requested.
+    /// 控制是否请求试看。
     pub fn try_look(mut self, enabled: bool) -> Self {
         self.try_look = Some(u8::from(enabled));
         self
@@ -242,7 +242,7 @@ impl VideoPlayUrlParams {
     }
 }
 
-/// Parameters for `/x/player/online/total`.
+/// `/x/player/online/total` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoOnlineTotalParams {
     id: VideoId,
@@ -271,7 +271,7 @@ impl VideoOnlineTotalParams {
     }
 }
 
-/// Parameters for `/x/player/wbi/v2`.
+/// `/x/player/wbi/v2` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoPlayerInfoParams {
     id: VideoId,
@@ -321,7 +321,7 @@ impl VideoPlayerInfoParams {
     }
 }
 
-/// Parameters for `/x/web-interface/archive/related`.
+/// `/x/web-interface/archive/related` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoRelatedParams {
     id: VideoId,
@@ -345,7 +345,7 @@ impl VideoRelatedParams {
     }
 }
 
-/// Parameters for `/x/web-interface/wbi/index/top/feed/rcmd`.
+/// `/x/web-interface/wbi/index/top/feed/rcmd` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VideoHomepageRecommendationsParams {
     page_size: u8,
@@ -402,7 +402,7 @@ impl Default for VideoHomepageRecommendationsParams {
     }
 }
 
-/// Parameters for `/x/web-interface/view/conclusion/get`.
+/// `/x/web-interface/view/conclusion/get` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoAiSummaryParams {
     id: VideoId,
@@ -437,7 +437,7 @@ impl VideoAiSummaryParams {
     }
 }
 
-/// Parameters for `/x/web-interface/view/detail/tag`.
+/// `/x/web-interface/view/detail/tag` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoTagsParams {
     id: VideoId,
@@ -473,7 +473,7 @@ impl VideoTagsParams {
     }
 }
 
-/// Parameters for `/x/stein/edgeinfo_v2`.
+/// `/x/stein/edgeinfo_v2` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InteractiveVideoInfoParams {
     id: VideoId,

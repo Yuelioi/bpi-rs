@@ -8,7 +8,7 @@ const INFO_ENDPOINT: &str = "https://api.bilibili.com/pugv/view/web/season";
 const EP_LIST_ENDPOINT: &str = "https://api.bilibili.com/pugv/view/web/ep/list";
 const VIDEO_STREAM_ENDPOINT: &str = "https://api.bilibili.com/pugv/player/web/playurl";
 
-/// Cheese course API client.
+/// 课堂课程 API 客户端。
 #[derive(Clone, Copy)]
 pub struct CheeseClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -34,7 +34,7 @@ impl<'a> CheeseClient<'a> {
         VIDEO_STREAM_ENDPOINT
     }
 
-    /// Gets cheese course information by season or episode ID.
+    /// 按 season 或 episode ID 获取课堂课程信息。
     pub async fn info(&self, params: CheeseInfoParams) -> BpiResult<CourseInfo> {
         self.client
             .get(INFO_ENDPOINT)
@@ -43,7 +43,7 @@ impl<'a> CheeseClient<'a> {
             .await
     }
 
-    /// Gets cheese course information by season ID.
+    /// 按 season ID 获取课堂课程信息。
     pub async fn info_by_season_id(&self, season_id: SeasonId) -> BpiResult<CourseInfo> {
         self.client
             .get(INFO_ENDPOINT)
@@ -52,7 +52,7 @@ impl<'a> CheeseClient<'a> {
             .await
     }
 
-    /// Gets cheese course information by episode ID.
+    /// 按 episode ID 获取课堂课程信息。
     pub async fn info_by_ep_id(&self, episode_id: EpisodeId) -> BpiResult<CourseInfo> {
         self.client
             .get(INFO_ENDPOINT)
@@ -61,7 +61,7 @@ impl<'a> CheeseClient<'a> {
             .await
     }
 
-    /// Gets a cheese course episode list.
+    /// 获取课堂课程 episode 列表。
     pub async fn ep_list(&self, params: CheeseEpListParams) -> BpiResult<CourseEpList> {
         self.client
             .get(EP_LIST_ENDPOINT)
@@ -70,7 +70,7 @@ impl<'a> CheeseClient<'a> {
             .await
     }
 
-    /// Gets cheese course video stream data.
+    /// 获取课堂课程视频流数据。
     pub async fn video_stream(
         &self,
         params: CheeseVideoStreamParams,

@@ -78,7 +78,7 @@ const AUTH_COOKIE_NAMES: &[&str] = &[
     "buvid3",
 ];
 
-/// Configures a [`BpiClient`] before construction.
+/// 在构造前配置 [`BpiClient`]。
 #[derive(Debug)]
 pub struct BpiClientBuilder {
     timeout: Duration,
@@ -111,67 +111,67 @@ impl Default for BpiClientBuilder {
 }
 
 impl BpiClientBuilder {
-    /// Sets the total request timeout.
+    /// 设置请求总超时时间。
     pub fn timeout(mut self, timeout: Duration) -> Self {
         self.timeout = timeout;
         self
     }
 
-    /// Sets the TCP connect timeout.
+    /// 设置 TCP 连接超时时间。
     pub fn connect_timeout(mut self, timeout: Duration) -> Self {
         self.connect_timeout = timeout;
         self
     }
 
-    /// Sets the default user-agent applied by [`BpiClient::get`] and [`BpiClient::post`].
+    /// 设置 [`BpiClient::get`] 和 [`BpiClient::post`] 使用的默认 user-agent。
     pub fn user_agent(mut self, user_agent: impl Into<String>) -> Self {
         self.user_agent = user_agent.into();
         self
     }
 
-    /// Sets the default referer header applied by [`BpiClient::get`] and [`BpiClient::post`].
+    /// 设置 [`BpiClient::get`] 和 [`BpiClient::post`] 使用的默认 referer 请求头。
     pub fn referer(mut self, referer: impl Into<String>) -> Self {
         self.referer = referer.into();
         self
     }
 
-    /// Sets the default origin header applied by [`BpiClient::get`] and [`BpiClient::post`].
+    /// 设置 [`BpiClient::get`] 和 [`BpiClient::post`] 使用的默认 origin 请求头。
     pub fn origin(mut self, origin: impl Into<String>) -> Self {
         self.origin = origin.into();
         self
     }
 
-    /// Controls whether reqwest should bypass system proxies.
+    /// 控制 reqwest 是否绕过系统代理。
     pub fn no_proxy(mut self, enabled: bool) -> Self {
         self.no_proxy = enabled;
         self
     }
 
-    /// Adds an explicit proxy to the reqwest client builder.
+    /// 向 reqwest client builder 添加显式代理。
     pub fn proxy(mut self, proxy: reqwest::Proxy) -> Self {
         self.proxies.push(proxy);
         self
     }
 
-    /// Seeds the client session from a raw Cookie header string.
+    /// 从原始 Cookie 请求头字符串初始化客户端会话。
     pub fn cookie(mut self, cookie: impl Into<String>) -> Self {
         self.cookie = Some(cookie.into());
         self
     }
 
-    /// Seeds the client session from structured account values.
+    /// 从结构化账号值初始化客户端会话。
     pub fn account(mut self, account: Account) -> Self {
         self.account = Some(account);
         self
     }
 
-    /// Uses an externally configured reqwest client.
+    /// 使用外部配置的 reqwest client。
     pub fn reqwest_client(mut self, client: Client) -> Self {
         self.reqwest_client = Some(client);
         self
     }
 
-    /// Builds a client without reading files, initializing global logging, or using shared state.
+    /// 构建客户端，不读取文件、不初始化全局日志，也不使用共享状态。
     pub fn build(self) -> Result<BpiClient, BpiError> {
         let jar = Arc::new(reqwest::cookie::Jar::default());
         let mut account = None;
@@ -233,7 +233,7 @@ impl BpiClientBuilder {
     }
 }
 
-/// Bilibili API client.
+/// Bilibili API 客户端。
 pub struct BpiClient {
     client: Client,
     jar: Arc<reqwest::cookie::Jar>,
@@ -246,17 +246,17 @@ pub struct BpiClient {
 }
 
 impl BpiClient {
-    /// Creates an owned client with default configuration.
+    /// 使用默认配置创建自有客户端。
     pub fn new() -> Result<Self, BpiError> {
         Self::builder().build()
     }
 
-    /// Starts configuring a client.
+    /// 开始配置客户端。
     pub fn builder() -> BpiClientBuilder {
         BpiClientBuilder::default()
     }
 
-    /// Sets account information and updates this client's cookie state.
+    /// 设置账号信息并更新此客户端的 cookie 状态。
     pub fn set_account(&self, account: Account) -> Result<(), BpiError> {
         account.validate_complete()?;
 
@@ -271,7 +271,7 @@ impl BpiClient {
         Ok(())
     }
 
-    /// Clears account information from this client.
+    /// 清除此客户端的账号信息。
     pub fn clear_account(&self) {
         *self.account.lock().expect("account mutex poisoned") = None;
         *self
@@ -282,7 +282,7 @@ impl BpiClient {
         tracing::info!("Bilibili account cleared");
     }
 
-    /// Sets account information from a raw Cookie header string.
+    /// 从原始 Cookie 请求头字符串设置账号信息。
     pub fn set_account_from_cookie_str(&self, cookie_str: &str) -> Result<(), BpiError> {
         let pairs = parse_cookie_pairs(cookie_str)?;
         let account = Account::from_cookie_pairs(&pairs);
@@ -297,7 +297,7 @@ impl BpiClient {
         Ok(())
     }
 
-    /// Checks whether this client has login cookies.
+    /// 检查此客户端是否有登录 cookie。
     pub fn has_login_cookies(&self) -> bool {
         if self
             .cookie_header
@@ -316,12 +316,12 @@ impl BpiClient {
             .unwrap_or(false)
     }
 
-    /// Returns the current account information.
+    /// 返回当前账号信息。
     pub fn get_account(&self) -> Option<Account> {
         self.account.lock().expect("account mutex poisoned").clone()
     }
 
-    /// Gets the current CSRF token from account information.
+    /// 从账号信息获取当前 CSRF token。
     pub fn csrf(&self) -> Result<String, BpiError> {
         let account = self.account.lock().expect("account mutex poisoned");
         let account = account.as_ref().ok_or_else(BpiError::auth_required)?;
@@ -329,12 +329,12 @@ impl BpiClient {
         account.csrf().map(str::to_owned)
     }
 
-    /// Creates a GET request with this client's default Bilibili headers.
+    /// 使用此客户端默认的 Bilibili 请求头创建 GET 请求。
     pub fn get(&self, url: &str) -> RequestBuilder {
         self.apply_default_headers(url, self.client.get(url))
     }
 
-    /// Creates a GET request that preserves raw compressed response bytes.
+    /// 创建保留原始压缩响应字节的 GET 请求。
     #[cfg(feature = "danmaku")]
     pub(crate) fn get_without_response_decoding(
         &self,
@@ -352,7 +352,7 @@ impl BpiClient {
         Ok(self.apply_default_headers(url, client.get(url)))
     }
 
-    /// Creates a POST request with this client's default Bilibili headers.
+    /// 使用此客户端默认的 Bilibili 请求头创建 POST 请求。
     pub fn post(&self, url: &str) -> RequestBuilder {
         self.apply_default_headers(url, self.client.post(url))
     }
@@ -409,169 +409,169 @@ impl BpiClient {
 }
 
 impl BpiClient {
-    /// Creates an activity domain client.
+    /// 创建 activity 领域客户端。
     #[cfg(feature = "activity")]
     pub fn activity(&self) -> ActivityClient<'_> {
         ActivityClient::new(self)
     }
 
-    /// Creates an article domain client.
+    /// 创建 article 领域客户端。
     #[cfg(feature = "article")]
     pub fn article(&self) -> ArticleClient<'_> {
         ArticleClient::new(self)
     }
 
-    /// Creates an audio domain client.
+    /// 创建 audio 领域客户端。
     #[cfg(feature = "audio")]
     pub fn audio(&self) -> AudioClient<'_> {
         AudioClient::new(self)
     }
 
-    /// Creates a bangumi domain client.
+    /// 创建 bangumi 领域客户端。
     #[cfg(feature = "bangumi")]
     pub fn bangumi(&self) -> BangumiClient<'_> {
         BangumiClient::new(self)
     }
 
-    /// Creates a cheese course domain client.
+    /// 创建 cheese 课程领域客户端。
     #[cfg(feature = "cheese")]
     pub fn cheese(&self) -> CheeseClient<'_> {
         CheeseClient::new(self)
     }
 
-    /// Creates a client info domain client.
+    /// 创建 client info 领域客户端。
     #[cfg(feature = "clientinfo")]
     pub fn clientinfo(&self) -> ClientInfoClient<'_> {
         ClientInfoClient::new(self)
     }
 
-    /// Creates a comment domain client.
+    /// 创建 comment 领域客户端。
     #[cfg(feature = "comment")]
     pub fn comment(&self) -> CommentClient<'_> {
         CommentClient::new(self)
     }
 
-    /// Creates a creative center domain client.
+    /// 创建 creative center 领域客户端。
     #[cfg(feature = "creativecenter")]
     pub fn creativecenter(&self) -> CreativeCenterClient<'_> {
         CreativeCenterClient::new(self)
     }
 
-    /// Creates a danmaku domain client.
+    /// 创建 danmaku 领域客户端。
     #[cfg(feature = "danmaku")]
     pub fn danmaku(&self) -> DanmakuClient<'_> {
         DanmakuClient::new(self)
     }
 
-    /// Creates a dynamic domain client.
+    /// 创建 dynamic 领域客户端。
     #[cfg(feature = "dynamic")]
     pub fn dynamic(&self) -> DynamicClient<'_> {
         DynamicClient::new(self)
     }
 
-    /// Creates an electric charging domain client.
+    /// 创建 electric charging 领域客户端。
     #[cfg(feature = "electric")]
     pub fn electric(&self) -> ElectricClient<'_> {
         ElectricClient::new(self)
     }
 
-    /// Creates a favorite domain client.
+    /// 创建 favorite 领域客户端。
     #[cfg(feature = "fav")]
     pub fn fav(&self) -> FavClient<'_> {
         FavClient::new(self)
     }
 
-    /// Creates a history and to-view domain client.
+    /// 创建 history and to-view 领域客户端。
     #[cfg(feature = "historytoview")]
     pub fn historytoview(&self) -> HistoryToViewClient<'_> {
         HistoryToViewClient::new(self)
     }
 
-    /// Creates a login domain client.
+    /// 创建 login 领域客户端。
     #[cfg(feature = "login")]
     pub fn login(&self) -> LoginClient<'_> {
         LoginClient::new(self)
     }
 
-    /// Creates a live domain client.
+    /// 创建 live 领域客户端。
     #[cfg(feature = "live")]
     pub fn live(&self) -> LiveClient<'_> {
         LiveClient::new(self)
     }
 
-    /// Creates a manga domain client.
+    /// 创建 manga 领域客户端。
     #[cfg(feature = "manga")]
     pub fn manga(&self) -> MangaClient<'_> {
         MangaClient::new(self)
     }
 
-    /// Creates a misc domain client.
+    /// 创建 misc 领域客户端。
     #[cfg(feature = "misc")]
     pub fn misc(&self) -> MiscClient<'_> {
         MiscClient::new(self)
     }
 
-    /// Creates a message domain client.
+    /// 创建 message 领域客户端。
     #[cfg(feature = "message")]
     pub fn message(&self) -> MessageClient<'_> {
         MessageClient::new(self)
     }
 
-    /// Creates a note domain client.
+    /// 创建 note 领域客户端。
     #[cfg(feature = "note")]
     pub fn note(&self) -> NoteClient<'_> {
         NoteClient::new(self)
     }
 
-    /// Creates an opus domain client.
+    /// 创建 opus 领域客户端。
     #[cfg(feature = "opus")]
     pub fn opus(&self) -> OpusClient<'_> {
         OpusClient::new(self)
     }
 
-    /// Creates a search domain client.
+    /// 创建 search 领域客户端。
     #[cfg(feature = "search")]
     pub fn search(&self) -> SearchClient<'_> {
         SearchClient::new(self)
     }
 
-    /// Creates a video domain client.
+    /// 创建 video 领域客户端。
     #[cfg(feature = "video")]
     pub fn video(&self) -> VideoClient<'_> {
         VideoClient::new(self)
     }
 
-    /// Creates a video ranking domain client.
+    /// 创建 video ranking 领域客户端。
     #[cfg(feature = "video_ranking")]
     pub fn video_ranking(&self) -> VideoRankingClient<'_> {
         VideoRankingClient::new(self)
     }
 
-    /// Creates a VIP domain client.
+    /// 创建 VIP 领域客户端。
     #[cfg(feature = "vip")]
     pub fn vip(&self) -> VipClient<'_> {
         VipClient::new(self)
     }
 
-    /// Creates a wallet domain client.
+    /// 创建 wallet 领域客户端。
     #[cfg(feature = "wallet")]
     pub fn wallet(&self) -> WalletClient<'_> {
         WalletClient::new(self)
     }
 
-    /// Creates a user domain client.
+    /// 创建 user 领域客户端。
     #[cfg(feature = "user")]
     pub fn user(&self) -> UserClient<'_> {
         UserClient::new(self)
     }
 
-    /// Creates a web widget domain client.
+    /// 创建 web widget 领域客户端。
     #[cfg(feature = "web_widget")]
     pub fn web_widget(&self) -> WebWidgetClient<'_> {
         WebWidgetClient::new(self)
     }
 
-    /// Creates a client from structured account configuration.
+    /// 从结构化账号配置创建客户端。
     pub fn from_config(config: &Account) -> Result<Self, BpiError> {
         Self::builder().account(config.clone()).build()
     }

@@ -34,7 +34,7 @@ const VIEWER_DATA_ENDPOINT: &str = "https://member.bilibili.com/x/web/data/base"
 const ELECTROMAGNETIC_INFO_ENDPOINT: &str =
     "https://api.bilibili.com/studio/up-rating/v3/rating/info";
 
-/// Creative center API client.
+/// 创作中心 API 客户端。
 #[derive(Clone, Copy)]
 pub struct CreativeCenterClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -115,7 +115,7 @@ impl<'a> CreativeCenterClient<'a> {
         ELECTROMAGNETIC_INFO_ENDPOINT
     }
 
-    /// Lists seasons created by the current authenticated user.
+    /// 列出当前已认证用户创建的合集。
     pub async fn season_list(&self, params: SeasonListParams) -> BpiResult<SeasonListData> {
         self.client
             .get(SEASON_LIST_ENDPOINT)
@@ -124,7 +124,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets one creative center season by season id.
+    /// 按 season id 获取一个创作中心合集。
     pub async fn season_info(&self, params: SeasonInfoParams) -> BpiResult<SeasonInfoData> {
         self.client
             .get(SEASON_INFO_ENDPOINT)
@@ -133,7 +133,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets the season that contains an archive id.
+    /// 获取包含指定 archive id 的合集。
     pub async fn season_by_aid(&self, params: SeasonByAidParams) -> BpiResult<SeasonByAidData> {
         self.client
             .get(SEASON_BY_AID_ENDPOINT)
@@ -142,7 +142,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets videos in a creative center season section.
+    /// 获取创作中心合集分区中的视频。
     pub async fn season_section_episodes(
         &self,
         params: SeasonSectionEpisodesParams,
@@ -154,7 +154,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Lists archives for the current authenticated creator.
+    /// 列出当前已认证创作者的稿件。
     pub async fn archives_list(&self, params: UpArchivesListParams) -> BpiResult<SpArchivesData> {
         self.client
             .get(ARCHIVES_LIST_ENDPOINT)
@@ -163,7 +163,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets basic video information for a creator archive.
+    /// 获取创作者稿件的基础视频信息。
     pub async fn archive_videos(
         &self,
         params: UpArchiveVideosParams,
@@ -175,7 +175,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets creator video statistics.
+    /// 获取创作者视频统计。
     pub async fn up_stat(&self) -> BpiResult<UpStatData> {
         self.client
             .get(UP_STAT_ENDPOINT)
@@ -183,7 +183,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets creator archive comparison statistics.
+    /// 获取创作者稿件对比统计。
     pub async fn archive_compare(
         &self,
         params: UpArchiveCompareParams,
@@ -195,7 +195,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets creator article statistics.
+    /// 获取创作者专栏统计。
     pub async fn article_stat(&self) -> BpiResult<UpArticleStatData> {
         self.client
             .get(ARTICLE_STAT_ENDPOINT)
@@ -203,7 +203,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets creator video trend data.
+    /// 获取创作者视频趋势数据。
     pub async fn video_trend(&self, params: UpVideoTrendParams) -> BpiResult<Vec<VideoTrendItem>> {
         self.client
             .get(VIDEO_TREND_ENDPOINT)
@@ -212,7 +212,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets creator article trend data.
+    /// 获取创作者专栏趋势数据。
     pub async fn article_trend(
         &self,
         params: UpArticleTrendParams,
@@ -224,7 +224,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets creator playback source distribution.
+    /// 获取创作者播放来源分布。
     pub async fn play_source(&self) -> BpiResult<PlaySourceData> {
         self.client
             .get(PLAY_SOURCE_ENDPOINT)
@@ -233,7 +233,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets creator viewer distribution data.
+    /// 获取创作者观众分布数据。
     pub async fn viewer_data(&self) -> BpiResult<ViewerData> {
         self.client
             .get(VIEWER_DATA_ENDPOINT)
@@ -241,7 +241,7 @@ impl<'a> CreativeCenterClient<'a> {
             .await
     }
 
-    /// Gets current account electromagnetic rating information.
+    /// 获取当前账号的电磁力评级信息。
     pub async fn electromagnetic_info(&self) -> BpiResult<ElectromagneticInfo> {
         self.client
             .get(ELECTROMAGNETIC_INFO_ENDPOINT)

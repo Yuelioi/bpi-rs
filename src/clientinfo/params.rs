@@ -2,24 +2,24 @@ use std::net::IpAddr;
 
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/ip_service/v1/ip_service/get_ip_addr`.
+/// `/ip_service/v1/ip_service/get_ip_addr` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ClientInfoIpParams {
     ip: Option<IpAddr>,
 }
 
 impl ClientInfoIpParams {
-    /// Creates parameters that query the caller's current IP address.
+    /// 创建查询调用方当前 IP 地址的参数。
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Creates parameters for a validated IP address.
+    /// 为已验证的 IP 地址创建参数。
     pub fn for_ip(ip: IpAddr) -> Self {
         Self { ip: Some(ip) }
     }
 
-    /// Parses and sets an IPv4 or IPv6 address.
+    /// 解析并设置 IPv4 或 IPv6 地址。
     pub fn with_ip_str(mut self, ip: &str) -> BpiResult<Self> {
         self.ip = Some(parse_ip(ip)?);
         Ok(self)

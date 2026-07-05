@@ -1,6 +1,6 @@
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/x/im/web/msgfeed/unread`.
+/// `/x/im/web/msgfeed/unread` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MessageUnreadCountParams {
     build: String,
@@ -39,7 +39,7 @@ impl MessageUnreadCountParams {
     }
 }
 
-/// Parameters for `/x/msgfeed/reply`.
+/// `/x/msgfeed/reply` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MessageReplyFeedParams {
     start_id: Option<u64>,
@@ -68,19 +68,19 @@ impl MessageReplyFeedParams {
         Self::default()
     }
 
-    /// Sets the cursor ID returned by the previous page.
+    /// 设置上一页返回的游标 ID。
     pub fn with_start_id(mut self, start_id: u64) -> BpiResult<Self> {
         self.start_id = Some(validate_positive_u64("id", start_id)?);
         Ok(self)
     }
 
-    /// Sets the cursor timestamp returned by the previous page.
+    /// 设置上一页返回的游标时间戳。
     pub fn with_start_time(mut self, start_time: u64) -> BpiResult<Self> {
         self.start_time = Some(validate_positive_u64("reply_time", start_time)?);
         Ok(self)
     }
 
-    /// Sets Bilibili's raw web-location marker.
+    /// 设置 Bilibili 原始 web-location 标记。
     pub fn with_web_location(mut self, web_location: impl Into<String>) -> Self {
         self.web_location = web_location.into();
         self
@@ -105,7 +105,7 @@ impl MessageReplyFeedParams {
     }
 }
 
-/// Unread category accepted by `/session_svr/v1/session_svr/single_unread`.
+/// `/session_svr/v1/session_svr/single_unread` 接受的未读分类。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SingleUnreadType {
     All,
@@ -127,7 +127,7 @@ impl SingleUnreadType {
     }
 }
 
-/// Parameters for `/session_svr/v1/session_svr/single_unread`.
+/// `/session_svr/v1/session_svr/single_unread` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MessageSingleUnreadParams {
     unread_type: SingleUnreadType,

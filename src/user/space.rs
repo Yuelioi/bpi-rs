@@ -209,7 +209,7 @@ pub struct BangumiFollowListResponseData {
     pub total: u64,
 }
 
-/// Parameters for setting the user space notice.
+/// 设置用户空间公告的参数。
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct UserSpaceNoticeSetParams {
     notice: Option<String>,
@@ -248,7 +248,7 @@ impl UserSpaceNoticeSetParams {
 // --- 测试模块 ---
 
 impl<'a> UserClient<'a> {
-    /// Sets the user space notice and returns the canonical payload result.
+    /// 设置用户空间公告并返回标准 payload 结果。
     pub async fn set_space_notice(
         &self,
         params: UserSpaceNoticeSetParams,

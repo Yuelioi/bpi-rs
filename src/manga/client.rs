@@ -13,7 +13,7 @@ const POINT_PRODUCTS_ENDPOINT: &str =
     "https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/ListProduct";
 const COUPONS_ENDPOINT: &str = "https://manga.bilibili.com/twirp/user.v1.User/GetCoupons";
 
-/// Manga API client.
+/// 漫画 API 客户端。
 #[derive(Clone, Copy)]
 pub struct MangaClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -49,7 +49,7 @@ impl<'a> MangaClient<'a> {
         COUPONS_ENDPOINT
     }
 
-    /// Gets manga season information.
+    /// 获取漫画 season 信息。
     pub async fn season_info(&self) -> BpiResult<SeasonInfoData> {
         self.client
             .post(SEASON_INFO_ENDPOINT)
@@ -57,7 +57,7 @@ impl<'a> MangaClient<'a> {
             .await
     }
 
-    /// Gets manga clock-in status information.
+    /// 获取漫画签到状态信息。
     pub async fn clock_in_info(&self) -> BpiResult<ClockInInfoData> {
         self.client
             .post(CLOCK_IN_INFO_ENDPOINT)
@@ -65,7 +65,7 @@ impl<'a> MangaClient<'a> {
             .await
     }
 
-    /// Gets the current manga point balance.
+    /// 获取当前漫画积分余额。
     pub async fn user_point(&self) -> BpiResult<UserPointData> {
         self.client
             .post(USER_POINT_ENDPOINT)
@@ -73,7 +73,7 @@ impl<'a> MangaClient<'a> {
             .await
     }
 
-    /// Lists manga point-shop products.
+    /// 列出漫画积分商城商品。
     pub async fn point_products(&self) -> BpiResult<Vec<Product>> {
         self.client
             .post(POINT_PRODUCTS_ENDPOINT)
@@ -81,7 +81,7 @@ impl<'a> MangaClient<'a> {
             .await
     }
 
-    /// Gets the current account's manga coupons.
+    /// 获取当前账号的漫画券。
     pub async fn coupons(&self, page_num: i32, page_size: i32) -> BpiResult<CouponsData> {
         let params = GetCouponsRequest {
             page_num,

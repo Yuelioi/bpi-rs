@@ -3,7 +3,7 @@ use crate::{BilibiliRequest, BpiClient, BpiResult};
 
 const INFO_ENDPOINT: &str = "https://pay.bilibili.com/paywallet/wallet/getUserWallet";
 
-/// Wallet API client.
+/// 钱包 API 客户端。
 #[derive(Clone, Copy)]
 pub struct WalletClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -19,7 +19,7 @@ impl<'a> WalletClient<'a> {
         INFO_ENDPOINT
     }
 
-    /// Gets authenticated wallet information.
+    /// 获取已认证钱包信息。
     pub async fn info(&self, params: WalletInfoParams) -> BpiResult<UserWallet> {
         let csrf = self.client.csrf()?;
         let body = params.body(&csrf);

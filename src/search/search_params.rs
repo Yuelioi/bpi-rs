@@ -157,7 +157,7 @@ impl CategoryId {
     }
 }
 
-/// Parameters for article search.
+/// 专栏搜索参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchArticleParams {
     keyword: String,
@@ -202,7 +202,7 @@ impl SearchArticleParams {
     }
 }
 
-/// Parameters for bangumi search.
+/// bangumi 搜索参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchBangumiParams {
     keyword: String,
@@ -231,7 +231,7 @@ impl SearchBangumiParams {
     }
 }
 
-/// Parameters for Bilibili user search.
+/// Bilibili 用户搜索参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchBiliUserParams {
     keyword: String,
@@ -276,7 +276,7 @@ impl SearchBiliUserParams {
     }
 }
 
-/// Parameters for combined live-room/live-user search.
+/// 直播间/直播用户组合搜索参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchLiveParams {
     keyword: String,
@@ -305,7 +305,7 @@ impl SearchLiveParams {
     }
 }
 
-/// Parameters for live-room search.
+/// 直播间搜索参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchLiveRoomParams {
     keyword: String,
@@ -342,7 +342,7 @@ impl SearchLiveRoomParams {
     }
 }
 
-/// Parameters for live-user search.
+/// 直播用户搜索参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchLiveUserParams {
     keyword: String,
@@ -387,7 +387,7 @@ impl SearchLiveUserParams {
     }
 }
 
-/// Parameters for movie/film search.
+/// 影视搜索参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchMovieParams {
     keyword: String,
@@ -416,7 +416,7 @@ impl SearchMovieParams {
     }
 }
 
-/// Parameters for video search.
+/// 视频搜索参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SearchVideoParams {
     keyword: String,

@@ -12,7 +12,7 @@ const VIEW_ENDPOINT: &str = "https://api.bilibili.com/x/article/view";
 const CARDS_ENDPOINT: &str = "https://api.bilibili.com/x/article/cards";
 const ARTICLES_ENDPOINT: &str = "https://api.bilibili.com/x/article/list/web/articles";
 
-/// Article API client.
+/// 专栏 API 客户端。
 #[derive(Clone, Copy)]
 pub struct ArticleClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -43,7 +43,7 @@ impl<'a> ArticleClient<'a> {
         ARTICLES_ENDPOINT
     }
 
-    /// Gets article summary information.
+    /// 获取专栏概要信息。
     pub async fn info(&self, params: ArticleInfoParams) -> BpiResult<ArticleInfoData> {
         self.client
             .get(INFO_ENDPOINT)
@@ -52,7 +52,7 @@ impl<'a> ArticleClient<'a> {
             .await
     }
 
-    /// Gets article content.
+    /// 获取专栏内容。
     pub async fn view(&self, params: ArticleViewParams) -> BpiResult<ArticleViewData> {
         let signed_params = self.client.get_wbi_sign2(params.query_pairs()).await?;
 
@@ -63,7 +63,7 @@ impl<'a> ArticleClient<'a> {
             .await
     }
 
-    /// Gets article, video, or live cards referenced by article content.
+    /// 获取专栏内容引用的专栏、视频或直播卡片。
     pub async fn cards(&self, params: ArticleCardsParams) -> BpiResult<CardData> {
         let signed_params = self.client.get_wbi_sign2(params.query_pairs()).await?;
 
@@ -74,7 +74,7 @@ impl<'a> ArticleClient<'a> {
             .await
     }
 
-    /// Gets article list information.
+    /// 获取专栏列表信息。
     pub async fn articles(&self, params: ArticleArticlesInfoParams) -> BpiResult<ArticlesData> {
         self.client
             .get(ARTICLES_ENDPOINT)

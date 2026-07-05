@@ -3,121 +3,121 @@ use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::ids::Mid;
 
-/// Login/navigation state returned by `/x/web-interface/nav`.
+/// `/x/web-interface/nav` 返回的登录和导航状态。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LoginNav {
-    /// Whether the current session is logged in.
+    /// 当前会话是否已登录。
     #[serde(rename = "isLogin")]
     pub is_login: bool,
-    /// Logged-in user ID. Guest responses return `0`, exposed as `None`.
+    /// 已登录用户 ID。游客响应返回 `0`，对外暴露为 `None`。
     #[serde(default, deserialize_with = "deserialize_optional_mid")]
     pub mid: Option<Mid>,
-    /// Logged-in display name. Empty guest values are exposed as `None`.
+    /// 已登录显示名称。游客空值对外暴露为 `None`。
     #[serde(default, deserialize_with = "deserialize_optional_string")]
     pub uname: Option<String>,
-    /// Logged-in avatar URL. Empty guest values are exposed as `None`.
+    /// 已登录头像 URL。游客空值对外暴露为 `None`。
     #[serde(default, deserialize_with = "deserialize_optional_string")]
     pub face: Option<String>,
-    /// WBI image keys. Bilibili returns these for guest sessions too.
+    /// WBI 图片 key。Bilibili 对游客会话也会返回这些字段。
     pub wbi_img: LoginWbiImg,
 }
 
-/// WBI image key URLs embedded in the login nav response.
+/// 登录 nav 响应中嵌入的 WBI 图片 key URL。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LoginWbiImg {
-    /// URL containing the img key filename.
+    /// 包含 img key 文件名的 URL。
     pub img_url: String,
-    /// URL containing the sub key filename.
+    /// 包含 sub key 文件名的 URL。
     pub sub_url: String,
 }
 
-/// Authenticated user's social counters returned by `/x/web-interface/nav/stat`.
+/// `/x/web-interface/nav/stat` 返回的已认证用户社交计数。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LoginStats {
-    /// Number of followed users.
+    /// 关注用户数。
     pub following: u64,
-    /// Number of followers.
+    /// 粉丝数。
     pub follower: u64,
-    /// Number of published dynamic posts.
+    /// 已发布动态数。
     pub dynamic_count: u64,
 }
 
-/// Current authenticated account coin balance.
+/// 当前已认证账号的硬币余额。
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct LoginCoinBalance {
-    /// Current coin balance.
+    /// 当前硬币余额。
     pub money: f64,
 }
 
-/// Today's experience gained from coin operations.
+/// 今日通过投币操作获得的经验。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct LoginTodayCoinExp {
-    /// Experience gained today.
+    /// 今日获得的经验。
     pub value: u32,
 }
 
-/// Daily reward completion state returned by `/x/member/web/exp/reward`.
+/// `/x/member/web/exp/reward` 返回的每日奖励完成状态。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LoginDailyReward {
-    /// Whether the daily login reward is complete.
+    /// 每日登录奖励是否完成。
     pub login: bool,
-    /// Whether the daily watch reward is complete.
+    /// 每日观看奖励是否完成。
     pub watch: bool,
-    /// Experience gained from daily coin operations.
+    /// 每日投币操作获得的经验。
     pub coins: u32,
-    /// Whether the daily share reward is complete.
+    /// 每日分享奖励是否完成。
     pub share: bool,
-    /// Whether the email-binding reward is complete.
+    /// 邮箱绑定奖励是否完成。
     pub email: bool,
-    /// Whether the phone-binding reward is complete.
+    /// 手机绑定奖励是否完成。
     pub tel: bool,
-    /// Whether the safe-question reward is complete.
+    /// 安全问题奖励是否完成。
     pub safe_question: bool,
-    /// Whether the real-name verification reward is complete.
+    /// 实名认证奖励是否完成。
     pub identify_card: bool,
 }
 
-/// Authenticated account profile returned by `/x/member/web/account`.
+/// `/x/member/web/account` 返回的已认证账号资料。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LoginAccountInfo {
-    /// Current user's ID.
+    /// 当前用户 ID。
     pub mid: Mid,
-    /// Current user's display name.
+    /// 当前用户显示名称。
     pub uname: String,
-    /// Login username, which may differ from the display name.
+    /// 登录用户名，可能不同于显示名称。
     pub userid: String,
-    /// Current profile signature.
+    /// 当前个人签名。
     pub sign: String,
-    /// Birthday string returned by Bilibili, usually `YYYY-MM-DD`.
+    /// Bilibili 返回的生日字符串，通常为 `YYYY-MM-DD`。
     pub birthday: String,
-    /// Sex label returned by Bilibili.
+    /// Bilibili 返回的性别标签。
     pub sex: String,
-    /// Whether the account has not set a custom nickname.
+    /// 账号是否尚未设置自定义昵称。
     pub nick_free: bool,
-    /// Membership rank string returned by Bilibili.
+    /// Bilibili 返回的会员 rank 字符串。
     pub rank: String,
 }
 
-/// Authenticated account VIP state returned by `/x/vip/web/user/info`.
+/// `/x/vip/web/user/info` 返回的已认证账号 VIP 状态。
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LoginVipInfo {
-    /// Current user's ID.
+    /// 当前用户 ID。
     pub mid: Mid,
-    /// VIP type returned by Bilibili.
+    /// Bilibili 返回的 VIP 类型。
     pub vip_type: u8,
-    /// VIP status returned by Bilibili.
+    /// Bilibili 返回的 VIP 状态。
     pub vip_status: u8,
-    /// VIP expiry timestamp in milliseconds.
+    /// VIP 到期时间戳，单位毫秒。
     pub vip_due_date: u64,
-    /// VIP payment type returned by Bilibili.
+    /// Bilibili 返回的 VIP 支付类型。
     pub vip_pay_type: u8,
-    /// VIP theme type returned by Bilibili.
+    /// Bilibili 返回的 VIP 主题类型。
     pub theme_type: u8,
 }
 
 impl LoginVipInfo {
-    /// Returns whether the account currently has an active VIP status.
+    /// 返回账号当前是否拥有有效 VIP 状态。
     pub fn is_active(self) -> bool {
         self.vip_status == 1 && self.vip_due_date > 0
     }

@@ -14,7 +14,7 @@ const SECTIONS_ENDPOINT: &str = "https://api.bilibili.com/pgc/web/season/section
 const TIMELINE_ENDPOINT: &str = "https://api.bilibili.com/pgc/web/timeline";
 const VIDEO_STREAM_ENDPOINT: &str = "https://api.bilibili.com/pgc/player/web/playurl";
 
-/// Bangumi API client.
+/// Bangumi API 客户端。
 #[derive(Clone, Copy)]
 pub struct BangumiClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -50,7 +50,7 @@ impl<'a> BangumiClient<'a> {
         VIDEO_STREAM_ENDPOINT
     }
 
-    /// Gets bangumi media information by media ID.
+    /// 按 media ID 获取 bangumi 媒体信息。
     pub async fn info(&self, params: BangumiInfoParams) -> BpiResult<BangumiInfoResult> {
         self.client
             .get(INFO_ENDPOINT)
@@ -59,7 +59,7 @@ impl<'a> BangumiClient<'a> {
             .await
     }
 
-    /// Gets bangumi detail by season or episode ID.
+    /// 按 season 或 episode ID 获取 bangumi 详情。
     pub async fn detail(&self, params: BangumiDetailParams) -> BpiResult<BangumiDetailResult> {
         self.client
             .get(DETAIL_ENDPOINT)
@@ -68,7 +68,7 @@ impl<'a> BangumiClient<'a> {
             .await
     }
 
-    /// Gets bangumi detail by season ID.
+    /// 按 season ID 获取 bangumi 详情。
     pub async fn detail_by_season_id(&self, season_id: SeasonId) -> BpiResult<BangumiDetailResult> {
         self.client
             .get(DETAIL_ENDPOINT)
@@ -77,7 +77,7 @@ impl<'a> BangumiClient<'a> {
             .await
     }
 
-    /// Gets bangumi detail by episode ID.
+    /// 按 episode ID 获取 bangumi 详情。
     pub async fn detail_by_ep_id(&self, episode_id: EpisodeId) -> BpiResult<BangumiDetailResult> {
         self.client
             .get(DETAIL_ENDPOINT)
@@ -86,7 +86,7 @@ impl<'a> BangumiClient<'a> {
             .await
     }
 
-    /// Gets bangumi season sections by season ID.
+    /// 按 season ID 获取 bangumi season 分区。
     pub async fn sections(&self, params: BangumiSectionsParams) -> BpiResult<BangumiSectionResult> {
         self.client
             .get(SECTIONS_ENDPOINT)
@@ -95,7 +95,7 @@ impl<'a> BangumiClient<'a> {
             .await
     }
 
-    /// Gets the bangumi or film timeline.
+    /// 获取 bangumi 或影视时间线。
     pub async fn timeline(
         &self,
         params: BangumiTimelineParams,
@@ -107,7 +107,7 @@ impl<'a> BangumiClient<'a> {
             .await
     }
 
-    /// Gets bangumi video stream data.
+    /// 获取 bangumi 视频流数据。
     pub async fn video_stream(
         &self,
         params: BangumiVideoStreamParams,

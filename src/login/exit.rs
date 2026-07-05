@@ -35,7 +35,7 @@ pub struct LogoutResponse {
     pub data: Option<LogoutData>,
 }
 
-/// Parameters for web logout.
+/// Web 登出的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LogoutWebParams {
     gourl: String,
@@ -68,7 +68,7 @@ impl LogoutWebParams {
 }
 
 impl<'a> LoginClient<'a> {
-    /// Logs out the current web session and returns the canonical payload result.
+    /// 登出当前 Web 会话并返回标准 payload 结果。
     pub async fn logout(&self, params: LogoutWebParams) -> BpiResult<LogoutData> {
         let csrf = self.client.csrf()?;
         let form = params.form_pairs(&csrf);

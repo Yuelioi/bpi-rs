@@ -1,12 +1,12 @@
 use crate::ids::{Mid, SeasonId};
 use crate::{BpiError, BpiResult};
 
-/// Sort order for video collection archives.
+/// 视频合集稿件排序方式。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CollectionArchiveSort {
-    /// Oldest first.
+    /// 最早的在前。
     Asc,
-    /// Newest first.
+    /// 最新的在前。
     Desc,
 }
 
@@ -19,7 +19,7 @@ impl CollectionArchiveSort {
     }
 }
 
-/// Parameters for `/x/polymer/web-space/seasons_archives_list`.
+/// `/x/polymer/web-space/seasons_archives_list` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoCollectionSeasonsArchivesParams {
     mid: Mid,
@@ -30,7 +30,7 @@ pub struct VideoCollectionSeasonsArchivesParams {
 }
 
 impl VideoCollectionSeasonsArchivesParams {
-    /// Creates parameters for a specific user's video season.
+    /// 为指定用户的视频合集创建参数。
     pub fn new(mid: Mid, season_id: SeasonId) -> Self {
         Self {
             mid,
@@ -41,19 +41,19 @@ impl VideoCollectionSeasonsArchivesParams {
         }
     }
 
-    /// Sets whether the archive list should be returned in reverse order.
+    /// 设置稿件列表是否按倒序返回。
     pub fn with_sort_reverse(mut self, sort_reverse: bool) -> Self {
         self.sort_reverse = Some(sort_reverse);
         self
     }
 
-    /// Sets the page number.
+    /// 设置页码。
     pub fn with_page_num(mut self, page_num: u64) -> BpiResult<Self> {
         self.page_num = validate_positive_u64("page_num", page_num)?;
         Ok(self)
     }
 
-    /// Sets the page size.
+    /// 设置每页数量。
     pub fn with_page_size(mut self, page_size: u64) -> BpiResult<Self> {
         self.page_size = validate_positive_u64("page_size", page_size)?;
         Ok(self)
@@ -75,7 +75,7 @@ impl VideoCollectionSeasonsArchivesParams {
     }
 }
 
-/// Parameters for `/x/polymer/web-space/home/seasons_series`.
+/// `/x/polymer/web-space/home/seasons_series` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoCollectionHomeSeasonsSeriesParams {
     mid: Mid,
@@ -84,7 +84,7 @@ pub struct VideoCollectionHomeSeasonsSeriesParams {
 }
 
 impl VideoCollectionHomeSeasonsSeriesParams {
-    /// Creates parameters for the home season/series endpoint.
+    /// 为主页合集/系列接口创建参数。
     pub fn new(mid: Mid) -> Self {
         Self {
             mid,
@@ -93,13 +93,13 @@ impl VideoCollectionHomeSeasonsSeriesParams {
         }
     }
 
-    /// Sets the page number.
+    /// 设置页码。
     pub fn with_page_num(mut self, page_num: u64) -> BpiResult<Self> {
         self.page_num = validate_positive_u64("page_num", page_num)?;
         Ok(self)
     }
 
-    /// Sets the page size.
+    /// 设置每页数量。
     pub fn with_page_size(mut self, page_size: u64) -> BpiResult<Self> {
         self.page_size = validate_positive_u64("page_size", page_size)?;
         Ok(self)
@@ -114,7 +114,7 @@ impl VideoCollectionHomeSeasonsSeriesParams {
     }
 }
 
-/// Parameters for `/x/polymer/web-space/seasons_series_list`.
+/// `/x/polymer/web-space/seasons_series_list` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoCollectionSeasonsSeriesParams {
     mid: Mid,
@@ -123,7 +123,7 @@ pub struct VideoCollectionSeasonsSeriesParams {
 }
 
 impl VideoCollectionSeasonsSeriesParams {
-    /// Creates parameters for the seasons and series list endpoint.
+    /// 为合集和系列列表接口创建参数。
     pub fn new(mid: Mid) -> Self {
         Self {
             mid,
@@ -132,13 +132,13 @@ impl VideoCollectionSeasonsSeriesParams {
         }
     }
 
-    /// Sets the page number.
+    /// 设置页码。
     pub fn with_page_num(mut self, page_num: u64) -> BpiResult<Self> {
         self.page_num = Some(validate_positive_u64("page_num", page_num)?);
         Ok(self)
     }
 
-    /// Sets the page size.
+    /// 设置每页数量。
     pub fn with_page_size(mut self, page_size: u64) -> BpiResult<Self> {
         self.page_size = Some(validate_positive_u64("page_size", page_size)?);
         Ok(self)
@@ -158,14 +158,14 @@ impl VideoCollectionSeasonsSeriesParams {
     }
 }
 
-/// Parameters for `/x/series/series`.
+/// `/x/series/series` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VideoCollectionSeriesInfoParams {
     series_id: u64,
 }
 
 impl VideoCollectionSeriesInfoParams {
-    /// Creates parameters for a specific video series.
+    /// 为指定视频系列创建参数。
     pub fn new(series_id: u64) -> BpiResult<Self> {
         Ok(Self {
             series_id: validate_positive_u64("series_id", series_id)?,
@@ -177,7 +177,7 @@ impl VideoCollectionSeriesInfoParams {
     }
 }
 
-/// Parameters for `/x/series/archives`.
+/// `/x/series/archives` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VideoCollectionSeriesArchivesParams {
     mid: Mid,
@@ -189,7 +189,7 @@ pub struct VideoCollectionSeriesArchivesParams {
 }
 
 impl VideoCollectionSeriesArchivesParams {
-    /// Creates parameters for the archives inside a specific series.
+    /// 为指定系列内的稿件创建参数。
     pub fn new(mid: Mid, series_id: u64) -> BpiResult<Self> {
         Ok(Self {
             mid,
@@ -201,25 +201,25 @@ impl VideoCollectionSeriesArchivesParams {
         })
     }
 
-    /// Controls whether only normal archives should be returned.
+    /// 控制是否只返回普通稿件。
     pub fn with_only_normal(mut self, only_normal: bool) -> Self {
         self.only_normal = Some(only_normal);
         self
     }
 
-    /// Sets archive sort order.
+    /// 设置稿件排序方式。
     pub fn with_sort(mut self, sort: CollectionArchiveSort) -> Self {
         self.sort = Some(sort);
         self
     }
 
-    /// Sets the page number.
+    /// 设置页码。
     pub fn with_page_num(mut self, page_num: u64) -> BpiResult<Self> {
         self.page_num = Some(validate_positive_u64("pn", page_num)?);
         Ok(self)
     }
 
-    /// Sets the page size.
+    /// 设置每页数量。
     pub fn with_page_size(mut self, page_size: u64) -> BpiResult<Self> {
         self.page_size = Some(validate_positive_u64("ps", page_size)?);
         Ok(self)

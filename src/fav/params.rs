@@ -1,7 +1,7 @@
 use crate::ids::{MediaId, Mid};
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/x/v3/fav/folder/info`.
+/// `/x/v3/fav/folder/info` 的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FavFolderInfoParams {
     media_id: MediaId,
@@ -17,7 +17,7 @@ impl FavFolderInfoParams {
     }
 }
 
-/// Parameters for `/x/v3/fav/folder/created/list-all`.
+/// `/x/v3/fav/folder/created/list-all` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FavCreatedListParams {
     up_mid: Mid,
@@ -66,7 +66,7 @@ impl FavCreatedListParams {
     }
 }
 
-/// Parameters for `/x/v3/fav/folder/collected/list`.
+/// `/x/v3/fav/folder/collected/list` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FavCollectedListParams {
     up_mid: Mid,
@@ -110,7 +110,7 @@ impl FavCollectedListParams {
     }
 }
 
-/// Parameters for `/x/v3/fav/resource/infos`.
+/// `/x/v3/fav/resource/infos` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FavResourceInfosParams {
     resources: String,
@@ -138,7 +138,7 @@ impl FavResourceInfosParams {
     }
 }
 
-/// Parameters for `/x/v3/fav/resource/ids`.
+/// `/x/v3/fav/resource/ids` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FavResourceIdsParams {
     media_id: MediaId,
@@ -166,7 +166,7 @@ impl FavResourceIdsParams {
     }
 }
 
-/// Parameters for creating a favorite folder.
+/// 创建收藏夹的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FavFolderAddParams {
     title: String,
@@ -209,7 +209,7 @@ impl FavFolderAddParams {
     }
 }
 
-/// Parameters for editing a favorite folder.
+/// 编辑收藏夹的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FavFolderEditParams {
     media_id: MediaId,
@@ -258,7 +258,7 @@ impl FavFolderEditParams {
     }
 }
 
-/// Parameters for deleting favorite folders.
+/// 删除收藏夹的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FavFolderDeleteParams {
     media_ids: Vec<MediaId>,
@@ -292,7 +292,7 @@ impl FavFolderDeleteParams {
     }
 }
 
-/// Parameters for copying or moving favorite resources.
+/// 复制或移动收藏资源的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FavResourceTransferParams {
     src_media_id: MediaId,
@@ -328,7 +328,7 @@ impl FavResourceTransferParams {
     }
 }
 
-/// Parameters for deleting favorite resources in batches.
+/// 批量删除收藏资源的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FavResourceBatchDeleteParams {
     media_id: MediaId,
@@ -353,7 +353,7 @@ impl FavResourceBatchDeleteParams {
     }
 }
 
-/// Parameters for cleaning invalid resources from a favorite folder.
+/// 清理收藏夹中失效资源的参数。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FavResourceCleanParams {
     media_id: MediaId,

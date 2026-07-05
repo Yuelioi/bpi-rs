@@ -56,7 +56,7 @@ pub struct PopularityRedPocket {
 
 #[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct ActivityBoxInfo {
-    /// Undocumented activity box fields returned by live lottery endpoints.
+    /// 直播抽奖 endpoint 返回的未文档化活动盒子字段。
     #[serde(default)]
     #[serde(flatten)]
     pub extra: serde_json::Map<String, serde_json::Value>,
@@ -68,7 +68,7 @@ pub struct LotteryInfoData {
     pub popularity_red_pocket: Option<Vec<PopularityRedPocket>>,
     /// 活动盒子信息
     pub activity_box_info: Option<ActivityBoxInfo>,
-    /// Undocumented lottery sections such as anchor, guard, gift, storm, or red pocket state.
+    /// 未文档化的抽奖分区，例如 anchor、guard、gift、storm 或红包状态。
     #[serde(default)]
     #[serde(flatten)]
     pub extra: serde_json::Map<String, serde_json::Value>,

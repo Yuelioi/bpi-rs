@@ -133,7 +133,7 @@ pub struct CreateComplexDynamicData {
     pub dyn_type: u8,
 }
 
-/// Parameters for uploading a dynamic image.
+/// 上传动态图片的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicUploadPicParams {
     file_path: PathBuf,
@@ -154,7 +154,7 @@ impl DynamicUploadPicParams {
     }
 }
 
-/// Parameters for publishing a plain-text dynamic.
+/// 发布纯文本动态的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicTextCreateParams {
     content: String,
@@ -168,7 +168,7 @@ impl DynamicTextCreateParams {
     }
 }
 
-/// Parameters for publishing a complex dynamic.
+/// 发布复杂动态的参数。
 #[derive(Debug, Clone)]
 pub struct DynamicComplexCreateParams {
     scene: u8,
@@ -239,7 +239,7 @@ impl DynamicComplexCreateParams {
 }
 
 impl<'a> DynamicClient<'a> {
-    /// Uploads a dynamic image and returns the canonical payload result.
+    /// 上传动态图片并返回标准 payload 结果。
     pub async fn upload_pic(&self, params: DynamicUploadPicParams) -> BpiResult<UploadPicData> {
         let csrf = self.client.csrf()?;
 
@@ -270,7 +270,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Publishes a plain-text dynamic and returns the canonical payload result.
+    /// 发布纯文本动态并返回标准 payload 结果。
     pub async fn create_text(
         &self,
         params: DynamicTextCreateParams,
@@ -291,7 +291,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Publishes a complex dynamic and returns the canonical payload result.
+    /// 发布复杂动态并返回标准 payload 结果。
     pub async fn create_complex(
         &self,
         params: DynamicComplexCreateParams,

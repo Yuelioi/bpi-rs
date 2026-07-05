@@ -15,7 +15,7 @@ const RESOURCE_INFOS_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/resourc
 const LIST_DETAIL_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/resource/list";
 const RESOURCE_IDS_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/resource/ids";
 
-/// Favorite API client.
+/// 收藏 API 客户端。
 #[derive(Clone, Copy)]
 pub struct FavClient<'a> {
     pub(crate) client: &'a BpiClient,
@@ -56,7 +56,7 @@ impl<'a> FavClient<'a> {
         RESOURCE_IDS_ENDPOINT
     }
 
-    /// Gets favorite folder metadata.
+    /// 获取收藏夹元数据。
     pub async fn folder_info(&self, params: FavFolderInfoParams) -> BpiResult<FavFolderInfo> {
         self.client
             .get(FOLDER_INFO_ENDPOINT)
@@ -65,7 +65,7 @@ impl<'a> FavClient<'a> {
             .await
     }
 
-    /// Gets folders created by a user.
+    /// 获取用户创建的收藏夹。
     pub async fn created_list(
         &self,
         params: FavCreatedListParams,
@@ -77,7 +77,7 @@ impl<'a> FavClient<'a> {
             .await
     }
 
-    /// Gets folders collected by a user.
+    /// 获取用户收藏的收藏夹。
     pub async fn collected_list(
         &self,
         params: FavCollectedListParams,
@@ -89,7 +89,7 @@ impl<'a> FavClient<'a> {
             .await
     }
 
-    /// Gets resource information for multiple favorite resources.
+    /// 获取多个收藏资源的信息。
     pub async fn resource_infos(
         &self,
         params: FavResourceInfosParams,
@@ -101,7 +101,7 @@ impl<'a> FavClient<'a> {
             .await
     }
 
-    /// Gets a favorite folder's detailed resource list.
+    /// 获取收藏夹的详细资源列表。
     pub async fn list_detail(&self, params: FavListDetailParams) -> BpiResult<FavListDetailData> {
         self.client
             .get(LIST_DETAIL_ENDPOINT)
@@ -110,7 +110,7 @@ impl<'a> FavClient<'a> {
             .await
     }
 
-    /// Gets all resource IDs in a favorite folder.
+    /// 获取收藏夹中的全部资源 ID。
     pub async fn resource_ids(
         &self,
         params: FavResourceIdsParams,

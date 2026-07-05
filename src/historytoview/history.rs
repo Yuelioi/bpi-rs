@@ -126,7 +126,7 @@ pub struct HistoryListData {
 }
 
 impl<'a> HistoryToViewClient<'a> {
-    /// Deletes a history item and returns the canonical payload result.
+    /// 删除历史记录条目并返回标准 payload 结果。
     pub async fn delete_history(
         &self,
         params: HistoryDeleteParams,
@@ -140,7 +140,7 @@ impl<'a> HistoryToViewClient<'a> {
             .await
     }
 
-    /// Clears all history items and returns the canonical payload result.
+    /// 清空全部历史记录条目并返回标准 payload 结果。
     pub async fn clear_history(&self) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
@@ -153,7 +153,7 @@ impl<'a> HistoryToViewClient<'a> {
             .await
     }
 
-    /// Enables or disables history recording and returns the canonical payload result.
+    /// 启用或禁用历史记录，并返回标准 payload 结果。
     pub async fn set_history_shadow(
         &self,
         params: HistoryShadowSetParams,

@@ -1,7 +1,7 @@
 use crate::ids::Mid;
 use crate::{BpiError, BpiResult};
 
-/// Parameters for `/x/safecenter/login_notice`.
+/// `/x/safecenter/login_notice` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoginNoticeParams {
     mid: Mid,
@@ -28,7 +28,7 @@ impl LoginNoticeParams {
     }
 }
 
-/// Parameters for `/x/member/web/login/log`.
+/// `/x/member/web/login/log` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoginLogParams {
     jsonp: String,
@@ -67,7 +67,7 @@ impl LoginLogParams {
     }
 }
 
-/// Parameters for `/x/passport-login/web/qrcode/poll`.
+/// `/x/passport-login/web/qrcode/poll` 的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoginQrPollParams {
     qrcode_key: String,

@@ -10,7 +10,7 @@ const REMOVE_DRAFT_ENDPOINT: &str =
 const SET_TOP_ENDPOINT: &str = "https://api.bilibili.com/x/dynamic/feed/space/set_top";
 const REMOVE_TOP_ENDPOINT: &str = "https://api.bilibili.com/x/dynamic/feed/space/rm_top";
 
-/// Parameters for liking or unliking a dynamic item.
+/// 点赞或取消点赞动态条目的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicLikeParams {
     dyn_id_str: String,
@@ -42,7 +42,7 @@ impl DynamicLikeParams {
     }
 }
 
-/// Parameters for deleting a scheduled dynamic draft.
+/// 删除定时动态草稿的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicDraftDeleteParams {
     draft_id: String,
@@ -60,7 +60,7 @@ impl DynamicDraftDeleteParams {
     }
 }
 
-/// Parameters for setting or removing a dynamic top item.
+/// 设置或移除置顶动态条目的参数。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DynamicTopParams {
     dyn_str: String,
@@ -79,7 +79,7 @@ impl DynamicTopParams {
 }
 
 impl<'a> DynamicClient<'a> {
-    /// Likes or unlikes a dynamic item and returns the canonical payload result.
+    /// 点赞或取消点赞动态条目，并返回标准 payload 结果。
     pub async fn like(&self, params: DynamicLikeParams) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
         let json_body = params.json_body();
@@ -92,7 +92,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Deletes a scheduled dynamic draft and returns the canonical payload result.
+    /// 删除定时动态草稿，并返回标准 payload 结果。
     pub async fn delete_draft(
         &self,
         params: DynamicDraftDeleteParams,
@@ -106,7 +106,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Sets a dynamic item as top and returns the canonical payload result.
+    /// 将动态条目设为置顶，并返回标准 payload 结果。
     pub async fn set_top(&self, params: DynamicTopParams) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
         let json_body = params.json_body();
@@ -119,7 +119,7 @@ impl<'a> DynamicClient<'a> {
             .await
     }
 
-    /// Removes a dynamic item from top and returns the canonical payload result.
+    /// 移除动态条目的置顶状态，并返回标准 payload 结果。
     pub async fn remove_top(
         &self,
         params: DynamicTopParams,
