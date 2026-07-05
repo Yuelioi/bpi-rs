@@ -4,7 +4,7 @@
     "method": "GET",
     "url": "https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space",
     "query": {
-      "host_mid": "4279370",
+      "host_mid": "1000001",
       "page": "0",
       "type": "all",
       "web_location": "333.1387"

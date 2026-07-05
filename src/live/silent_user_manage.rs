@@ -438,7 +438,7 @@ mod tests {
     }
 
     fn anchor_id() -> Mid {
-        Mid::new(4_279_370).expect("test anchor id should be valid")
+        Mid::new(1_000_001).expect("test anchor id should be valid")
     }
 
     #[test]
@@ -498,7 +498,7 @@ mod tests {
         assert_eq!(
             banned_params.query_pairs("${csrf}"),
             vec![
-                ("anchor_id", "4279370".to_string()),
+                ("anchor_id", "1000001".to_string()),
                 ("pn", "1".to_string()),
                 ("ps", "10".to_string()),
                 ("mobi_app", "android".to_string()),

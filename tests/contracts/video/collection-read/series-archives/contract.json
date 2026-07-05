@@ -4,7 +4,7 @@
     "method": "GET",
     "url": "https://api.bilibili.com/x/series/archives",
     "query": {
-      "mid": "4279370",
+      "mid": "1000001",
       "series_id": "250285",
       "sort": "asc",
       "pn": "1",

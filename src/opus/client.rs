@@ -69,7 +69,7 @@ mod tests {
         let client = BpiClient::new()?;
         let opus = client.opus();
 
-        assert_space_feed_future(opus.space_feed(OpusSpaceFeedParams::new(Mid::new(4_279_370)?)));
+        assert_space_feed_future(opus.space_feed(OpusSpaceFeedParams::new(Mid::new(1_000_001)?)));
         Ok(())
     }
 
@@ -84,7 +84,7 @@ mod tests {
         assert_eq!(contract.request.url.as_str(), opus.space_feed_endpoint());
         assert_eq!(
             contract.request.query.get("host_mid").map(String::as_str),
-            Some("4279370")
+            Some("1000001")
         );
         assert_eq!(
             contract.request.query.get("page").map(String::as_str),

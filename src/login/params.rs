@@ -100,20 +100,20 @@ mod tests {
 
     #[test]
     fn login_notice_params_serializes_mid() -> BpiResult<()> {
-        let params = LoginNoticeParams::new(Mid::new(4279370)?);
+        let params = LoginNoticeParams::new(Mid::new(1000001)?);
 
-        assert_eq!(params.query_pairs(), vec![("mid", "4279370".to_string())]);
+        assert_eq!(params.query_pairs(), vec![("mid", "1000001".to_string())]);
         Ok(())
     }
 
     #[test]
     fn login_notice_params_serializes_buvid() -> BpiResult<()> {
-        let params = LoginNoticeParams::new(Mid::new(4279370)?).with_buvid("BUVID3")?;
+        let params = LoginNoticeParams::new(Mid::new(1000001)?).with_buvid("BUVID3")?;
 
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("mid", "4279370".to_string()),
+                ("mid", "1000001".to_string()),
                 ("buvid", "BUVID3".to_string()),
             ]
         );
@@ -122,7 +122,7 @@ mod tests {
 
     #[test]
     fn login_notice_params_rejects_blank_buvid() {
-        let err = LoginNoticeParams::new(Mid::new(4279370).unwrap())
+        let err = LoginNoticeParams::new(Mid::new(1000001).unwrap())
             .with_buvid("   ")
             .unwrap_err();
 

@@ -4,7 +4,7 @@
     "method": "GET",
     "url": "https://api.bilibili.com/x/polymer/web-space/seasons_archives_list",
     "query": {
-      "mid": "4279370",
+      "mid": "1000001",
       "season_id": "4294056",
       "page_num": "1",
       "page_size": "20",

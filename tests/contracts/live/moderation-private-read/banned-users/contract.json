@@ -4,7 +4,7 @@
     "method": "GET",
     "url": "https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/GetBlackList",
     "query": {
-      "anchor_id": "4279370",
+      "anchor_id": "1000001",
       "pn": "1",
       "ps": "10",
       "mobi_app": "android",

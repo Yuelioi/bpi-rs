@@ -67,7 +67,7 @@ mod tests {
     use crate::{ApiEnvelope, BpiClient, BpiError, BpiResult};
     use tracing::info;
 
-    const TEST_VMID: u64 = 4279370;
+    const TEST_VMID: u64 = 1000001;
 
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(

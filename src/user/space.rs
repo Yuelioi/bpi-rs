@@ -317,7 +317,7 @@ mod tests {
         );
         assert_eq!(
             bangumi.request.query.get("vmid").map(String::as_str),
-            Some("4279370")
+            Some("1000001")
         );
         assert_eq!(
             bangumi.request.query.get("type").map(String::as_str),

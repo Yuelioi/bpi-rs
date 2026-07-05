@@ -4,7 +4,7 @@
     "method": "GET",
     "url": "https://api.bilibili.com/x/space/bangumi/follow/list",
     "query": {
-      "vmid": "4279370",
+      "vmid": "1000001",
       "type": "1",
       "pn": "1",
       "ps": "15"

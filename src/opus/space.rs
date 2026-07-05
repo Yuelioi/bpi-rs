@@ -72,7 +72,7 @@ mod tests {
     #[tokio::test]
     async fn test_opus_space_feed() -> Result<(), BpiError> {
         let bpi = BpiClient::new().expect("client should build");
-        let params = OpusSpaceFeedParams::new(Mid::new(4279370)?)
+        let params = OpusSpaceFeedParams::new(Mid::new(1000001)?)
             .with_page(1)
             .with_kind(OpusSpaceFeedKind::All);
         let resp = bpi.opus().space_feed(params).await;
@@ -85,12 +85,12 @@ mod tests {
 
     #[test]
     fn opus_space_feed_params_serializes_default_query() -> Result<(), BpiError> {
-        let params = OpusSpaceFeedParams::new(Mid::new(4279370)?);
+        let params = OpusSpaceFeedParams::new(Mid::new(1000001)?);
 
         assert_eq!(
             params.query_pairs(),
             [
-                ("host_mid", "4279370".to_string()),
+                ("host_mid", "1000001".to_string()),
                 ("page", "0".to_string()),
                 ("type", "all".to_string()),
                 ("web_location", "333.1387".to_string()),
@@ -101,7 +101,7 @@ mod tests {
 
     #[test]
     fn opus_space_feed_params_serializes_optional_query() -> Result<(), BpiError> {
-        let params = OpusSpaceFeedParams::new(Mid::new(4279370)?)
+        let params = OpusSpaceFeedParams::new(Mid::new(1000001)?)
             .with_page(2)
             .with_offset("offset-token")?
             .with_kind(OpusSpaceFeedKind::Article);
@@ -109,7 +109,7 @@ mod tests {
         assert_eq!(
             params.query_pairs(),
             [
-                ("host_mid", "4279370".to_string()),
+                ("host_mid", "1000001".to_string()),
                 ("page", "2".to_string()),
                 ("offset", "offset-token".to_string()),
                 ("type", "article".to_string()),
@@ -121,7 +121,7 @@ mod tests {
 
     #[test]
     fn opus_space_feed_params_rejects_blank_offset() -> Result<(), BpiError> {
-        let err = OpusSpaceFeedParams::new(Mid::new(4279370)?)
+        let err = OpusSpaceFeedParams::new(Mid::new(1000001)?)
             .with_offset("   ")
             .unwrap_err();
 
@@ -147,7 +147,7 @@ mod tests {
         );
         assert_eq!(
             contract.request.query.get("host_mid").map(String::as_str),
-            Some("4279370")
+            Some("1000001")
         );
         assert_eq!(
             contract.request.query.get("page").map(String::as_str),

@@ -216,7 +216,7 @@ mod tests {
     use super::super::params::CollectionArchiveSort;
 
     // 测试用的 mid
-    const TEST_MID: u64 = 4279370;
+    const TEST_MID: u64 = 1000001;
     // 测试用的合集 ID
     const TEST_SEASON_ID: u64 = 4294056;
 

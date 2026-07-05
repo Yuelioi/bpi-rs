@@ -263,12 +263,12 @@ mod tests {
     #[test]
     fn seasons_archives_params_serializes_defaults() -> BpiResult<()> {
         let params =
-            VideoCollectionSeasonsArchivesParams::new(Mid::new(4279370)?, SeasonId::new(4294056)?);
+            VideoCollectionSeasonsArchivesParams::new(Mid::new(1000001)?, SeasonId::new(4294056)?);
 
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("mid", "4279370".to_string()),
+                ("mid", "1000001".to_string()),
                 ("season_id", "4294056".to_string()),
                 ("page_num", "1".to_string()),
                 ("page_size", "20".to_string())
@@ -280,7 +280,7 @@ mod tests {
     #[test]
     fn seasons_archives_params_serializes_sort_and_pagination() -> BpiResult<()> {
         let params =
-            VideoCollectionSeasonsArchivesParams::new(Mid::new(4279370)?, SeasonId::new(4294056)?)
+            VideoCollectionSeasonsArchivesParams::new(Mid::new(1000001)?, SeasonId::new(4294056)?)
                 .with_sort_reverse(false)
                 .with_page_num(2)?
                 .with_page_size(30)?;
@@ -288,7 +288,7 @@ mod tests {
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("mid", "4279370".to_string()),
+                ("mid", "1000001".to_string()),
                 ("season_id", "4294056".to_string()),
                 ("page_num", "2".to_string()),
                 ("page_size", "30".to_string()),
@@ -300,12 +300,12 @@ mod tests {
 
     #[test]
     fn home_seasons_series_params_serializes_defaults() -> BpiResult<()> {
-        let params = VideoCollectionHomeSeasonsSeriesParams::new(Mid::new(4279370)?);
+        let params = VideoCollectionHomeSeasonsSeriesParams::new(Mid::new(1000001)?);
 
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("mid", "4279370".to_string()),
+                ("mid", "1000001".to_string()),
                 ("page_num", "1".to_string()),
                 ("page_size", "10".to_string())
             ]
@@ -315,14 +315,14 @@ mod tests {
 
     #[test]
     fn seasons_series_params_serializes_optional_pagination() -> BpiResult<()> {
-        let params = VideoCollectionSeasonsSeriesParams::new(Mid::new(4279370)?)
+        let params = VideoCollectionSeasonsSeriesParams::new(Mid::new(1000001)?)
             .with_page_num(1)?
             .with_page_size(5)?;
 
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("mid", "4279370".to_string()),
+                ("mid", "1000001".to_string()),
                 ("page_num", "1".to_string()),
                 ("page_size", "5".to_string())
             ]
@@ -345,7 +345,7 @@ mod tests {
 
     #[test]
     fn series_archives_params_serializes_optional_filters() -> BpiResult<()> {
-        let params = VideoCollectionSeriesArchivesParams::new(Mid::new(4279370)?, 250285)?
+        let params = VideoCollectionSeriesArchivesParams::new(Mid::new(1000001)?, 250285)?
             .with_sort(CollectionArchiveSort::Asc)
             .with_page_num(1)?
             .with_page_size(10)?;
@@ -353,7 +353,7 @@ mod tests {
         assert_eq!(
             params.query_pairs(),
             vec![
-                ("mid", "4279370".to_string()),
+                ("mid", "1000001".to_string()),
                 ("series_id", "250285".to_string()),
                 ("sort", "asc".to_string()),
                 ("pn", "1".to_string()),

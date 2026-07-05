@@ -630,7 +630,7 @@ mod tests {
             ),
         );
         assert_banned_users_future(
-            live.banned_users(LiveBannedUserListParams::new(Mid::new(4_279_370)?).page_size(10)?),
+            live.banned_users(LiveBannedUserListParams::new(Mid::new(1_000_001)?).page_size(10)?),
         );
         assert_shield_keywords_future(
             live.shield_keywords(LiveShieldKeywordListParams::new(RoomId::new(3_818_081)?)),

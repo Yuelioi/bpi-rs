@@ -294,7 +294,7 @@ mod tests {
                 "tv_vip_pay_type": "0",
                 "tv_vip_status": "0",
                 "vip_pay_type": "0",
-                "mid": "4279370"
+                "mid": "1000001"
             }"##,
         )
         .expect("vip should parse string numeric fields");
@@ -303,7 +303,7 @@ mod tests {
         assert_eq!(vip.vip_status, 1);
         assert_eq!(vip.vip_due_date, 1813334400000);
         assert_eq!(vip.role, Some(3));
-        assert_eq!(vip.mid, Some(4279370));
+        assert_eq!(vip.mid, Some(1000001));
     }
 
     #[test]

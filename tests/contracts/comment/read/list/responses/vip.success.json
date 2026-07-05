@@ -516,7 +516,7 @@
                     }
                   ]
                 },
-                "mid": "4279370"
+                "mid": "1000001"
               },
               "contract_desc": "",
               "face_nft_new": 0,
@@ -530,7 +530,7 @@
                 "current_min": 0,
                 "next_exp": 0
               },
-              "mid": "4279370",
+              "mid": "1000001",
               "nameplate": {
                 "condition": "所有自制视频总播放数>=100万，数据次日更新",
                 "image": "https://i2.hdslb.com/bfs/face/27a952195555e64508310e366b3e38bd4cd143fc.png",
@@ -559,7 +559,7 @@
               },
               "sex": "男",
               "sign": "清雪醒孤月, 迟暮醉人离",
-              "uname": "月离离离离",
+              "uname": "sanitized-user",
               "user_sailing": null,
               "vip": {
                 "accessStatus": 0,
@@ -595,8 +595,8 @@
                 "vipType": 2
               }
             },
-            "mid": 4279370,
-            "mid_str": "4279370",
+            "mid": 1000001,
+            "mid_str": "1000001",
             "note_cvid_str": "0",
             "oid": 23199,
             "oid_str": "23199",
