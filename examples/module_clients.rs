@@ -12,7 +12,7 @@ async fn main() -> BpiResult<()> {
     let bangumi_params = BangumiInfoParams::new(MediaId::new(28_220_978)?);
 
     if !run_live_example() {
-        println!("module-client quickstart compiled; set BPI_RUN_EXAMPLE=1 to call live APIs");
+        println!("module-client 快速示例已编译；设置 BPI_RUN_EXAMPLE=1 后会发起真实网络请求");
         return Ok(());
     }
 

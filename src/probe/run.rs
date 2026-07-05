@@ -55,14 +55,12 @@ fn client_for_contract(contract: &ApiContract, accounts: &RawProbeConfig) -> Bpi
     }
 
     if let Some(profile) = contract.request.auth.profile.as_deref() {
-        let account = accounts
-            .account(profile)?
-            .ok_or_else(|| {
-                BpiError::invalid_parameter(
-                    "profile",
-                    "account profile not found; configure [probe.vip]/[probe.normal] or *_vip/*_normal fields",
-                )
-            })?;
+        let account = accounts.account(profile)?.ok_or_else(|| {
+            BpiError::invalid_parameter(
+                "profile",
+                "account profile not found; configure [vip] or [normal]",
+            )
+        })?;
         builder = builder.account(account);
     } else if contract.request.auth.requires_cookie() || contract.request.auth.requires_csrf() {
         return Err(BpiError::invalid_parameter(
@@ -354,7 +352,7 @@ fn binary_response_body(bytes: &[u8], content_type: Option<String>) -> serde_jso
 mod tests {
     use super::*;
     use crate::BpiError;
-    use crate::probe::account::{ProbeAccountConfig, ProbeAccountProfile, RawProbeConfig};
+    use crate::probe::account::{ProbeAccountProfile, RawProbeConfig};
     use crate::probe::contract::ApiContract;
     use crate::sign::wbi::WbiKeys;
     use crate::sign::wbi_client::current_wbi_cache_bucket;
@@ -403,17 +401,14 @@ mod tests {
             }"#,
         )?;
         let config = RawProbeConfig {
-            probe: ProbeAccountConfig {
-                vip: Some(ProbeAccountProfile {
-                    bili_jct: "csrf".to_string(),
-                    dede_user_id: "42".to_string(),
-                    dede_user_id_ckmd5: "ck".to_string(),
-                    sessdata: "session".to_string(),
-                    buvid3: "buvid".to_string(),
-                }),
-                normal: None,
-            },
-            ..RawProbeConfig::default()
+            vip: Some(ProbeAccountProfile {
+                bili_jct: "csrf".to_string(),
+                dede_user_id: "42".to_string(),
+                dede_user_id_ckmd5: "ck".to_string(),
+                sessdata: "session".to_string(),
+                buvid3: "buvid".to_string(),
+            }),
+            normal: None,
         };
 
         let client = client_for_contract(&contract, &config)?;
@@ -516,17 +511,14 @@ mod tests {
             }"#,
         )?;
         let config = RawProbeConfig {
-            probe: ProbeAccountConfig {
-                normal: Some(ProbeAccountProfile {
-                    bili_jct: "normal-csrf".to_string(),
-                    dede_user_id: "43".to_string(),
-                    dede_user_id_ckmd5: "ck-normal".to_string(),
-                    sessdata: "session-normal".to_string(),
-                    buvid3: "buvid-normal".to_string(),
-                }),
-                vip: None,
-            },
-            ..RawProbeConfig::default()
+            normal: Some(ProbeAccountProfile {
+                bili_jct: "normal-csrf".to_string(),
+                dede_user_id: "43".to_string(),
+                dede_user_id_ckmd5: "ck-normal".to_string(),
+                sessdata: "session-normal".to_string(),
+                buvid3: "buvid-normal".to_string(),
+            }),
+            vip: None,
         };
         let client = client_for_contract(&contract, &config)?;
         let request = build_request(&client, &contract).await?;
@@ -566,17 +558,14 @@ mod tests {
             }"#,
         )?;
         let config = RawProbeConfig {
-            probe: ProbeAccountConfig {
-                normal: Some(ProbeAccountProfile {
-                    bili_jct: "normal-csrf".to_string(),
-                    dede_user_id: "43".to_string(),
-                    dede_user_id_ckmd5: "ck-normal".to_string(),
-                    sessdata: "session-normal".to_string(),
-                    buvid3: "buvid-normal".to_string(),
-                }),
-                vip: None,
-            },
-            ..RawProbeConfig::default()
+            normal: Some(ProbeAccountProfile {
+                bili_jct: "normal-csrf".to_string(),
+                dede_user_id: "43".to_string(),
+                dede_user_id_ckmd5: "ck-normal".to_string(),
+                sessdata: "session-normal".to_string(),
+                buvid3: "buvid-normal".to_string(),
+            }),
+            vip: None,
         };
         let client = client_for_contract(&contract, &config)?;
         let request = build_request(&client, &contract).await?;
@@ -618,17 +607,14 @@ mod tests {
             }"#,
         )?;
         let config = RawProbeConfig {
-            probe: ProbeAccountConfig {
-                normal: Some(ProbeAccountProfile {
-                    bili_jct: "normal-csrf".to_string(),
-                    dede_user_id: "43".to_string(),
-                    dede_user_id_ckmd5: "ck-normal".to_string(),
-                    sessdata: "session-normal".to_string(),
-                    buvid3: "buvid-normal".to_string(),
-                }),
-                vip: None,
-            },
-            ..RawProbeConfig::default()
+            normal: Some(ProbeAccountProfile {
+                bili_jct: "normal-csrf".to_string(),
+                dede_user_id: "43".to_string(),
+                dede_user_id_ckmd5: "ck-normal".to_string(),
+                sessdata: "session-normal".to_string(),
+                buvid3: "buvid-normal".to_string(),
+            }),
+            vip: None,
         };
         let client = client_for_contract(&contract, &config)?;
         let variables = template_variables_at_timestamp(&client, &contract, 1_234_567_890)?;

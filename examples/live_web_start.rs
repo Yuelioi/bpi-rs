@@ -5,18 +5,21 @@
 //! $env:BPI_ACCOUNT_TOML = "account.toml"
 //! $env:BILI_ROOM_ID = "4354019"
 //! $env:BILI_AREA_ID = "309"
+//! $env:BPI_MUTATING_TEST = "1"
 //! cargo run --example live_web_start --features live,misc
 //! ```
 //!
 //! 若已在直播，加 `--stop-if-live` 会先关播再开播（会短暂断流）。
 //! 只关播并验证状态，使用 `--stop-only`。
 
-use bpi_rs::{Account, BpiClient, BpiError, BpiResult};
-use config::{Config, ConfigError, File};
-use std::path::PathBuf;
+#[path = "common/account.rs"]
+mod account;
+
+use bpi_rs::BpiResult;
 
 const DEFAULT_ROOM_ID: i64 = 4354019;
 const DEFAULT_AREA_ID: u64 = 309;
+const MUTATING_ENV: &str = "BPI_MUTATING_TEST";
 
 fn mask(s: &str) -> String {
     if s.len() <= 8 {
@@ -25,72 +28,8 @@ fn mask(s: &str) -> String {
     format!("{}...{}", &s[..4], &s[s.len() - 4..])
 }
 
-fn account_path() -> PathBuf {
-    std::env::var("BPI_ACCOUNT_TOML")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("account.toml"))
-}
-
-fn load_account() -> BpiResult<Account> {
-    let path = account_path();
-    if !path.exists() {
-        return Err(BpiError::invalid_parameter(
-            "account_path",
-            "account config file does not exist",
-        ));
-    }
-
-    let settings = Config::builder()
-        .add_source(File::from(path))
-        .build()
-        .map_err(|err| BpiError::parse(format!("读取账号配置失败: {err}")))?;
-
-    let account = match settings.get::<Account>("vip") {
-        Ok(account) => account,
-        Err(ConfigError::NotFound(_)) => match load_suffixed_account(&settings, "_vip")? {
-            Some(account) => account,
-            None => settings
-                .try_deserialize::<Account>()
-                .map_err(|err| BpiError::parse(format!("解析账号配置失败: {err}")))?,
-        },
-        Err(err) => {
-            return Err(BpiError::parse(format!("解析 vip 账号配置失败: {err}")));
-        }
-    };
-
-    account.validate_complete()?;
-    Ok(account)
-}
-
-fn load_suffixed_account(settings: &Config, suffix: &str) -> BpiResult<Option<Account>> {
-    let dede_user_id = config_string(settings, &format!("dede_user_id{suffix}"))?;
-    let sessdata = config_string(settings, &format!("sessdata{suffix}"))?;
-    let bili_jct = config_string(settings, &format!("bili_jct{suffix}"))?;
-    let buvid3 = config_string(settings, &format!("buvid3{suffix}"))?;
-
-    if dede_user_id.is_none() && sessdata.is_none() && bili_jct.is_none() && buvid3.is_none() {
-        return Ok(None);
-    }
-
-    let account = Account::new(
-        dede_user_id.ok_or_else(incomplete_account)?,
-        sessdata.ok_or_else(incomplete_account)?,
-        bili_jct.ok_or_else(incomplete_account)?,
-        buvid3.ok_or_else(incomplete_account)?,
-    );
-    Ok(Some(account))
-}
-
-fn config_string(settings: &Config, key: &str) -> BpiResult<Option<String>> {
-    match settings.get_string(key) {
-        Ok(value) => Ok(Some(value)),
-        Err(ConfigError::NotFound(_)) => Ok(None),
-        Err(err) => Err(BpiError::parse(format!("解析账号配置项 {key} 失败: {err}"))),
-    }
-}
-
-fn incomplete_account() -> BpiError {
-    BpiError::invalid_parameter("account", "account profile is incomplete")
+fn mutating_enabled() -> bool {
+    std::env::var(MUTATING_ENV).ok().as_deref() == Some("1")
 }
 
 #[tokio::main]
@@ -106,8 +45,7 @@ async fn main() -> BpiResult<()> {
         .and_then(|s| s.parse().ok())
         .unwrap_or(DEFAULT_AREA_ID);
 
-    let bpi = BpiClient::new()?;
-    bpi.set_account(load_account()?)?;
+    let bpi = account::authenticated_client()?;
 
     println!("=== Rust 网页自动开播验证 ===");
     println!("room_id={room_id} area_v2={area_id}");
@@ -118,6 +56,11 @@ async fn main() -> BpiResult<()> {
         "当前状态: live_status={} title={} area={}·{}",
         info.live_status, info.title, info.parent_area_name, info.area_name
     );
+
+    if !mutating_enabled() {
+        println!("{MUTATING_ENV}=1 未设置，只读取直播间状态，不执行开播、关播或获取推流码。");
+        return Ok(());
+    }
 
     if stop_only {
         if info.live_status == 1 {

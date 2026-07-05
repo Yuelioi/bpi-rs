@@ -103,4 +103,4 @@ pub use client::BpiClient;
 pub use err::error::BpiError;
 pub use request::BilibiliRequest;
 pub use response::{ApiEnvelope, BpiResult};
-pub use session::Account;
+pub use session::{Account, AccountProfile};

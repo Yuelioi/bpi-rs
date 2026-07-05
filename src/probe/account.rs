@@ -1,20 +1,12 @@
 use std::path::Path;
 
 use config::{Config, File};
-use serde::{Deserialize, Deserializer};
+use serde::Deserialize;
 
 use crate::{Account, BpiError, BpiResult};
 
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct RawProbeConfig {
-    #[serde(default)]
-    pub probe: ProbeAccountConfig,
-    #[serde(default, flatten)]
-    pub(crate) flat: FlatProbeAccountConfig,
-}
-
-#[derive(Debug, Clone, Default, Deserialize)]
-pub struct ProbeAccountConfig {
     pub vip: Option<ProbeAccountProfile>,
     pub normal: Option<ProbeAccountProfile>,
 }
@@ -27,40 +19,6 @@ pub struct ProbeAccountProfile {
     pub dede_user_id_ckmd5: String,
     pub sessdata: String,
     pub buvid3: String,
-}
-
-#[derive(Debug, Clone, Default, Deserialize)]
-pub(crate) struct FlatProbeAccountConfig {
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    bili_jct: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    dede_user_id: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    dede_user_id_ckmd5: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    sessdata: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    buvid3: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    bili_jct_vip: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    dede_user_id_vip: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    dede_user_id_ckmd5_vip: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    sessdata_vip: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    buvid3_vip: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    bili_jct_normal: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    dede_user_id_normal: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    dede_user_id_ckmd5_normal: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    sessdata_normal: Option<String>,
-    #[serde(default, deserialize_with = "deserialize_optional_stringish")]
-    buvid3_normal: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -99,18 +57,9 @@ impl RawProbeConfig {
     }
 
     fn profile(&self, profile: ProbeAccountProfileName) -> Option<ProbeAccountProfile> {
-        self.probe
-            .profile(profile)
-            .cloned()
-            .or_else(|| self.flat.profile(profile))
-    }
-}
-
-impl ProbeAccountConfig {
-    fn profile(&self, profile: ProbeAccountProfileName) -> Option<&ProbeAccountProfile> {
         match profile {
-            ProbeAccountProfileName::Vip => self.vip.as_ref(),
-            ProbeAccountProfileName::Normal => self.normal.as_ref(),
+            ProbeAccountProfileName::Vip => self.vip.clone(),
+            ProbeAccountProfileName::Normal => self.normal.clone(),
         }
     }
 }
@@ -126,81 +75,6 @@ impl ProbeAccountProfile {
     }
 }
 
-impl FlatProbeAccountConfig {
-    fn profile(&self, profile: ProbeAccountProfileName) -> Option<ProbeAccountProfile> {
-        match profile {
-            ProbeAccountProfileName::Vip => build_profile(
-                &self.bili_jct_vip,
-                &self.dede_user_id_vip,
-                &self.dede_user_id_ckmd5_vip,
-                &self.sessdata_vip,
-                &self.buvid3_vip,
-            )
-            .or_else(|| {
-                build_profile(
-                    &self.bili_jct,
-                    &self.dede_user_id,
-                    &self.dede_user_id_ckmd5,
-                    &self.sessdata,
-                    &self.buvid3,
-                )
-            }),
-            ProbeAccountProfileName::Normal => build_profile(
-                &self.bili_jct_normal,
-                &self.dede_user_id_normal,
-                &self.dede_user_id_ckmd5_normal,
-                &self.sessdata_normal,
-                &self.buvid3_normal,
-            ),
-        }
-    }
-}
-
-fn build_profile(
-    bili_jct: &Option<String>,
-    dede_user_id: &Option<String>,
-    dede_user_id_ckmd5: &Option<String>,
-    sessdata: &Option<String>,
-    buvid3: &Option<String>,
-) -> Option<ProbeAccountProfile> {
-    Some(ProbeAccountProfile {
-        bili_jct: configured_value(bili_jct)?,
-        dede_user_id: configured_value(dede_user_id)?,
-        dede_user_id_ckmd5: configured_value(dede_user_id_ckmd5).unwrap_or_default(),
-        sessdata: configured_value(sessdata)?,
-        buvid3: configured_value(buvid3)?,
-    })
-}
-
-fn configured_value(value: &Option<String>) -> Option<String> {
-    value
-        .as_deref()
-        .map(str::trim)
-        .filter(|value| !value.is_empty())
-        .map(str::to_owned)
-}
-
-fn deserialize_optional_stringish<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    #[derive(Deserialize)]
-    #[serde(untagged)]
-    enum Stringish {
-        String(String),
-        Unsigned(u64),
-        Signed(i64),
-    }
-
-    Ok(
-        Option::<Stringish>::deserialize(deserializer)?.map(|value| match value {
-            Stringish::String(value) => value,
-            Stringish::Unsigned(value) => value.to_string(),
-            Stringish::Signed(value) => value.to_string(),
-        }),
-    )
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -208,17 +82,14 @@ mod tests {
     #[test]
     fn account_profile_maps_vip_fields() {
         let raw = RawProbeConfig {
-            probe: ProbeAccountConfig {
-                vip: Some(ProbeAccountProfile {
-                    bili_jct: "csrf".to_string(),
-                    dede_user_id: "42".to_string(),
-                    dede_user_id_ckmd5: "ck".to_string(),
-                    sessdata: "session".to_string(),
-                    buvid3: "buvid".to_string(),
-                }),
-                normal: None,
-            },
-            flat: FlatProbeAccountConfig::default(),
+            vip: Some(ProbeAccountProfile {
+                bili_jct: "csrf".to_string(),
+                dede_user_id: "42".to_string(),
+                dede_user_id_ckmd5: "ck".to_string(),
+                sessdata: "session".to_string(),
+                buvid3: "buvid".to_string(),
+            }),
+            normal: None,
         };
 
         let account = raw
@@ -233,17 +104,14 @@ mod tests {
     #[test]
     fn account_profile_maps_normal_fields() {
         let raw = RawProbeConfig {
-            probe: ProbeAccountConfig {
-                vip: None,
-                normal: Some(ProbeAccountProfile {
-                    bili_jct: "csrf2".to_string(),
-                    dede_user_id: "43".to_string(),
-                    dede_user_id_ckmd5: "ck2".to_string(),
-                    sessdata: "session2".to_string(),
-                    buvid3: "buvid2".to_string(),
-                }),
-            },
-            flat: FlatProbeAccountConfig::default(),
+            vip: None,
+            normal: Some(ProbeAccountProfile {
+                bili_jct: "csrf2".to_string(),
+                dede_user_id: "43".to_string(),
+                dede_user_id_ckmd5: "ck2".to_string(),
+                sessdata: "session2".to_string(),
+                buvid3: "buvid2".to_string(),
+            }),
         };
 
         let account = raw
@@ -259,11 +127,8 @@ mod tests {
     #[test]
     fn account_profile_returns_none_for_unknown_profile() {
         let raw = RawProbeConfig {
-            probe: ProbeAccountConfig {
-                vip: None,
-                normal: None,
-            },
-            flat: FlatProbeAccountConfig::default(),
+            vip: None,
+            normal: None,
         };
 
         assert!(
@@ -289,18 +154,18 @@ mod tests {
     }
 
     #[test]
-    fn account_config_deserializes_semantic_probe_sections() -> Result<(), BpiError> {
+    fn account_config_deserializes_root_profile_sections() -> Result<(), BpiError> {
         let raw: RawProbeConfig = Config::builder()
             .add_source(File::from_str(
                 r#"
-                [probe.vip]
+                [vip]
                 bili_jct = "vip-csrf"
-                dede_user_id = 42
+                dede_user_id = "42"
                 dede_user_id_ckmd5 = "vip-ck"
                 sessdata = "vip-session"
                 buvid3 = "vip-buvid"
 
-                [probe.normal]
+                [normal]
                 bili_jct = "normal-csrf"
                 dede_user_id = "43"
                 dede_user_id_ckmd5 = "normal-ck"
@@ -329,7 +194,7 @@ mod tests {
     }
 
     #[test]
-    fn account_config_deserializes_semantic_flat_suffixes() -> Result<(), BpiError> {
+    fn account_config_rejects_legacy_flat_suffixes() -> Result<(), BpiError> {
         let raw: RawProbeConfig = Config::builder()
             .add_source(File::from_str(
                 r#"
@@ -350,16 +215,13 @@ mod tests {
             .and_then(Config::try_deserialize)
             .map_err(|err| BpiError::parse(err.to_string()))?;
 
-        let vip = raw.account("vip")?.expect("vip profile should exist");
-        let normal = raw.account("normal")?.expect("normal profile should exist");
-
-        assert_eq!(vip.dede_user_id, "42");
-        assert_eq!(normal.dede_user_id, "43");
+        assert!(raw.account("vip")?.is_none());
+        assert!(raw.account("normal")?.is_none());
         Ok(())
     }
 
     #[test]
-    fn account_config_uses_legacy_flat_fields_as_vip_fallback() -> Result<(), BpiError> {
+    fn account_config_rejects_legacy_flat_fields_as_vip_fallback() -> Result<(), BpiError> {
         let raw: RawProbeConfig = Config::builder()
             .add_source(File::from_str(
                 r#"
@@ -375,12 +237,7 @@ mod tests {
             .and_then(Config::try_deserialize)
             .map_err(|err| BpiError::parse(err.to_string()))?;
 
-        let vip = raw
-            .account("vip")?
-            .expect("legacy vip profile should exist");
-
-        assert_eq!(vip.dede_user_id, "42");
-        assert_eq!(vip.bili_jct, "legacy-csrf");
+        assert!(raw.account("vip")?.is_none());
         Ok(())
     }
 

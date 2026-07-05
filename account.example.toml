@@ -1,14 +1,16 @@
-# 本地测试用, 可以打开 B 站登录, F12 > Application => Cookies 找到下面的值
-# 字段后缀表示账号语义, 不要使用 2/3 这类临时编号。
+# 本地测试用。可以打开 B 站登录，F12 > Application > Cookies 找到下面的值。
+# 当前只支持 [vip] / [normal] 结构化 profile，不再兼容 *_vip / *_normal 旧格式。
 
-bili_jct_vip = "vip_bili_jct"
-dede_user_id_vip = "vip_dede_user_id"
-dede_user_id_ckmd5_vip = "vip_dede_user_id_ckmd5"
-sessdata_vip = "vip_sessdata"
-buvid3_vip = "vip_buvid3"
+[normal]
+bili_jct = "normal_bili_jct"
+dede_user_id = "normal_dede_user_id"
+dede_user_id_ckmd5 = "normal_dede_user_id_ckmd5"
+sessdata = "normal_sessdata"
+buvid3 = "normal_buvid3"
 
-bili_jct_normal = "normal_bili_jct"
-dede_user_id_normal = "normal_dede_user_id"
-dede_user_id_ckmd5_normal = "normal_dede_user_id_ckmd5"
-sessdata_normal = "normal_sessdata"
-buvid3_normal = "normal_buvid3"
+[vip]
+bili_jct = "vip_bili_jct"
+dede_user_id = "vip_dede_user_id"
+dede_user_id_ckmd5 = "vip_dede_user_id_ckmd5"
+sessdata = "vip_sessdata"
+buvid3 = "vip_buvid3"

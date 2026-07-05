@@ -341,7 +341,7 @@ fn normalize_id_list(
 mod tests {
     use crate::{
         BpiClient, BpiError,
-        session::{Account, TestAccountProfile},
+        session::{Account, AccountProfile},
     };
 
     use super::{
@@ -617,7 +617,7 @@ mod tests {
 
         let target = live_coin_target_from_env()?;
         let multiply = live_coin_multiply_from_env()?;
-        let account = Account::load_test_account_profile(TestAccountProfile::Vip)?;
+        let account = Account::load_test_account_profile(AccountProfile::Vip)?;
         let client = BpiClient::builder().account(account).build()?;
         let video = client.video();
 
@@ -651,7 +651,7 @@ mod tests {
     #[ignore = "local account shape diagnostic; prints presence only, never secret values"]
     #[test]
     fn live_vip_account_shape_has_expected_cookie_fields() -> Result<(), BpiError> {
-        let account = Account::load_test_account_profile(TestAccountProfile::Vip)?;
+        let account = Account::load_test_account_profile(AccountProfile::Vip)?;
 
         eprintln!("vip has DedeUserID: {}", !account.dede_user_id.is_empty());
         eprintln!("vip has SESSDATA: {}", !account.sessdata.is_empty());
@@ -665,7 +665,7 @@ mod tests {
     #[tokio::test]
     async fn live_vip_coin_status_from_env() -> Result<(), BpiError> {
         let target = live_coin_target_from_env()?;
-        let account = Account::load_test_account_profile(TestAccountProfile::Vip)?;
+        let account = Account::load_test_account_profile(AccountProfile::Vip)?;
         let client = BpiClient::builder().account(account).build()?;
         let video = client.video();
 
