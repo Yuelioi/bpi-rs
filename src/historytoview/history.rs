@@ -98,8 +98,8 @@ pub struct HistoryListItem {
     pub duration: Option<u32>,
     /// 备注
     pub current: Option<String>,
-    /// 总计分集数，仅用于剧集
-    pub total: Option<u32>,
+    /// 总计分集数，仅用于剧集；B 站可能返回 -1 表示未知。
+    pub total: Option<i32>,
     /// 最新一话 / 最新一 P 标识
     pub new_desc: Option<String>,
     /// 是否已完结，仅用于剧集
@@ -249,6 +249,7 @@ mod tests {
         .into_payload()?;
         assert_eq!(list.cursor.ps, 5);
         assert_eq!(list.list.len(), 1);
+        assert_eq!(list.list[0].total, Some(-1));
 
         let err = ApiEnvelope::<serde_json::Value>::from_slice(include_bytes!(
             "../../tests/contracts/historytoview/read/history-shadow/responses/anonymous.requires_login.json"
