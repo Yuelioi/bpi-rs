@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 
 const LIKE_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/archive/like";
 const COIN_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/coin/add";
+const COIN_STATUS_ENDPOINT: &str = "https://api.bilibili.com/x/web-interface/archive/coins";
 const FAVORITE_ENDPOINT: &str = "https://api.bilibili.com/x/v3/fav/resource/deal";
 
 /// 投币视频 - 响应结构体
@@ -32,10 +33,56 @@ pub struct FavoriteData {
     pub success_num: u32,
 }
 
+/// Current account coin status for a video.
+#[derive(Debug, Serialize, Clone, Deserialize, PartialEq, Eq)]
+pub struct VideoCoinStatusData {
+    /// Number of coins the current account has already given to this video.
+    pub multiply: u8,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct LegacyVideoIdForm {
     aid: String,
     bvid: String,
+}
+
+impl LegacyVideoIdForm {
+    fn form_pairs(&self) -> Vec<(&'static str, String)> {
+        let mut pairs = Vec::new();
+        if self.aid != "0" {
+            pairs.push(("aid", self.aid.clone()));
+        }
+        if !self.bvid.is_empty() {
+            pairs.push(("bvid", self.bvid.clone()));
+        }
+        pairs
+    }
+}
+
+/// Parameters for checking whether the current account has coined a video.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct VideoCoinStatusParams {
+    video_id: LegacyVideoIdForm,
+}
+
+impl VideoCoinStatusParams {
+    pub fn from_aid(aid: u64) -> BpiResult<Self> {
+        Self::from_ids(Some(aid), None)
+    }
+
+    pub fn from_bvid(bvid: impl Into<String>) -> BpiResult<Self> {
+        Self::from_ids(None, Some(bvid.into()))
+    }
+
+    pub fn from_ids(aid: Option<u64>, bvid: Option<String>) -> BpiResult<Self> {
+        Ok(Self {
+            video_id: legacy_video_id_form(aid, bvid)?,
+        })
+    }
+
+    fn query_pairs(&self) -> Vec<(&'static str, String)> {
+        self.video_id.form_pairs()
+    }
 }
 
 /// Parameters for video like/unlike operations.
@@ -62,12 +109,10 @@ impl VideoLikeParams {
     }
 
     fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
-        vec![
-            ("aid", self.video_id.aid.clone()),
-            ("bvid", self.video_id.bvid.clone()),
-            ("like", self.like.to_string()),
-            ("csrf", csrf.to_string()),
-        ]
+        let mut pairs = self.video_id.form_pairs();
+        pairs.push(("like", self.like.to_string()));
+        pairs.push(("csrf", csrf.to_string()));
+        pairs
     }
 }
 
@@ -105,13 +150,11 @@ impl VideoCoinParams {
     }
 
     fn form_pairs(&self, csrf: &str) -> Vec<(&'static str, String)> {
-        vec![
-            ("aid", self.video_id.aid.clone()),
-            ("bvid", self.video_id.bvid.clone()),
-            ("multiply", self.multiply.to_string()),
-            ("select_like", self.select_like.to_string()),
-            ("csrf", csrf.to_string()),
-        ]
+        let mut pairs = self.video_id.form_pairs();
+        pairs.push(("multiply", self.multiply.to_string()));
+        pairs.push(("select_like", self.select_like.to_string()));
+        pairs.push(("csrf", csrf.to_string()));
+        pairs
     }
 }
 
@@ -169,19 +212,37 @@ impl VideoFavoriteParams {
 }
 
 impl<'a> VideoClient<'a> {
-    /// Likes or unlikes a video and returns the canonical payload result.
-    pub async fn like(&self, params: VideoLikeParams) -> BpiResult<CoinData> {
+    /// Checks how many coins the current account has given to a video.
+    ///
+    /// The upstream endpoint may lag briefly immediately after [`Self::coin`] succeeds.
+    pub async fn coin_status(
+        &self,
+        params: VideoCoinStatusParams,
+    ) -> BpiResult<VideoCoinStatusData> {
+        self.client
+            .get(COIN_STATUS_ENDPOINT)
+            .with_bilibili_headers()
+            .query(&params.query_pairs())
+            .send_bpi_payload("video.coin_status")
+            .await
+    }
+
+    /// Likes or unlikes a video and returns the optional canonical payload result.
+    pub async fn like(&self, params: VideoLikeParams) -> BpiResult<Option<serde_json::Value>> {
         let csrf = self.client.csrf()?;
 
         self.client
             .post(LIKE_ENDPOINT)
             .with_bilibili_headers()
             .form(&params.form_pairs(&csrf))
-            .send_bpi_payload("video.like")
+            .send_bpi_optional_payload("video.like")
             .await
     }
 
     /// Gives coins to a video and returns the canonical payload result.
+    ///
+    /// Bilibili's web endpoint expects a normal login cookie set, including `buvid3`; accounts
+    /// without it may hit risk control even when `SESSDATA` and `bili_jct` are present.
     pub async fn coin(&self, params: VideoCoinParams) -> BpiResult<CoinData> {
         let csrf = self.client.csrf()?;
 
@@ -278,11 +339,14 @@ fn normalize_id_list(
 
 #[cfg(test)]
 mod tests {
-    use crate::BpiError;
+    use crate::{
+        BpiClient, BpiError,
+        session::{Account, TestAccountProfile},
+    };
 
     use super::{
-        VideoCoinParams, VideoFavoriteParams, VideoLikeParams, legacy_video_id_form,
-        validate_coin_multiply,
+        VideoCoinParams, VideoCoinStatusParams, VideoFavoriteParams, VideoLikeParams,
+        legacy_video_id_form, validate_coin_multiply,
     };
 
     #[test]
@@ -319,7 +383,6 @@ mod tests {
             params.form_pairs("csrf-token"),
             vec![
                 ("aid", "170001".to_string()),
-                ("bvid", String::new()),
                 ("like", "1".to_string()),
                 ("csrf", "csrf-token".to_string()),
             ]
@@ -334,12 +397,22 @@ mod tests {
         assert_eq!(
             params.form_pairs("csrf-token"),
             vec![
-                ("aid", "0".to_string()),
                 ("bvid", "BV1xx411c7mD".to_string()),
                 ("multiply", "2".to_string()),
                 ("select_like", "0".to_string()),
                 ("csrf", "csrf-token".to_string()),
             ]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn video_coin_status_params_serializes_bvid() -> Result<(), BpiError> {
+        let params = VideoCoinStatusParams::from_bvid("BV1xx411c7mD")?;
+
+        assert_eq!(
+            params.query_pairs(),
+            vec![("bvid", "BV1xx411c7mD".to_string())]
         );
         Ok(())
     }
@@ -369,5 +442,236 @@ mod tests {
                 ..
             }
         ));
+    }
+
+    #[test]
+    fn video_action_methods_use_documented_payload_shapes() {
+        let source = include_str!("action.rs")
+            .split("#[cfg(test)]")
+            .next()
+            .expect("production source should precede tests");
+        let optional_helper = concat!(".send_", "bpi_optional_payload");
+        let payload_helper = concat!(".send_", "bpi_payload");
+
+        assert!(source.contains(&format!("{payload_helper}(\"video.coin_status\")")));
+        assert!(source.contains(&format!("{optional_helper}(\"video.like\")")));
+        assert!(source.contains(&format!("{payload_helper}(\"video.coin\")")));
+    }
+
+    fn live_mutating_tests_enabled() -> bool {
+        std::env::var("BPI_MUTATING_TEST").ok().as_deref() == Some("1")
+    }
+
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    enum LiveCoinTarget {
+        Aid(u64),
+        Bvid(String),
+    }
+
+    impl LiveCoinTarget {
+        fn label(&self) -> String {
+            match self {
+                Self::Aid(aid) => format!("aid={aid}"),
+                Self::Bvid(bvid) => format!("bvid={bvid}"),
+            }
+        }
+
+        fn coin_status_params(&self) -> Result<VideoCoinStatusParams, BpiError> {
+            match self {
+                Self::Aid(aid) => VideoCoinStatusParams::from_aid(*aid),
+                Self::Bvid(bvid) => VideoCoinStatusParams::from_bvid(bvid.as_str()),
+            }
+        }
+
+        fn coin_params(&self, multiply: u8) -> Result<VideoCoinParams, BpiError> {
+            match self {
+                Self::Aid(aid) => VideoCoinParams::from_aid(*aid, multiply),
+                Self::Bvid(bvid) => VideoCoinParams::from_bvid(bvid.as_str(), multiply),
+            }
+        }
+    }
+
+    fn live_coin_target_from_env() -> Result<LiveCoinTarget, BpiError> {
+        parse_live_coin_target(
+            std::env::var("BPI_VIDEO_AID").ok(),
+            std::env::var("BPI_VIDEO_BVID").ok(),
+        )
+    }
+
+    fn parse_live_coin_target(
+        aid: Option<String>,
+        bvid: Option<String>,
+    ) -> Result<LiveCoinTarget, BpiError> {
+        if let Some(aid) = aid {
+            let aid = aid.trim();
+            if !aid.is_empty() {
+                let aid = aid.parse::<u64>().map_err(|_| {
+                    BpiError::invalid_parameter("BPI_VIDEO_AID", "value must be a non-zero avid")
+                })?;
+                if aid == 0 {
+                    return Err(BpiError::invalid_parameter(
+                        "BPI_VIDEO_AID",
+                        "value must be a non-zero avid",
+                    ));
+                }
+                return Ok(LiveCoinTarget::Aid(aid));
+            }
+        }
+
+        if let Some(bvid) = bvid {
+            let bvid = bvid.trim();
+            if !bvid.is_empty() {
+                return Ok(LiveCoinTarget::Bvid(bvid.to_string()));
+            }
+        }
+
+        Err(BpiError::invalid_parameter(
+            "BPI_VIDEO_AID",
+            "set BPI_VIDEO_AID or BPI_VIDEO_BVID",
+        ))
+    }
+
+    fn live_coin_multiply_from_env() -> Result<u8, BpiError> {
+        parse_live_coin_multiply(std::env::var("BPI_VIDEO_COIN_MULTIPLY").ok())
+    }
+
+    fn parse_live_coin_multiply(value: Option<String>) -> Result<u8, BpiError> {
+        let Some(value) = value else {
+            return Ok(1);
+        };
+        let value = value.trim();
+        if value.is_empty() {
+            return Ok(1);
+        }
+
+        let multiply = value.parse::<u8>().map_err(|_| {
+            BpiError::invalid_parameter("BPI_VIDEO_COIN_MULTIPLY", "value must be 1 or 2")
+        })?;
+        if matches!(multiply, 1 | 2) {
+            return Ok(multiply);
+        }
+
+        Err(BpiError::invalid_parameter(
+            "BPI_VIDEO_COIN_MULTIPLY",
+            "value must be 1 or 2",
+        ))
+    }
+
+    #[test]
+    fn live_coin_target_from_env_prefers_aid() -> Result<(), BpiError> {
+        let target = parse_live_coin_target(Some("116856715220362".to_string()), None)?;
+
+        assert_eq!(target.label(), "aid=116856715220362");
+        Ok(())
+    }
+
+    #[test]
+    fn live_coin_target_from_env_accepts_bvid() -> Result<(), BpiError> {
+        let target = parse_live_coin_target(None, Some("BV11GTb6GEXX".to_string()))?;
+
+        assert_eq!(target.label(), "bvid=BV11GTb6GEXX");
+        Ok(())
+    }
+
+    #[test]
+    fn live_coin_target_from_env_requires_a_video_id() {
+        let err = parse_live_coin_target(None, None).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "BPI_VIDEO_AID",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn live_coin_multiply_from_env_defaults_to_one() -> Result<(), BpiError> {
+        assert_eq!(parse_live_coin_multiply(None)?, 1);
+        Ok(())
+    }
+
+    #[test]
+    fn live_coin_multiply_from_env_rejects_invalid_value() {
+        let err = parse_live_coin_multiply(Some("3".to_string())).unwrap_err();
+
+        assert!(matches!(
+            err,
+            BpiError::InvalidParameter {
+                field: "BPI_VIDEO_COIN_MULTIPLY",
+                ..
+            }
+        ));
+    }
+
+    #[ignore = "live mutating test; requires BPI_MUTATING_TEST=1 plus BPI_VIDEO_AID or BPI_VIDEO_BVID"]
+    #[tokio::test]
+    async fn live_vip_coin_from_env_spends_requested_coins() -> Result<(), BpiError> {
+        if !live_mutating_tests_enabled() {
+            eprintln!(
+                "skipping live mutating test; set BPI_MUTATING_TEST=1, BPI_VIDEO_AID or BPI_VIDEO_BVID, and optional BPI_VIDEO_COIN_MULTIPLY"
+            );
+            return Ok(());
+        }
+
+        let target = live_coin_target_from_env()?;
+        let multiply = live_coin_multiply_from_env()?;
+        let account = Account::load_test_account_profile(TestAccountProfile::Vip)?;
+        let client = BpiClient::builder().account(account).build()?;
+        let video = client.video();
+
+        match video.coin_status(target.coin_status_params()?).await {
+            Ok(status) => eprintln!("coin status before {}: {status:?}", target.label()),
+            Err(err) => eprintln!("coin status before {} failed: {err:?}", target.label()),
+        }
+
+        match video.coin(target.coin_params(multiply)?).await {
+            Ok(payload) => eprintln!(
+                "coin succeeded for {} with multiply={multiply}: {payload:?}",
+                target.label()
+            ),
+            Err(err) => {
+                eprintln!(
+                    "coin failed for {} with multiply={multiply}: {err:?}",
+                    target.label()
+                );
+                return Err(err);
+            }
+        }
+
+        match video.coin_status(target.coin_status_params()?).await {
+            Ok(status) => eprintln!("coin status after {}: {status:?}", target.label()),
+            Err(err) => eprintln!("coin status after {} failed: {err:?}", target.label()),
+        }
+
+        Ok(())
+    }
+
+    #[ignore = "local account shape diagnostic; prints presence only, never secret values"]
+    #[test]
+    fn live_vip_account_shape_has_expected_cookie_fields() -> Result<(), BpiError> {
+        let account = Account::load_test_account_profile(TestAccountProfile::Vip)?;
+
+        eprintln!("vip has DedeUserID: {}", !account.dede_user_id.is_empty());
+        eprintln!("vip has SESSDATA: {}", !account.sessdata.is_empty());
+        eprintln!("vip has bili_jct: {}", !account.bili_jct.is_empty());
+        eprintln!("vip has buvid3: {}", !account.buvid3.is_empty());
+
+        Ok(())
+    }
+
+    #[ignore = "live read diagnostic; requires BPI_VIDEO_AID or BPI_VIDEO_BVID"]
+    #[tokio::test]
+    async fn live_vip_coin_status_from_env() -> Result<(), BpiError> {
+        let target = live_coin_target_from_env()?;
+        let account = Account::load_test_account_profile(TestAccountProfile::Vip)?;
+        let client = BpiClient::builder().account(account).build()?;
+        let video = client.video();
+
+        let status = video.coin_status(target.coin_status_params()?).await?;
+        eprintln!("coin status for {}: {status:?}", target.label());
+
+        Ok(())
     }
 }

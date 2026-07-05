@@ -22,7 +22,10 @@ pub mod video_zone;
 pub mod video_zone_v2;
 pub mod videostream_url;
 
-pub use action::{VideoCoinParams, VideoFavoriteParams, VideoLikeParams};
+pub use action::{
+    VideoCoinParams, VideoCoinStatusData, VideoCoinStatusParams, VideoFavoriteParams,
+    VideoLikeParams,
+};
 pub use client::VideoClient;
 pub use collection::{
     CollectionArchiveSort, CollectionArchivesMutationParams, CollectionCreateAndAddArchivesParams,
