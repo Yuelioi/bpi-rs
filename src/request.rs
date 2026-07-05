@@ -1,6 +1,7 @@
+#[cfg(feature = "manga")]
+use crate::response::ApiEnvelope;
 use crate::{
     BpiError,
-    response::ApiEnvelope,
     transport::{ReqwestTransport, TransportEnvelope, TransportResponse},
 };
 use reqwest::RequestBuilder;
@@ -105,6 +106,7 @@ impl BilibiliRequest for RequestBuilder {
     }
 }
 
+#[cfg(feature = "manga")]
 pub(crate) async fn send_bpi_envelope<T>(
     request: RequestBuilder,
     operation_name: &str,
@@ -122,6 +124,7 @@ where
     Ok(result)
 }
 
+#[cfg(feature = "manga")]
 fn decode_bpi_envelope_response<T>(
     operation_name: &str,
     response: &TransportResponse,
@@ -209,6 +212,7 @@ fn log_decode_error(operation_name: &str, bytes: &[u8], error: &serde_json::Erro
     }
     #[cfg(not(any(test, debug_assertions)))]
     {
+        let _ = bytes;
         tracing::error!("{} JSON解析失败: {}", operation_name, error);
     }
 }
