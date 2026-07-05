@@ -43,7 +43,7 @@ pub struct RoomPendants {
     /// 手机版头像框
     pub mobile_frame: Option<RoomPendantFrame>,
     /// 大v
-    pub badge: RoomPendantBadge,
+    pub badge: Option<RoomPendantBadge>,
     /// 手机版大v
     pub mobile_badge: Option<RoomPendantBadge>,
 }
@@ -173,6 +173,31 @@ mod tests {
 
         assert_eq!(payload.room_id, 23174842);
         assert_eq!(payload.live_status, 1);
+        Ok(())
+    }
+
+    #[test]
+    fn room_pendants_accepts_null_badge() -> BpiResult<()> {
+        let pendants = serde_json::from_str::<RoomPendants>(
+            r#"{
+                "frame": {
+                    "name": "",
+                    "value": "",
+                    "position": 0,
+                    "desc": "",
+                    "area": 0,
+                    "area_old": 0,
+                    "bg_color": "",
+                    "bg_pic": "",
+                    "use_old_area": false
+                },
+                "mobile_frame": null,
+                "badge": null,
+                "mobile_badge": null
+            }"#,
+        )?;
+
+        assert!(pendants.badge.is_none());
         Ok(())
     }
 
