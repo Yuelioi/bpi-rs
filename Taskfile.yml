@@ -43,6 +43,36 @@ tasks:
     cmds:
       - cargo package --allow-dirty
 
+  probe_fields:
+    desc: Print field path statistics for committed contract JSON files.
+    cmds:
+      - cargo run --bin bpi-probe -- fields tests/contracts
+
+  probe_sanitize_audit:
+    desc: Check committed response fixtures for high-confidence sensitive fields.
+    cmds:
+      - cargo run --bin bpi-probe -- sanitize-audit tests/contracts
+
+  probe_contract_audit:
+    desc: Check committed contract structure and v2 metadata migration status.
+    cmds:
+      - cargo run --bin bpi-probe -- contract-audit tests/contracts
+
+  probe_read_only:
+    desc: Run all read-only promoted contracts against anonymous, normal, and vip profiles.
+    cmds:
+      - $env:BPI_PROBE='1'; cargo run --all-features --bin bpi-probe -- batch-run tests/contracts --account account.toml --profiles anonymous,normal,vip --pages 10 --read-only --output target/bpi-probe-runs/read-only
+
+  api_doc:
+    desc: Generate the AI-friendly API index from contracts and Rust source.
+    cmds:
+      - cargo run --all-features --bin bpi-probe -- api-doc tests/contracts --output docs/api-index.md
+
+  contract_test:
+    desc: Run the unified offline contract runner.
+    cmds:
+      - cargo test --all-features --test contract_runner
+
   check_feature_matrix:
     desc: Check that no-default and single-feature library builds stay healthy.
     cmds:

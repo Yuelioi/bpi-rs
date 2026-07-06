@@ -46,7 +46,7 @@ impl ContractUrl {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum HttpMethod {
     Get,
@@ -102,7 +102,7 @@ pub enum AuthRequirement {
     Wbi,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CapturedRequest {
     pub method: HttpMethod,
     pub url: String,
@@ -122,14 +122,14 @@ impl CapturedRequest {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProbeResponse {
     pub status: u16,
     pub headers: BTreeMap<String, String>,
     pub body: serde_json::Value,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProbeResult {
     pub contract: String,
     pub request: CapturedRequest,
