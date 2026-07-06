@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1
+
+- 修复历史记录响应中 `total: -1` 导致反序列化失败的问题。
+- 升级契约探针工具链，新增契约审计、字段统计、脱敏审计、批量只读 Probe、fixture promote 和 API 索引生成。
+- 将已提交接口契约迁移到 v2 元数据，补齐模块、批次、endpoint、风险分类、profiles、脱敏和来源信息。
+- 新增 `docs/api-index.md`，自动汇总 API、函数说明、风险分类、profiles、URL、契约路径和 Rust 模型，方便维护者和 AI 使用。
+- 新增 `docs/development.md`，整理本地验证、Probe、账号配置和风险门控流程。
+- 修复 `probe::model` 在关闭默认 feature 或只启用部分 feature 时引用被裁剪模块导致的编译失败。
+
 ## 0.2.0
 
 - 使用模块客户端作为主 API 形态，例如 `client.video().view(...)`、`client.login().nav()`。
