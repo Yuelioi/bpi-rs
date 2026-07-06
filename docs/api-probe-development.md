@@ -55,12 +55,42 @@ cargo run --quiet --bin bpi-probe -- `
   target\bpi-probe-runs\<domain>\<batch>\<endpoint>\<profile>.response.json
 ```
 
+批量运行已提交契约：
+
+```powershell
+$env:BPI_PROBE = "1"
+cargo run --bin bpi-probe -- batch-run tests/contracts/video/info-read `
+  --account account.toml `
+  --profiles anonymous,normal,vip `
+  --pages 10 `
+  --output target/bpi-probe-runs
+```
+
+`batch-run` 默认不会运行网络请求，必须设置 `BPI_PROBE=1`。`mutating`、`spending`、`login-session` 还需要额外环境变量门控，避免误触发有副作用接口。`--pages` 默认为 `10`，会展开本身带 `page`、`pn` 或 `pageNum` 的普通分页契约；`historytoview.history_list` 使用响应里的 `data.cursor.max/view_at/business` 继续翻页；非分页契约仍只运行一次。
+
+只跑全量只读契约：
+
+```powershell
+task probe_read_only
+```
+
+这个任务等价于带 `--read-only` 的 `batch-run tests/contracts`，会覆盖 `anonymous`、`normal`、`vip` 三个 profile，并跳过 `mutating`、`spending`、`login-session` 风险分类。运行前必须确认本地 `account.toml` 里有 `[normal]` 和 `[vip]`，否则登录态用例会失败。
+
 常见 profile：
 
 ```text
 anonymous
 normal
 vip
+```
+
+离线检查契约字段、脱敏残留和结构一致性：
+
+```powershell
+task probe_fields
+task probe_sanitize_audit
+task probe_contract_audit
+task contract_test
 ```
 
 4. 对比结果
@@ -74,6 +104,7 @@ vip
    - 契约放到 `tests/contracts/<domain>/<endpoint>/contract.json`。
    - 脱敏响应样例放到 `tests/contracts/<domain>/<endpoint>/responses/*.json`。
    - 不提交 `target/bpi-probe-runs` 里的原始输出。
+   - 新增契约优先补齐 `schema_version`、`module`、`batch`、`endpoint`、`risk`、`status`、`profiles`、`sanitize` 和 `provenance` 字段。
 
 6. 写 Rust 代码
    - 新接口挂到对应模块客户端，例如 `client.video()`、`client.login()`、`client.live()`。
@@ -99,6 +130,99 @@ vip
 | `spending` | 投币、支付、购买、兑换、充电 | 双重门控，并要求显式目标参数 |
 | `login-session` | 二维码登录、Cookie 刷新、短信、风控相关接口 | 不提交 token、Cookie、设备标识或原始响应 |
 
+## 契约字段
+
+新增或迁移契约时，推荐使用 v2 元数据字段。旧契约可以暂时缺省这些字段；一旦声明 `schema_version: 2`，`module`、`batch`、`endpoint`、`risk`、`status` 和 `profiles` 都是必填字段。
+
+```json
+{
+  "schema_version": 2,
+  "name": "video.view",
+  "module": "video",
+  "batch": "info-read",
+  "endpoint": "view",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": ["anonymous", "normal", "vip"],
+  "request": {
+    "method": "GET",
+    "url": "https://api.bilibili.com/x/web-interface/view",
+    "query": {
+      "bvid": "BV1xx411c7mD"
+    },
+    "auth": {
+      "requires": []
+    }
+  },
+  "sanitize": {
+    "preset": ["account"],
+    "replace": {
+      "$.data.owner.mid": 1000001,
+      "$.data.owner.name": "sanitized-user"
+    },
+    "drop": [],
+    "keep": ["$.data.title", "$.data.bvid"]
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "observed_at": "2026-07-06",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0",
+    "privacy": "account fields sanitized before commit"
+  },
+  "cases": []
+}
+```
+
+字段说明：
+
+| 字段 | 含义 |
+| --- | --- |
+| `schema_version` | 契约格式版本。旧契约缺省按 v1 读取；新契约使用 `2`。 |
+| `module` | SDK 模块名，例如 `video`、`login`、`live`。 |
+| `batch` | 探针批次名，对应目录层级，例如 `info-read`。 |
+| `endpoint` | 批次内 endpoint 名，例如 `view`。 |
+| `risk` | API 风险分类，必须来自上面的六类。 |
+| `status` | 契约状态：`draft`、`probed`、`promoted`、`blocked`、`deprecated`。 |
+| `profiles` | 计划覆盖的 profile 列表，例如 `anonymous`、`normal`、`vip`。 |
+| `sanitize` | 当前 endpoint 的脱敏覆盖规则。通用规则放在代码内置字段表里。 |
+| `provenance` | 探针来源和工具信息，不能包含账号身份、本机路径、Cookie、IP 或设备标识。 |
+
+`sanitize` 只写 endpoint 特有规则。Cookie、token、csrf、`buvid3`、手机号、邮箱、IP、设备标识等通用敏感字段由内置脱敏字段表统一处理。
+
+## 自动审计
+
+`bpi-probe` 提供三个不需要账号的离线审计命令：
+
+| 命令 | 用途 |
+| --- | --- |
+| `fields` | 统计契约和响应样例里的 JSON 字段路径，用来维护脱敏字段表。 |
+| `sanitize-audit` | 扫描 `responses/*.json` 中高置信度的 Cookie、csrf、`buvid3`、邮箱等敏感残留。 |
+| `contract-audit` | 检查 `contract.json` 能否解析、fixture 是否存在、`fixture_kind` 是否已知、profile 是否冲突、v2 元数据是否完整。 |
+
+`contract-audit` 要求已迁移契约补齐 v2 元数据；旧格式兼容只用于读取历史文件，不应再用于新增契约。
+
+`contract_test` 是统一离线契约测试入口，会复用结构审计，并额外检查 fixture JSON、`api_code` 一致性、高置信敏感残留，以及已注册 Rust 模型的反序列化。给契约声明新的 `rust_model` 后，应同步把模型加入 `src/probe/model.rs` 的注册表，否则统一测试和实时批量探针只能校验响应 code，不能发现字段类型漂移。
+
+`batch-run` 是真实网络探针入口，输出到 `target/bpi-probe-runs/<module>/<batch>/<endpoint>/<case>.response.json`。分页契约会输出 `target/bpi-probe-runs/<module>/<batch>/<endpoint>/<case>.pageN.response.json`，这些原始输出不能提交。批量探针会对已注册的 `rust_model` 实时反序列化；多页响应里的字段类型异常会在这里失败。
+
+API 索引用契约和源码自动生成：
+
+```powershell
+task api_doc
+```
+
+生成结果写入 `docs/api-index.md`，包含模块、API 名称、风险分类、profiles、方法、URL、Rust 模型、契约路径和匹配到的 `pub async fn` 源码路径。函数匹配按模块优先；匹配不到时显示 `-`，后续可以通过统一契约名和函数名继续补齐。
+
+探针结果确认可用后，用 `promote` 生成可提交 fixture：
+
+```powershell
+cargo run --bin bpi-probe -- promote `
+  target/bpi-probe-runs/video/info-read/view/anonymous.response.json
+```
+
+`promote` 会按路径反推 `tests/contracts/<module>/<batch>/<endpoint>/contract.json`，写入脱敏后的 `responses/*.json`，更新对应 case 的 `http_status`、`api_code`、`fixture`、`fixture_kind` 和观察日期，并强制执行契约结构审计。
+
 ## 完成前检查
 
 至少运行：
@@ -107,6 +231,7 @@ vip
 cargo fmt --check
 cargo check --all-features
 cargo test --all-features
+task contract_test
 ```
 
 如果改了 examples：

@@ -4,8 +4,6 @@
 
 `bpi-rs` 0.2 主打模块化 API、显式登录态、类型化参数、直接返回业务 payload，以及可离线验证的接口契约。它适合需要在 Rust 项目里批量接入 B 站接口的工具、自动化程序、数据采集程序和服务端应用。
 
-维护入口：[`CONTRIBUTING.md`](CONTRIBUTING.md)、[`SECURITY.md`](SECURITY.md)、[`CHANGELOG.md`](CHANGELOG.md)、[`docs/api-probe-development.md`](docs/api-probe-development.md)、[`docs/api-risk-classification.md`](docs/api-risk-classification.md)、[`docs/release-checklist.md`](docs/release-checklist.md)。
-
 ## 项目优势
 
 | 特性 | 说明 |
@@ -212,58 +210,19 @@ if status.code == 0 {
 }
 ```
 
-## 开发和验证
+## 项目文档
 
-默认检查应保持离线、稳定：
-
-```powershell
-cargo fmt --check
-cargo clippy --all-targets --all-features --locked -- -D warnings
-cargo check --all-features
-cargo test --all-features --lib
-cargo test --doc
-cargo check --examples --all-features
-cargo check --no-default-features --lib
-```
-
-Live Probe 是显式 opt-in 工作流，原始输出保存在 `target/`：
-
-```text
-target/bpi-contract-drafts/...
-target/bpi-probe-runs/...
-target/bpi-probe-notes/...
-```
-
-本地凭据可放在 `account.toml` 供 Probe/开发使用。不要提交 `account.toml`、Cookie、`SESSDATA`、`bili_jct`、`buvid3`、原始 Probe 输出或账号相关响应数据。
-开发新接口前请先阅读 [新 API 探针开发指南](docs/api-probe-development.md)。
-
-变更类接口包括点赞、投币、收藏、关注、评论、发弹幕、开播/关播、发布/删除内容、支付或兑换等。相关示例和 live 测试默认不运行；确需执行时必须确认账号和目标资源，并显式设置 `BPI_MUTATING_TEST=1`。
-
-示例本地配置：
-
-```toml
-[normal]
-bili_jct = "..."
-dede_user_id = "123"
-sessdata = "..."
-buvid3 = "..."
-
-[vip]
-bili_jct = "..."
-dede_user_id = "456"
-sessdata = "..."
-buvid3 = "..."
-```
-
-## 迁移说明
-
-- 旧扁平 API 不再是主文档路径。
-- 新模块客户端在契约支持时直接返回业务 payload。
-- `tests/contracts/**` 下的接口契约和脱敏 fixtures 是迁移后的行为依据。
-- 变更类接口和敏感登录/session 流程默认不运行 live 测试。
-- 本地账号配置只支持 `[vip]` / `[normal]` profile，不再兼容 `*_vip` / `*_normal` 旧格式。
-
-更多调用迁移示例见 [docs/migration-0.2.md](docs/migration-0.2.md)。
+| 文档 | 内容 |
+| --- | --- |
+| [API 索引](docs/api-index.md) | 自动生成的接口清单，包含函数说明、风险分类、profiles、URL、契约路径和 Rust 模型，可作为 AI 理解本仓库 API 的接口地图。 |
+| [开发和验证](docs/development.md) | 本地检查、Taskfile 入口、API 索引生成、只读 Probe、账号配置和风险门控。 |
+| [新 API 探针开发指南](docs/api-probe-development.md) | 新增或迁移接口时如何先跑 Probe、沉淀契约、脱敏响应并补测试。 |
+| [API 风险分类](docs/api-risk-classification.md) | `public-read`、`authenticated-read`、`private-read`、`mutating`、`spending`、`login-session` 的定义和门控规则。 |
+| [0.2 迁移指南](docs/migration-0.2.md) | 从旧扁平 API 迁移到模块客户端、显式登录态和 payload 返回风格。 |
+| [发布检查清单](docs/release-checklist.md) | 发布前检查、打包和版本确认流程。 |
+| [贡献指南](CONTRIBUTING.md) | 贡献流程和代码协作约定。 |
+| [安全策略](SECURITY.md) | 安全问题报告方式。 |
+| [变更日志](CHANGELOG.md) | 版本变更记录。 |
 
 ## License
 
