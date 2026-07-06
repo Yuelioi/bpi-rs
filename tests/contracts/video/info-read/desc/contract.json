@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "video.desc",
+  "module": "video",
+  "batch": "info-read",
+  "endpoint": "desc",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/web-interface/archive/desc",
@@ -16,8 +27,18 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": [
+      "$.data"
+    ]
+  },
   "provenance": {
     "source": "local_probe_output",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0",
     "privacy": "fixture keeps public plain description text; full raw probe output is ignored under target/bpi-probe-runs/video/info-read/desc"
   },
   "cases": [

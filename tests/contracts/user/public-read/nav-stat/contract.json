@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "user.nav_stat",
+  "module": "user",
+  "batch": "public-read",
+  "endpoint": "nav-stat",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/space/navnum",
@@ -16,9 +27,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "fixture minimizes public user data; full raw probe output is ignored under target/bpi-probe-runs/user/public-read/nav-stat"
+    "privacy": "fixture minimizes public user data; full raw probe output is ignored under target/bpi-probe-runs/user/public-read/nav-stat",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

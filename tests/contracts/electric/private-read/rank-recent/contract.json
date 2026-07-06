@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "electric.rank_recent",
+  "module": "electric",
+  "batch": "private-read",
+  "endpoint": "rank-recent",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://member.bilibili.com/x/h5/elec/rank/recent",
@@ -17,9 +28,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated success fixtures are sanitized and truncate private records"
+    "privacy": "authenticated success fixtures are sanitized and truncate private records",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

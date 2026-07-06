@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "message.unread_count",
+  "module": "message",
+  "batch": "read",
+  "endpoint": "unread-count",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.vc.bilibili.com/x/im/web/msgfeed/unread",
@@ -17,9 +28,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "success fixture keeps only aggregate unread counters"
+    "privacy": "success fixture keeps only aggregate unread counters",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

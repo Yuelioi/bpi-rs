@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "fav.folder_info",
+  "module": "fav",
+  "batch": "read",
+  "endpoint": "folder-info",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/v3/fav/folder/info",
@@ -16,9 +27,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "public folder metadata fixture sanitized from real Probe body"
+    "privacy": "public folder metadata fixture sanitized from real Probe body",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

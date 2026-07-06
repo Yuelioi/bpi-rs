@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "manga.user_point",
+  "module": "manga",
+  "batch": "read-core",
+  "endpoint": "user-point",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "POST",
     "url": "https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/GetUserPoint",
@@ -14,9 +25,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "point balance fixture is zero and account-neutral"
+    "privacy": "point balance fixture is zero and account-neutral",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

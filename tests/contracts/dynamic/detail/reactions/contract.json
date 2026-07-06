@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "dynamic.detail_reaction",
+  "module": "dynamic",
+  "batch": "detail",
+  "endpoint": "reactions",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail/reaction",
@@ -16,9 +27,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "success fixtures are sanitized to avoid committing public user lists or account-personalized fields"
+    "privacy": "success fixtures are sanitized to avoid committing public user lists or account-personalized fields",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

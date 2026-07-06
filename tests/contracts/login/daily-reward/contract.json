@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "login.daily_reward",
+  "module": "login",
+  "batch": "daily-reward",
+  "endpoint": "daily-reward",
+  "risk": "authenticated-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/member/web/exp/reward",
@@ -14,9 +25,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "normal success response contains only reward booleans and coin experience"
+    "privacy": "normal success response contains only reward booleans and coin experience",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

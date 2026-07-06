@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "cheese.info.ep_list",
+  "module": "cheese",
+  "batch": "info",
+  "endpoint": "ep-list",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/pugv/view/web/ep/list",
@@ -18,9 +29,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "public cheese response body trimmed from real Probe bodies; account headers kept only in local Probe output"
+    "privacy": "public cheese response body trimmed from real Probe bodies; account headers kept only in local Probe output",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

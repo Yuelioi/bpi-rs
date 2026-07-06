@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "historytoview.history_list",
+  "module": "historytoview",
+  "batch": "read",
+  "endpoint": "history-list",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/web-interface/history/cursor",
@@ -16,9 +27,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated history fixture keeps observed structure but redacts private titles, ids, users, and urls"
+    "privacy": "authenticated history fixture keeps observed structure but redacts private titles, ids, users, and urls",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

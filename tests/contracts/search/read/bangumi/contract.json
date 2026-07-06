@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "search.bangumi",
+  "module": "search",
+  "batch": "read",
+  "endpoint": "bangumi",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/web-interface/wbi/search/type",
@@ -8,22 +19,38 @@
       "keyword": "天气之子",
       "page": "1"
     },
-    "required_headers": ["user-agent", "referer", "origin"],
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
     "headers": {},
     "auth": {
-      "requires": ["wbi"]
+      "requires": [
+        "wbi"
+      ]
     }
+  },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
   },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "fixture minimizes public search results; full raw probe output is ignored under target/bpi-probe-runs/search/read/bangumi"
+    "privacy": "fixture minimizes public search results; full raw probe output is ignored under target/bpi-probe-runs/search/read/bangumi",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
       "name": "anonymous",
       "profile": "anonymous",
       "auth": {
-        "requires": ["wbi"]
+        "requires": [
+          "wbi"
+        ]
       },
       "response": {
         "http_status": 200,
@@ -38,7 +65,10 @@
       "profile": "normal",
       "auth": {
         "profile": "normal",
-        "requires": ["wbi", "cookie"]
+        "requires": [
+          "wbi",
+          "cookie"
+        ]
       },
       "response": {
         "http_status": 200,
@@ -53,7 +83,10 @@
       "profile": "vip",
       "auth": {
         "profile": "vip",
-        "requires": ["wbi", "cookie"]
+        "requires": [
+          "wbi",
+          "cookie"
+        ]
       },
       "response": {
         "http_status": 200,

@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "misc.bili_ticket",
+  "module": "misc",
+  "batch": "sign",
+  "endpoint": "bili-ticket",
+  "risk": "login-session",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "POST",
     "url": "https://api.bilibili.com/bapis/bilibili.api.ticket.v1.Ticket/GenWebTicket",
@@ -19,9 +30,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "bili_ticket JWT, timestamp, profile csrf, and WBI key URLs sanitized before commit"
+    "privacy": "bili_ticket JWT, timestamp, profile csrf, and WBI key URLs sanitized before commit",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

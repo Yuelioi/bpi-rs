@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.follow_up_list",
+  "module": "live",
+  "batch": "account-private-read",
+  "endpoint": "follow-up-list",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/xlive/web-ucenter/user/following",
@@ -19,8 +30,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account",
+      "private_profile"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0",
     "privacy": "authenticated fixture redacts followed account, cover, face, and room identity"
   },
   "cases": [

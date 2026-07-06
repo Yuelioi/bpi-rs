@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "bangumi.playurl",
+  "module": "bangumi",
+  "batch": "playurl",
+  "endpoint": "playurl",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/pgc/player/web/playurl",
@@ -19,9 +30,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "playback URLs and their account/time-bound query strings redacted from real Probe bodies"
+    "privacy": "playback URLs and their account/time-bound query strings redacted from real Probe bodies",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "audio.collection_info",
+  "module": "audio",
+  "batch": "collection-info",
+  "endpoint": "collection-info",
+  "risk": "authenticated-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://www.bilibili.com/audio/music-service-c/web/collections/info",
@@ -16,9 +27,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "raw Probe output kept under target; promoted fixtures are sanitized or trimmed when responses contain signed URLs, account state, or large public lists"
+    "privacy": "raw Probe output kept under target; promoted fixtures are sanitized or trimmed when responses contain signed URLs, account state, or large public lists",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
@@ -68,4 +87,3 @@
     }
   ]
 }
-

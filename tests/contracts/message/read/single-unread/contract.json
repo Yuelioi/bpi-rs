@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "message.single_unread",
+  "module": "message",
+  "batch": "read",
+  "endpoint": "single-unread",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread",
@@ -20,9 +31,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "success fixture keeps zeroed private-message unread counters"
+    "privacy": "success fixture keeps zeroed private-message unread counters",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

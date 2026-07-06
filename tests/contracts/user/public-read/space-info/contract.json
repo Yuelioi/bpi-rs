@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "user.space_info",
+  "module": "user",
+  "batch": "public-read",
+  "endpoint": "space-info",
+  "risk": "authenticated-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/space/wbi/acc/info",
@@ -18,9 +29,17 @@
       ]
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "fixture minimizes public user data; full raw probe output is ignored under target/bpi-probe-runs/user/public-read/space-info"
+    "privacy": "fixture minimizes public user data; full raw probe output is ignored under target/bpi-probe-runs/user/public-read/space-info",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

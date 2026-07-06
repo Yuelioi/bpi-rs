@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "opus.space_feed",
+  "module": "opus",
+  "batch": "space-read",
+  "endpoint": "space-feed",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/polymer/web-dynamic/v1/opus/feed/space",
@@ -9,15 +20,27 @@
       "type": "all",
       "web_location": "333.1387"
     },
-    "required_headers": ["user-agent", "referer", "origin"],
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
     "headers": {},
     "auth": {
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "fixture redacts opus content, media URLs, opus ids, and jump URLs"
+    "privacy": "fixture redacts opus content, media URLs, opus ids, and jump URLs",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
@@ -38,7 +61,9 @@
       "profile": "normal",
       "auth": {
         "profile": "normal",
-        "requires": ["cookie"]
+        "requires": [
+          "cookie"
+        ]
       },
       "response": {
         "api_code": 0,
@@ -52,7 +77,9 @@
       "profile": "vip",
       "auth": {
         "profile": "vip",
-        "requires": ["cookie"]
+        "requires": [
+          "cookie"
+        ]
       },
       "response": {
         "api_code": 0,

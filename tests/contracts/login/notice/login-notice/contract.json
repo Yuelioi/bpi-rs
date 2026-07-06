@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "login.notice",
+  "module": "login",
+  "batch": "notice",
+  "endpoint": "login-notice",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/safecenter/login_notice",
@@ -16,9 +27,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "request mid and private login record fields sanitized before commit"
+    "privacy": "request mid and private login record fields sanitized before commit",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

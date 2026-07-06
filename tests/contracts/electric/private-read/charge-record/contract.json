@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "electric.charge_record",
+  "module": "electric",
+  "batch": "private-read",
+  "endpoint": "charge-record",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/xlive/revenue/v1/guard/getChargeRecord",
@@ -17,9 +28,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated success fixture contains only an empty private list"
+    "privacy": "authenticated success fixture contains only an empty private list",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

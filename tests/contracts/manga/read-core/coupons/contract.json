@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "manga.coupons",
+  "module": "manga",
+  "batch": "read-core",
+  "endpoint": "coupons",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "POST",
     "url": "https://manga.bilibili.com/twirp/user.v1.User/GetCoupons",
@@ -21,9 +32,17 @@
       "type": 0
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "success fixture is empty account-neutral coupon state"
+    "privacy": "success fixture is empty account-neutral coupon state",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

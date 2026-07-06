@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "bangumi.info.review_user",
+  "module": "bangumi",
+  "batch": "info",
+  "endpoint": "review-user",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/pgc/review/user",
@@ -16,9 +27,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "public bangumi response body promoted without account headers"
+    "privacy": "public bangumi response body promoted without account headers",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

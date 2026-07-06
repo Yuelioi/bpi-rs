@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "video.ai_summary",
+  "module": "video",
+  "batch": "player-read",
+  "endpoint": "ai-summary",
+  "risk": "authenticated-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/web-interface/view/conclusion/get",
@@ -16,13 +27,21 @@
     "headers": {},
     "auth": {
       "requires": [
-          "wbi"
-        ]
+        "wbi"
+      ]
     }
+  },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
   },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "anonymous login error preserved; summary text redacted/sanitized"
+    "privacy": "anonymous login error preserved; summary text redacted/sanitized",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
@@ -79,5 +98,3 @@
     }
   ]
 }
-
-

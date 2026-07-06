@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "electric.upower_item_detail",
+  "module": "electric",
+  "batch": "public-read",
+  "endpoint": "upower-item-detail",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/upower/item/detail",
@@ -16,9 +27,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "success fixture is sanitized and truncates public user lists"
+    "privacy": "success fixture is sanitized and truncates public user lists",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

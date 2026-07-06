@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.gift_types",
+  "module": "live",
+  "batch": "gift-read",
+  "endpoint": "gift-types",
+  "risk": "authenticated-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/gift/v1/master/getGiftTypes",
@@ -14,9 +25,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated success currently returns an empty public gift type list"
+    "privacy": "authenticated success currently returns an empty public gift type list",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

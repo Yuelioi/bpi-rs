@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "login.stat",
+  "module": "login",
+  "batch": "stat",
+  "endpoint": "stat",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/web-interface/nav/stat",
@@ -14,9 +25,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "private account fields sanitized before commit"
+    "privacy": "private account fields sanitized before commit",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

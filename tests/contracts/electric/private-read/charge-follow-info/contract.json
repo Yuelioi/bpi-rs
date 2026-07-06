@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "electric.charge_follow_info",
+  "module": "electric",
+  "batch": "private-read",
+  "endpoint": "charge-follow-info",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/upower/charge/follow/info",
@@ -16,9 +27,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated success fixture is sanitized and truncates public rank/user fields"
+    "privacy": "authenticated success fixture is sanitized and truncates public rank/user fields",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

@@ -1,20 +1,43 @@
 {
+  "schema_version": 2,
   "name": "search.suggest",
+  "module": "search",
+  "batch": "read",
+  "endpoint": "suggest",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://s.search.bilibili.com/main/suggest",
     "query": {
       "term": "rust"
     },
-    "required_headers": ["user-agent", "referer", "origin"],
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
     "headers": {},
     "auth": {
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "fixture keeps generic search term only; full raw probe output is ignored under target/bpi-probe-runs/search/read/suggest"
+    "privacy": "fixture keeps generic search term only; full raw probe output is ignored under target/bpi-probe-runs/search/read/suggest",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
@@ -36,7 +59,9 @@
       "profile": "normal",
       "auth": {
         "profile": "normal",
-        "requires": ["cookie"]
+        "requires": [
+          "cookie"
+        ]
       },
       "response": {
         "http_status": 200,
@@ -51,7 +76,9 @@
       "profile": "vip",
       "auth": {
         "profile": "vip",
-        "requires": ["cookie"]
+        "requires": [
+          "cookie"
+        ]
       },
       "response": {
         "http_status": 200,

@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "danmaku.mobile.seg",
+  "module": "danmaku",
+  "batch": "non-json-read",
+  "endpoint": "mobile-seg",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/v2/dm/list/seg.so",
@@ -16,9 +27,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "danmaku non-JSON read response bodies promoted from real Probe output; account headers kept only in local Probe output; large segment sample uses cid 16546 to keep committed fixtures reviewable"
+    "privacy": "danmaku non-JSON read response bodies promoted from real Probe output; account headers kept only in local Probe output; large segment sample uses cid 16546 to keep committed fixtures reviewable",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

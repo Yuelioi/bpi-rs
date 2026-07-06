@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "video.tags",
+  "module": "video",
+  "batch": "player-read",
+  "endpoint": "tags",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/web-interface/view/detail/tag",
@@ -17,9 +28,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "public read response body promoted after review"
+    "privacy": "public read response body promoted after review",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
@@ -72,5 +91,3 @@
     }
   ]
 }
-
-

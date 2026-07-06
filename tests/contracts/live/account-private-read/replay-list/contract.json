@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.replay_list",
+  "module": "live",
+  "batch": "account-private-read",
+  "endpoint": "replay-list",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/xlive/app-blink/v1/anchorVideo/AnchorGetReplayList",
@@ -17,8 +28,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account",
+      "private_profile"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0",
     "privacy": "authenticated success returned empty replay state without account identifiers"
   },
   "cases": [

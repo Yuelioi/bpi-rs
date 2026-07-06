@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "video.view",
+  "module": "video",
+  "batch": "info-read",
+  "endpoint": "view",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/web-interface/view",
@@ -16,8 +27,24 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {
+      "$.data.owner.mid": 1000001,
+      "$.data.owner.name": "sanitized-user"
+    },
+    "drop": [],
+    "keep": [
+      "$.data.title",
+      "$.data.bvid"
+    ]
+  },
   "provenance": {
     "source": "local_probe_output",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0",
     "privacy": "fixture keeps public video metadata only; full raw probe output is ignored under target/bpi-probe-runs/video/info-read/view"
   },
   "cases": [

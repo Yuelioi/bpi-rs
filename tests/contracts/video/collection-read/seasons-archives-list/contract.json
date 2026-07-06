@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "video.collection.seasons_archives_list",
+  "module": "video",
+  "batch": "collection-read",
+  "endpoint": "seasons-archives-list",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/polymer/web-space/seasons_archives_list",
@@ -22,9 +33,17 @@
       ]
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "fixture contains public video collection metadata only; raw profile outputs remain ignored under target/bpi-probe-runs/video/collection-read"
+    "privacy": "fixture contains public video collection metadata only; raw profile outputs remain ignored under target/bpi-probe-runs/video/collection-read",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

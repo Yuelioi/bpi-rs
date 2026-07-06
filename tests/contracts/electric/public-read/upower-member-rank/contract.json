@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "electric.upower_member_rank",
+  "module": "electric",
+  "batch": "public-read",
+  "endpoint": "upower-member-rank",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/upower/up/member/rank/v2",
@@ -18,9 +29,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated fixture sanitizes account-derived user_info"
+    "privacy": "authenticated fixture sanitizes account-derived user_info",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

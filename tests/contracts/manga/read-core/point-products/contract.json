@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "manga.point_products",
+  "module": "manga",
+  "batch": "read-core",
+  "endpoint": "point-products",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "POST",
     "url": "https://manga.bilibili.com/twirp/pointshop.v1.Pointshop/ListProduct",
@@ -14,9 +25,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "product fixture keeps one public shop item with image and title sanitized"
+    "privacy": "product fixture keeps one public shop item with image and title sanitized",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

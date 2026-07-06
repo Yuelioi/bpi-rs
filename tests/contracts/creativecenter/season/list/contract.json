@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "creativecenter.season.list",
+  "module": "creativecenter",
+  "batch": "season",
+  "endpoint": "list",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://member.bilibili.com/x2/creative/web/seasons",
@@ -17,9 +28,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "success fixtures are sanitized and trimmed from real Probe bodies; raw account-specific output remains under target"
+    "privacy": "success fixtures are sanitized and trimmed from real Probe bodies; raw account-specific output remains under target",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "danmaku.adv.state",
+  "module": "danmaku",
+  "batch": "json-read",
+  "endpoint": "adv-state",
+  "risk": "authenticated-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/dm/adv/state",
@@ -15,9 +26,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "danmaku JSON read response bodies promoted from real Probe output; account headers kept only in local Probe output"
+    "privacy": "danmaku JSON read response bodies promoted from real Probe output; account headers kept only in local Probe output",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

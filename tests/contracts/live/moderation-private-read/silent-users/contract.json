@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.silent_users",
+  "module": "live",
+  "batch": "moderation-private-read",
+  "endpoint": "silent-users",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "POST",
     "url": "https://api.live.bilibili.com/xlive/web-ucenter/v1/banned/GetSilentUserList",
@@ -23,9 +34,19 @@
       "csrf": "${csrf}"
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated success is an empty moderation list; non-admin/error fixtures contain no account identity"
+    "privacy": "authenticated success is an empty moderation list; non-admin/error fixtures contain no account identity",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

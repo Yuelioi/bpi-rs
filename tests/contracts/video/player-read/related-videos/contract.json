@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "video.related_videos",
+  "module": "video",
+  "batch": "player-read",
+  "endpoint": "related-videos",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/web-interface/archive/related",
@@ -16,9 +27,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "public related video list trimmed to one item and media URLs sanitized"
+    "privacy": "public related video list trimmed to one item and media URLs sanitized",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
@@ -71,5 +90,3 @@
     }
   ]
 }
-
-

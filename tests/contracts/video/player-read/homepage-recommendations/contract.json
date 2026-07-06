@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "video.homepage_recommendations",
+  "module": "video",
+  "batch": "player-read",
+  "endpoint": "homepage-recommendations",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/web-interface/wbi/index/top/feed/rcmd",
@@ -19,13 +30,21 @@
     "headers": {},
     "auth": {
       "requires": [
-          "wbi"
-        ]
+        "wbi"
+      ]
     }
+  },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
   },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "recommendation list trimmed to one anonymous item; tracking and media URLs sanitized"
+    "privacy": "recommendation list trimmed to one anonymous item; tracking and media URLs sanitized",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
@@ -82,5 +101,3 @@
     }
   ]
 }
-
-

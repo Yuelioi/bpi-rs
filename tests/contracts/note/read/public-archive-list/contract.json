@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "note.public_archive_list",
+  "module": "note",
+  "batch": "read",
+  "endpoint": "public-archive-list",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/note/publish/list/archive",
@@ -9,21 +20,35 @@
       "pn": "1",
       "ps": "10"
     },
-    "required_headers": ["user-agent", "referer", "origin"],
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
     "headers": {},
     "auth": {
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "selected public archive returned closed public-note state with no note items"
+    "privacy": "selected public archive returned closed public-note state with no note items",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
       "name": "anonymous",
       "profile": "anonymous",
-      "auth": { "requires": [] },
+      "auth": {
+        "requires": []
+      },
       "response": {
         "api_code": 0,
         "fixture": "responses/closed.success.json",
@@ -34,7 +59,12 @@
     {
       "name": "normal",
       "profile": "normal",
-      "auth": { "profile": "normal", "requires": ["cookie"] },
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
       "response": {
         "api_code": 0,
         "fixture": "responses/closed.success.json",
@@ -45,7 +75,12 @@
     {
       "name": "vip",
       "profile": "vip",
-      "auth": { "profile": "vip", "requires": ["cookie"] },
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
       "response": {
         "api_code": 0,
         "fixture": "responses/closed.success.json",

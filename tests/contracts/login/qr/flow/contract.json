@@ -1,7 +1,26 @@
 {
+  "schema_version": 2,
   "name": "login.qr.flow",
+  "module": "login",
+  "batch": "qr",
+  "endpoint": "flow",
+  "risk": "login-session",
+  "status": "promoted",
+  "profiles": [
+    "anonymous"
+  ],
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0",
     "privacy": "no account data in waiting QR flow fixture"
   },
   "steps": [

@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "historytoview.history_shadow",
+  "module": "historytoview",
+  "batch": "read",
+  "endpoint": "history-shadow",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/v2/history/shadow",
@@ -14,9 +25,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated success fixture contains only the boolean shadow setting"
+    "privacy": "authenticated success fixture contains only the boolean shadow setting",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

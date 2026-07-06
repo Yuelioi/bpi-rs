@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "electric.remark_list",
+  "module": "electric",
+  "batch": "private-read",
+  "endpoint": "remark-list",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://member.bilibili.com/x/web/elec/remark/list",
@@ -17,9 +28,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated success fixture is sanitized and truncates private messages"
+    "privacy": "authenticated success fixture is sanitized and truncates private messages",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

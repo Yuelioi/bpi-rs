@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.recommend",
+  "module": "live",
+  "batch": "public-core",
+  "endpoint": "recommend",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/xlive/web-interface/v1/webMain/getMoreRecList",
@@ -17,9 +28,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "recommendation fixture redacts room, anchor, image, link, and tracking callback data"
+    "privacy": "recommendation fixture redacts room, anchor, image, link, and tracking callback data",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

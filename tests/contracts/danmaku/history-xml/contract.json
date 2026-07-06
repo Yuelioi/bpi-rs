@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "danmaku.history.xml",
+  "module": "danmaku",
+  "batch": "history-xml",
+  "endpoint": "history-xml",
+  "risk": "authenticated-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/v2/dm/history",
@@ -17,9 +28,17 @@
     },
     "response_decoding": "disabled"
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "danmaku compressed XML response bodies promoted from real Probe output; account headers kept only in local Probe output; response_decoding disabled is required to preserve raw compressed bytes"
+    "privacy": "danmaku compressed XML response bodies promoted from real Probe output; account headers kept only in local Probe output; response_decoding disabled is required to preserve raw compressed bytes",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

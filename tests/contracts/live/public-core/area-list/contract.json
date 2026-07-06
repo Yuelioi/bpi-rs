@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.area_list",
+  "module": "live",
+  "batch": "public-core",
+  "endpoint": "area-list",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/room/v1/Area/getList",
@@ -14,9 +25,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "public area taxonomy fixture is trimmed to one parent and one child"
+    "privacy": "public area taxonomy fixture is trimmed to one parent and one child",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

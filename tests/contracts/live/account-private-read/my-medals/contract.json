@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.my_medals",
+  "module": "live",
+  "batch": "account-private-read",
+  "endpoint": "my-medals",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/xlive/app-ucenter/v1/user/GetMyMedals",
@@ -17,8 +28,26 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account",
+      "private_profile"
+    ],
+    "replace": {
+      "$.data.items[].medal_info.target_id": 1000001,
+      "$.data.items[].anchor_info.nick_name": "sanitized-user",
+      "$.data.items[].anchor_info.face": "https://example.invalid/avatar.png"
+    },
+    "drop": [],
+    "keep": [
+      "$.data.page_info",
+      "$.data.items[].medal_info.medal_name"
+    ]
+  },
   "provenance": {
     "source": "local_probe_output",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0",
     "privacy": "authenticated non-empty fixture redacts medal owner and room identity"
   },
   "cases": [

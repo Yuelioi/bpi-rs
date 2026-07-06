@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "note.user_private_list",
+  "module": "note",
+  "batch": "read",
+  "endpoint": "user-private-list",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/note/list",
@@ -7,21 +18,37 @@
       "pn": "1",
       "ps": "10"
     },
-    "required_headers": ["user-agent", "referer", "origin"],
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
     "headers": {},
     "auth": {
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "success fixture keeps account-private list shape with sanitized note and archive data"
+    "privacy": "success fixture keeps account-private list shape with sanitized note and archive data",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
       "name": "anonymous",
       "profile": "anonymous",
-      "auth": { "requires": [] },
+      "auth": {
+        "requires": []
+      },
       "response": {
         "api_code": -101,
         "fixture": "responses/anonymous.requires_login.json",
@@ -32,7 +59,12 @@
     {
       "name": "normal",
       "profile": "normal",
-      "auth": { "profile": "normal", "requires": ["cookie"] },
+      "auth": {
+        "profile": "normal",
+        "requires": [
+          "cookie"
+        ]
+      },
       "response": {
         "api_code": 0,
         "fixture": "responses/authenticated.success.json",
@@ -43,7 +75,12 @@
     {
       "name": "vip",
       "profile": "vip",
-      "auth": { "profile": "vip", "requires": ["cookie"] },
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
       "response": {
         "api_code": 0,
         "fixture": "responses/authenticated.success.json",

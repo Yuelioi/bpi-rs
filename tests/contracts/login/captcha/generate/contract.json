@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "login.captcha_generate",
+  "module": "login",
+  "batch": "captcha",
+  "endpoint": "generate",
+  "risk": "login-session",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://passport.bilibili.com/x/passport-login/captcha",
@@ -16,9 +27,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "one-time captcha token, gt, and challenge sanitized before commit"
+    "privacy": "one-time captcha token, gt, and challenge sanitized before commit",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

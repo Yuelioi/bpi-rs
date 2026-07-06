@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "video.player_info_v2",
+  "module": "video",
+  "batch": "player-read",
+  "endpoint": "player-info-v2",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/player/wbi/v2",
@@ -15,13 +26,21 @@
     "headers": {},
     "auth": {
       "requires": [
-          "wbi"
-        ]
+        "wbi"
+      ]
     }
+  },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
   },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "login/account state, IP, subtitle/mask URLs, and playback progress are sanitized before promotion"
+    "privacy": "login/account state, IP, subtitle/mask URLs, and playback progress are sanitized before promotion",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
@@ -78,5 +97,3 @@
     }
   ]
 }
-
-

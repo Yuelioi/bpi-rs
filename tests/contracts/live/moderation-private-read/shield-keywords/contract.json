@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.shield_keywords",
+  "module": "live",
+  "batch": "moderation-private-read",
+  "endpoint": "shield-keywords",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "POST",
     "url": "https://api.live.bilibili.com/xlive/app-ucenter/v1/banned/GetShieldKeywordList",
@@ -25,9 +36,19 @@
       "platform": "android"
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "success fixture is an empty keyword list; permission fixtures contain no account identity"
+    "privacy": "success fixture is an empty keyword list; permission fixtures contain no account identity",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

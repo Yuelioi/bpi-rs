@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "manga.clock_in_info",
+  "module": "manga",
+  "batch": "read-core",
+  "endpoint": "clock-in-info",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "POST",
     "url": "https://manga.bilibili.com/twirp/activity.v1.Activity/GetClockInInfo",
@@ -14,9 +25,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "fixture sanitizes static image URLs while preserving clock-in reward structure"
+    "privacy": "fixture sanitizes static image URLs while preserving clock-in reward structure",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

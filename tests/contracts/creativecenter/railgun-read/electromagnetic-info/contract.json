@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "creativecenter.railgun.electromagnetic_info",
+  "module": "creativecenter",
+  "batch": "railgun-read",
+  "endpoint": "electromagnetic-info",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/studio/up-rating/v3/rating/info",
@@ -12,9 +23,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "success fixtures contain account-neutral zeroed rating state from real Probe bodies"
+    "privacy": "success fixtures contain account-neutral zeroed rating state from real Probe bodies",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

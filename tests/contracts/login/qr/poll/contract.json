@@ -1,5 +1,14 @@
 {
+  "schema_version": 2,
   "name": "login.qr_poll",
+  "module": "login",
+  "batch": "qr",
+  "endpoint": "poll",
+  "risk": "login-session",
+  "status": "promoted",
+  "profiles": [
+    "anonymous"
+  ],
   "request": {
     "method": "GET",
     "url": "https://passport.bilibili.com/x/passport-login/web/qrcode/poll",
@@ -16,9 +25,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "private account fields sanitized before commit"
+    "privacy": "private account fields sanitized before commit",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

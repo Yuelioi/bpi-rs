@@ -1,5 +1,14 @@
 {
+  "schema_version": 2,
   "name": "electric.remark_detail",
+  "module": "electric",
+  "batch": "private-read",
+  "endpoint": "remark-detail",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous"
+  ],
   "request": {
     "method": "GET",
     "url": "https://member.bilibili.com/x/web/elec/remark/detail",
@@ -16,9 +25,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "anonymous request uses a non-private placeholder id; authenticated success is validated by flow contracts"
+    "privacy": "anonymous request uses a non-private placeholder id; authenticated success is validated by flow contracts",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

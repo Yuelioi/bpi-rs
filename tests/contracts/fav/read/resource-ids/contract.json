@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "fav.resource_ids",
+  "module": "fav",
+  "batch": "read",
+  "endpoint": "resource-ids",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/v3/fav/resource/ids",
@@ -17,9 +28,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "public resource id fixture is trimmed from real Probe body"
+    "privacy": "public resource id fixture is trimmed from real Probe body",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

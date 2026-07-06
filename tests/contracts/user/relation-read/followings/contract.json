@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "user.followings",
+  "module": "user",
+  "batch": "relation-read",
+  "endpoint": "followings",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/relation/followings",
@@ -19,9 +30,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "fixture minimizes public relation-list data; full raw probe output is ignored under target/bpi-probe-runs/user/relation-read/followings"
+    "privacy": "fixture minimizes public relation-list data; full raw probe output is ignored under target/bpi-probe-runs/user/relation-read/followings",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

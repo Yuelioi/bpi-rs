@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "video.interactive_video_info",
+  "module": "video",
+  "batch": "player-read",
+  "endpoint": "interactive-info",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/stein/edgeinfo_v2",
@@ -17,9 +28,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "response buvid removed and interactive story/preload lists trimmed"
+    "privacy": "response buvid removed and interactive story/preload lists trimmed",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
@@ -72,5 +91,3 @@
     }
   ]
 }
-
-

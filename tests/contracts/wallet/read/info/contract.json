@@ -1,5 +1,15 @@
 {
+  "schema_version": 2,
   "name": "wallet.info",
+  "module": "wallet",
+  "batch": "read",
+  "endpoint": "info",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "POST",
     "url": "https://pay.bilibili.com/paywallet/wallet/getUserWallet",
@@ -24,9 +34,19 @@
       "version": "1.0"
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "private wallet balance, account mid, and profile csrf sanitized before commit; anonymous empty-csrf probe is recorded only in local notes because it uses a different request body"
+    "privacy": "private wallet balance, account mid, and profile csrf sanitized before commit; anonymous empty-csrf probe is recorded only in local notes because it uses a different request body",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.danmu_info",
+  "module": "live",
+  "batch": "room-interaction-read",
+  "endpoint": "danmu-info",
+  "risk": "authenticated-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo",
@@ -19,9 +30,17 @@
       ]
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated fixture redacts websocket token and uses a non-routable host"
+    "privacy": "authenticated fixture redacts websocket token and uses a non-routable host",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

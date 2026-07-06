@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "fav.collected_list",
+  "module": "fav",
+  "batch": "read",
+  "endpoint": "collected-list",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/v3/fav/folder/collected/list",
@@ -19,9 +30,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "public empty list fixture promoted without account headers"
+    "privacy": "public empty list fixture promoted without account headers",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

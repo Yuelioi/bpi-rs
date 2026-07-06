@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.lottery_info",
+  "module": "live",
+  "batch": "room-interaction-read",
+  "endpoint": "lottery-info",
+  "risk": "authenticated-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/xlive/lottery-interface/v1/lottery/getLotteryInfoWeb",
@@ -18,9 +29,17 @@
       ]
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "success fixture contains public empty lottery state for the probed room"
+    "privacy": "success fixture contains public empty lottery state for the probed room",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

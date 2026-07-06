@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "electric.recharge_list",
+  "module": "electric",
+  "batch": "private-read",
+  "endpoint": "recharge-list",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://pay.bilibili.com/bk/brokerage/listForCustomerRechargeRecord",
@@ -18,9 +29,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "authenticated success fixture is sanitized and truncates private records"
+    "privacy": "authenticated success fixture is sanitized and truncates private records",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

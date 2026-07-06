@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "user.card",
+  "module": "user",
+  "batch": "public-read",
+  "endpoint": "card",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/web-interface/card",
@@ -17,9 +28,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "fixture minimizes public user data; full raw probe output is ignored under target/bpi-probe-runs/user/public-read/card"
+    "privacy": "fixture minimizes public user data; full raw probe output is ignored under target/bpi-probe-runs/user/public-read/card",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

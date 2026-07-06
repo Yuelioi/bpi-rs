@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "video.pagelist",
+  "module": "video",
+  "batch": "info-read",
+  "endpoint": "pagelist",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.bilibili.com/x/player/pagelist",
@@ -16,8 +27,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": [
+      "$.data[].part",
+      "$.data[].cid"
+    ]
+  },
   "provenance": {
     "source": "local_probe_output",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0",
     "privacy": "fixture keeps public page metadata only; full raw probe output is ignored under target/bpi-probe-runs/video/info-read/pagelist"
   },
   "cases": [

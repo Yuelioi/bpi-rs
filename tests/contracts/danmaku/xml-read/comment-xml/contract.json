@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "danmaku.xml.comment_xml",
+  "module": "danmaku",
+  "batch": "xml-read",
+  "endpoint": "comment-xml",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://comment.bilibili.com/16546.xml",
@@ -13,9 +24,17 @@
     },
     "response_decoding": "disabled"
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "compressed XML fixture contains public danmaku content; response_decoding disabled is required to preserve raw deflate bytes"
+    "privacy": "compressed XML fixture contains public danmaku content; response_decoding disabled is required to preserve raw deflate bytes",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

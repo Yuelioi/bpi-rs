@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.web_heart_beat",
+  "module": "live",
+  "batch": "telemetry-read",
+  "endpoint": "heartbeat",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://live-trace.bilibili.com/xlive/rdata-interface/v1/heartbeat/webHeartBeat",
@@ -17,9 +28,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "telemetry heartbeat response contains no account data; hb is a deterministic base64 room/interval payload"
+    "privacy": "telemetry heartbeat response contains no account data; hb is a deterministic base64 room/interval payload",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

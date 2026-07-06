@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.banned_users",
+  "module": "live",
+  "batch": "moderation-private-read",
+  "endpoint": "banned-users",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/xlive/app-ucenter/v2/xbanned/banned/GetBlackList",
@@ -26,9 +37,19 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "vip sample fixture redacts blocked user identity and operator identity; raw account/private data remains under target only"
+    "privacy": "vip sample fixture redacts blocked user identity and operator identity; raw account/private data remains under target only",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {

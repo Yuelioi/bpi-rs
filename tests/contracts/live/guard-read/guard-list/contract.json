@@ -1,5 +1,16 @@
 {
+  "schema_version": 2,
   "name": "live.guard_list",
+  "module": "live",
+  "batch": "guard-read",
+  "endpoint": "guard-list",
+  "risk": "public-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
   "request": {
     "method": "GET",
     "url": "https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topListNew",
@@ -20,9 +31,17 @@
       "requires": []
     }
   },
+  "sanitize": {
+    "preset": [],
+    "replace": {},
+    "drop": [],
+    "keep": []
+  },
   "provenance": {
     "source": "local_probe_output",
-    "privacy": "public leaderboard fixture redacts user ids, names, faces, and room owner identity"
+    "privacy": "public leaderboard fixture redacts user ids, names, faces, and room owner identity",
+    "tool": "bpi-probe",
+    "tool_version": "0.2.0"
   },
   "cases": [
     {
