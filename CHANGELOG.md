@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+- 修复 `0.2.1` 发布流程中新版 clippy 报出的私有模块响应模型 `dead_code` 和 `ResponseDecoding` 手写 `Default` 问题。
+
 ## 0.2.1
 
 - 修复历史记录响应中 `total: -1` 导致反序列化失败的问题。

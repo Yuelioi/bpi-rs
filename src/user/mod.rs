@@ -12,7 +12,7 @@ pub mod official_role;
 pub mod params;
 pub mod register;
 pub mod relation;
-mod search;
+pub mod search;
 pub mod space;
 pub mod status_number;
 
@@ -36,8 +36,8 @@ pub use params::{
     UserUploadedVideosParams,
 };
 pub use relation::{
-    RelationAction, RelationSource, UserGroupCreateParams, UserGroupDeleteParams,
-    UserGroupMoveUsersParams, UserGroupUpdateParams, UserGroupUsersParams,
+    ModifyRelationResponseData, RelationAction, RelationSource, UserGroupCreateParams,
+    UserGroupDeleteParams, UserGroupMoveUsersParams, UserGroupUpdateParams, UserGroupUsersParams,
     UserModifyRelationParams,
 };
 pub use space::UserSpaceNoticeSetParams;

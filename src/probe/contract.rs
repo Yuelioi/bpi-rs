@@ -53,17 +53,12 @@ pub enum HttpMethod {
     Post,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ResponseDecoding {
+    #[default]
     Auto,
     Disabled,
-}
-
-impl Default for ResponseDecoding {
-    fn default() -> Self {
-        Self::Auto
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]

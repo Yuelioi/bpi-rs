@@ -38,6 +38,13 @@ tasks:
     cmds:
       - task: check_all
 
+  pre_commit:
+    desc: Run CI-equivalent checks plus Git patch whitespace checks before committing.
+    cmds:
+      - task: ci
+      - git diff --check
+      - git diff --cached --check
+
   package_check:
     desc: Verify the crate package without publishing.
     cmds:

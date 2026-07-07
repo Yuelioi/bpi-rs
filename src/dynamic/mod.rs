@@ -20,6 +20,7 @@ mod serde_utils;
 
 pub use action::{DynamicDraftDeleteParams, DynamicLikeParams, DynamicTopParams};
 pub use client::DynamicClient;
+pub use module::*;
 pub use params::{
     DynamicAllParams, DynamicCheckNewParams, DynamicDetailParams, DynamicForwardItemParams,
     DynamicForwardsParams, DynamicLiveUsersParams, DynamicLotteryNoticeParams,
