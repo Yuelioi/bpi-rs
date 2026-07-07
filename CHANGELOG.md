@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3
+
+- 修复创作中心封面上传路径中新版 clippy 报出的 `unused_parens` 警告，确保 `-D warnings` 的 CI 检查通过。
+- 新增 tag 驱动的 GitHub Actions 发布流程：推送 `v*` tag 后先跑完整 CI、打包和 dry-run，再自动发布到 crates.io。
+
 ## 0.2.2
 
 - 修复 `0.2.1` 发布流程中新版 clippy 报出的私有模块响应模型 `dead_code` 和 `ResponseDecoding` 手写 `Default` 问题。

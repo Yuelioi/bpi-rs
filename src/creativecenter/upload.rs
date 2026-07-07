@@ -46,7 +46,7 @@ impl<'a> CreativeCenterClient<'a> {
             cover_str.to_string()
         } else if cover_str
             .chars()
-            .all(|c| (c.is_ascii_alphanumeric() || c == '+' || c == '/' || c == '='))
+            .all(|c| c.is_ascii_alphanumeric() || c == '+' || c == '/' || c == '=')
         {
             format!("data:{};base64,{}", mime_type, cover_str)
         } else {
