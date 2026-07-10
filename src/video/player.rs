@@ -43,9 +43,9 @@ pub struct PlayerInfoResponseData {
     pub block_time: u64,
     pub role: String,
     /// 上次观看时间
-    pub last_play_time: u64,
+    pub last_play_time: i64,
     /// 上次观看 cid
-    pub last_play_cid: u64,
+    pub last_play_cid: i64,
     /// 当前 UNIX 秒级时间戳
     pub now_time: u64,
     /// 在线人数
@@ -296,6 +296,24 @@ mod tests {
             assert_eq!(payload.bvid, "BV1xx411c7mD");
             assert_eq!(payload.cid, 62131);
         }
+        Ok(())
+    }
+
+    #[test]
+    fn video_player_info_v2_accepts_negative_resume_sentinels() -> BpiResult<()> {
+        let mut response: serde_json::Value = serde_json::from_slice(include_bytes!(
+            "../../tests/contracts/video/player-read/player-info-v2/responses/normal.success.json"
+        ))?;
+        response["data"]["last_play_time"] = serde_json::json!(-1000);
+        response["data"]["last_play_cid"] = serde_json::json!(-1000);
+
+        let payload = serde_json::from_value::<ApiEnvelope<PlayerInfoResponseData>>(response)?
+            .into_payload()?;
+
+        assert_eq!(
+            (payload.last_play_time, payload.last_play_cid),
+            (-1000, -1000)
+        );
         Ok(())
     }
 

@@ -13,6 +13,8 @@ pub struct VideoView {
     pub videos: u32,
     /// 视频标题。
     pub title: String,
+    /// 视频封面 URL。
+    pub pic: String,
     /// UP 主信息。
     pub owner: VideoOwner,
     /// 视频统计。

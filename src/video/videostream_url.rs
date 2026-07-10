@@ -101,8 +101,8 @@ pub struct PlayUrlResponseData {
     pub dash: Option<DashInfo>,
     pub support_formats: Vec<SupportFormat>,
     pub high_format: Option<serde_json::Value>,
-    pub last_play_time: u64,
-    pub last_play_cid: u64,
+    pub last_play_time: i64,
+    pub last_play_cid: i64,
 }
 
 // --- 测试模块 ---
@@ -239,6 +239,24 @@ mod tests {
                 .and_then(|dash| dash.video.first())
                 .map(|track| track.base_url.as_str()),
             Some("https://example.invalid/bilibili/playurl/redacted.m4s")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn video_play_url_accepts_negative_resume_sentinels() -> BpiResult<()> {
+        let mut response: serde_json::Value = serde_json::from_slice(include_bytes!(
+            "../../tests/contracts/video/playurl/play-url/responses/success.json"
+        ))?;
+        response["data"]["last_play_time"] = serde_json::json!(-1000);
+        response["data"]["last_play_cid"] = serde_json::json!(-1000);
+
+        let payload =
+            serde_json::from_value::<ApiEnvelope<PlayUrlResponseData>>(response)?.into_payload()?;
+
+        assert_eq!(
+            (payload.last_play_time, payload.last_play_cid),
+            (-1000, -1000)
         );
         Ok(())
     }

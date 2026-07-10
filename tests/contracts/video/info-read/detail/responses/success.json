@@ -8,6 +8,7 @@
       "bvid": "BV1xx411c7mD",
       "videos": 1,
       "title": "sanitized video title",
+      "pic": "https://i0.hdslb.com/bfs/archive/sanitized.jpg",
       "owner": {
         "mid": 2,
         "name": "sanitized owner",

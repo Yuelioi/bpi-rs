@@ -528,6 +528,7 @@ mod tests {
         .into_payload()?;
 
         assert_eq!(view.bvid.as_str(), "BV1xx411c7mD");
+        assert_eq!(view.pic, "https://i0.hdslb.com/bfs/archive/sanitized.jpg");
         assert_eq!(detail.view.bvid.as_str(), "BV1xx411c7mD");
         assert_eq!(pagelist.len(), 1);
         assert_eq!(desc, "www");
