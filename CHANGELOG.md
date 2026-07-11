@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- 新增可恢复的响应模型解码错误：领域方法因上游 schema 漂移而失败时，可通过 `BpiError::response_body()` 使用临时模型解析同一次响应；默认错误输出、序列化和 tracing 保持脱敏。
+
 ## 0.2.3
 
 - 修复创作中心封面上传路径中新版 clippy 报出的 `unused_parens` 警告，确保 `-D warnings` 的 CI 检查通过。

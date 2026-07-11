@@ -3,7 +3,7 @@ use std::time::Duration;
 use bytes::Bytes;
 use serde::de::DeserializeOwned;
 
-use crate::{BpiResult, response::ApiEnvelope};
+use crate::{BpiError, BpiResult, response::ApiEnvelope};
 
 /// 可安全写入响应日志的元数据。
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -33,7 +33,8 @@ impl TransportResponse {
     where
         T: DeserializeOwned,
     {
-        let envelope = ApiEnvelope::<T>::from_slice(&self.body)?;
+        let envelope: ApiEnvelope<T> = serde_json::from_slice(&self.body)
+            .map_err(|source| BpiError::response_decode(source, self.body.clone()))?;
         let mut metadata = self.metadata.clone();
         metadata.api_code = Some(envelope.code);
 
@@ -144,7 +145,7 @@ mod tests {
             .and_then(TransportEnvelope::into_payload)
             .unwrap_err();
 
-        assert!(err.requires_login());
+        assert!(matches!(err, BpiError::Api { code: -101, .. }));
     }
 
     #[test]
@@ -165,6 +166,30 @@ mod tests {
         assert_eq!(payload.metadata.api_code, Some(0));
         assert!(payload.payload.is_none());
         Ok(())
+    }
+
+    #[test]
+    fn decode_api_envelope_preserves_body_when_payload_model_does_not_match() {
+        let body = Bytes::from_static(br#"{ "code": 0, "data": { "value": -1000 } }"#);
+        let response = TransportResponse {
+            metadata: ResponseMetadata {
+                status: 200,
+                duration: Duration::from_millis(12),
+                api_code: None,
+            },
+            body: body.clone(),
+        };
+
+        let err = response.decode_api_envelope::<Payload>().unwrap_err();
+
+        assert_eq!(err.response_body(), Some(body.as_ref()));
+    }
+
+    #[test]
+    fn ordinary_json_decode_error_does_not_expose_response_body() {
+        let err = BpiError::from(serde_json::from_slice::<serde_json::Value>(b"{").unwrap_err());
+
+        assert!(err.response_body().is_none());
     }
 
     fn success_response() -> TransportResponse {

@@ -150,6 +150,7 @@ requires_vip()
 is_permission_error()
 is_risk_control()
 semantic_error()
+response_body()
 ```
 
 需要完整 B 站响应外壳时使用 `ApiEnvelope<T>`：
@@ -189,6 +190,29 @@ async fn season_sections(client: &BpiClient, season_id: u64) -> BpiResult<Sectio
 ```rust
 let csrf = client.csrf()?;
 ```
+
+如果已封装的领域方法因为 Bilibili 响应字段类型变化而解码失败，可以从错误中取得同一次请求的原始响应，并使用临时模型恢复。这样仍会复用领域方法负责的参数构造、WBI 签名、Cookie 和请求头：
+
+```rust
+use bpi_rs::{ApiEnvelope, BpiError, BpiResult};
+use serde::Deserialize;
+
+#[derive(Debug, Deserialize)]
+struct TemporaryPayload {
+    last_play_time: i64,
+}
+
+fn recover_temporary_payload(error: &BpiError) -> BpiResult<Option<TemporaryPayload>> {
+    let Some(body) = error.response_body() else {
+        return Ok(None);
+    };
+
+    let payload = ApiEnvelope::<TemporaryPayload>::from_slice(body)?.into_payload()?;
+    Ok(Some(payload))
+}
+```
+
+`response_body()` 只对 HTTP 响应模型解码失败返回 `Some`。原始响应不会进入错误的 `Display`、`Debug`、序列化结果或 tracing 日志。临时模型只是维护者发布正式修复前的兼容手段；发现 schema 漂移后请提交 issue 或 PR。
 
 ## 二维码登录
 

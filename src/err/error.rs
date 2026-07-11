@@ -1,5 +1,64 @@
+use std::fmt;
+
+use bytes::Bytes;
 use serde::Serialize;
 use thiserror::Error;
+
+/// HTTP 响应模型解码失败时保留的可恢复上下文。
+///
+/// 调试和错误格式化只显示响应长度，不会输出原始响应内容。调用方可以通过
+/// [`BpiError::response_body`] 显式取得响应字节并使用临时模型重新解析。
+pub struct ResponseDecodeError {
+    source: serde_json::Error,
+    body: Bytes,
+}
+
+impl ResponseDecodeError {
+    pub(crate) fn new(source: serde_json::Error, body: Bytes) -> Self {
+        Self { source, body }
+    }
+
+    pub(crate) fn source_error(&self) -> &serde_json::Error {
+        &self.source
+    }
+
+    fn response_body(&self) -> &[u8] {
+        &self.body
+    }
+}
+
+impl fmt::Debug for ResponseDecodeError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("ResponseDecodeError")
+            .field("category", &self.source.classify())
+            .field("line", &self.source.line())
+            .field("column", &self.source.column())
+            .field(
+                "response_body",
+                &format_args!("<redacted: {} bytes>", self.body.len()),
+            )
+            .finish()
+    }
+}
+
+impl fmt::Display for ResponseDecodeError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            formatter,
+            "failed to decode response ({:?}) at line {} column {}",
+            self.source.classify(),
+            self.source.line(),
+            self.source.column()
+        )
+    }
+}
+
+impl std::error::Error for ResponseDecodeError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(&self.source)
+    }
+}
 
 /// 错误类型分类
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -50,6 +109,13 @@ pub enum BpiError {
         source: serde_json::Error,
     },
 
+    /// HTTP 响应模型解码失败；原始响应可供调用方使用临时模型恢复。
+    #[error(transparent)]
+    ResponseDecode {
+        #[serde(skip)]
+        error: ResponseDecodeError,
+    },
+
     /// API返回的业务错误
     #[error("API错误 [{code}]: {message}")]
     Api {
@@ -97,6 +163,12 @@ impl BpiError {
     pub fn auth_required() -> Self {
         BpiError::Auth {
             message: "需要登录".to_string(),
+        }
+    }
+
+    pub(crate) fn response_decode(source: serde_json::Error, body: Bytes) -> Self {
+        Self::ResponseDecode {
+            error: ResponseDecodeError::new(source, body),
         }
     }
 }
@@ -161,6 +233,17 @@ impl BpiError {
         }
     }
 
+    /// 返回导致模型解码失败的原始 HTTP 响应。
+    ///
+    /// 只有从 transport 响应反序列化产生的 [`BpiError::ResponseDecode`] 才会返回
+    /// `Some`。普通 JSON 解析错误不会伪装成可恢复的 HTTP 响应错误。
+    pub fn response_body(&self) -> Option<&[u8]> {
+        match self {
+            Self::ResponseDecode { error } => Some(error.response_body()),
+            _ => None,
+        }
+    }
+
     /// 获取错误分类
     pub fn category(&self) -> ErrorCategory {
         match self {
@@ -171,6 +254,7 @@ impl BpiError {
             BpiError::HttpStatus { .. } => ErrorCategory::Network,
             BpiError::Parse { .. } => ErrorCategory::Request,
             BpiError::Decode { .. } => ErrorCategory::Request,
+            BpiError::ResponseDecode { .. } => ErrorCategory::Request,
             BpiError::InvalidParameter { .. } => ErrorCategory::Request,
             BpiError::Authentication { .. } => ErrorCategory::Auth,
             BpiError::Auth { .. } => ErrorCategory::Auth,
@@ -270,6 +354,8 @@ impl BpiError {
 
 #[cfg(test)]
 mod tests {
+    use bytes::Bytes;
+
     use super::*;
 
     #[test]
@@ -316,5 +402,36 @@ mod tests {
             BpiError::from_code(-403).semantic_error(),
             Some("permission_denied")
         );
+    }
+
+    #[test]
+    fn response_decode_debug_redacts_response_body() {
+        let err = response_decode_error();
+
+        assert!(!format!("{err:?}").contains("private-response-marker"));
+    }
+
+    #[test]
+    fn response_decode_display_redacts_response_body() {
+        let err = response_decode_error();
+
+        assert!(!err.to_string().contains("private-response-marker"));
+    }
+
+    #[test]
+    fn response_decode_serialization_redacts_response_body() -> Result<(), serde_json::Error> {
+        let err = response_decode_error();
+        let serialized = serde_json::to_string(&err)?;
+
+        assert!(!serialized.contains("private-response-marker"));
+        Ok(())
+    }
+
+    fn response_decode_error() -> BpiError {
+        let source = serde_json::from_slice::<u64>(br#""private-response-marker""#).unwrap_err();
+        BpiError::response_decode(
+            source,
+            Bytes::from_static(br#"{"secret":"private-response-marker"}"#),
+        )
     }
 }

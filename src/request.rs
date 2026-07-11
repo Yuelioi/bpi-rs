@@ -9,19 +9,6 @@ use serde::de::DeserializeOwned;
 use tokio::time::Instant;
 use tracing;
 
-/// 找到不超过 index 的最近合法 UTF-8 字符边界
-#[cfg(any(test, debug_assertions))]
-fn floor_char_boundary(s: &str, index: usize) -> usize {
-    if index >= s.len() {
-        return s.len();
-    }
-    let mut i = index;
-    while i > 0 && !s.is_char_boundary(i) {
-        i -= 1;
-    }
-    i
-}
-
 pub trait BilibiliRequest {
     fn with_bilibili_headers(self) -> Self;
     fn with_user_agent(self) -> Self;
@@ -174,10 +161,12 @@ where
     match response.decode_api_envelope::<T>().and_then(extract) {
         Ok(result) => Ok(result),
         Err(err) => {
-            if let BpiError::Decode { source } = &err {
-                log_decode_error(operation_name, &response.body, source);
-            } else {
-                tracing::error!("{} API错误: {}", operation_name, err);
+            match &err {
+                BpiError::Decode { source } => log_decode_error(operation_name, source),
+                BpiError::ResponseDecode { error } => {
+                    log_decode_error(operation_name, error.source_error());
+                }
+                _ => tracing::error!("{} API错误: {}", operation_name, err),
             }
             Err(err)
         }
@@ -189,32 +178,14 @@ fn log_success(operation_name: &str, start: Instant) {
     tracing::info!("{} 请求成功，耗时: {:.2?}", operation_name, duration);
 }
 
-fn log_decode_error(operation_name: &str, bytes: &[u8], error: &serde_json::Error) {
-    #[cfg(any(test, debug_assertions))]
-    {
-        let json_str = String::from_utf8_lossy(bytes);
-        let error_pos = error.column().saturating_sub(1);
-        let start = floor_char_boundary(&json_str, error_pos.saturating_sub(25));
-        let end = floor_char_boundary(&json_str, (error_pos + 25).min(json_str.len()));
-        let context = &json_str[start..end];
-        tracing::error!(
-            "{} JSON解析失败 (行:{} 列:{}): {}",
-            operation_name,
-            error.line(),
-            error.column(),
-            error
-        );
-        tracing::error!(
-            "错误位置: ...{}... ({}^)",
-            context,
-            " ".repeat(error_pos.saturating_sub(start))
-        );
-    }
-    #[cfg(not(any(test, debug_assertions)))]
-    {
-        let _ = bytes;
-        tracing::error!("{} JSON解析失败: {}", operation_name, error);
-    }
+fn log_decode_error(operation_name: &str, error: &serde_json::Error) {
+    tracing::error!(
+        "{} JSON解析失败 (类别:{:?} 行:{} 列:{})",
+        operation_name,
+        error.classify(),
+        error.line(),
+        error.column()
+    );
 }
 
 #[cfg(test)]
@@ -263,6 +234,26 @@ mod tests {
         )?;
 
         assert!(payload.is_none());
+        Ok(())
+    }
+
+    #[derive(Debug, Deserialize, PartialEq, Eq)]
+    struct TemporaryPayload {
+        value: i64,
+    }
+
+    #[test]
+    fn response_decode_body_can_be_reparsed_with_temporary_payload() -> BpiResult<()> {
+        let err = decode_bpi_payload_response::<Payload>(
+            "unit",
+            &response(br#"{ "code": 0, "data": { "value": -1000 } }"#),
+        )
+        .unwrap_err();
+        let body = err.response_body().ok_or(BpiError::MissingData)?;
+
+        let temporary = ApiEnvelope::<TemporaryPayload>::from_slice(body)?.into_payload()?;
+
+        assert_eq!(temporary.value, -1000);
         Ok(())
     }
 
