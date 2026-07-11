@@ -2,14 +2,14 @@
 
 ## State
 
-准备发布 bpi-rs 0.2.4。版本号、锁文件和 changelog 已提交；完整 CI、隐私扫描、正式 package 和 publish dry-run 已通过。0.2.3 已存在于 crates.io，远端 `v0.2.3` 指向 `713ea5d`。
+准备发布 bpi-rs 0.2.4。版本号、锁文件和 changelog 已提交并推送 main；完整 CI、隐私扫描、正式 package 和 publish dry-run 已通过。0.2.3 已存在于 crates.io，远端 `v0.2.3` 指向 `713ea5d`。
 
 仓库在推送 `v*` tag 后由 GitHub Actions 自动执行 `cargo publish --locked`。为避免本地 publish 与 CI 竞速，本次使用单一 tag workflow 发布路径。
 
 ## Next
 
-- 刷新 origin，确认 main 无远端新提交后推送。
-- 创建并推送 `v0.2.4`，监控 workflow 和 crates.io。
+- 创建并推送 `v0.2.4`。
+- 监控 workflow 和 crates.io。
 
 ## Read now
 
@@ -33,10 +33,11 @@ Done:
 - 提交发布准备：`98e7d2e chore(release): 准备 0.2.4`。
 - 干净工作区 `cargo package --locked` 通过：982 个文件，4.2 MiB，压缩后 676.9 KiB。
 - `cargo publish --locked --dry-run` 通过。
+- main 已推送到 origin，包含至 `9940e3d`。
 
 Current:
 
-- 推送 main 前的远端复核。
+- 创建并推送 `v0.2.4`。
 
 Verified:
 
