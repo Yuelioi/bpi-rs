@@ -157,8 +157,17 @@ requires_vip()
 is_permission_error()
 is_risk_control()
 semantic_error()
-response_body()
 ```
+
+## 响应字段变化导致解析失败
+
+模块客户端已经封装了 endpoint，但内置响应模型暂时跟不上真实 schema 时，会返回 `BpiError::ResponseDecode`。通过 `response_body()` 可以取得同一次请求的原始响应，再使用调用方临时定义的 `ApiEnvelope<T>` 解析。
+
+该恢复路径会保留模块客户端已经完成的签名、认证和参数构造，不需要重新发送请求。原始响应是显式访问的敏感数据，不会出现在错误格式化、序列化或 tracing 日志中。
+
+临时模型不应成为长期分叉；确认响应变化后请向 bpi-rs 提交 issue 或 PR。
+
+0.2 为此新增了 `BpiError::ResponseDecode`。下游匹配 `BpiError` 时应保留通配分支并优先使用语义 helper，避免依赖错误枚举永远不增加变体。
 
 ## 二维码登录
 
@@ -204,12 +213,6 @@ async fn custom_read(client: &BpiClient) -> BpiResult<Payload> {
 ```
 
 观察到成功响应可能省略 payload 或返回 `null` 时，使用 `send_bpi_optional_payload`。
-
-如果模块客户端已经封装了 endpoint，但内置响应模型暂时跟不上真实 schema，可以在 `BpiError::ResponseDecode` 上通过 `response_body()` 取得同一次请求的原始响应，再使用调用方临时定义的 `ApiEnvelope<T>` 解析。该恢复路径会保留模块客户端已经完成的签名、认证和参数构造，不需要重新发送请求。
-
-原始响应是显式访问的敏感数据，不会出现在错误格式化、序列化或 tracing 日志中。临时模型不应成为长期分叉；确认响应变化后请向 bpi-rs 提交 issue 或 PR。
-
-0.2 为此新增了 `BpiError::ResponseDecode`。下游匹配 `BpiError` 时应保留通配分支并优先使用语义 helper，避免依赖错误枚举永远不增加变体。
 
 ## 测试、探针和本地凭据
 
