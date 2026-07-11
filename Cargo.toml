@@ -1,6 +1,6 @@
 [package]
 name = "bpi-rs"
-version = "0.2.3"
+version = "0.2.4"
 edition = "2024"
 rust-version = "1.85"
 authors = ["YUELI <yuelioi1210@gmail.com>"]
