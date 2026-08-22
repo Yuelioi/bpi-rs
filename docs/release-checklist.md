@@ -74,8 +74,8 @@ CARGO_REGISTRY_TOKEN
 本地确认无误后创建并推送版本 tag：
 
 ```powershell
-git tag v0.2.3
-git push origin v0.2.3
+git tag v0.3.0
+git push origin v0.3.0
 ```
 
 如需手动发布，仍可使用：

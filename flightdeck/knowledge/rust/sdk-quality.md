@@ -1,10 +1,12 @@
-# Rust SDK quality checklist
-
-SUMMARY: Always apply this Rust API, async, error, docs, and test quality bar before implementing or reviewing bpi-rs SDK migration work.
-READ WHEN: before any Rust implementation, implementation planning, or code review for the bpi-rs 0.2 migration.
-RECHECK WHEN: Rust edition, reqwest, Tokio, tracing, or crate public API policy changes.
-
 ---
+kind: checklist
+summary: "Always apply this Rust API, async, error, docs, and test quality bar before implementing or reviewing bpi-rs SDK migration work."
+activation: action
+read_when: "before any Rust implementation, implementation planning, or code review for the bpi-rs 0.2 migration."
+recheck_when: "Rust edition, reqwest, Tokio, tracing, or crate public API policy changes."
+---
+
+# Rust SDK quality checklist
 
 Use this as the working quality bar for bpi-rs 0.2 implementation.
 

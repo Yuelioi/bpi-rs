@@ -1,8 +1,11 @@
-# Git pre-commit checklist
-SUMMARY: Always run the repository pre-commit gate before committing; it combines GitHub Actions-equivalent checks with Git patch whitespace checks.
-READ WHEN: before any commit in this repository.
-
 ---
+kind: checklist
+summary: "Always run the repository pre-commit gate before committing; it combines GitHub Actions-equivalent checks with Git patch whitespace checks."
+activation: action
+read_when: "before any commit in this repository."
+---
+
+# Git pre-commit checklist
 
 Use `task pre_commit` before committing. It runs the same check set exposed by `task ci`, then runs both `git diff --check` and `git diff --cached --check`.
 

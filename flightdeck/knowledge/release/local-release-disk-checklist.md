@@ -1,9 +1,12 @@
-# 本地发布磁盘空间检查清单
-SUMMARY: Always verify sufficient free disk and control Rust incremental caches before running bpi-rs CI, package, and publish verification locally.
-READ WHEN: before any local bpi-rs release validation or repeated full-feature package verification.
-RECHECK WHEN: Cargo target layout, release tasks, build drive, or CI verification commands change.
-
 ---
+kind: checklist
+summary: "Always verify sufficient free disk and control Rust incremental caches before running bpi-rs CI, package, and publish verification locally."
+activation: action
+read_when: "before any local bpi-rs release validation or repeated full-feature package verification."
+recheck_when: "Cargo target layout, release tasks, build drive, or CI verification commands change."
+---
+
+# 本地发布磁盘空间检查清单
 
 ## Before validation
 

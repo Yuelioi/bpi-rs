@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- **破坏性变更**：`DashFlac.audio` 改为 `Option<DashStream>`，与上游 FLAC 单对象/`null` 形态一致；`BangumiDetailResult.total` 与 `BangumiPendant.pid` 改为有符号整数，以保留负数哨兵。
+- 修复 DASH/MP4 备用地址为 `null`、番剧 `durl`/`durls` 混淆，以及非零 API code 被错误 payload 解码遮蔽的问题。
+- 兼容 2009～2026 动态中的数字/空动态 ID，以及跨年代番剧、电影、付费、未开播、国创等精简或可缺字段。
+- 新增代表性 live 响应矩阵与离线回归：动态 49 条、番剧 37 个 season、33 个 episode；修复后相关矩阵 `ResponseDecode` 均归零。
+- 修复只启用 `video` feature 时的测试导入、合法空合集断言和 Windows 下只读 Probe 任务的环境变量配置。
+
 ## 0.2.4
 
 - 新增可恢复的响应模型解码错误：领域方法因上游 schema 漂移而失败时，可通过 `BpiError::response_body()` 使用临时模型解析同一次响应；默认错误输出、序列化和 tracing 保持脱敏。
