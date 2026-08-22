@@ -4,6 +4,11 @@
 
 `bpi-rs` 0.3 主打模块化 API、显式登录态、类型化参数、直接返回业务 payload，以及可离线验证的接口契约。它适合需要在 Rust 项目里批量接入 B 站接口的工具、自动化程序、数据采集程序和服务端应用。
 
+## 相关项目
+
+- [bdl](https://github.com/Yuelioi/bdl)：使用 `bpi-rs` 和 Tauri 构建的 Bilibili 下载器。
+- [bpi-go](https://github.com/Yuelioi/bpi-go)：Go 语言版本的 Bilibili API SDK。
+
 ## 项目优势
 
 | 特性 | 说明 |
@@ -238,11 +243,6 @@ if status.code == 0 {
     println!("login cookies: {:?}", status.cookies);
 }
 ```
-
-## 相关项目
-
-- [bdl](https://github.com/Yuelioi/bdl)：使用 `bpi-rs` 和 Tauri 构建的 Bilibili 下载器。
-- [bpi-go](https://github.com/Yuelioi/bpi-go)：Go 语言版本的 Bilibili API SDK。
 
 ## 项目文档
 
