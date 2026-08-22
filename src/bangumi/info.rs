@@ -185,6 +185,7 @@ pub struct BangumiMedia {
     pub horizontal_picture: String,
     pub media_id: u64,
     pub new_ep: BangumiMediaNewEp,
+    #[serde(default)]
     pub rating: BangumiRating,
     pub season_id: u64,
     pub share_url: String,
@@ -214,7 +215,7 @@ pub struct BangumiDetailNewEp {
     pub title: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BangumiRating {
     pub count: u64,
     pub score: f64,
@@ -274,7 +275,8 @@ pub struct BangumiDetailResult {
     pub styles: Vec<String>,
     pub subtitle: String,
     pub title: String,
-    pub total: u32,
+    /// 分集总数；上游在未知时返回 `-1`。
+    pub total: i32,
     pub r#type: u32,
     pub up_info: Option<BangumiUpInfo>,
     pub user_status: Option<BangumiUserStatus>,
@@ -294,7 +296,8 @@ pub struct BangumiActivity {
 pub struct BangumiPendant {
     pub image: String,
     pub name: String,
-    pub pid: u64,
+    /// 上游在无有效挂件时可能返回负数哨兵。
+    pub pid: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -383,6 +386,7 @@ pub struct BangumiSkipTime {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BangumiFreya {
+    #[serde(default)]
     pub bubble_desc: String,
     pub bubble_show_cnt: u32,
     pub icon_show: u32,
@@ -406,6 +410,7 @@ pub struct BangumiPayment {
     pub pay_type: BangumiPayType,
     pub price: String,
     pub promotion: String,
+    #[serde(default)]
     pub tip: String,
     pub view_start_time: u64,
     pub vip_discount: u32,
@@ -511,6 +516,7 @@ pub struct BangumiSeasonStat {
 pub struct BangumiSection {
     pub attr: u32,
     pub episode_id: u64,
+    #[serde(default)]
     pub episode_ids: Vec<u64>,
     pub episodes: Vec<BangumiSectionEpisode>,
     pub id: u64,
@@ -520,7 +526,8 @@ pub struct BangumiSection {
     pub type2: u32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default)]
 pub struct BangumiSectionEpisode {
     pub aid: u64,
     pub archive_attr: Option<u32>,
@@ -565,7 +572,8 @@ pub struct BangumiSectionEpisode {
     pub vid: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default)]
 pub struct BangumiReport {
     pub aid: String,
     pub ep_title: String,
@@ -601,8 +609,10 @@ pub struct BangumiVt {
     pub value: u64,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default)]
 pub struct BangumiStat {
+    #[serde(alias = "coin")]
     pub coins: u64,
     pub danmakus: u64,
     pub favorite: u64,
@@ -612,6 +622,7 @@ pub struct BangumiStat {
     pub likes: u64,
     pub reply: u64,
     pub share: u64,
+    #[serde(alias = "play")]
     pub views: u64,
     pub vt: u64,
 }
@@ -628,7 +639,8 @@ pub struct BangumiShow {
     pub wide_screen: u32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default)]
 pub struct BangumiUpInfo {
     pub avatar: String,
     pub avatar_subscript_url: String,
@@ -659,11 +671,12 @@ pub struct BangumiUserStatus {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BangumiSectionResult {
+    #[serde(default)]
     pub main_section: BangumiMainSection,
     pub section: Vec<BangumiMainSection>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BangumiMainSection {
     pub episodes: Vec<BangumiSectionEpisodeInfo>,
     pub id: u64,
@@ -701,6 +714,142 @@ mod tests {
     const TEST_SEASON_ID: u64 = 1172; // ssid
     const TEST_EP_ID: u64 = 21265; // epid
     const TEST_MEDIA_ID: u64 = 28220978; //  mdid
+
+    #[test]
+    fn bangumi_section_episode_stat_accepts_compact_stat_shape() {
+        let stat = serde_json::from_value::<BangumiStat>(serde_json::json!({
+            "coin": 1,
+            "danmakus": 2,
+            "likes": 3,
+            "play": 4,
+            "reply": 5,
+            "vt": 6
+        }))
+        .expect("compact section episode stat should parse");
+
+        assert_eq!(stat.coins, 1);
+        assert_eq!(stat.views, 4);
+        assert_eq!(stat.favorite, 0);
+        assert_eq!(stat.follow_text, "");
+    }
+
+    #[test]
+    fn bangumi_optional_display_fields_accept_absence() {
+        let freya = serde_json::from_value::<BangumiFreya>(serde_json::json!({
+            "bubble_show_cnt": 0,
+            "icon_show": 0
+        }))
+        .expect("freya bubble description should be optional");
+        assert_eq!(freya.bubble_desc, "");
+
+        let payment = serde_json::from_value::<BangumiPayment>(serde_json::json!({
+            "discount": 0,
+            "pay_type": {
+                "allow_discount": 0,
+                "allow_pack": 0,
+                "allow_ticket": 0,
+                "allow_time_limit": 0,
+                "allow_vip_discount": 0,
+                "forbid_bb": 0
+            },
+            "price": "0",
+            "promotion": "",
+            "view_start_time": 0,
+            "vip_discount": 0,
+            "vip_first_promotion": "",
+            "vip_price": "0",
+            "vip_promotion": ""
+        }))
+        .expect("payment tip should be optional");
+        assert_eq!(payment.tip, "");
+    }
+
+    #[test]
+    fn bangumi_unreleased_media_and_sections_accept_empty_state() {
+        let media = serde_json::from_value::<BangumiMedia>(serde_json::json!({
+            "areas": [],
+            "cover": "",
+            "horizontal_picture": "",
+            "media_id": 1,
+            "new_ep": { "id": 1, "index": "", "index_show": "" },
+            "season_id": 1,
+            "share_url": "",
+            "title": "",
+            "type": 1,
+            "type_name": "番剧"
+        }))
+        .expect("unreleased media should not require a rating");
+        assert_eq!(media.rating.count, 0);
+        assert_eq!(media.rating.score, 0.0);
+
+        let sections = serde_json::from_value::<BangumiSectionResult>(serde_json::json!({
+            "section": []
+        }))
+        .expect("unreleased season should not require a main section");
+        assert!(sections.main_section.episodes.is_empty());
+        assert!(sections.section.is_empty());
+    }
+
+    #[test]
+    fn bangumi_section_episode_accepts_compact_historical_shape() {
+        let episode = serde_json::from_value::<BangumiSectionEpisode>(serde_json::json!({
+            "aid": 1,
+            "cid": 2,
+            "ep_id": 3,
+            "id": 3,
+            "title": "1"
+        }))
+        .expect("historical section episode should allow absent display fields");
+
+        assert_eq!((episode.aid, episode.cid, episode.ep_id), (1, 2, 3));
+        assert_eq!(episode.badge_type, 0);
+        assert_eq!(episode.link_type, "");
+        assert!(episode.stat.is_none());
+    }
+
+    #[test]
+    fn bangumi_section_metadata_accepts_compact_display_shape() {
+        let report = serde_json::from_value::<BangumiReport>(serde_json::json!({}))
+            .expect("section report metadata fields should be optional");
+        assert_eq!(report.aid, "");
+
+        let up_info = serde_json::from_value::<BangumiUpInfo>(serde_json::json!({
+            "mid": 1,
+            "uname": "up"
+        }))
+        .expect("section up info display fields should be optional");
+        assert_eq!(up_info.mid, 1);
+        assert_eq!(up_info.avatar_subscript_url, "");
+    }
+
+    #[test]
+    fn bangumi_section_accepts_missing_redundant_episode_ids() {
+        let section = serde_json::from_value::<BangumiSection>(serde_json::json!({
+            "attr": 0,
+            "episode_id": 1,
+            "episodes": [],
+            "id": 1,
+            "report": null,
+            "title": "",
+            "type": 0,
+            "type2": 0
+        }))
+        .expect("section should not require redundant episode_ids");
+
+        assert!(section.episode_ids.is_empty());
+    }
+
+    #[test]
+    fn bangumi_pendant_accepts_negative_sentinel_id() {
+        let pendant = serde_json::from_value::<BangumiPendant>(serde_json::json!({
+            "image": "",
+            "name": "",
+            "pid": -1014771399
+        }))
+        .expect("pendant sentinel id should remain representable");
+
+        assert_eq!(i128::from(pendant.pid), -1014771399_i128);
+    }
 
     fn contract(endpoint: &str) -> BpiResult<EndpointContract> {
         let bytes = match endpoint {

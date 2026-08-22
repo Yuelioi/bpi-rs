@@ -197,7 +197,7 @@ mod tests {
 
     use super::*;
     use crate::transport::{ResponseMetadata, TransportResponse};
-    use crate::{BpiError, BpiResult};
+    use crate::{ApiEnvelope, BpiError, BpiResult};
 
     #[derive(Debug, Deserialize, PartialEq, Eq)]
     struct Payload {

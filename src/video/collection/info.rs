@@ -478,7 +478,8 @@ mod tests {
                     let payload =
                         serde_json::from_value::<ApiEnvelope<GetSeasonsSeriesData>>(body)?
                             .into_payload()?;
-                    assert!(payload.items_lists.page.total >= 1);
+                    assert!(payload.items_lists.page.page_num >= 1);
+                    assert!(payload.items_lists.page.page_size >= 1);
                 }
             }
 

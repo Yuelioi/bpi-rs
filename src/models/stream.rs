@@ -117,7 +117,7 @@ pub struct VideoStreamData {
     pub video_codecid: u32,
 
     /// FLV/MP4 直链（可选）
-    #[serde(default, rename = "durls")]
+    #[serde(default)]
     pub durl: Option<Vec<Durl>>,
     /// DASH 流（可选）
     #[serde(default)]

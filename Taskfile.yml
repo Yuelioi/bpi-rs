@@ -67,8 +67,10 @@ tasks:
 
   probe_read_only:
     desc: Run all read-only promoted contracts against anonymous, normal, and vip profiles.
+    env:
+      BPI_PROBE: '1'
     cmds:
-      - $env:BPI_PROBE='1'; cargo run --all-features --bin bpi-probe -- batch-run tests/contracts --account account.toml --profiles anonymous,normal,vip --pages 10 --read-only --output target/bpi-probe-runs/read-only
+      - cargo run --all-features --bin bpi-probe -- batch-run tests/contracts --account account.toml --profiles anonymous,normal,vip --pages 10 --read-only --output target/bpi-probe-runs/read-only
 
   api_doc:
     desc: Generate the AI-friendly API index from contracts and Rust source.

@@ -1,7 +1,7 @@
 //! 视频流地址相关接口 (web端)
 //!
 //! [查看 API 文档](https://github.com/SocialSisterYi/bilibili-API-collect/tree/master/docs/video)
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 pub(crate) const PLAY_URL_ENDPOINT: &str = "https://api.bilibili.com/x/player/wbi/playurl";
 
@@ -28,7 +28,11 @@ pub struct DashDolby {
 /// DASH 流中的 FLAC 音频信息
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DashFlac {
-    pub audio: Vec<DashStream>,
+    #[serde(default)]
+    pub display: Option<bool>,
+    /// Hi-Res 音轨；上游在无可用音轨时返回 `null`
+    #[serde(default)]
+    pub audio: Option<DashStream>,
 }
 
 /// 单个 DASH 流信息
@@ -38,7 +42,11 @@ pub struct DashStream {
     #[serde(rename = "baseUrl")]
     pub base_url: String,
 
-    #[serde(rename = "backupUrl")]
+    #[serde(
+        rename = "backupUrl",
+        default,
+        deserialize_with = "deserialize_vec_or_default"
+    )]
     pub backup_url: Vec<String>,
     pub bandwidth: u64,
     #[serde(rename = "mimeType")]
@@ -68,7 +76,16 @@ pub struct DurlInfo {
     pub ahead: String,
     pub vhead: String,
     pub url: String,
+    #[serde(default, deserialize_with = "deserialize_vec_or_default")]
     pub backup_url: Vec<String>,
+}
+
+fn deserialize_vec_or_default<'de, D, T>(deserializer: D) -> Result<Vec<T>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    Ok(Option::<Vec<T>>::deserialize(deserializer)?.unwrap_or_default())
 }
 
 /// 支持的格式详细信息
@@ -259,6 +276,80 @@ mod tests {
             (-1000, -1000)
         );
         Ok(())
+    }
+
+    #[test]
+    fn dash_info_accepts_nullable_and_single_stream_flac_audio() {
+        let base = serde_json::json!({
+            "video": [],
+            "audio": [],
+            "duration": 192,
+            "dolby": { "type": 1, "audio": null },
+        });
+        let stream = serde_json::json!({
+            "id": 30251,
+            "baseUrl": "https://example.invalid/flac.m4s",
+            "backupUrl": [],
+            "bandwidth": 1000,
+            "mimeType": "audio/mp4",
+            "codecs": "fLaC",
+        });
+
+        let mut null_response = base.clone();
+        null_response["flac"] = serde_json::json!({
+            "display": true,
+            "audio": null,
+        });
+        let null_flac = serde_json::from_value::<DashInfo>(null_response)
+            .expect("flac.audio=null should not prevent DASH parsing")
+            .flac
+            .expect("the FLAC descriptor should remain available");
+        assert_eq!(null_flac.display, Some(true));
+        assert!(null_flac.audio.is_none());
+
+        let mut stream_response = base;
+        stream_response["flac"] = serde_json::json!({
+            "display": true,
+            "audio": stream,
+        });
+        let stream_flac = serde_json::from_value::<DashInfo>(stream_response)
+            .expect("a single flac.audio stream should parse")
+            .flac
+            .expect("the FLAC descriptor should remain available");
+        assert_eq!(stream_flac.display, Some(true));
+        assert_eq!(stream_flac.audio.map(|audio| audio.id), Some(30251));
+    }
+
+    #[test]
+    fn play_url_models_accept_null_backup_urls() {
+        let dash = serde_json::from_value::<DashInfo>(serde_json::json!({
+            "video": [{
+                "id": 64,
+                "baseUrl": "https://example.invalid/video.m4s",
+                "backupUrl": null,
+                "bandwidth": 1000,
+                "mimeType": "video/mp4",
+                "codecs": "avc1.640028"
+            }],
+            "audio": [],
+            "dolby": null,
+            "flac": null,
+            "duration": 60
+        }))
+        .expect("dash backupUrl=null should mean no backup URLs");
+        assert!(dash.video[0].backup_url.is_empty());
+
+        let durl = serde_json::from_value::<DurlInfo>(serde_json::json!({
+            "order": 1,
+            "length": 60_000,
+            "size": 1_000_000,
+            "ahead": "",
+            "vhead": "",
+            "url": "https://example.invalid/video.mp4",
+            "backup_url": null
+        }))
+        .expect("durl backup_url=null should mean no backup URLs");
+        assert!(durl.backup_url.is_empty());
     }
 
     fn local_probe_body(profile: &str) -> Option<serde_json::Value> {

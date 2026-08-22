@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use bytes::Bytes;
-use serde::de::DeserializeOwned;
+use serde::de::{DeserializeOwned, IgnoredAny};
 
 use crate::{BpiError, BpiResult, response::ApiEnvelope};
 
@@ -33,8 +33,19 @@ impl TransportResponse {
     where
         T: DeserializeOwned,
     {
-        let envelope: ApiEnvelope<T> = serde_json::from_slice(&self.body)
+        let header: ApiEnvelope<IgnoredAny> = serde_json::from_slice(&self.body)
             .map_err(|source| BpiError::response_decode(source, self.body.clone()))?;
+        let envelope = if header.code == 0 {
+            serde_json::from_slice(&self.body)
+                .map_err(|source| BpiError::response_decode(source, self.body.clone()))?
+        } else {
+            ApiEnvelope {
+                code: header.code,
+                data: None,
+                message: header.message,
+                status: header.status,
+            }
+        };
         let mut metadata = self.metadata.clone();
         metadata.api_code = Some(envelope.code);
 
@@ -146,6 +157,28 @@ mod tests {
             .unwrap_err();
 
         assert!(matches!(err, BpiError::Api { code: -101, .. }));
+    }
+
+    #[test]
+    fn transport_envelope_prioritizes_api_error_over_incompatible_error_payload() {
+        let response = TransportResponse {
+            metadata: ResponseMetadata {
+                status: 200,
+                duration: Duration::from_millis(12),
+                api_code: None,
+            },
+            body: Bytes::from_static(
+                br#"{ "code": -352, "message": "risk control", "data": { "ga_data": null } }"#,
+            ),
+        };
+
+        let err = response
+            .decode_api_envelope::<Payload>()
+            .and_then(TransportEnvelope::into_payload)
+            .unwrap_err();
+
+        assert!(matches!(err, BpiError::Api { code: -352, .. }));
+        assert!(err.is_risk_control());
     }
 
     #[test]

@@ -1,5 +1,5 @@
 use crate::models::{Official, Pendant, Vip};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, de};
 // --- 动态详情 API 结构体 ---
 
 /// 动态详情响应数据
@@ -11,6 +11,7 @@ pub struct DynamicDetailData {
 /// 动态卡片内容，作为多个 API 的共享结构体
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DynamicDetailItem {
+    #[serde(deserialize_with = "deserialize_dynamic_id_text")]
     pub id_str: String,
     pub basic: DynamicBasic,
 
@@ -22,6 +23,20 @@ pub struct DynamicDetailItem {
     pub r#type: String,
 
     pub visible: bool,
+}
+
+fn deserialize_dynamic_id_text<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    match serde_json::Value::deserialize(deserializer)? {
+        serde_json::Value::String(value) => Ok(value),
+        serde_json::Value::Number(value) => Ok(value.to_string()),
+        serde_json::Value::Null => Ok(String::new()),
+        _ => Err(de::Error::custom(
+            "dynamic id must be a string, number, or null",
+        )),
+    }
 }
 
 /// 动态卡片内容，作为多个 API 的共享结构体
@@ -213,6 +228,52 @@ mod tests {
 
     fn parse_dynamic_id(value: &str) -> Result<DynamicId, BpiError> {
         value.parse()
+    }
+
+    fn dynamic_item_json(id: serde_json::Value, orig: serde_json::Value) -> serde_json::Value {
+        serde_json::json!({
+            "id_str": id,
+            "basic": {
+                "comment_id_str": "1",
+                "comment_type": 1,
+                "editable": null,
+                "jump_url": null,
+                "like_icon": {},
+                "rid_str": "1"
+            },
+            "modules": {},
+            "orig": orig,
+            "type": "DYNAMIC_TYPE_AV",
+            "visible": true
+        })
+    }
+
+    #[test]
+    fn dynamic_detail_item_accepts_legacy_numeric_id() {
+        let item = serde_json::from_value::<DynamicDetailItem>(dynamic_item_json(
+            serde_json::json!(188029375348892_u64),
+            serde_json::Value::Null,
+        ))
+        .expect("legacy numeric dynamic id should normalize to text");
+
+        assert_eq!(item.id_str, "188029375348892");
+    }
+
+    #[test]
+    fn dynamic_detail_item_accepts_null_id_in_deleted_orig_placeholder() {
+        let deleted_orig = dynamic_item_json(serde_json::Value::Null, serde_json::Value::Null);
+        let item = serde_json::from_value::<DynamicDetailItem>(dynamic_item_json(
+            serde_json::json!("944264795038679059"),
+            deleted_orig,
+        ))
+        .expect("deleted orig placeholder should not prevent forward parsing");
+
+        assert_eq!(
+            item.orig
+                .expect("orig placeholder should remain available")
+                .id_str,
+            ""
+        );
     }
 
     fn contract(endpoint: &str) -> BpiResult<EndpointContract> {

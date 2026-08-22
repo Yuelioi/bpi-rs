@@ -50,6 +50,49 @@ mod tests {
     const TEST_EP_ID: u64 = 21265; // epid
     const TEST_CID: u64 = 91549662;
 
+    #[test]
+    fn bangumi_stream_uses_current_quality_durl_instead_of_quality_groups() {
+        let stream = serde_json::from_value::<BangumiVideoStreamData>(serde_json::json!({
+            "quality": 32,
+            "accept_quality": [32],
+            "accept_format": "flv480",
+            "accept_description": ["清晰 480P"],
+            "format": "flv480",
+            "video_codecid": 7,
+            "durl": [{
+                "size": 100,
+                "ahead": "",
+                "length": 1000,
+                "vhead": "",
+                "backup_url": [],
+                "url": "https://example.invalid/current.flv",
+                "order": 1
+            }],
+            "durls": [{
+                "quality": 32,
+                "durl": [{ "size": 100 }]
+            }],
+            "dash": null,
+            "has_paid": false,
+            "support_formats": [],
+            "code": 0,
+            "fnver": 0,
+            "video_project": true,
+            "type": "FLV",
+            "bp": 0,
+            "vip_type": null,
+            "vip_status": null,
+            "is_drm": false,
+            "no_rexcode": 0,
+            "record_info": null
+        }))
+        .expect("non-empty quality groups should not be parsed as current durl entries");
+
+        let durl = stream.base.durl.expect("current quality durl should parse");
+        assert_eq!(durl.len(), 1);
+        assert_eq!(durl[0].size, 100);
+    }
+
     fn contract() -> BpiResult<EndpointContract> {
         EndpointContract::from_slice(include_bytes!(
             "../../tests/contracts/bangumi/playurl/contract.json"
