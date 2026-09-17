@@ -2,7 +2,7 @@
 name = "bpi-rs"
 version = "0.3.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.88"
 authors = ["YUELI <yuelioi1210@gmail.com>"]
 description = "Bilibili API client library for Rust"
 license = "MIT"
@@ -84,7 +84,7 @@ tracing-subscriber = { version = "0.3", features = [
   "ansi",
   "std",
 ] }
-reqwest = { version = "0.12", default-features = false, features = [
+reqwest = { version = "0.13", default-features = false, features = [
   "json",
   "cookies",
   "gzip",
@@ -92,7 +92,9 @@ reqwest = { version = "0.12", default-features = false, features = [
   "brotli",
   "stream",
   "multipart",
-  "rustls-tls",
+  "query",
+  "form",
+  "rustls",
 ] }
 serde_json = "1"
 thiserror = "2.0"
@@ -102,12 +104,12 @@ bytes = { version = "1.8" }
 
 md5 = { version = "0.8" } # wbi
 
-base64 = { version = "0.22" }
-hmac = "0.12"
-sha2 = "0.10"
+base64 = { version = "0.23" }
+hmac = "0.13"
+sha2 = "0.11"
 hex = "0.4"
 flate2 = { version = "1.1", optional = true }
-quick-xml = { version = "0.38", features = ["serialize"], optional = true }
+quick-xml = { version = "0.42", features = ["serialize"], optional = true }
 bitflags = { version = "2.9" }
 uuid = { version = "1.18", features = ["v4"], optional = true }
 
