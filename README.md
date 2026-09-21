@@ -4,13 +4,21 @@
 
 - [bpi-py](https://github.com/Yuelioi/bpi-py)：Python 版本。
 - [bpi-go](https://github.com/Yuelioi/bpi-go)：Go 版本。
-- [bdl](https://github.com/Yuelioi/bdl)：使用 `bpi-rs` 和 Tauri 构建的 Bilibili 下载器。
 
-面向 Rust 的 Bilibili API SDK，基于 `reqwest` 和 `tokio`。
+一个面向 Rust 的非官方异步 Bilibili Web API SDK，基于 `reqwest` 和 `tokio`。
 
-`bpi-rs` 0.3 主打模块化 API、显式登录态、类型化参数、直接返回业务 payload，以及可离线验证的接口契约。它适合需要在 Rust 项目里批量接入 B 站接口的工具、自动化程序、数据采集程序和服务端应用。
+`bpi-rs` 提供模块化 API、显式登录态、类型化参数、直接返回业务 payload，以及可离线验证的接口契约，用来减少重复处理 Bilibili Web 接口细节的工作。
 
-## 项目优势
+> [!IMPORTANT]
+> `bpi-rs` 是非官方第三方项目，与哔哩哔哩（Bilibili）无隶属、合作、授权或官方支持关系。
+>
+> 本项目涉及的 Web 接口并非官方公开稳定 API，可能随时变更、失效或受到访问限制。本项目仅用于个人学习、研究与技术交流。使用者应自行遵守适用法律法规、平台服务条款与账号权限要求，并对自己的使用行为负责。
+>
+> 请勿将本项目用于绕过访问控制、未经授权获取数据、侵犯隐私或其他合法权益、大规模高频请求、干扰平台正常服务等用途。
+
+## 为什么用 bpi-rs？
+
+从使用者角度，主要是少写很多和 Bilibili Web 接口本身有关的重复代码。
 
 | 特性 | 说明 |
 | --- | --- |
@@ -87,6 +95,8 @@ let account = Account {
 
 let client = BpiClient::builder().account(account).build()?;
 ```
+
+请只使用你有权使用的账号凭据，并妥善保管 Cookie、`SESSDATA`、CSRF token 等敏感信息，不要将它们提交到仓库、日志或公开环境。
 
 ## 常用模块
 
@@ -258,6 +268,12 @@ if status.code == 0 {
 | [贡献指南](CONTRIBUTING.md) | 贡献流程和代码协作约定。 |
 | [安全策略](SECURITY.md) | 安全问题报告方式。 |
 | [变更日志](CHANGELOG.md) | 版本变更记录。 |
+
+## 接口稳定性
+
+Bilibili Web API 并不是官方稳定公开 API，上游接口、字段和错误码可能随时变化。
+
+`bpi-rs` 不保证第三方接口的可用性、稳定性或持续兼容，也不代表使用这些接口已经获得平台授权。请根据自己的使用场景控制请求频率、数据范围和账号权限。
 
 ## License
 
