@@ -11,7 +11,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CourseInfo {
     pub brief: CourseBrief,
-    pub coupon: CourseCoupon,
+    /// 优惠券；无可用优惠时可能为 null 或省略
+    pub coupon: Option<CourseCoupon>,
     pub cover: String,
     pub episode_page: CourseEpisodePage,
     pub episode_sort: i32,
@@ -108,6 +109,8 @@ pub struct CourseFaqItem {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CoursePayment {
     pub desc: String,
+    /// 无折扣时可能省略
+    #[serde(default)]
     pub discount_desc: String,
     #[serde(default)]
     pub discount_prefix: String,
@@ -204,6 +207,20 @@ mod tests {
 
     const TEST_SEASON_ID: u64 = 556;
     const TEST_EP_ID: u64 = 20767;
+
+    #[test]
+    fn course_without_coupon_or_discount_decodes() -> BpiResult<()> {
+        // ss877726892 的真实匿名响应没有优惠券，也不返回折扣描述。
+        let payload = ApiEnvelope::<CourseInfo>::from_slice(include_bytes!(
+            "../../tests/fixtures/cheese/no-coupon.sanitized.json"
+        ))?
+        .into_payload()?;
+        assert_eq!(payload.season_id, 877726892);
+        assert_eq!(payload.episodes.len(), 7);
+        assert!(payload.coupon.is_none());
+        assert!(payload.payment.discount_desc.is_empty());
+        Ok(())
+    }
 
     fn contract(name: &str) -> BpiResult<EndpointContract> {
         let bytes = match name {
