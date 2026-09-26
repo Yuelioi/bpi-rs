@@ -34,3 +34,6 @@ src-tauri/libs
 src/doc
 
 account.toml
+
+# Local multi-session work notes
+/flightdeck/
