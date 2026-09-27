@@ -1,3 +1,4 @@
+use std::fmt;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -79,7 +80,6 @@ const AUTH_COOKIE_NAMES: &[&str] = &[
 ];
 
 /// 在构造前配置 [`BpiClient`]。
-#[derive(Debug)]
 pub struct BpiClientBuilder {
     timeout: Duration,
     connect_timeout: Duration,
@@ -91,6 +91,20 @@ pub struct BpiClientBuilder {
     cookie: Option<String>,
     account: Option<Account>,
     reqwest_client: Option<Client>,
+}
+
+impl fmt::Debug for BpiClientBuilder {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("BpiClientBuilder")
+            .field("timeout", &self.timeout)
+            .field("connect_timeout", &self.connect_timeout)
+            .field("no_proxy", &self.no_proxy)
+            .field("proxy_count", &self.proxies.len())
+            .field("has_cookie", &self.cookie.is_some())
+            .field("has_account", &self.account.is_some())
+            .field("has_custom_reqwest_client", &self.reqwest_client.is_some())
+            .finish_non_exhaustive()
+    }
 }
 
 impl Default for BpiClientBuilder {
@@ -243,6 +257,26 @@ pub struct BpiClient {
     origin: HeaderValue,
     cookie_header: Mutex<Option<String>>,
     wbi_key_cache: WbiKeyCache,
+}
+
+impl fmt::Debug for BpiClient {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let has_account = self
+            .account
+            .try_lock()
+            .ok()
+            .map(|account| account.is_some());
+        let has_cookie_header = self
+            .cookie_header
+            .try_lock()
+            .ok()
+            .map(|cookie| cookie.is_some());
+
+        f.debug_struct("BpiClient")
+            .field("has_account", &has_account)
+            .field("has_cookie_header", &has_cookie_header)
+            .finish_non_exhaustive()
+    }
 }
 
 impl BpiClient {
@@ -639,6 +673,51 @@ mod tests {
             second.cookie_header_for_test()
         );
         Ok(())
+    }
+
+    #[test]
+    fn client_debug_does_not_expose_cookie_credentials() -> Result<(), BpiError> {
+        let client = BpiClient::builder()
+            .cookie(
+                "DedeUserID=42; SESSDATA=secret-session; bili_jct=secret-csrf; buvid3=secret-buvid",
+            )
+            .build()?;
+
+        let debug = format!("{client:?}");
+
+        assert!(debug.contains("BpiClient"));
+        assert!(debug.contains("has_account: Some(true)"));
+        assert!(debug.contains("has_cookie_header: Some(true)"));
+        assert!(!debug.contains("secret-session"));
+        assert!(!debug.contains("secret-csrf"));
+        assert!(!debug.contains("secret-buvid"));
+        Ok(())
+    }
+
+    #[test]
+    fn builder_debug_does_not_expose_cookie_credentials() {
+        let builder = BpiClient::builder()
+            .cookie(
+                "DedeUserID=42; SESSDATA=secret-session; bili_jct=secret-csrf; buvid3=secret-buvid",
+            )
+            .account(Account::new(
+                "42".to_string(),
+                "account-session".to_string(),
+                "account-csrf".to_string(),
+                "account-buvid".to_string(),
+            ));
+
+        let debug = format!("{builder:?}");
+
+        assert!(debug.contains("BpiClientBuilder"));
+        assert!(debug.contains("has_cookie: true"));
+        assert!(debug.contains("has_account: true"));
+        assert!(!debug.contains("secret-session"));
+        assert!(!debug.contains("secret-csrf"));
+        assert!(!debug.contains("secret-buvid"));
+        assert!(!debug.contains("account-session"));
+        assert!(!debug.contains("account-csrf"));
+        assert!(!debug.contains("account-buvid"));
     }
 
     #[test]
