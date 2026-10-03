@@ -12,7 +12,7 @@
 
 会话 `begin_ts`、`end_ts`、`session_ts` 使用**微秒**；消息 `timestamp` 使用**秒**。获取更早会话使用上一页最小 `session_ts`，获取更早消息使用最小 `msg_seqno` 作为 `end_seqno`。增量读取分别使用 `begin_ts`、`begin_seqno`。依据 `has_more` 与游标是否前进决定继续或退出，并处理重复页。空会话或空消息页实测返回 `null`，对应 `Option<Vec<_>>`。
 
-`content` 保留嵌套 JSON 字符串，`msg_type` 保留原始数值，允许未知类型。历史消息可能缺少 `new_face_version`；`at_uids` 可为 `null`。会话模型只声明稳定私信字段，特殊系统卡片的 `account_info` 和未观察到有效值的 `user_label` 未建模。
+`content` 保留嵌套 JSON 字符串，`msg_type` 保留原始数值，允许未知类型。没有最近消息的普通会话也可能返回 `last_msg: null`，调用方应按空会话处理；`last_msg` 在模型中可选。历史消息可能缺少 `new_face_version`；`at_uids` 可为 `null`。会话模型只声明稳定私信字段，特殊系统卡片的 `account_info` 和未观察到有效值的 `user_label` 未建模。
 
 发送沿用既有文本/图片入口，增加 `MessageSendParams::text`。文本拒绝空白，嵌套 JSON UTF-8 编码不超过 2000 字节；正文中的换行和首尾空白保留。需要已配置账号、CSRF 与 WBI，表单中 `csrf`、`csrf_token` 相同，签名使用发送者、接收者和同一 UUID。SDK 不重试写操作。调用方应核对非零 `msg_key`；网络结果不确定时先回读消息，避免重复发送。
 

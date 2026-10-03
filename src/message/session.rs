@@ -195,7 +195,8 @@ pub struct MessageSession {
     pub system_msg_type: u32,
     pub is_follow: u32,
     pub is_dnd: u32,
-    pub last_msg: MessagePrivateMessage,
+    /// 无最近消息的会话可返回 null。
+    pub last_msg: Option<MessagePrivateMessage>,
 }
 
 /// 消息记录。空页 messages 为 null，保留服务端分页边界。

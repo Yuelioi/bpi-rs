@@ -61,6 +61,15 @@
       "user_and_system_type_1": "two pages advance",
       "unfollowed_type_2": "two pages advance",
       "recommendation": "query types 1 and 2 separately for history; detect repeated cursor"
+    },
+    "no_last_message": {
+      "fixture": "responses/vip.no-last-message.json",
+      "query": {
+        "session_type": "1",
+        "size": "100",
+        "end_ts": "previous-minimum-microseconds"
+      },
+      "observation": "Page 8 contains a user session (session_type=1, system_msg_type=0) with last_msg=null; minimized to that row."
     }
   },
   "cases": [
@@ -124,6 +133,23 @@
       "response": {
         "api_code": 0,
         "fixture": "responses/vip.empty.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "MessageSessionsData"
+      }
+    },
+    {
+      "name": "vip_no_last_message",
+      "profile": "vip",
+      "auth": {
+        "requires": [
+          "cookie"
+        ],
+        "profile": "vip"
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/vip.no-last-message.json",
         "fixture_kind": "sanitized_probe_body",
         "rust_model": "MessageSessionsData"
       }

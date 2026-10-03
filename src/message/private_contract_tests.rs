@@ -140,6 +140,24 @@ fn private_read_models_parse_sanitized_and_null_pages() -> BpiResult<()> {
 }
 
 #[test]
+fn private_sessions_without_last_message_parse() -> BpiResult<()> {
+    let body = include_bytes!(
+        "../../tests/contracts/message/private-read/sessions/responses/vip.no-last-message.json"
+    );
+    let data = ApiEnvelope::<MessageSessionsData>::from_slice(body)?.into_payload()?;
+    assert!(data.session_list.as_ref().unwrap()[0].last_msg.is_none());
+    let mut value: serde_json::Value = serde_json::from_slice(body)?;
+    value["data"]["session_list"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("last_msg");
+    let data = ApiEnvelope::<MessageSessionsData>::from_slice(&serde_json::to_vec(&value)?)?
+        .into_payload()?;
+    assert!(data.session_list.as_ref().unwrap()[0].last_msg.is_none());
+    Ok(())
+}
+
+#[test]
 fn private_read_models_match_local_probe_bodies_when_available() -> BpiResult<()> {
     for endpoint in ["sessions", "session-messages"] {
         for profile in [
@@ -149,6 +167,8 @@ fn private_read_models_match_local_probe_bodies_when_available() -> BpiResult<()
             "vip-empty",
             "vip-page1",
             "vip-page2",
+            "vip-type1-full",
+            "vip-type1-full-page8",
             "vip-type1-page1",
             "vip-type1-page2",
             "vip-type2-page1",

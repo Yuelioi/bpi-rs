@@ -1,0 +1,26 @@
+{
+  "code": 0,
+  "message": "OK",
+  "data": {
+    "anti_disturb_cleaning": false,
+    "has_more": 1,
+    "is_address_list_empty": 0,
+    "show_level": true,
+    "session_list": [
+      {
+        "talker_id": 1000001,
+        "session_type": 1,
+        "session_ts": 1700000000000000,
+        "top_ts": 0,
+        "ack_seqno": 1000001,
+        "ack_ts": 1700000000000000,
+        "max_seqno": 1000001,
+        "unread_count": 0,
+        "system_msg_type": 0,
+        "is_follow": 0,
+        "is_dnd": 0,
+        "last_msg": null
+      }
+    ]
+  }
+}
