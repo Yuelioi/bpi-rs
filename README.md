@@ -283,3 +283,5 @@ Bilibili Web API 并不是官方稳定公开 API，上游接口、字段和错�
 
 - [bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)
 - [reqwest](https://github.com/seanmonstar/reqwest)
+
+私信接入与分页、发送风险说明见 [私信 API](docs/private-message-api.md)。

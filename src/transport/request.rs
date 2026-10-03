@@ -66,6 +66,11 @@ fn is_sensitive_query_key(key: &str) -> bool {
             | "csrf"
             | "csrf_token"
             | "w_rid"
+            | "w_sender_uid"
+            | "w_receiver_id"
+            | "w_dev_id"
+            | "dev_id"
+            | "talker_id"
             | "access_key"
             | "token"
             | "cookie"
@@ -82,6 +87,14 @@ fn is_sensitive_header_name(name: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn private_message_query_identity_is_not_logged() {
+        let url = sanitize_url_for_logging(
+            "https://api.vc.bilibili.com/web_im/v1/web_im/send_msg?w_sender_uid=1000001&w_receiver_id=1000002&w_dev_id=private-device&w_rid=signature&talker_id=1000002",
+        );
+        assert_eq!(url, "https://api.vc.bilibili.com/web_im/v1/web_im/send_msg");
+    }
 
     #[test]
     fn sanitize_url_for_logging_removes_sensitive_query_values() {

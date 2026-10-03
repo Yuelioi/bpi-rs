@@ -1,0 +1,93 @@
+{
+  "schema_version": 2,
+  "name": "message.private.send",
+  "module": "message",
+  "batch": "private-write",
+  "endpoint": "send",
+  "risk": "mutating",
+  "status": "promoted",
+  "profiles": [
+    "vip"
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://api.vc.bilibili.com/web_im/v1/web_im/send_msg",
+    "query": {
+      "w_sender_uid": "1000001",
+      "w_receiver_id": "1000001",
+      "w_dev_id": "00000000-0000-4000-8000-000000000000"
+    },
+    "form": {
+      "msg[sender_uid]": "1000001",
+      "msg[receiver_id]": "1000001",
+      "msg[receiver_type]": "1",
+      "msg[msg_type]": "1",
+      "msg[msg_status]": "0",
+      "msg[dev_id]": "00000000-0000-4000-8000-000000000000",
+      "msg[timestamp]": "{{unix_ts}}",
+      "msg[new_face_version]": "1",
+      "msg[content]": "{\"content\":\"<redacted>\"}",
+      "csrf": "{{csrf}}",
+      "csrf_token": "{{csrf}}",
+      "build": "0",
+      "mobi_app": "web"
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {},
+    "auth": {
+      "requires": [
+        "cookie",
+        "csrf",
+        "wbi"
+      ]
+    }
+  },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {
+      "msg_key": 1000001
+    },
+    "drop": [],
+    "keep": []
+  },
+  "provenance": {
+    "source": "consumer_go_live_verification_and_rust_source",
+    "observed_at": "2026-10-03",
+    "tool": "bilibili-live-check",
+    "tool_version": "local-adapter",
+    "privacy": "Only successful nonzero msg_key and subsequent read-back were observed. Full send body was not retained; fixture is synthetic, not a promoted raw response. No identity, message content or device identifier retained.",
+    "validation": "synthetic_verified_shape",
+    "live_gate": [
+      "BPI_MUTATING_TEST=1",
+      "BPI_MESSAGE_RECEIVER_ID",
+      "BPI_MESSAGE_TEXT"
+    ],
+    "automatic_live_probe": false
+  },
+  "cases": [
+    {
+      "name": "verified_text_shape",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie",
+          "csrf",
+          "wbi"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/synthetic.success.json",
+        "fixture_kind": "synthetic_verified_shape",
+        "rust_model": "SendMsgData"
+      }
+    }
+  ]
+}

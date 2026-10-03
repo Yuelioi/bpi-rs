@@ -1,0 +1,10 @@
+{
+  "code": 0,
+  "message": "OK",
+  "data": {
+    "has_more": 0,
+    "max_seqno": 0,
+    "messages": null,
+    "min_seqno": 0
+  }
+}

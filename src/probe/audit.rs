@@ -268,6 +268,7 @@ fn allowed_fixture_kind(kind: &str) -> bool {
             | "sanitized_probe"
             | "sanitized_probe_body"
             | "trimmed_probe_body"
+            | "synthetic_verified_shape"
     )
 }
 

@@ -1,0 +1,61 @@
+{
+  "code": 0,
+  "message": "OK",
+  "data": {
+    "has_more": 0,
+    "max_seqno": 1000001,
+    "messages": [
+      {
+        "sender_uid": 1000001,
+        "receiver_id": 1000001,
+        "receiver_type": 1,
+        "msg_type": 1,
+        "content": "{\"content\":\"<redacted>\"}",
+        "msg_seqno": 1000001,
+        "msg_key": 1000001,
+        "timestamp": 1700000000,
+        "msg_status": 0,
+        "msg_source": 7,
+        "at_uids": [
+          1000001
+        ],
+        "new_face_version": 1,
+        "notify_code": ""
+      },
+      {
+        "sender_uid": 1000001,
+        "receiver_id": 1000001,
+        "receiver_type": 1,
+        "msg_type": 1,
+        "content": "{\"content\":\"<redacted>\"}",
+        "msg_seqno": 1000001,
+        "msg_key": 1000001,
+        "timestamp": 1700000000,
+        "msg_status": 0,
+        "msg_source": 2,
+        "at_uids": [
+          1000001
+        ],
+        "new_face_version": 1,
+        "notify_code": ""
+      },
+      {
+        "sender_uid": 1000001,
+        "receiver_id": 1000001,
+        "receiver_type": 1,
+        "msg_type": 2,
+        "content": "{\"content\":\"<redacted>\"}",
+        "msg_seqno": 1000001,
+        "msg_key": 1000001,
+        "timestamp": 1700000000,
+        "msg_status": 0,
+        "msg_source": 7,
+        "at_uids": [
+          1000001
+        ],
+        "notify_code": ""
+      }
+    ],
+    "min_seqno": 1000001
+  }
+}

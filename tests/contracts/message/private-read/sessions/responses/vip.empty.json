@@ -1,0 +1,11 @@
+{
+  "code": 0,
+  "message": "OK",
+  "data": {
+    "anti_disturb_cleaning": false,
+    "has_more": 0,
+    "is_address_list_empty": 0,
+    "session_list": null,
+    "show_level": false
+  }
+}

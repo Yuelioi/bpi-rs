@@ -8,6 +8,14 @@ pub fn parse_registered_response_model(model: &str, body: &serde_json::Value) ->
 pub fn parse_registered_model(model: &str, bytes: &[u8]) -> BpiResult<bool> {
     let _ = bytes;
     match model {
+        #[cfg(feature = "message")]
+        "MessageSessionsData" => parse_envelope::<crate::message::MessageSessionsData>(bytes),
+        #[cfg(feature = "message")]
+        "MessageSessionMessagesData" => {
+            parse_envelope::<crate::message::MessageSessionMessagesData>(bytes)
+        }
+        #[cfg(feature = "message")]
+        "SendMsgData" => parse_envelope::<crate::message::private_msg::SendMsgData>(bytes),
         #[cfg(feature = "historytoview")]
         "HistoryListData" => {
             parse_envelope::<crate::historytoview::history::HistoryListData>(bytes)
@@ -29,7 +37,8 @@ pub fn parse_registered_model(model: &str, bytes: &[u8]) -> BpiResult<bool> {
     feature = "login",
     feature = "wallet",
     feature = "video",
-    feature = "vip"
+    feature = "vip",
+    feature = "message"
 ))]
 fn parse_envelope<T>(bytes: &[u8]) -> BpiResult<bool>
 where

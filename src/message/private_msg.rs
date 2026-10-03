@@ -92,16 +92,89 @@ impl MessageSendParams {
             ));
         }
 
+        if let MessageType::Text(text) = &message_type {
+            if text.trim().is_empty() {
+                return Err(BpiError::invalid_parameter(
+                    "message",
+                    "text cannot be blank",
+                ));
+            }
+            if serde_json::to_string(&json!({"content": text}))?.len() > 2000 {
+                return Err(BpiError::invalid_parameter(
+                    "message",
+                    "encoded text exceeds 2000 bytes",
+                ));
+            }
+        }
+
         Ok(Self {
             receiver_id,
             receiver_type,
             message_type,
         })
     }
+
+    /// 构造文本私信参数。按嵌套 JSON 的 UTF-8 字节数限制长度，保留正文空白。
+    pub fn text(receiver_id: u64, text: impl Into<String>) -> BpiResult<Self> {
+        Self::new(receiver_id, 1, MessageType::Text(text.into()))
+    }
+
+    pub(crate) fn request_parts(
+        &self,
+        sender_uid: &str,
+        csrf: &str,
+        dev_id: &str,
+        timestamp: i64,
+    ) -> BpiResult<SendRequestParts> {
+        let msg_type = match self.message_type {
+            MessageType::Text(_) => 1,
+            MessageType::Image(_) => 2,
+        };
+        let content = match &self.message_type {
+            MessageType::Text(text) => json!({"content": text}).to_string(),
+            MessageType::Image(image) => serde_json::to_string(image)?,
+        };
+        let form = vec![
+            ("msg[sender_uid]", sender_uid.into()),
+            ("msg[receiver_id]", self.receiver_id.to_string()),
+            ("msg[receiver_type]", self.receiver_type.to_string()),
+            ("msg[msg_type]", msg_type.to_string()),
+            ("msg[msg_status]", "0".into()),
+            ("msg[dev_id]", dev_id.into()),
+            ("msg[timestamp]", timestamp.to_string()),
+            ("msg[new_face_version]", "1".into()),
+            ("msg[content]", content),
+            ("csrf", csrf.into()),
+            ("csrf_token", csrf.into()),
+            ("build", "0".into()),
+            ("mobi_app", "web".into()),
+        ];
+        let query = vec![
+            ("w_sender_uid", sender_uid.into()),
+            ("w_receiver_id", self.receiver_id.to_string()),
+            ("w_dev_id", dev_id.into()),
+        ];
+        Ok(SendRequestParts { form, query })
+    }
+}
+
+pub(crate) struct SendRequestParts {
+    pub form: Vec<(&'static str, String)>,
+    pub query: Vec<(&'static str, String)>,
 }
 
 impl<'a> MessageClient<'a> {
-    /// 发送私信并返回标准 payload 结果。
+    /// 发送私信（mutating），需要 Cookie、CSRF 和 WBI；不会自动重试。
+    ///
+    /// 成功响应可能带提示信息；调用者应核对 msg_key 再确认发送结果。
+    /// 网络失败时不要盲目重试，可读取会话记录核对，避免重复发送。
+    ///
+    /// ```no_run
+    /// # async fn example(client: &bpi_rs::BpiClient) -> bpi_rs::BpiResult<()> {
+    /// let params = bpi_rs::message::MessageSendParams::text(1_000_001, "收到")?;
+    /// let _result = client.message().send(params).await?;
+    /// # Ok(()) }
+    /// ```
     pub async fn send(&self, params: MessageSendParams) -> BpiResult<SendMsgData> {
         let csrf = self.client.csrf()?;
         let sender_uid = &self
@@ -112,46 +185,14 @@ impl<'a> MessageClient<'a> {
         let dev_id = Uuid::new_v4().to_string();
         let timestamp = Utc::now().timestamp();
 
-        let msg_type = match &params.message_type {
-            MessageType::Text(_) => 1,
-            MessageType::Image(_) => 2,
-        };
-
-        let mut form = vec![
-            ("msg[sender_uid]", sender_uid.to_string()),
-            ("msg[receiver_id]", params.receiver_id.to_string()),
-            ("msg[receiver_type]", params.receiver_type.to_string()),
-            ("msg[msg_type]", msg_type.to_string()),
-            ("msg[msg_status]", "0".to_string()),
-            ("msg[dev_id]", dev_id.clone()),
-            ("msg[timestamp]", timestamp.to_string()),
-            ("msg[new_face_version]", "1".to_string()),
-            ("csrf", csrf.clone()),
-            ("csrf_token", csrf.clone()),
-            ("build", "0".to_string()),
-            ("mobi_app", "web".to_string()),
-        ];
-
-        let content = match params.message_type {
-            MessageType::Text(text) => json!({ "content": text }).to_string(),
-            MessageType::Image(image) => serde_json::to_string(&image)?,
-        };
-
-        form.push(("msg[content]", content));
-
-        let params = vec![
-            ("w_sender_uid", sender_uid.to_string()),
-            ("w_receiver_id", params.receiver_id.to_string()),
-            ("w_dev_id", dev_id.clone()),
-        ];
-
-        let signed_params = self.client.get_wbi_sign2(params).await?;
+        let parts = params.request_parts(sender_uid, &csrf, &dev_id, timestamp)?;
+        let signed_params = self.client.get_wbi_sign2(parts.query).await?;
 
         // 发送请求
         self.client
             .post("https://api.vc.bilibili.com/web_im/v1/web_im/send_msg")
             .query(&signed_params)
-            .form(&form)
+            .form(&parts.form)
             .send_bpi_payload("message.private.send")
             .await
     }

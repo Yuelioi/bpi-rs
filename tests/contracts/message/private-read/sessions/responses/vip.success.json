@@ -1,0 +1,68 @@
+{
+  "code": 0,
+  "message": "OK",
+  "data": {
+    "anti_disturb_cleaning": false,
+    "has_more": 1,
+    "is_address_list_empty": 0,
+    "session_list": [
+      {
+        "talker_id": 1000001,
+        "session_type": 1,
+        "session_ts": 1700000000000000,
+        "top_ts": 0,
+        "ack_seqno": 1000001,
+        "ack_ts": 1700000000000000,
+        "max_seqno": 1000001,
+        "unread_count": 0,
+        "system_msg_type": 0,
+        "is_follow": 1,
+        "is_dnd": 0,
+        "last_msg": {
+          "sender_uid": 1000001,
+          "receiver_id": 1000001,
+          "receiver_type": 1,
+          "msg_type": 1,
+          "content": "{\"content\":\"<redacted>\"}",
+          "msg_seqno": 1000001,
+          "msg_key": 1000001,
+          "timestamp": 1700000000,
+          "msg_status": 0,
+          "msg_source": 7,
+          "at_uids": null,
+          "new_face_version": 1,
+          "notify_code": ""
+        }
+      },
+      {
+        "talker_id": 1000001,
+        "session_type": 1,
+        "session_ts": 1700000000000000,
+        "top_ts": 0,
+        "ack_seqno": 1000001,
+        "ack_ts": 1700000000000000,
+        "max_seqno": 1000001,
+        "unread_count": 0,
+        "system_msg_type": 7,
+        "is_follow": 1,
+        "is_dnd": 1,
+        "last_msg": {
+          "sender_uid": 1000001,
+          "receiver_id": 1000001,
+          "receiver_type": 1,
+          "msg_type": 10,
+          "content": "{\"content\":\"<redacted>\"}",
+          "msg_seqno": 1000001,
+          "msg_key": 1000001,
+          "timestamp": 1700000000,
+          "msg_status": 0,
+          "msg_source": 6,
+          "at_uids": null,
+          "new_face_version": 1,
+          "notify_code": ""
+        }
+      }
+    ],
+    "show_level": false
+  }
+}

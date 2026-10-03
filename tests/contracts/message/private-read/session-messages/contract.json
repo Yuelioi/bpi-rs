@@ -1,0 +1,123 @@
+{
+  "schema_version": 2,
+  "name": "message.session_messages",
+  "module": "message",
+  "batch": "private-read",
+  "endpoint": "session-messages",
+  "risk": "private-read",
+  "status": "promoted",
+  "profiles": [
+    "anonymous",
+    "normal",
+    "vip"
+  ],
+  "request": {
+    "method": "GET",
+    "url": "https://api.vc.bilibili.com/svr_sync/v1/svr_sync/fetch_session_msgs",
+    "query": {
+      "talker_id": "1000001",
+      "session_type": "1",
+      "size": "100",
+      "mobi_app": "web"
+    },
+    "auth": {
+      "requires": []
+    },
+    "required_headers": [
+      "user-agent",
+      "referer",
+      "origin"
+    ],
+    "headers": {}
+  },
+  "sanitize": {
+    "preset": [
+      "account"
+    ],
+    "replace": {
+      "content": "<redacted>"
+    },
+    "drop": [
+      "account_info",
+      "user_label"
+    ],
+    "keep": []
+  },
+  "provenance": {
+    "source": "local_probe_output",
+    "observed_at": "2026-10-03",
+    "tool": "bpi-probe",
+    "tool_version": "0.3.0",
+    "privacy": "Minimal private-message fields; identities, content, times, counters and sequence numbers replaced. Normal credentials returned -101; no normal success claim.",
+    "empty_fixture": "responses/vip.empty.json",
+    "empty_query": {
+      "begin_seqno": "latest-sequence"
+    }
+  },
+  "cases": [
+    {
+      "name": "anonymous",
+      "profile": "anonymous",
+      "auth": {
+        "requires": []
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": -101,
+        "fixture": "responses/anonymous.requires_login.json",
+        "fixture_kind": "probe_error_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "normal",
+      "profile": "normal",
+      "auth": {
+        "requires": [
+          "cookie"
+        ],
+        "profile": "normal"
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": -101,
+        "fixture": "responses/normal.requires_login.json",
+        "fixture_kind": "probe_error_body",
+        "error": "requires_login"
+      }
+    },
+    {
+      "name": "vip",
+      "profile": "vip",
+      "auth": {
+        "requires": [
+          "cookie"
+        ],
+        "profile": "vip"
+      },
+      "response": {
+        "http_status": 200,
+        "api_code": 0,
+        "fixture": "responses/vip.success.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "MessageSessionMessagesData"
+      }
+    },
+    {
+      "name": "vip_empty",
+      "profile": "vip",
+      "auth": {
+        "profile": "vip",
+        "requires": [
+          "cookie"
+        ]
+      },
+      "response": {
+        "api_code": 0,
+        "fixture": "responses/vip.empty.json",
+        "fixture_kind": "sanitized_probe_body",
+        "rust_model": "MessageSessionMessagesData"
+      }
+    }
+  ]
+}
