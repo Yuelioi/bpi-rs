@@ -37,3 +37,6 @@ account.toml
 
 # Local multi-session work notes
 /flightdeck/
+
+# Task build and release artifacts
+/.task/

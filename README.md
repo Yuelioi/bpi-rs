@@ -285,3 +285,5 @@ Bilibili Web API 并不是官方稳定公开 API，上游接口、字段和错�
 - [reqwest](https://github.com/seanmonstar/reqwest)
 
 私信接入与分页、发送风险说明见 [私信 API](docs/private-message-api.md)。
+
+当前版本 `0.3.1` 的能力增量见 [更新日志](CHANGELOG.md) 和 [三端对齐说明](docs/release-0.3.1.md)。
